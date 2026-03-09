@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Monitoreo y Administración - Supertiendas Cañaveral</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --brand-green: #166534;
+            --brand-green-dark: #14532d;
+            --brand-green-light: #22c55e;
+            --danger-red: #dc2626;
+            --warning-yellow: #f59e0b;
+            --info-blue: #3b82f6;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --text-dark: #1e293b;
+            --text-gray: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-back {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* CONTAINER */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* TABS */
+        .tabs {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .tabs-header {
+            display: flex;
+            background: var(--bg-light);
+            border-bottom: 2px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .tab-button {
+            flex: 1;
+            min-width: 150px;
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-gray);
+            transition: all 0.3s;
+            position: relative;
+            white-space: nowrap;
+        }
+
+        .tab-button:hover {
+            background: rgba(22, 101, 52, 0.05);
+            color: var(--brand-green);
+        }
+
+        .tab-button.active {
+            color: var(--brand-green);
+            background: white;
+        }
+
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--brand-green);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* CARDS */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .stat-card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-icon.green {
+            background: rgba(22, 101, 52, 0.1);
+            color: var(--brand-green);
+        }
+
+        .stat-icon.blue {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info-blue);
+        }
+
+        .stat-icon.red {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--danger-red);
+        }
+
+        .stat-icon.yellow {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-yellow);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .stat-label {
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        /* TABLE */
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .table-header h3 {
+            font-size: 1.25rem;
+            color: var(--text-dark);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg-light);
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 0.9rem;
+        }
+
+        td {
+            padding: 1rem;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+
+        tbody tr:hover {
+            background: rgba(22, 101, 52, 0.03);
+        }
+
+        /* BADGES */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge.success {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+        }
+
+        .badge.danger {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--danger-red);
+        }
+
+        .badge.warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-yellow);
+        }
+
+        .badge.info {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info-blue);
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--brand-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--brand-green-dark);
+        }
+
+        .btn-danger {
+            background: var(--danger-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-success {
+            background: var(--brand-green-light);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #16a34a;
+        }
+
+        .btn-sm {
+            padding: 0.375rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        /* LOADING */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-gray);
+        }
+
+        .spinner {
+            border: 3px solid var(--border-color);
+            border-top-color: var(--brand-green);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* DISK USAGE */
+        .disk-info {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-bar-container {
+            background: var(--bg-light);
+            border-radius: 9999px;
+            height: 24px;
+            overflow: hidden;
+            position: relative;
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--brand-green), var(--brand-green-light));
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.75rem;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        /* LOGS */
+        .log-viewer {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .log-line {
+            padding: 0.25rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        /* FORMS */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--brand-green);
+        }
+
+        /* ALERTS */
+        .alert {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .alert-success {
+            background: rgba(34, 197, 94, 0.1);
+            color: #16a34a;
+            border-left: 4px solid #16a34a;
+        }
+
+        .alert-danger {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--danger-red);
+            border-left: 4px solid var(--danger-red);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning-yellow);
+            border-left: 4px solid var(--warning-yellow);
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.25rem;
+            }
+
+            .tabs-header {
+                flex-wrap: wrap;
+            }
+
+            .tab-button {
+                min-width: 120px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .table-wrapper {
+                overflow-x: scroll;
+            }
+
+            .container {
+                padding: 0 1rem;
+            }
+
+            .tab-content {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="header-content">
+            <h1>
+                📊 Panel de Monitoreo y Administración
+            </h1>
+            <div class="header-user">
+                <span>👤 {{ usuario }}</span>
+                <button class="btn-back" onclick="window.location.href='/dashboard'">
+                    🏠 Volver al Menú
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div class="container">
+        <!-- TABS -->
+        <div class="tabs">
+            <!-- TABS HEADER -->
+            <div class="tabs-header">
+                <button class="tab-button active" onclick="openTab('dashboard')">
+                    📊 Dashboard
+                </button>
+                <button class="tab-button" onclick="openTab('disk')">
+                    💾 Espacio en Disco
+                </button>
+                <button class="tab-button" onclick="openTab('ips')">
+                    🚫 IPs Bloqueadas
+                </button>
+                <button class="tab-button" onclick="openTab('usuarios')">
+                    👥 Usuarios
+                </button>
+                <button class="tab-button" onclick="openTab('alertas')">
+                    🚨 Alertas
+                </button>
+                <button class="tab-button" onclick="openTab('logs')">
+                    📜 Logs de Seguridad
+                </button>
+            </div>
+
+            <!-- TAB 1: DASHBOARD -->
+            <div class="tab-content active" id="tab-dashboard">
+                <div id="stats-loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando estadísticas...</p>
+                </div>
+
+                <div id="stats-content" style="display: none;">
+                    <div class="stats-grid">
+                        <!-- Usuarios -->
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <div class="stat-icon green">👥</div>
+                                <div>
+                                    <div class="stat-label">Total Usuarios</div>
+                                    <div class="stat-value" id="stat-usuarios-total">0</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 1rem; font-size: 0.9rem;">
+                                <span>✅ Activos: <strong id="stat-usuarios-activos">0</strong></span>
+                                <span>❌ Inactivos: <strong id="stat-usuarios-inactivos">0</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Terceros -->
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <div class="stat-icon blue">🏢</div>
+                                <div>
+                                    <div class="stat-label">Total Terceros</div>
+                                    <div class="stat-value" id="stat-terceros-total">0</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- IPs Bloqueadas -->
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <div class="stat-icon red">🚫</div>
+                                <div>
+                                    <div class="stat-label">IPs Bloqueadas</div>
+                                    <div class="stat-value" id="stat-ips-bloqueadas">0</div>
+                                </div>
+                            </div>
+                            <div style="font-size: 0.9rem;">
+                                <span>⚠️ Sospechosas: <strong id="stat-ips-sospechosas">0</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Accesos 24h -->
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <div class="stat-icon yellow">📈</div>
+                                <div>
+                                    <div class="stat-label">Accesos (24h)</div>
+                                    <div class="stat-value" id="stat-accesos-total">0</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 1rem; font-size: 0.9rem;">
+                                <span>✅ Exitosos: <strong id="stat-accesos-exitosos">0</strong></span>
+                                <span>❌ Fallidos: <strong id="stat-accesos-fallidos">0</strong></span>
+                            </div>
+                        </div>
+
+                        <!-- Alertas -->
+                        <div class="stat-card">
+                            <div class="stat-card-header">
+                                <div class="stat-icon red">🚨</div>
+                                <div>
+                                    <div class="stat-label">Alertas (7 días)</div>
+                                    <div class="stat-value" id="stat-alertas-total">0</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 1rem; font-size: 0.9rem;">
+                                <span>⏳ Pendientes: <strong id="stat-alertas-pendientes">0</strong></span>
+                                <span>✔️ Resueltas: <strong id="stat-alertas-resueltas">0</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-success">
+                        <span>ℹ️</span>
+                        <div>
+                            <strong>Sistema Operativo:</strong> Las estadísticas se actualizan en tiempo real. 
+                            Las alertas de seguridad se envían automáticamente por Telegram cuando se detectan amenazas.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: ESPACIO EN DISCO -->
+            <div class="tab-content" id="tab-disk">
+                <div id="disk-loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Analizando uso de disco...</p>
+                </div>
+
+                <div id="disk-content" style="display: none;">
+                    <!-- Sistema Principal -->
+                    <div class="disk-info">
+                        <h3 style="margin-bottom: 1rem;">💾 Sistema de Archivos Principal</h3>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem;">
+                            <div>
+                                <div class="stat-label">Total</div>
+                                <div class="stat-value" style="font-size: 1.5rem;" id="disk-total">0 GB</div>
+                            </div>
+                            <div>
+                                <div class="stat-label">Usado</div>
+                                <div class="stat-value" style="font-size: 1.5rem; color: var(--warning-yellow);" id="disk-usado">0 GB</div>
+                            </div>
+                            <div>
+                                <div class="stat-label">Libre</div>
+                                <div class="stat-value" style="font-size: 1.5rem; color: var(--brand-green);" id="disk-libre">0 GB</div>
+                            </div>
+                        </div>
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="disk-progress" style="width: 0%;">0%</div>
+                        </div>
+                    </div>
+
+                    <!-- Carpetas del Proyecto -->
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3>📁 Carpetas del Proyecto</h3>
+                            <button class="btn btn-primary btn-sm" onclick="cargarDiskUsage()">🔄 Actualizar</button>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Carpeta</th>
+                                        <th>Tamaño (MB)</th>
+                                        <th>Tamaño (GB)</th>
+                                        <th>Archivos</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="carpetas-tbody">
+                                    <tr>
+                                        <td colspan="4" style="text-align: center; color: var(--text-gray);">
+                                            Cargando...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: IPS BLOQUEADAS -->
+            <div class="tab-content" id="tab-ips">
+                <div style="margin-bottom: 1.5rem;">
+                    <div class="alert alert-warning">
+                        <span>⚠️</span>
+                        <div>
+                            <strong>Control de Acceso:</strong> Puedes bloquear o desbloquear IPs manualmente desde esta sección.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formulario Bloquear IP -->
+                <div class="table-container" style="margin-bottom: 1.5rem;">
+                    <div class="table-header">
+                        <h3>🔒 Bloquear IP Manualmente</h3>
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <div style="display: grid; grid-template-columns: 1fr 2fr 120px; gap: 1rem; align-items: end;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label">Dirección IP</label>
+                                <input type="text" class="form-input" id="ip-bloquear" placeholder="192.168.1.100">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label class="form-label">Motivo</label>
+                                <input type="text" class="form-input" id="motivo-bloquear" placeholder="Actividad sospechosa">
+                            </div>
+                            <button class="btn btn-danger" onclick="bloquearIP()">🚫 Bloquear</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="ips-loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando IPs bloqueadas...</p>
+                </div>
+
+                <div id="ips-content" style="display: none;">
+                    <!-- IPs en Lista Negra -->
+                    <div class="table-container" style="margin-bottom: 1.5rem;">
+                        <div class="table-header">
+                            <h3>🚫 Lista Negra (<span id="count-negras">0</span> IPs)</h3>
+                            <button class="btn btn-primary btn-sm" onclick="cargarIPsBloqueadas()">🔄 Actualizar</button>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>IP</th>
+                                        <th>Motivo</th>
+                                        <th>Fecha Bloqueo</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ips-negras-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- IPs Sospechosas Bloqueadas -->
+                    <div class="table-container" style="margin-bottom: 1.5rem;">
+                        <div class="table-header">
+                            <h3>⚠️ Sospechosas Bloqueadas (<span id="count-sospechosas">0</span> IPs)</h3>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>IP</th>
+                                        <th>Intentos</th>
+                                        <th>Motivo</th>
+                                        <th>Última Actividad</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ips-sospechosas-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- IPs con Advertencia -->
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3>🟡 En Observación (<span id="count-advertencia">0</span> IPs)</h3>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>IP</th>
+                                        <th>Intentos</th>
+                                        <th>Última Actividad</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="ips-advertencia-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: USUARIOS -->
+            <div class="tab-content" id="tab-usuarios">
+                <div id="usuarios-loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando usuarios...</p>
+                </div>
+
+                <div id="usuarios-content" style="display: none;">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3>👥 Gestión de Usuarios</h3>
+                            <button class="btn btn-primary btn-sm" onclick="cargarUsuarios()">🔄 Actualizar</button>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Usuario</th>
+                                        <th>Correo</th>
+                                        <th>NIT</th>
+                                        <th>Razón Social</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="usuarios-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: ALERTAS -->
+            <div class="tab-content" id="tab-alertas">
+                <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem;">
+                    <button class="btn btn-primary btn-sm" onclick="cargarAlertas(false)">
+                        Todas las Alertas
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="cargarAlertas(true)">
+                        Solo Pendientes
+                    </button>
+                </div>
+
+                <div id="alertas-loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando alertas de seguridad...</p>
+                </div>
+
+                <div id="alertas-content" style="display: none;">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3>🚨 Alertas de Seguridad (Últimos 7 días)</h3>
+                            <button class="btn btn-primary btn-sm" onclick="cargarAlertas(false)">🔄 Actualizar</button>
+                        </div>
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Tipo</th>
+                                        <th>IP</th>
+                                        <th>Usuario</th>
+                                        <th>Detalles</th>
+                                        <th>Fecha</th>
+                                        <th>Estado</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="alertas-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 6: LOGS -->
+            <div class="tab-content" id="tab-logs">
+                <div style="margin-bottom: 1.5rem; display: flex; gap: 1rem; align-items: center;">
+                    <input type="text" class="form-input" id="filtro-logs" placeholder="Filtrar logs... (LOGIN, ERROR, IP, etc.)" style="max-width: 400px;">
+                    <button class="btn btn-primary btn-sm" onclick="cargarLogs()">🔍 Buscar</button>
+                    <button class="btn btn-success btn-sm" onclick="cargarLogs()">🔄 Actualizar</button>
+                </div>
+
+                <div id="logs-loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Cargando logs de seguridad...</p>
+                </div>
+
+                <div id="logs-content" style="display: none;">
+                    <div class="table-container">
+                        <div class="table-header">
+                            <h3>📜 Logs de Seguridad (Últimas 100 líneas)</h3>
+                        </div>
+                        <div class="log-viewer" id="log-viewer">
+                            <!-- Los logs se cargarán aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // NAVEGACIÓN ENTRE TABS
+        // ========================================
+        function openTab(tabName) {
+            // Ocultar todos los contenidos
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+
+            // Desactivar todos los botones
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(button => button.classList.remove('active'));
+
+            // Mostrar el contenido seleccionado
+            document.getElementById('tab-' + tabName).classList.add('active');
+            
+            // Activar el botón seleccionado
+            event.target.classList.add('active');
+
+            // Cargar datos según la pestaña
+            switch(tabName) {
+                case 'dashboard':
+                    cargarEstadisticas();
+                    break;
+                case 'disk':
+                    cargarDiskUsage();
+                    break;
+                case 'ips':
+                    cargarIPsBloqueadas();
+                    break;
+                case 'usuarios':
+                    cargarUsuarios();
+                    break;
+                case 'alertas':
+                    cargarAlertas(false);
+                    break;
+                case 'logs':
+                    cargarLogs();
+                    break;
+            }
+        }
+
+        // ========================================
+        // CARGAR ESTADÍSTICAS
+        // ========================================
+        async function cargarEstadisticas() {
+            try {
+                const response = await fetch('/admin/monitoreo/api/stats');
+                const result = await response.json();
+
+                if (result.success) {
+                    const data = result.data;
+
+                    // Usuarios
+                    document.getElementById('stat-usuarios-total').textContent = data.usuarios.total;
+                    document.getElementById('stat-usuarios-activos').textContent = data.usuarios.activos;
+                    document.getElementById('stat-usuarios-inactivos').textContent = data.usuarios.inactivos;
+
+                    // Terceros
+                    document.getElementById('stat-terceros-total').textContent = data.terceros.total;
+
+                    // IPs
+                    document.getElementById('stat-ips-bloqueadas').textContent = data.seguridad.ips_bloqueadas;
+                    document.getElementById('stat-ips-sospechosas').textContent = data.seguridad.ips_sospechosas;
+
+                    // Accesos
+                    document.getElementById('stat-accesos-total').textContent = data.accesos_24h.total;
+                    document.getElementById('stat-accesos-exitosos').textContent = data.accesos_24h.exitosos;
+                    document.getElementById('stat-accesos-fallidos').textContent = data.accesos_24h.fallidos;
+
+                    // Alertas
+                    document.getElementById('stat-alertas-total').textContent = data.alertas_7d.total;
+                    document.getElementById('stat-alertas-pendientes').textContent = data.alertas_7d.pendientes;
+                    document.getElementById('stat-alertas-resueltas').textContent = data.alertas_7d.resueltas;
+
+                    // Mostrar contenido
+                    document.getElementById('stats-loading').style.display = 'none';
+                    document.getElementById('stats-content').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+                alert('Error cargando estadísticas: ' + error.message);
+            }
+        }
+
+        // ========================================
+        // CARGAR USO DE DISCO
+        // ========================================
+        async function cargarDiskUsage() {
+            try {
+                const response = await fetch('/admin/monitoreo/api/disk_usage');
+                const result = await response.json();
+
+                if (result.success) {
+                    const data = result.data;
+
+                    // Sistema
+                    document.getElementById('disk-total').textContent = data.sistema.total_gb + ' GB';
+                    document.getElementById('disk-usado').textContent = data.sistema.usado_gb + ' GB';
+                    document.getElementById('disk-libre').textContent = data.sistema.libre_gb + ' GB';
+                    
+                    const porcentaje = data.sistema.porcentaje_usado;
+                    document.getElementById('disk-progress').style.width = porcentaje + '%';
+                    document.getElementById('disk-progress').textContent = porcentaje + '%';
+
+                    // Cambiar color según uso
+                    const progressBar = document.getElementById('disk-progress');
+                    if (porcentaje > 90) {
+                        progressBar.style.background = 'var(--danger-red)';
+                    } else if (porcentaje > 75) {
+                        progressBar.style.background = 'var(--warning-yellow)';
+                    }
+
+                    // Carpetas
+                    const tbody = document.getElementById('carpetas-tbody');
+                    tbody.innerHTML = '';
+
+                    for (const [nombre, info] of Object.entries(data.carpetas_proyecto)) {
+                        if (!info.error) {
+                            tbody.innerHTML += `
+                                <tr>
+                                    <td><strong>${nombre}</strong></td>
+                                    <td>${info.size_mb} MB</td>
+                                    <td>${info.size_gb} GB</td>
+                                    <td>${info.file_count} archivos</td>
+                                </tr>
+                            `;
+                        }
+                    }
+
+                    // Mostrar contenido
+                    document.getElementById('disk-loading').style.display = 'none';
+                    document.getElementById('disk-content').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error cargando uso de disco:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // ========================================
+        // CARGAR IPS BLOQUEADAS
+        // ========================================
+        async function cargarIPsBloqueadas() {
+            try {
+                const response = await fetch('/admin/monitoreo/api/ips_bloqueadas');
+                const result = await response.json();
+
+                if (result.success) {
+                    const data = result.data;
+
+                    // Actualizar contadores
+                    document.getElementById('count-negras').textContent = data.totales.negras;
+                    document.getElementById('count-sospechosas').textContent = data.totales.sospechosas;
+                    document.getElementById('count-advertencia').textContent = data.totales.advertencia;
+
+                    // IPs Negras
+                    const tbodyNegras = document.getElementById('ips-negras-tbody');
+                    tbodyNegras.innerHTML = data.negras.length === 0 ? 
+                        '<tr><td colspan="4" style="text-align: center; color: var(--text-gray);">No hay IPs en lista negra</td></tr>' :
+                        data.negras.map(ip => `
+                            <tr>
+                                <td><code>${ip.ip}</code></td>
+                                <td>${ip.motivo || 'Sin motivo'}</td>
+                                <td>${ip.fecha_bloqueo || 'N/A'}</td>
+                                <td>
+                                    <button class="btn btn-success btn-sm" onclick="desbloquearIP('${ip.ip}')">
+                                        🔓 Desbloquear
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('');
+
+                    // IPs Sospechosas
+                    const tbodySospechosas = document.getElementById('ips-sospechosas-tbody');
+                    tbodySospechosas.innerHTML = data.sospechosas.length === 0 ?
+                        '<tr><td colspan="5" style="text-align: center; color: var(--text-gray);">No hay IPs sospechosas bloqueadas</td></tr>' :
+                        data.sospechosas.map(ip => `
+                            <tr>
+                                <td><code>${ip.ip}</code></td>
+                                <td><span class="badge danger">${ip.intentos} intentos</span></td>
+                                <td>${ip.motivo || 'Sin motivo'}</td>
+                                <td>${ip.ultima_actividad || 'N/A'}</td>
+                                <td>
+                                    <button class="btn btn-success btn-sm" onclick="desbloquearIP('${ip.ip}')">
+                                        🔓 Desbloquear
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('');
+
+                    // IPs Advertencia
+                    const tbodyAdvertencia = document.getElementById('ips-advertencia-tbody');
+                    tbodyAdvertencia.innerHTML = data.advertencia.length === 0 ?
+                        '<tr><td colspan="4" style="text-align: center; color: var(--text-gray);">No hay IPs en observación</td></tr>' :
+                        data.advertencia.map(ip => `
+                            <tr>
+                                <td><code>${ip.ip}</code></td>
+                                <td><span class="badge warning">${ip.intentos} intentos</span></td>
+                                <td>${ip.ultima_actividad || 'N/A'}</td>
+                                <td>
+                                    <button class="btn btn-danger btn-sm" onclick="bloquearIPDirecta('${ip.ip}')">
+                                        🚫 Bloquear
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('');
+
+                    // Mostrar contenido
+                    document.getElementById('ips-loading').style.display = 'none';
+                    document.getElementById('ips-content').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error cargando IPs:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // ========================================
+        // BLOQUEAR IP
+        // ========================================
+        async function bloquearIP() {
+            const ip = document.getElementById('ip-bloquear').value.trim();
+            const motivo = document.getElementById('motivo-bloquear').value.trim();
+
+            if (!ip) {
+                alert('Por favor ingresa una dirección IP');
+                return;
+            }
+
+            if (!confirm(`¿Estás seguro de bloquear la IP ${ip}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin/monitoreo/api/bloquear_ip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip, motivo })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ IP bloqueada exitosamente');
+                    document.getElementById('ip-bloquear').value = '';
+                    document.getElementById('motivo-bloquear').value = '';
+                    cargarIPsBloqueadas();
+                } else {
+                    alert('❌ Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error bloqueando IP:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        async function bloquearIPDirecta(ip) {
+            if (!confirm(`¿Bloquear la IP ${ip}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin/monitoreo/api/bloquear_ip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip, motivo: 'Bloqueo preventivo desde panel de monitoreo' })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ IP bloqueada');
+                    cargarIPsBloqueadas();
+                } else {
+                    alert('❌ Error: ' + result.message);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // ========================================
+        // DESBLOQUEAR IP
+        // ========================================
+        async function desbloquearIP(ip) {
+            if (!confirm(`¿Desbloquear la IP ${ip}?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin/monitoreo/api/desbloquear_ip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ip })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ IP desbloqueada exitosamente');
+                    cargarIPsBloqueadas();
+                } else {
+                    alert('❌ Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error desbloqueando IP:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // ========================================
+        // CARGAR USUARIOS
+        // ========================================
+        async function cargarUsuarios() {
+            try {
+                const response = await fetch('/admin/monitoreo/api/usuarios');
+                const result = await response.json();
+
+                if (result.success) {
+                    const tbody = document.getElementById('usuarios-tbody');
+                    tbody.innerHTML = result.data.map(user => `
+                        <tr>
+                            <td>${user.id}</td>
+                            <td><strong>${user.usuario}</strong></td>
+                            <td>${user.correo}</td>
+                            <td>${user.nit || 'N/A'}</td>
+                            <td>${user.razon_social || 'N/A'}</td>
+                            <td>
+                                <span class="badge ${user.activo ? 'success' : 'danger'}">
+                                    ${user.activo ? '✅ Activo' : '❌ Inactivo'}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn ${user.activo ? 'btn-danger' : 'btn-success'} btn-sm" 
+                                        onclick="toggleUsuario(${user.id}, ${!user.activo})">
+                                    ${user.activo ? '🔒 Desactivar' : '✅ Activar'}
+                                </button>
+                            </td>
+                        </tr>
+                    `).join('');
+
+                    document.getElementById('usuarios-loading').style.display = 'none';
+                    document.getElementById('usuarios-content').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error cargando usuarios:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // ========================================
+        // ACTIVAR/DESACTIVAR USUARIO
+        // ========================================
+        async function toggleUsuario(usuarioId, activar) {
+            const accion = activar ? 'activar' : 'desactivar';
+            
+            if (!confirm(`¿Estás seguro de ${accion} este usuario?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/admin/monitoreo/api/toggle_usuario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ usuario_id: usuarioId, activar })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(`✅ Usuario ${activar ? 'activado' : 'desactivado'} exitosamente`);
+                    cargarUsuarios();
+                    cargarEstadisticas(); // Actualizar stats
+                } else {
+                    alert('❌ Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error toggling usuario:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // ========================================
+        // CARGAR ALERTAS
+        // ========================================
+        async function cargarAlertas(soloPendientes) {
+            try {
+                const url = `/admin/monitoreo/api/alertas?solo_pendientes=${soloPendientes}`;
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.success) {
+                    const tbody = document.getElementById('alertas-tbody');
+                    tbody.innerHTML = result.data.length === 0 ?
+                        '<tr><td colspan="8" style="text-align: center; color: var(--text-gray);">No hay alertas</td></tr>' :
+                        result.data.map(alerta => `
+                            <tr>
+                                <td>${alerta.id}</td>
+                                <td><span class="badge danger">${alerta.tipo_alerta}</span></td>
+                                <td><code>${alerta.ip || 'N/A'}</code></td>
+                                <td>${alerta.usuario || 'N/A'}</td>
+                                <td>${alerta.detalles || 'Sin detalles'}</td>
+                                <td>${alerta.fecha_alerta}</td>
+                                <td>
+                                    <span class="badge ${alerta.resuelta ? 'success' : 'warning'}">
+                                        ${alerta.resuelta ? '✔️ Resuelta' : '⏳ Pendiente'}
+                                    </span>
+                                </td>
+                                <td>
+                                    ${!alerta.resuelta ? `
+                                        <button class="btn btn-success btn-sm" onclick="resolverAlerta(${alerta.id})">
+                                            ✔️ Resolver
+                                        </button>
+                                    ` : '-'}
+                                </td>
+                            </tr>
+                        `).join('');
+
+                    document.getElementById('alertas-loading').style.display = 'none';
+                    document.getElementById('alertas-content').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error cargando alertas:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // ========================================
+        // RESOLVER ALERTA
+        // ========================================
+        async function resolverAlerta(alertaId) {
+            const notas = prompt('Notas de resolución (opcional):');
+            
+            if (notas === null) return; // Cancelado
+
+            try {
+                const response = await fetch('/admin/monitoreo/api/resolver_alerta', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ alerta_id: alertaId, notas })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ Alerta marcada como resuelta');
+                    cargarAlertas(false);
+                    cargarEstadisticas(); // Actualizar stats
+                } else {
+                    alert('❌ Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error resolviendo alerta:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // ========================================
+        // CARGAR LOGS
+        // ========================================
+        async function cargarLogs() {
+            try {
+                const filtro = document.getElementById('filtro-logs').value;
+                const url = `/admin/monitoreo/api/logs_seguridad?filtro=${encodeURIComponent(filtro)}`;
+                const response = await fetch(url);
+                const result = await response.json();
+
+                if (result.success) {
+                    const viewer = document.getElementById('log-viewer');
+                    viewer.innerHTML = result.data.length === 0 ?
+                        '<div style="text-align: center; color: var(--text-gray);">No se encontraron logs</div>' :
+                        result.data.map(linea => `<div class="log-line">${linea}</div>`).join('');
+
+                    document.getElementById('logs-loading').style.display = 'none';
+                    document.getElementById('logs-content').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error cargando logs:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // ========================================
+        // CARGAR DATOS AL INICIAR
+        // ========================================
+        window.addEventListener('DOMContentLoaded', () => {
+            cargarEstadisticas();
+        });
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

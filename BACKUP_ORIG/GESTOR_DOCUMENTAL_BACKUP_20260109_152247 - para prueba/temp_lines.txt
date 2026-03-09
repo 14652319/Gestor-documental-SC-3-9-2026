@@ -1,0 +1,6 @@
+﻿                        <div class="submenu-item" onclick="navegarA('facturas', 'consultas')">
+                            <span class="submenu-icon">�</span>
+                            <span>Consultas</span>
+                        </div>
+                    </div>
+                </div>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Recepción Digital Firmada - Relación</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
+        .container { max-width: 560px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 32px; }
+        .header { background: #14532d; color: #fff; border-radius: 8px 8px 0 0; padding: 18px 0; text-align: center; }
+        .header h2 { margin: 0; font-size: 1.5em; }
+        .success { background: #e9f7ef; color: #14532d; border-radius: 8px; padding: 18px; text-align: center; margin: 28px 0 18px 0; font-size: 1.2em; }
+        .relacion { font-weight: bold; color: #14532d; }
+        .facturas-list { background: #f8f9fa; border-radius: 8px; padding: 14px; margin: 18px 0; }
+        .facturas-list table { width: 100%; border-collapse: collapse; font-size: 1em; }
+        .facturas-list th, .facturas-list td { border-bottom: 1px solid #e1e8ed; padding: 8px 6px; text-align: left; }
+        .facturas-list th { background: #e9f7ef; color: #14532d; }
+        .footer { text-align: center; color: #888; font-size: 0.95em; margin-top: 28px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>✅ Recepción Digital Firmada</h2>
+        </div>
+        <div class="success">
+            La recepción digital de la relación <span class="relacion">{{numero_relacion}}</span> ha sido firmada exitosamente.<br>
+            <b>{{cantidad_facturas}} factura(s) confirmadas.</b>
+        </div>
+        <div class="facturas-list">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Prefijo</th>
+                        <th>Folio</th>
+                        <th>Valor</th>
+                        <th>Fecha</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{facturas_html}}
+                </tbody>
+            </table>
+        </div>
+        <div class="footer">
+            Supertiendas Cañaveral SAS<br>
+            Gestor Documental - Sistema de Autenticación Segura
+        </div>
+    </div>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recibir Facturas - Gestor Documental</title>
+    <style>
+        /* ============================================
+           🎨 VARIABLES CSS - COLORES INSTITUCIONALES
+           ============================================ */
+        :root {
+            /* Modo Claro - Verde/Amarillo Cañaveral */
+            --bg-primary: #f0f4f0;
+            --bg-secondary: #ffffff;
+            --bg-card: #ffffff;
+            --text-primary: #2c3e2c;
+            --text-secondary: #5a6b5a;
+            --border-color: #d0dcd0;
+            --shadow: rgba(22, 101, 52, 0.1);
+            
+            /* Colores de marca */
+            --brand-green: #166534;
+            --brand-green-light: #22c55e;
+            --brand-green-dark: #14532d;
+            --brand-yellow: #fbbf24;
+            --brand-yellow-light: #fef3c7;
+            
+            /* Estados */
+            --color-success: #22c55e;
+            --color-warning: #f59e0b;
+            --color-danger: #ef4444;
+            --color-info: #3b82f6;
+            --color-purple: #a855f7;
+            
+            /* Timer inactividad */
+            --timer-normal: #22c55e;
+            --timer-warning: #fbbf24;
+            --timer-danger: #ef4444;
+        }
+
+        [data-theme="dark"] {
+            /* Modo Oscuro - Azul/Morado */
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-card: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border-color: #334155;
+            --shadow: rgba(0, 0, 0, 0.3);
+            
+            --brand-green: #3b82f6;
+            --brand-green-light: #60a5fa;
+            --brand-green-dark: #1e40af;
+            --brand-yellow: #a855f7;
+            --brand-yellow-light: #c084fc;
+        }
+
+        /* ============================================
+           📐 RESET Y BASE
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
+
+        /* ============================================
+           🎯 HEADER CON USUARIO Y TIMER
+           ============================================ */
+        .header {
+            background: var(--bg-card);
+            border-bottom: 3px solid var(--brand-green);
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--brand-green);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-icon {
+            font-size: 2rem;
+        }
+
+        .header-title {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-light) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* Timer de inactividad */
+        .inactivity-timer {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-primary);
+            border-radius: 8px;
+            border: 2px solid var(--timer-normal);
+            transition: all 0.3s ease;
+        }
+
+        .inactivity-timer.warning {
+            border-color: var(--timer-warning);
+            animation: pulse-warning 2s infinite;
+        }
+
+        .inactivity-timer.danger {
+            border-color: var(--timer-danger);
+            animation: pulse-danger 1s infinite;
+        }
+
+        @keyframes pulse-warning {
+            0%, 100% { border-color: var(--timer-warning); }
+            50% { border-color: var(--brand-yellow-light); }
+        }
+
+        @keyframes pulse-danger {
+            0%, 100% { border-color: var(--timer-danger); }
+            50% { border-color: #fca5a5; }
+        }
+
+        .timer-icon {
+            font-size: 1.2rem;
+        }
+
+        .timer-text {
+            font-weight: 600;
+            font-size: 1rem;
+            min-width: 50px;
+        }
+
+        /* Toggle modo oscuro */
+        .theme-toggle {
+            background: var(--bg-primary);
+            border: 2px solid var(--border-color);
+            border-radius: 25px;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.05);
+            border-color: var(--brand-green);
+        }
+
+        /* Botón salir */
+        .btn-logout {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-logout:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        /* ============================================
+           📊 CONTENEDOR PRINCIPAL
+           ============================================ */
+        .container {
+            max-width: 1600px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        /* ============================================
+           📈 TARJETAS KPI
+           ============================================ */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .kpi-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px var(--shadow);
+            transition: all 0.3s ease;
+            border-left: 5px solid;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            opacity: 0.1;
+            font-size: 4rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+
+        .kpi-card.pendientes { border-left-color: var(--color-info); }
+        .kpi-card.proximas { border-left-color: var(--color-warning); }
+        .kpi-card.vencidas { border-left-color: var(--color-danger); }
+        .kpi-card.monto { border-left-color: var(--color-purple); }
+
+        .kpi-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .kpi-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+
+        .kpi-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .kpi-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0.5rem 0;
+            animation: countUp 1s ease-out;
+        }
+
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .kpi-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .kpi-trend {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .kpi-trend.up { color: var(--color-success); }
+        .kpi-trend.down { color: var(--color-danger); }
+
+        /* ============================================
+           🔍 PANEL DE FILTROS
+           ============================================ */
+        .filters-panel {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 15px var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .filters-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .filters-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-input,
+        .filter-select {
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .filter-input:focus,
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--brand-green);
+            box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.1);
+        }
+
+        /* Asegurar visibilidad de inputs date en modo oscuro */
+        [data-theme="dark"] .filter-input[type="date"] {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .filters-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-light) 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(22, 101, 52, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--brand-green);
+            background: var(--bg-card);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--color-success) 0%, #16a34a 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--color-danger) 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--color-warning) 0%, #d97706 100%);
+            color: white;
+        }
+
+        /* ============================================
+           📋 TABLA DE FACTURAS
+           ============================================ */
+        .table-container {
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px var(--shadow);
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .table-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: var(--bg-primary);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        th.sortable {
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+
+        th.sortable:hover {
+            color: var(--brand-green);
+            background: var(--bg-card);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background: var(--bg-primary);
+            transform: scale(1.01);
+        }
+
+        /* Checkbox */
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--brand-green);
+        }
+
+        /* Estados de factura */
+        .estado-badge {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .estado-recibida {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .estado-validada {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .estado-rechazada {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .estado-contabilizada {
+            background: #e9d5ff;
+            color: #6b21a8;
+        }
+
+        .estado-pagada {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .estado-anulada {
+            background: #f3f4f6;
+            color: #6b7280;
+        }
+
+        [data-theme="dark"] .estado-recibida {
+            background: #1e3a8a;
+            color: #bfdbfe;
+        }
+
+        [data-theme="dark"] .estado-validada {
+            background: #064e3b;
+            color: #a7f3d0;
+        }
+
+        [data-theme="dark"] .estado-rechazada {
+            background: #7f1d1d;
+            color: #fecaca;
+        }
+
+        [data-theme="dark"] .estado-contabilizada {
+            background: #581c87;
+            color: #e9d5ff;
+        }
+
+        [data-theme="dark"] .estado-pagada {
+            background: #064e3b;
+            color: #a7f3d0;
+        }
+
+        [data-theme="dark"] .estado-anulada {
+            background: #374151;
+            color: #d1d5db;
+        }
+
+        /* Días restantes con colores */
+        .dias-restantes {
+            font-weight: 700;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .dias-normal {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .dias-proximo {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .dias-urgente {
+            background: #fed7aa;
+            color: #9a3412;
+        }
+
+        .dias-critica {
+            background: #fecaca;
+            color: #991b1b;
+            animation: blink 1.5s infinite;
+        }
+
+        .dias-vencida {
+            background: #fee2e2;
+            color: #7f1d1d;
+            font-weight: 800;
+        }
+
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0.5; }
+        }
+
+        /* Botones de acción en tabla */
+        .btn-action {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 3px 10px var(--shadow);
+        }
+
+        .btn-view {
+            background: var(--color-info);
+            color: white;
+        }
+
+        .btn-edit {
+            background: var(--color-warning);
+            color: white;
+        }
+
+        .btn-delete {
+            background: var(--color-danger);
+            color: white;
+        }
+
+        /* ============================================
+           🔔 MODAL BASE
+           ============================================ */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: 0 10px 40px var(--shadow);
+            max-width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: var(--color-danger);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem 2rem;
+            border-top: 2px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        /* ============================================
+           ⚙️ MODAL CREAR/EDITAR FACTURA
+           ============================================ */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .form-label.required::after {
+            content: ' *';
+            color: var(--color-danger);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: var(--brand-green);
+            box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Asegurar visibilidad de inputs date en modo oscuro */
+        [data-theme="dark"] .form-input[type="date"] {
+            background: #ffffff;
+            color: #000000;
+        }
+
+        .form-helper {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .form-error {
+            font-size: 0.8rem;
+            color: var(--color-danger);
+            font-weight: 600;
+        }
+
+        /* ============================================
+           📱 RESPONSIVE
+           ============================================ */
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .header-left,
+            .header-right {
+                flex-direction: column;
+                align-items: flex-start;
+                width: 100%;
+            }
+
+            .logo {
+                font-size: 1.2rem;
+            }
+
+            .header-title {
+                font-size: 1rem;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-value {
+                font-size: 2rem;
+            }
+
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .table-wrapper {
+                overflow-x: scroll;
+            }
+
+            table {
+                min-width: 900px;
+            }
+
+            .modal-content {
+                max-width: 95%;
+                margin: 1rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ============================================
+           🎪 ANIMACIONES Y LOADING
+           ============================================ */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, var(--bg-primary) 25%, var(--bg-secondary) 50%, var(--bg-primary) 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--bg-card);
+            border-left: 5px solid;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 5px 20px var(--shadow);
+            z-index: 3000;
+            animation: slideInRight 0.3s ease;
+            max-width: 400px;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .toast.success { border-left-color: var(--color-success); }
+        .toast.error { border-left-color: var(--color-danger); }
+        .toast.warning { border-left-color: var(--color-warning); }
+        .toast.info { border-left-color: var(--color-info); }
+
+        .toast-title {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .toast-message {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <!-- ============================================
+         🎯 HEADER CON USUARIO Y TIMER
+         ============================================ -->
+    <header class="header">
+        <div class="header-left">
+            <a href="#" class="logo">
+                <span class="logo-icon">📦</span>
+                <span>Gestor Documental</span>
+            </a>
+            <h1 class="header-title">Recibir Facturas</h1>
+        </div>
+        
+        <div class="header-right">
+            <!-- Timer de inactividad -->
+            <div class="inactivity-timer" id="inactivityTimer">
+                <span class="timer-icon">⏱️</span>
+                <span class="timer-text" id="timerDisplay">25:00</span>
+            </div>
+            
+            <!-- Información del usuario -->
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">JD</div>
+                <div class="user-details">
+                    <div class="user-name" id="userName">Juan Pérez</div>
+                    <div class="user-role">Contabilidad</div>
+                </div>
+            </div>
+            
+            <!-- Toggle modo oscuro/claro -->
+            <button class="theme-toggle" id="themeToggle" title="Cambiar tema">
+                <span id="themeIcon">🌙</span>
+            </button>
+            
+            <!-- Botón salir -->
+            <button class="btn-logout" onclick="cerrarSesion()">
+                <span>🚪</span>
+                <span>Salir</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ============================================
+         📊 CONTENEDOR PRINCIPAL
+         ============================================ -->
+    <div class="container">
+        <!-- KPIs -->
+        <div class="kpi-grid" id="kpiGrid">
+            <div class="kpi-card pendientes">
+                <div class="kpi-header">
+                    <span class="kpi-title">Pendientes Validación</span>
+                    <span class="kpi-icon">📋</span>
+                </div>
+                <div class="kpi-value" id="kpiPendientes">0</div>
+                <div class="kpi-footer">
+                    <span>Requieren revisión</span>
+                    <span class="kpi-trend up">📈 +5%</span>
+                </div>
+            </div>
+
+            <div class="kpi-card proximas">
+                <div class="kpi-header">
+                    <span class="kpi-title">Próximas a Vencer</span>
+                    <span class="kpi-icon">⏰</span>
+                </div>
+                <div class="kpi-value" id="kpiProximas">0</div>
+                <div class="kpi-footer">
+                    <span>≤ 7 días</span>
+                    <span class="kpi-trend down">📉 -10%</span>
+                </div>
+            </div>
+
+            <div class="kpi-card vencidas">
+                <div class="kpi-header">
+                    <span class="kpi-title">Vencidas</span>
+                    <span class="kpi-icon">🚨</span>
+                </div>
+                <div class="kpi-value" id="kpiVencidas">0</div>
+                <div class="kpi-footer">
+                    <span>Urgente atención</span>
+                    <span class="kpi-trend up">⚠️ CRITICO</span>
+                </div>
+            </div>
+
+            <div class="kpi-card monto">
+                <div class="kpi-header">
+                    <span class="kpi-title">Monto Pendiente</span>
+                    <span class="kpi-icon">💰</span>
+                </div>
+                <div class="kpi-value" id="kpiMonto">$0</div>
+                <div class="kpi-footer">
+                    <span>Por pagar</span>
+                    <span class="kpi-trend">📊</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de filtros -->
+        <div class="filters-panel">
+            <div class="filters-header">
+                <h2 class="filters-title">
+                    <span>🔍</span>
+                    <span>Filtros de Búsqueda</span>
+                </h2>
+            </div>
+
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Estado</label>
+                    <select class="filter-select" id="filterEstado">
+                        <option value="">Todos</option>
+                        <option value="RECIBIDA">Recibida</option>
+                        <option value="VALIDADA">Validada</option>
+                        <option value="RECHAZADA">Rechazada</option>
+                        <option value="CONTABILIZADA">Contabilizada</option>
+                        <option value="PAGADA">Pagada</option>
+                        <option value="ANULADA">Anulada</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">NIT Proveedor</label>
+                    <input type="text" class="filter-input" id="filterNit" placeholder="Ej: 900123456">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Fecha Desde</label>
+                    <input type="date" class="filter-input" id="filterFechaDesde">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Fecha Hasta</label>
+                    <input type="date" class="filter-input" id="filterFechaHasta">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Búsqueda General</label>
+                    <input type="text" class="filter-input" id="filterBuscar" placeholder="Número, NIT, Proveedor...">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Vencimiento</label>
+                    <select class="filter-select" id="filterVencimiento">
+                        <option value="">Todos</option>
+                        <option value="NORMAL">Normal (&gt;15 días)</option>
+                        <option value="PROXIMO">Próximo (7-15 días)</option>
+                        <option value="URGENTE">Urgente (2-7 días)</option>
+                        <option value="CRITICA">Crítica (0-2 días)</option>
+                        <option value="VENCIDA">Vencida</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filters-actions">
+                <button class="btn btn-primary" onclick="aplicarFiltros()">
+                    <span>🔍</span>
+                    <span>Filtrar</span>
+                </button>
+                <button class="btn btn-secondary" onclick="limpiarFiltros()">
+                    <span>🔄</span>
+                    <span>Limpiar</span>
+                </button>
+                <button class="btn btn-success" onclick="mostrarModalCrear()">
+                    <span>➕</span>
+                    <span>Nueva Factura</span>
+                </button>
+                <button class="btn btn-warning" onclick="exportarExcel()">
+                    <span>📊</span>
+                    <span>Exportar Excel</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabla de facturas -->
+        <div class="table-container">
+            <div class="table-header">
+                <h2 class="table-title">
+                    <span>📋</span>
+                    <span>Listado de Facturas</span>
+                    <span id="totalFacturas" style="font-size:0.9rem;color:var(--text-secondary);font-weight:normal;">(0 registros)</span>
+                </h2>
+
+                <div class="table-actions">
+                    <button class="btn btn-secondary" onclick="seleccionarTodas()">
+                        <span>☑️</span>
+                        <span>Seleccionar Todas</span>
+                    </button>
+                    <button class="btn btn-warning" id="btnDescargarZip" onclick="descargarSeleccionadasZip()" disabled>
+                        <span>📦</span>
+                        <span>Descargar PDFs (ZIP)</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table id="facturasTable">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" class="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                            <th class="sortable" onclick="ordenarPor('numero_factura')">N° Factura</th>
+                            <th class="sortable" onclick="ordenarPor('nit')">NIT</th>
+                            <th class="sortable" onclick="ordenarPor('razon_social')">Proveedor</th>
+                            <th class="sortable" onclick="ordenarPor('fecha_factura')">Fecha Factura</th>
+                            <th class="sortable" onclick="ordenarPor('fecha_vencimiento')">Vencimiento</th>
+                            <th class="sortable" onclick="ordenarPor('dias_restantes')">Días Restantes</th>
+                            <th class="sortable" onclick="ordenarPor('valor_neto')">Valor Neto</th>
+                            <th class="sortable" onclick="ordenarPor('estado')">Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="facturasTableBody">
+                        <!-- Datos cargados dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Continuará con los modales y JavaScript en la siguiente parte... -->
+
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

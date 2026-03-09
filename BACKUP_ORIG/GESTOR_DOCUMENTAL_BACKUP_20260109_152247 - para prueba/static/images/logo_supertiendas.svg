@@ -1,0 +1,14 @@
+<!-- Logo SVG Placeholder para Supertiendas Cañaveral -->
+<svg width="150" height="50" xmlns="http://www.w3.org/2000/svg">
+  <!-- Fondo verde corporativo -->
+  <rect width="150" height="50" fill="#166534" rx="5"/>
+  
+  <!-- Texto "SC" -->
+  <text x="20" y="35" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white">SC</text>
+  
+  <!-- Texto "Supertiendas" -->
+  <text x="55" y="25" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="white">Supertiendas</text>
+  
+  <!-- Texto "Cañaveral" -->
+  <text x="55" y="38" font-family="Arial, sans-serif" font-size="10" font-weight="normal" fill="white">Cañaveral</text>
+</svg>

@@ -1,0 +1,24 @@
+================================================================================
+TABLA maestro_dian_vs_erp - DISTRIBUCIÓN DE forma_pago POR AÑO
+================================================================================
+
+📅 AÑO 2026:
+   Crédito: 610,449 registros 
+   (null): 9 registros 
+
+📅 AÑO 2025:
+   1: 134,862 registros → Contado
+   2: 125,269 registros → Crédito
+   Crédito: 47,018 registros 
+   (null): 33,188 registros 
+   01: 114 registros → Contado
+   02: 59 registros → Crédito
+   0: 40 registros 
+   (null): 5 registros 
+   3: 3 registros 
+
+================================================================================
+📊 TOTALES POR AÑO:
+   2026: 610,458 facturas
+   2025: 340,558 facturas
+================================================================================

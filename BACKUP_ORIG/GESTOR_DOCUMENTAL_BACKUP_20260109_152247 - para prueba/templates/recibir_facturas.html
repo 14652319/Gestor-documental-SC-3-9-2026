@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recibir Facturas - Gestor Documental</title>
+    <link rel="stylesheet" href="/static/css/facturas.css">
+</head>
+<body>
+    <!-- ============================================
+         🎯 HEADER CON USUARIO Y TIMER
+         ============================================ -->
+    <header class="header">
+        <div class="header-left">
+            <a href="/dashboard" class="logo">
+                <span class="logo-icon">📦</span>
+                <span>Gestor Documental</span>
+            </a>
+            <h1 class="header-title">Recibir Facturas</h1>
+        </div>
+        
+        <div class="header-right">
+            <!-- Timer de inactividad -->
+            <div class="inactivity-timer" id="inactivityTimer">
+                <span class="timer-icon">⏱️</span>
+                <span class="timer-text" id="timerDisplay">25:00</span>
+            </div>
+            
+            <!-- Información del usuario -->
+            <div class="user-info">
+                <div class="user-avatar" id="userAvatar">JD</div>
+                <div class="user-details">
+                    <div class="user-name" id="userName">Cargando...</div>
+                    <div class="user-role" id="userRole">Usuario</div>
+                </div>
+            </div>
+            
+            <!-- Toggle modo oscuro/claro -->
+            <button class="theme-toggle" id="themeToggle" title="Cambiar tema">
+                <span id="themeIcon">🌙</span>
+            </button>
+            
+            <!-- Botón salir -->
+            <button class="btn-logout" onclick="cerrarSesion()">
+                <span>🚪</span>
+                <span>Salir</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ============================================
+         📊 CONTENEDOR PRINCIPAL
+         ============================================ -->
+    <div class="container">
+        <!-- KPIs -->
+        <div class="kpi-grid" id="kpiGrid">
+            <div class="kpi-card pendientes">
+                <div class="kpi-header">
+                    <span class="kpi-title">Pendientes Validación</span>
+                    <span class="kpi-icon">📋</span>
+                </div>
+                <div class="kpi-value" id="kpiPendientes">
+                    <div class="skeleton" style="width:100px;height:40px;"></div>
+                </div>
+                <div class="kpi-footer">
+                    <span>Requieren revisión</span>
+                </div>
+            </div>
+
+            <div class="kpi-card proximas">
+                <div class="kpi-header">
+                    <span class="kpi-title">Próximas a Vencer</span>
+                    <span class="kpi-icon">⏰</span>
+                </div>
+                <div class="kpi-value" id="kpiProximas">
+                    <div class="skeleton" style="width:100px;height:40px;"></div>
+                </div>
+                <div class="kpi-footer">
+                    <span>≤ 7 días</span>
+                </div>
+            </div>
+
+            <div class="kpi-card vencidas">
+                <div class="kpi-header">
+                    <span class="kpi-title">Vencidas</span>
+                    <span class="kpi-icon">🚨</span>
+                </div>
+                <div class="kpi-value" id="kpiVencidas">
+                    <div class="skeleton" style="width:100px;height:40px;"></div>
+                </div>
+                <div class="kpi-footer">
+                    <span>Urgente atención</span>
+                </div>
+            </div>
+
+            <div class="kpi-card monto">
+                <div class="kpi-header">
+                    <span class="kpi-title">Monto Pendiente</span>
+                    <span class="kpi-icon">💰</span>
+                </div>
+                <div class="kpi-value" id="kpiMonto">
+                    <div class="skeleton" style="width:150px;height:40px;"></div>
+                </div>
+                <div class="kpi-footer">
+                    <span>Por pagar</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel de filtros -->
+        <div class="filters-panel">
+            <div class="filters-header">
+                <h2 class="filters-title">
+                    <span>🔍</span>
+                    <span>Filtros de Búsqueda</span>
+                </h2>
+            </div>
+
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Estado</label>
+                    <select class="filter-select" id="filterEstado">
+                        <option value="">Todos</option>
+                        <option value="RECIBIDA">Recibida</option>
+                        <option value="VALIDADA">Validada</option>
+                        <option value="RECHAZADA">Rechazada</option>
+                        <option value="CONTABILIZADA">Contabilizada</option>
+                        <option value="PAGADA">Pagada</option>
+                        <option value="ANULADA">Anulada</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">NIT Proveedor</label>
+                    <input type="text" class="filter-input" id="filterNit" placeholder="Ej: 900123456">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Fecha Desde</label>
+                    <input type="date" class="filter-input" id="filterFechaDesde">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Fecha Hasta</label>
+                    <input type="date" class="filter-input" id="filterFechaHasta">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Búsqueda General</label>
+                    <input type="text" class="filter-input" id="filterBuscar" placeholder="Número, NIT, Proveedor...">
+                </div>
+
+                <div class="filter-group">
+                    <label class="filter-label">Vencimiento</label>
+                    <select class="filter-select" id="filterVencimiento">
+                        <option value="">Todos</option>
+                        <option value="NORMAL">Normal (&gt;15 días)</option>
+                        <option value="PROXIMO">Próximo (7-15 días)</option>
+                        <option value="URGENTE">Urgente (2-7 días)</option>
+                        <option value="CRITICA">Crítica (0-2 días)</option>
+                        <option value="VENCIDA">Vencida</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filters-actions">
+                <button class="btn btn-primary" onclick="aplicarFiltros()">
+                    <span>🔍</span>
+                    <span>Filtrar</span>
+                </button>
+                <button class="btn btn-secondary" onclick="limpiarFiltros()">
+                    <span>🔄</span>
+                    <span>Limpiar</span>
+                </button>
+                <button class="btn btn-success" onclick="mostrarModalCrear()">
+                    <span>➕</span>
+                    <span>Nueva Factura</span>
+                </button>
+                <button class="btn btn-warning" onclick="exportarExcel()">
+                    <span>📊</span>
+                    <span>Exportar Excel</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabla de facturas -->
+        <div class="table-container">
+            <div class="table-header">
+                <h2 class="table-title">
+                    <span>📋</span>
+                    <span>Listado de Facturas</span>
+                    <span id="totalFacturas" style="font-size:0.9rem;color:var(--text-secondary);font-weight:normal;">(0 registros)</span>
+                </h2>
+
+                <div class="table-actions">
+                    <button class="btn btn-secondary" onclick="seleccionarTodas()">
+                        <span>☑️</span>
+                        <span>Seleccionar Todas</span>
+                    </button>
+                    <button class="btn btn-warning" id="btnDescargarZip" onclick="descargarSeleccionadasZip()" disabled>
+                        <span>📦</span>
+                        <span>Descargar PDFs (ZIP)</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table id="facturasTable">
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" class="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                            <th class="sortable" onclick="ordenarPor('numero_factura')">N° Factura ⬍</th>
+                            <th class="sortable" onclick="ordenarPor('nit')">NIT ⬍</th>
+                            <th class="sortable" onclick="ordenarPor('razon_social')">Proveedor ⬍</th>
+                            <th class="sortable" onclick="ordenarPor('fecha_factura')">Fecha Factura ⬍</th>
+                            <th class="sortable" onclick="ordenarPor('fecha_vencimiento')">Vencimiento ⬍</th>
+                            <th class="sortable" onclick="ordenarPor('dias_restantes')">Días Restantes ⬍</th>
+                            <th class="sortable" onclick="ordenarPor('valor_neto')">Valor Neto ⬍</th>
+                            <th class="sortable" onclick="ordenarPor('estado')">Estado ⬍</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="facturasTableBody">
+                        <tr>
+                            <td colspan="10" style="text-align:center;padding:3rem;color:var(--text-secondary);">
+                                <div class="loading" style="margin:0 auto 1rem;"></div>
+                                <div>Cargando facturas...</div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         📝 MODAL: CREAR/EDITAR FACTURA
+         ============================================ -->
+    <div class="modal" id="modalCrearEditar">
+        <div class="modal-content" style="max-width:900px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalCrearEditarTitle">
+                    <span>➕</span>
+                    <span>Nueva Factura</span>
+                </h2>
+                <button class="modal-close" onclick="cerrarModal('modalCrearEditar')">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <form id="formFactura" onsubmit="return false;">
+                    <!-- Sección: Información del Proveedor -->
+                    <h3 style="margin-bottom:1rem;color:var(--brand-green);border-bottom:2px solid var(--border-color);padding-bottom:0.5rem;">
+                        👤 Información del Proveedor
+                    </h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label required">Proveedor</label>
+                            <select class="form-select" id="tercero_id" required>
+                                <option value="">Seleccione...</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">NIT</label>
+                            <input type="text" class="form-input" id="nit" readonly required>
+                        </div>
+                        <div class="form-group full-width">
+                            <label class="form-label required">Razón Social</label>
+                            <input type="text" class="form-input" id="razon_social" readonly required>
+                        </div>
+                    </div>
+
+                    <!-- Sección: Datos de la Factura -->
+                    <h3 style="margin:2rem 0 1rem;color:var(--brand-green);border-bottom:2px solid var(--border-color);padding-bottom:0.5rem;">
+                        📄 Datos de la Factura
+                    </h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label required">N° Factura</label>
+                            <input type="text" class="form-input" id="numero_factura" placeholder="FACT-2025-001" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Fecha Factura</label>
+                            <input type="date" class="form-input" id="fecha_factura" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label required">Fecha Vencimiento</label>
+                            <input type="date" class="form-input" id="fecha_vencimiento" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Forma de Pago</label>
+                            <select class="form-select" id="forma_pago">
+                                <option value="CREDITO">Crédito</option>
+                                <option value="CONTADO">Contado</option>
+                                <option value="TRANSFERENCIA">Transferencia</option>
+                                <option value="CHEQUE">Cheque</option>
+                                <option value="EFECTIVO">Efectivo</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Plazo Pago (días)</label>
+                            <input type="number" class="form-input" id="plazo_pago" placeholder="30" min="0">
+                        </div>
+                    </div>
+
+                    <!-- Sección: Valores -->
+                    <h3 style="margin:2rem 0 1rem;color:var(--brand-green);border-bottom:2px solid var(--border-color);padding-bottom:0.5rem;">
+                        💰 Valores
+                    </h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label required">Valor Bruto</label>
+                            <input type="number" class="form-input" id="valor_bruto" placeholder="1000000" step="0.01" required onchange="calcularValorNeto()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Descuento</label>
+                            <input type="number" class="form-input" id="valor_descuento" placeholder="0" step="0.01" value="0" onchange="calcularValorNeto()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">IVA</label>
+                            <input type="number" class="form-input" id="valor_iva" placeholder="190000" step="0.01" value="0" onchange="calcularValorNeto()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Retefuente</label>
+                            <input type="number" class="form-input" id="valor_retefuente" placeholder="0" step="0.01" value="0" onchange="calcularValorNeto()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">ReteIVA</label>
+                            <input type="number" class="form-input" id="valor_reteiva" placeholder="0" step="0.01" value="0" onchange="calcularValorNeto()">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">ReteICA</label>
+                            <input type="number" class="form-input" id="valor_reteica" placeholder="0" step="0.01" value="0" onchange="calcularValorNeto()">
+                        </div>
+                        <div class="form-group full-width" style="background:var(--bg-primary);padding:1rem;border-radius:8px;border:2px solid var(--brand-green);">
+                            <label class="form-label" style="font-size:1.2rem;color:var(--brand-green);">💵 Valor Neto</label>
+                            <input type="number" class="form-input" id="valor_neto" readonly style="font-size:1.3rem;font-weight:700;background:var(--bg-card);">
+                        </div>
+                    </div>
+
+                    <!-- Sección: Observaciones -->
+                    <h3 style="margin:2rem 0 1rem;color:var(--brand-green);border-bottom:2px solid var(--border-color);padding-bottom:0.5rem;">
+                        📝 Observaciones
+                    </h3>
+                    <div class="form-group full-width">
+                        <label class="form-label">Notas adicionales</label>
+                        <textarea class="form-textarea" id="observaciones" placeholder="Ingrese observaciones o notas sobre esta factura..."></textarea>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cerrarModal('modalCrearEditar')">
+                    <span>❌</span>
+                    <span>Cancelar</span>
+                </button>
+                <button class="btn btn-primary" id="btnGuardarFactura" onclick="guardarFactura()">
+                    <span>💾</span>
+                    <span>Guardar Factura</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         👁️ MODAL: DETALLE FACTURA
+         ============================================ -->
+    <div class="modal" id="modalDetalle">
+        <div class="modal-content" style="max-width:1200px;">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalDetalleTitle">
+                    <span>📋</span>
+                    <span>Detalle de Factura</span>
+                </h2>
+                <button class="modal-close" onclick="cerrarModal('modalDetalle')">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div id="detalleContent">
+                    <!-- Contenido cargado dinámicamente -->
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cerrarModal('modalDetalle')">
+                    <span>❌</span>
+                    <span>Cerrar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         ✅ MODAL: VALIDAR FACTURA
+         ============================================ -->
+    <div class="modal" id="modalValidar">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <span>✅</span>
+                    <span>Validar Factura</span>
+                </h2>
+                <button class="modal-close" onclick="cerrarModal('modalValidar')">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <p style="margin-bottom:1.5rem;font-size:1.1rem;color:var(--text-primary);">
+                    ¿Está seguro de validar y aprobar esta factura?
+                </p>
+                <div class="form-group">
+                    <label class="form-label">Observaciones (opcional)</label>
+                    <textarea class="form-textarea" id="validarObservaciones" placeholder="Ingrese observaciones sobre la validación..."></textarea>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cerrarModal('modalValidar')">
+                    <span>❌</span>
+                    <span>Cancelar</span>
+                </button>
+                <button class="btn btn-success" onclick="confirmarValidar()">
+                    <span>✅</span>
+                    <span>Confirmar Validación</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         ❌ MODAL: RECHAZAR FACTURA
+         ============================================ -->
+    <div class="modal" id="modalRechazar">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <h2 class="modal-title">
+                    <span>❌</span>
+                    <span>Rechazar Factura</span>
+                </h2>
+                <button class="modal-close" onclick="cerrarModal('modalRechazar')">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <p style="margin-bottom:1.5rem;font-size:1.1rem;color:var(--color-danger);">
+                    ⚠️ Debe especificar el motivo del rechazo:
+                </p>
+                <div class="form-group">
+                    <label class="form-label required">Motivo del Rechazo</label>
+                    <textarea class="form-textarea" id="rechazarMotivo" placeholder="Describa detalladamente el motivo del rechazo..." required style="min-height:150px;"></textarea>
+                    <span class="form-error" id="rechazarMotivoError" style="display:none;">El motivo del rechazo es obligatorio</span>
+                </div>
+            </div>
+            
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cerrarModal('modalRechazar')">
+                    <span>↩️</span>
+                    <span>Cancelar</span>
+                </button>
+                <button class="btn btn-danger" onclick="confirmarRechazar()">
+                    <span>❌</span>
+                    <span>Confirmar Rechazo</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================
+         ⏰ MODAL: ADVERTENCIA INACTIVIDAD
+         ============================================ -->
+    <div class="modal" id="modalInactividad">
+        <div class="modal-content" style="max-width:450px;text-align:center;">
+            <div class="modal-header">
+                <h2 class="modal-title" style="width:100%;justify-content:center;">
+                    <span>⏰</span>
+                    <span>Advertencia de Inactividad</span>
+                </h2>
+            </div>
+            
+            <div class="modal-body">
+                <div style="font-size:4rem;margin:1rem 0;">⚠️</div>
+                <p style="font-size:1.2rem;margin-bottom:1rem;color:var(--color-danger);font-weight:600;">
+                    Su sesión expirará en <span id="tiempoRestante">1:00</span> minuto
+                </p>
+                <p style="color:var(--text-secondary);">
+                    ¿Desea continuar con su sesión activa?
+                </p>
+            </div>
+            
+            <div class="modal-footer" style="justify-content:center;">
+                <button class="btn btn-primary" onclick="continuarSesion()" style="min-width:200px;">
+                    <span>✅</span>
+                    <span>Sí, Continuar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cargar CSS y JavaScript -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/facturas.css') }}">
+    <script src="{{ url_for('static', filename='js/facturas.js') }}"></script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

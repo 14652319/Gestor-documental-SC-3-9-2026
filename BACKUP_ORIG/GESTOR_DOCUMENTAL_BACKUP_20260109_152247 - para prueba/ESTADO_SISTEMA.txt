@@ -1,0 +1,64 @@
+████████████████████████████████████████████████████████████
+█                                                          █
+█  ✅ SISTEMAS CONFIGURADOS Y LISTOS PARA USAR             █
+█                                                          █
+████████████████████████████████████████████████████████████
+
+📋 ARCHIVOS CREADOS:
+   ✓ 1_iniciar_gestor.bat      (Inicia Gestor Documental)
+   ✓ 2_iniciar_dian.bat         (Inicia DIAN vs ERP)
+   ✓ LEER_PRIMERO.md            (Instrucciones completas)
+
+────────────────────────────────────────────────────────────
+
+🚀 INICIO RÁPIDO:
+
+   PASO 1: Haz doble clic en → 1_iniciar_gestor.bat
+           Espera que diga: "Running on http://127.0.0.1:8099"
+   
+   PASO 2: Haz doble clic en → 2_iniciar_dian.bat
+           Espera que diga: "Running on http://0.0.0.0:8097"
+   
+   PASO 3: Abre tu navegador en → http://localhost:8099
+
+────────────────────────────────────────────────────────────
+
+🔗 ACCESO DIRECTO:
+   
+   Gestor Documental: http://localhost:8099
+   DIAN vs ERP:       http://localhost:8097
+
+────────────────────────────────────────────────────────────
+
+💡 USO INTEGRADO:
+
+   1. Inicia sesión en el Gestor Documental
+   2. En el menú lateral, busca:
+      
+      ⚖️ Validación DIAN vs ERP
+   
+   3. Haz clic para abrir DIAN vs ERP en nueva ventana
+
+────────────────────────────────────────────────────────────
+
+✅ CAMBIOS REALIZADOS:
+
+   • Sistemas independientes (puertos diferentes)
+   • Gestor Documental: Puerto 8099
+   • DIAN vs ERP: Puerto 8097
+   • Enlace agregado en el dashboard
+   • Scripts de inicio simplificados
+   • Notificación visual al abrir DIAN vs ERP
+
+────────────────────────────────────────────────────────────
+
+⚠️  IMPORTANTE:
+
+   • Mantén ambas ventanas CMD abiertas
+   • Para cerrar: Ctrl+C o cierra las ventanas
+   • Asegúrate de que los puertos estén libres
+
+────────────────────────────────────────────────────────────
+
+Estado: ✅ FUNCIONAL Y LISTO
+Fecha:  30 de Noviembre de 2025

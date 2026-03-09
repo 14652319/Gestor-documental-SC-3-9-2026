@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 Listado de Facturas Digitales</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-primary: #16A085;
+            --brand-secondary: #128C7E;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .light-mode {
+            background-color: #F8F9FA;
+            color: #212529;
+        }
+
+        .dark-mode {
+            background-color: #1A1A1A;
+            color: #E9ECEF;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 24px;
+        }
+
+        .dark-mode .card {
+            background: #2D2D2D;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 2px solid #E0E0E0;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dark-mode .filter-btn {
+            background: #2D2D2D;
+            border-color: #444;
+            color: #E9ECEF;
+        }
+
+        .filter-btn.active {
+            background: var(--brand-primary);
+            color: white;
+            border-color: var(--brand-primary);
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-pendiente {
+            background: #FFF3CD;
+            color: #856404;
+        }
+
+        .badge-en_revision {
+            background: #D1ECF1;
+            color: #0C5460;
+        }
+
+        .badge-aprobado {
+            background: #D4EDDA;
+            color: #155724;
+        }
+
+        .badge-rechazado {
+            background: #F8D7DA;
+            color: #721C24;
+        }
+
+        .dark-mode .badge-pendiente {
+            background: #664D03;
+            color: #FFF3CD;
+        }
+
+        .dark-mode .badge-en_revision {
+            background: #0A4A54;
+            color: #D1ECF1;
+        }
+
+        .dark-mode .badge-aprobado {
+            background: #0F5132;
+            color: #D1E7DD;
+        }
+
+        .dark-mode .badge-rechazado {
+            background: #58151C;
+            color: #F8D7DA;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn-primary {
+            background: var(--brand-primary);
+            color: white;
+        }
+
+        .action-btn-primary:hover {
+            background: var(--brand-secondary);
+        }
+
+        .pagination-btn {
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 2px solid #E0E0E0;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .dark-mode .pagination-btn {
+            background: #2D2D2D;
+            border-color: #444;
+            color: #E9ECEF;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            border-color: var(--brand-primary);
+        }
+
+        .pagination-btn.active {
+            background: var(--brand-primary);
+            color: white;
+            border-color: var(--brand-primary);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <a href="{{ url_for('facturas_digitales.dashboard_facturas') }}" class="text-2xl">←</a>
+                <h1 class="text-2xl font-bold" style="color: var(--brand-primary);">
+                    📋 Listado de Facturas
+                </h1>
+            </div>
+            <button id="toggleDarkMode" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                <span id="darkModeIcon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Filtros -->
+        <div class="card mb-6">
+            <h3 class="text-lg font-bold mb-4">🔍 Filtros</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- Estado -->
+                <div>
+                    <label class="block font-semibold mb-2 text-sm">Estado</label>
+                    <select id="filterEstado" class="filter-btn w-full">
+                        <option value="">Todos</option>
+                        <option value="pendiente">Pendiente</option>
+                        <option value="en_revision">En Revisión</option>
+                        <option value="aprobado">Aprobado</option>
+                        <option value="rechazado">Rechazado</option>
+                    </select>
+                </div>
+
+                <!-- NIT -->
+                <div>
+                    <label class="block font-semibold mb-2 text-sm">NIT Proveedor</label>
+                    <input type="text" id="filterNit" class="filter-btn w-full" placeholder="Buscar por NIT">
+                </div>
+
+                <!-- Número Factura -->
+                <div>
+                    <label class="block font-semibold mb-2 text-sm">Número Factura</label>
+                    <input type="text" id="filterNumero" class="filter-btn w-full" placeholder="Buscar número">
+                </div>
+
+                <!-- Fecha Desde -->
+                <div>
+                    <label class="block font-semibold mb-2 text-sm">Desde</label>
+                    <input type="date" id="filterFechaDesde" class="filter-btn w-full">
+                </div>
+            </div>
+
+            <div class="flex gap-4 mt-4">
+                <button id="btnFiltrar" class="action-btn action-btn-primary">
+                    🔍 Filtrar
+                </button>
+                <button id="btnLimpiar" class="action-btn" style="background: #6c757d; color: white;">
+                    🔄 Limpiar
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabla de Facturas -->
+        <div class="card">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold">
+                    Total: <span id="totalFacturas">0</span> facturas
+                </h3>
+                <a href="{{ url_for('facturas_digitales.cargar') }}" class="action-btn action-btn-primary">
+                    📤 Nueva Factura
+                </a>
+            </div>
+
+            <!-- Loading -->
+            <div id="loading" class="text-center py-8">
+                <div class="text-4xl mb-2">⏳</div>
+                <p class="text-gray-600 dark:text-gray-400">Cargando facturas...</p>
+            </div>
+
+            <!-- Tabla -->
+            <div id="tableContainer" class="overflow-x-auto" style="display: none;">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b-2 dark:border-gray-700">
+                            <th class="text-left py-3 px-4 font-bold">Número</th>
+                            <th class="text-left py-3 px-4 font-bold">Proveedor</th>
+                            <th class="text-left py-3 px-4 font-bold">Fecha Emisión</th>
+                            <th class="text-right py-3 px-4 font-bold">Valor</th>
+                            <th class="text-center py-3 px-4 font-bold">Estado</th>
+                            <th class="text-center py-3 px-4 font-bold">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Se llena dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="text-center py-12" style="display: none;">
+                <div class="text-6xl mb-4">📭</div>
+                <h3 class="text-xl font-bold mb-2">No se encontraron facturas</h3>
+                <p class="text-gray-600 dark:text-gray-400">Intenta con otros filtros o carga una nueva factura</p>
+            </div>
+
+            <!-- Paginación -->
+            <div id="paginationContainer" class="flex justify-between items-center mt-6" style="display: none;">
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                    Mostrando <span id="rangeStart">1</span> - <span id="rangeEnd">20</span> de <span id="totalCount">0</span>
+                </div>
+                <div class="flex gap-2" id="paginationButtons">
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dark Mode
+        const toggleBtn = document.getElementById('toggleDarkMode');
+        const darkModeIcon = document.getElementById('darkModeIcon');
+        const body = document.body;
+
+        const darkMode = localStorage.getItem('darkMode') === 'true';
+        if (darkMode) {
+            body.classList.remove('light-mode');
+            body.classList.add('dark-mode');
+            darkModeIcon.textContent = '☀️';
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            body.classList.toggle('light-mode');
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            darkModeIcon.textContent = isDark ? '☀️' : '🌙';
+            localStorage.setItem('darkMode', isDark);
+        });
+
+        // Variables
+        let currentPage = 1;
+        let totalPages = 1;
+
+        // Cargar facturas
+        async function cargarFacturas(page = 1) {
+            const loading = document.getElementById('loading');
+            const tableContainer = document.getElementById('tableContainer');
+            const emptyState = document.getElementById('emptyState');
+            const paginationContainer = document.getElementById('paginationContainer');
+
+            loading.style.display = 'block';
+            tableContainer.style.display = 'none';
+            emptyState.style.display = 'none';
+            paginationContainer.style.display = 'none';
+
+            // Construir query params
+            const params = new URLSearchParams({
+                page: page,
+                per_page: 20
+            });
+
+            const estado = document.getElementById('filterEstado').value;
+            const nit = document.getElementById('filterNit').value;
+            const numero = document.getElementById('filterNumero').value;
+            const fechaDesde = document.getElementById('filterFechaDesde').value;
+
+            if (estado) params.append('estado', estado);
+            if (nit) params.append('nit', nit);
+            if (numero) params.append('numero', numero);
+            if (fechaDesde) params.append('fecha_desde', fechaDesde);
+
+            try {
+                const response = await fetch(`/facturas-digitales/api/facturas?${params}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    if (data.facturas.length === 0) {
+                        emptyState.style.display = 'block';
+                    } else {
+                        renderTable(data.facturas);
+                        renderPagination(data);
+                        tableContainer.style.display = 'block';
+                        paginationContainer.style.display = 'flex';
+                    }
+                    
+                    document.getElementById('totalFacturas').textContent = data.total || 0;
+                } else {
+                    throw new Error(data.error || 'Error al cargar facturas');
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                    confirmButtonColor: '#16A085'
+                });
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        // Renderizar tabla
+        function renderTable(facturas) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            facturas.forEach(factura => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800';
+                tr.innerHTML = `
+                    <td class="py-3 px-4 font-semibold">${factura.numero_factura}</td>
+                    <td class="py-3 px-4">
+                        <div class="text-sm font-medium">${factura.razon_social_proveedor}</div>
+                        <div class="text-xs text-gray-500">NIT: ${factura.nit_proveedor}</div>
+                    </td>
+                    <td class="py-3 px-4 text-sm">${new Date(factura.fecha_emision).toLocaleDateString('es-CO')}</td>
+                    <td class="py-3 px-4 text-right font-semibold">$${parseFloat(factura.valor_total).toLocaleString('es-CO', {minimumFractionDigits: 2})}</td>
+                    <td class="py-3 px-4 text-center">
+                        <span class="badge badge-${factura.estado}">
+                            ${factura.estado.toUpperCase().replace('_', ' ')}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-center">
+                        <a href="{{ url_for('facturas_digitales.detalle', id=0) }}".replace('/0', '/${factura.id}') class="text-blue-600 hover:text-blue-800 font-semibold text-sm">
+                            Ver →
+                        </a>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Renderizar paginación
+        function renderPagination(data) {
+            currentPage = data.current_page || 1;
+            totalPages = data.pages || 1;
+
+            document.getElementById('rangeStart').textContent = ((currentPage - 1) * data.per_page) + 1;
+            document.getElementById('rangeEnd').textContent = Math.min(currentPage * data.per_page, data.total);
+            document.getElementById('totalCount').textContent = data.total;
+
+            const container = document.getElementById('paginationButtons');
+            container.innerHTML = '';
+
+            // Botón anterior
+            const prevBtn = document.createElement('button');
+            prevBtn.className = 'pagination-btn';
+            prevBtn.textContent = '←';
+            prevBtn.disabled = !data.has_prev;
+            prevBtn.onclick = () => cargarFacturas(currentPage - 1);
+            container.appendChild(prevBtn);
+
+            // Números de página
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
+                    const pageBtn = document.createElement('button');
+                    pageBtn.className = 'pagination-btn' + (i === currentPage ? ' active' : '');
+                    pageBtn.textContent = i;
+                    pageBtn.onclick = () => cargarFacturas(i);
+                    container.appendChild(pageBtn);
+                } else if (i === currentPage - 2 || i === currentPage + 2) {
+                    const dots = document.createElement('span');
+                    dots.textContent = '...';
+                    dots.className = 'px-2';
+                    container.appendChild(dots);
+                }
+            }
+
+            // Botón siguiente
+            const nextBtn = document.createElement('button');
+            nextBtn.className = 'pagination-btn';
+            nextBtn.textContent = '→';
+            nextBtn.disabled = !data.has_next;
+            nextBtn.onclick = () => cargarFacturas(currentPage + 1);
+            container.appendChild(nextBtn);
+        }
+
+        // Event Listeners
+        document.getElementById('btnFiltrar').addEventListener('click', () => cargarFacturas(1));
+        document.getElementById('btnLimpiar').addEventListener('click', () => {
+            document.getElementById('filterEstado').value = '';
+            document.getElementById('filterNit').value = '';
+            document.getElementById('filterNumero').value = '';
+            document.getElementById('filterFechaDesde').value = '';
+            cargarFacturas(1);
+        });
+
+        // Enter en inputs
+        ['filterNit', 'filterNumero'].forEach(id => {
+            document.getElementById(id).addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') cargarFacturas(1);
+            });
+        });
+
+        // Cargar al iniciar
+        cargarFacturas();
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+</body>
+</html>

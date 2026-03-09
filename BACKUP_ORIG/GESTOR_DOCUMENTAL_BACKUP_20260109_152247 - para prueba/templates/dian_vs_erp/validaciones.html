@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validaciones - DIAN vs ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --brand-primary: #16a085;
+            --brand-secondary: #1abc9c;
+            --brand-dark: #138d75;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+
+        .filter-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .validacion-row {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            padding: 1rem;
+            border-left: 4px solid;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .validacion-row:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .validacion-coincidente {
+            border-left-color: #27ae60;
+            background: linear-gradient(90deg, #ffffff, #f8fff8);
+        }
+
+        .validacion-discrepante {
+            border-left-color: #e74c3c;
+            background: linear-gradient(90deg, #ffffff, #fff8f8);
+        }
+
+        .validacion-solo-dian {
+            border-left-color: #f39c12;
+            background: linear-gradient(90deg, #ffffff, #fffbf0);
+        }
+
+        .validacion-solo-erp {
+            border-left-color: #3498db;
+            background: linear-gradient(90deg, #ffffff, #f0f8ff);
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-coincidente {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-discrepante {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-solo-dian {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-solo-erp {
+            background: #cce7ff;
+            color: #004085;
+        }
+
+        .action-button {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .action-button:hover {
+            background: linear-gradient(135deg, var(--brand-dark), var(--brand-primary));
+            transform: translateY(-1px);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .pagination button:hover {
+            background: var(--brand-primary);
+            color: white;
+            border-color: var(--brand-primary);
+        }
+
+        .pagination button.active {
+            background: var(--brand-primary);
+            color: white;
+            border-color: var(--brand-primary);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .stat-mini {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .stat-number-mini {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center">
+                    <i class="fas fa-search text-3xl text-brand-primary mr-3"></i>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Validaciones DIAN vs ERP</h1>
+                        <p class="text-sm text-gray-600">Resultados de validación de facturas</p>
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <button onclick="exportarValidaciones()" class="action-button">
+                        <i class="fas fa-file-excel mr-2"></i>Exportar a Excel
+                    </button>
+                    <a href="{{ url_for('dian_vs_erp.dashboard') }}" class="action-button">
+                        <i class="fas fa-arrow-left mr-2"></i>Volver al Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Filtros -->
+        <div class="filter-card mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                <div>
+                    <label for="filtro_periodo" class="block text-sm font-medium text-gray-700 mb-2">
+                        Periodo
+                    </label>
+                    <select id="filtro_periodo" class="w-full p-2 border border-gray-300 rounded-lg">
+                        {% for periodo in periodos_disponibles %}
+                            <option value="{{ periodo }}" {{ 'selected' if periodo == periodo_actual else '' }}>
+                                {{ periodo }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="filtro_tipo" class="block text-sm font-medium text-gray-700 mb-2">
+                        Tipo de Validación
+                    </label>
+                    <select id="filtro_tipo" class="w-full p-2 border border-gray-300 rounded-lg">
+                        <option value="">Todos</option>
+                        <option value="coincidente">Coincidentes</option>
+                        <option value="discrepante">Discrepantes</option>
+                        <option value="solo_dian">Solo en DIAN</option>
+                        <option value="solo_erp">Solo en ERP</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="filtro_factura" class="block text-sm font-medium text-gray-700 mb-2">
+                        Número de Factura
+                    </label>
+                    <input type="text" id="filtro_factura" 
+                           placeholder="Buscar por prefijo o folio"
+                           class="w-full p-2 border border-gray-300 rounded-lg">
+                </div>
+                
+                <div>
+                    <label for="filtro_valor" class="block text-sm font-medium text-gray-700 mb-2">
+                        Rango de Valor
+                    </label>
+                    <select id="filtro_valor" class="w-full p-2 border border-gray-300 rounded-lg">
+                        <option value="">Todos</option>
+                        <option value="0-1000000">$0 - $1M</option>
+                        <option value="1000000-5000000">$1M - $5M</option>
+                        <option value="5000000-10000000">$5M - $10M</option>
+                        <option value="10000000-999999999">Más de $10M</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <button onclick="aplicarFiltros()" class="action-button w-full">
+                        <i class="fas fa-filter mr-2"></i>Filtrar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas del Periodo -->
+        {% if estadisticas %}
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div class="stat-mini">
+                <div class="stat-number-mini text-green-600">{{ estadisticas.coincidentes }}</div>
+                <div class="text-sm text-gray-600">Coincidentes</div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-number-mini text-red-600">{{ estadisticas.discrepantes }}</div>
+                <div class="text-sm text-gray-600">Discrepantes</div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-number-mini text-yellow-600">{{ estadisticas.solo_dian }}</div>
+                <div class="text-sm text-gray-600">Solo DIAN</div>
+            </div>
+            <div class="stat-mini">
+                <div class="stat-number-mini text-blue-600">{{ estadisticas.solo_erp }}</div>
+                <div class="text-sm text-gray-600">Solo ERP</div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Lista de Validaciones -->
+        <div class="dashboard-card">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-900">
+                    Resultados de Validación
+                    <span class="text-sm font-normal text-gray-600" id="resultados_contador">
+                        ({{ total_registros }} registros)
+                    </span>
+                </h3>
+                
+                <div class="flex items-center space-x-4">
+                    <select id="registros_por_pagina" class="border border-gray-300 rounded-lg p-2">
+                        <option value="25">25 por página</option>
+                        <option value="50" selected>50 por página</option>
+                        <option value="100">100 por página</option>
+                    </select>
+                    
+                    <button onclick="refrescarDatos()" class="text-brand-primary hover:text-brand-dark">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="validaciones_container">
+                <!-- Contenido cargado dinámicamente -->
+                <div class="text-center text-gray-500 py-8">
+                    <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                    <p>Cargando validaciones...</p>
+                </div>
+            </div>
+
+            <!-- Paginación -->
+            <div class="pagination" id="pagination_container">
+                <!-- Botones de paginación generados dinámicamente -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Detalles -->
+    <div id="modal_detalles" class="modal hidden">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-900">Detalles de Validación</h3>
+                <button onclick="cerrarModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            
+            <div id="modal_contenido">
+                <!-- Contenido dinámico -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 hidden z-50">
+        <div class="dashboard-card p-4 min-w-80">
+            <div class="flex items-center">
+                <i id="toastIcon" class="text-2xl mr-3"></i>
+                <div>
+                    <div id="toastTitle" class="font-semibold"></div>
+                    <div id="toastMessage" class="text-sm text-gray-600"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let paginaActual = 1;
+        let validacionesData = [];
+        let filtrosActivos = {};
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarValidaciones();
+            
+            // Event listeners para cambios en filtros
+            document.getElementById('filtro_periodo').addEventListener('change', aplicarFiltros);
+            document.getElementById('registros_por_pagina').addEventListener('change', aplicarFiltros);
+            
+            // Búsqueda en tiempo real con debounce
+            let timeoutBusqueda;
+            document.getElementById('filtro_factura').addEventListener('input', function() {
+                clearTimeout(timeoutBusqueda);
+                timeoutBusqueda = setTimeout(aplicarFiltros, 500);
+            });
+        });
+
+        // Cargar validaciones desde el servidor
+        function cargarValidaciones() {
+            const periodo = document.getElementById('filtro_periodo').value || '{{ periodo_actual }}';
+            const registrosPorPagina = document.getElementById('registros_por_pagina').value;
+            
+            const url = new URL('/dian_vs_erp/api/validaciones', window.location.origin);
+            url.searchParams.append('periodo', periodo);
+            url.searchParams.append('pagina', paginaActual);
+            url.searchParams.append('limite', registrosPorPagina);
+            
+            // Agregar filtros activos
+            Object.keys(filtrosActivos).forEach(key => {
+                if (filtrosActivos[key]) {
+                    url.searchParams.append(key, filtrosActivos[key]);
+                }
+            });
+
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        validacionesData = data.validaciones;
+                        mostrarValidaciones(data.validaciones);
+                        actualizarContador(data.total);
+                        generarPaginacion(data.total, parseInt(registrosPorPagina));
+                    } else {
+                        mostrarError('Error cargando validaciones: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    mostrarError('Error de conexión');
+                    console.error('Error:', error);
+                });
+        }
+
+        // Mostrar validaciones en la interfaz
+        function mostrarValidaciones(validaciones) {
+            const container = document.getElementById('validaciones_container');
+            
+            if (validaciones.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 py-12">
+                        <i class="fas fa-search text-4xl mb-4 opacity-50"></i>
+                        <h3 class="text-lg font-medium mb-2">No hay validaciones</h3>
+                        <p>No se encontraron validaciones con los filtros aplicados</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            validaciones.forEach(validacion => {
+                const tipoClass = `validacion-${validacion.tipo_validacion.replace(' ', '_')}`;
+                const badgeClass = `badge-${validacion.tipo_validacion.replace(' ', '_')}`;
+                
+                html += `
+                    <div class="validacion-row ${tipoClass}" onclick="verDetalles('${validacion.id}')">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center space-x-3">
+                                <div>
+                                    <h4 class="font-semibold text-gray-900">
+                                        ${validacion.prefijo || ''} ${validacion.folio || ''}
+                                    </h4>
+                                    <div class="text-sm text-gray-600">
+                                        ${validacion.fecha_factura ? new Date(validacion.fecha_factura).toLocaleDateString('es-ES') : 'Sin fecha'}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-right">
+                                <span class="badge ${badgeClass}">
+                                    ${validacion.tipo_validacion}
+                                </span>
+                                <div class="text-lg font-bold text-gray-900 mt-1">
+                                    $${validacion.valor_factura ? validacion.valor_factura.toLocaleString('es-CO') : '0'}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div>
+                                <span class="font-medium text-gray-600">NIT:</span>
+                                ${validacion.nit_tercero || 'N/A'}
+                            </div>
+                            <div>
+                                <span class="font-medium text-gray-600">Tercero:</span>
+                                ${validacion.nombre_tercero || 'N/A'}
+                            </div>
+                            <div>
+                                <span class="font-medium text-gray-600">Validado:</span>
+                                ${validacion.fecha_validacion ? new Date(validacion.fecha_validacion).toLocaleString('es-ES') : 'N/A'}
+                            </div>
+                        </div>
+                        
+                        ${validacion.observaciones ? `
+                        <div class="mt-3 p-2 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                            <div class="text-sm text-yellow-800">
+                                <strong>Observaciones:</strong> ${validacion.observaciones}
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // Aplicar filtros
+        function aplicarFiltros() {
+            // Recopilar filtros activos
+            filtrosActivos = {
+                tipo: document.getElementById('filtro_tipo').value,
+                factura: document.getElementById('filtro_factura').value.trim(),
+                valor: document.getElementById('filtro_valor').value
+            };
+            
+            // Resetear a la primera página
+            paginaActual = 1;
+            
+            // Cargar datos con filtros
+            cargarValidaciones();
+        }
+
+        // Actualizar contador de resultados
+        function actualizarContador(total) {
+            document.getElementById('resultados_contador').textContent = `(${total} registros)`;
+        }
+
+        // Generar paginación
+        function generarPaginacion(total, registrosPorPagina) {
+            const totalPaginas = Math.ceil(total / registrosPorPagina);
+            const container = document.getElementById('pagination_container');
+            
+            if (totalPaginas <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            
+            // Botón anterior
+            html += `
+                <button onclick="cambiarPagina(${paginaActual - 1})" 
+                        ${paginaActual <= 1 ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            `;
+            
+            // Números de página
+            const inicio = Math.max(1, paginaActual - 2);
+            const fin = Math.min(totalPaginas, paginaActual + 2);
+            
+            if (inicio > 1) {
+                html += '<button onclick="cambiarPagina(1)">1</button>';
+                if (inicio > 2) html += '<span>...</span>';
+            }
+            
+            for (let i = inicio; i <= fin; i++) {
+                html += `
+                    <button onclick="cambiarPagina(${i})" 
+                            ${i === paginaActual ? 'class="active"' : ''}>
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            if (fin < totalPaginas) {
+                if (fin < totalPaginas - 1) html += '<span>...</span>';
+                html += `<button onclick="cambiarPagina(${totalPaginas})">${totalPaginas}</button>`;
+            }
+            
+            // Botón siguiente
+            html += `
+                <button onclick="cambiarPagina(${paginaActual + 1})" 
+                        ${paginaActual >= totalPaginas ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        // Cambiar página
+        function cambiarPagina(pagina) {
+            if (pagina < 1) return;
+            paginaActual = pagina;
+            cargarValidaciones();
+            
+            // Scroll al top del contenido
+            document.querySelector('.dashboard-card').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Ver detalles de validación
+        function verDetalles(validacionId) {
+            fetch(`/dian_vs_erp/api/validacion_detalles/${validacionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        mostrarModalDetalles(data.validacion);
+                    } else {
+                        mostrarToast('Error', 'No se pudieron cargar los detalles', 'error');
+                    }
+                })
+                .catch(error => {
+                    mostrarToast('Error', 'Error de conexión', 'error');
+                });
+        }
+
+        // Mostrar modal con detalles
+        function mostrarModalDetalles(validacion) {
+            const modal = document.getElementById('modal_detalles');
+            const contenido = document.getElementById('modal_contenido');
+            
+            const tipoClass = validacion.tipo_validacion.replace(' ', '_');
+            const badgeClass = `badge-${tipoClass}`;
+            
+            contenido.innerHTML = `
+                <div class="space-y-4">
+                    <!-- Información Principal -->
+                    <div class="border-b pb-4">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h4 class="text-lg font-bold text-gray-900">
+                                    ${validacion.prefijo || ''} ${validacion.folio || ''}
+                                </h4>
+                                <p class="text-gray-600">
+                                    Fecha: ${validacion.fecha_factura ? new Date(validacion.fecha_factura).toLocaleDateString('es-ES') : 'Sin fecha'}
+                                </p>
+                            </div>
+                            <span class="badge ${badgeClass}">
+                                ${validacion.tipo_validacion}
+                            </span>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="font-medium text-gray-600">Valor:</span>
+                                $${validacion.valor_factura ? validacion.valor_factura.toLocaleString('es-CO') : '0'}
+                            </div>
+                            <div>
+                                <span class="font-medium text-gray-600">NIT:</span>
+                                ${validacion.nit_tercero || 'N/A'}
+                            </div>
+                            <div class="col-span-2">
+                                <span class="font-medium text-gray-600">Tercero:</span>
+                                ${validacion.nombre_tercero || 'N/A'}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Datos DIAN vs ERP -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="space-y-3">
+                            <h5 class="font-semibold text-gray-900 text-center bg-red-50 p-2 rounded">
+                                Datos DIAN
+                            </h5>
+                            ${validacion.datos_dian ? Object.entries(JSON.parse(validacion.datos_dian)).map(([key, value]) => 
+                                `<div class="text-sm">
+                                    <span class="font-medium text-gray-600">${key}:</span>
+                                    ${value || 'N/A'}
+                                </div>`
+                            ).join('') : '<p class="text-gray-500 text-sm">Sin datos DIAN</p>'}
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <h5 class="font-semibold text-gray-900 text-center bg-blue-50 p-2 rounded">
+                                Datos ERP
+                            </h5>
+                            ${validacion.datos_erp ? Object.entries(JSON.parse(validacion.datos_erp)).map(([key, value]) => 
+                                `<div class="text-sm">
+                                    <span class="font-medium text-gray-600">${key}:</span>
+                                    ${value || 'N/A'}
+                                </div>`
+                            ).join('') : '<p class="text-gray-500 text-sm">Sin datos ERP</p>'}
+                        </div>
+                    </div>
+                    
+                    <!-- Discrepancias -->
+                    ${validacion.discrepancias && JSON.parse(validacion.discrepancias).length > 0 ? `
+                    <div class="border-t pt-4">
+                        <h5 class="font-semibold text-red-600 mb-3">Discrepancias Encontradas:</h5>
+                        <div class="space-y-2">
+                            ${JSON.parse(validacion.discrepancias).map(discrepancia => 
+                                `<div class="p-2 bg-red-50 border-l-4 border-red-400 rounded text-sm">
+                                    ${discrepancia}
+                                </div>`
+                            ).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <!-- Observaciones -->
+                    ${validacion.observaciones ? `
+                    <div class="border-t pt-4">
+                        <h5 class="font-semibold text-gray-900 mb-2">Observaciones:</h5>
+                        <p class="text-sm text-gray-700 p-3 bg-yellow-50 border-l-4 border-yellow-400 rounded">
+                            ${validacion.observaciones}
+                        </p>
+                    </div>
+                    ` : ''}
+                    
+                    <!-- Metadata -->
+                    <div class="border-t pt-4 text-xs text-gray-500">
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <strong>Validado:</strong> 
+                                ${validacion.fecha_validacion ? new Date(validacion.fecha_validacion).toLocaleString('es-ES') : 'N/A'}
+                            </div>
+                            <div>
+                                <strong>ID:</strong> ${validacion.id}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        // Cerrar modal
+        function cerrarModal() {
+            document.getElementById('modal_detalles').classList.add('hidden');
+        }
+
+        // Exportar validaciones
+        function exportarValidaciones() {
+            const periodo = document.getElementById('filtro_periodo').value || '{{ periodo_actual }}';
+            
+            const btn = event.target;
+            const textoOriginal = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Exportando...';
+            
+            // Construir URL con filtros
+            const url = new URL('/dian_vs_erp/api/exportar_validaciones', window.location.origin);
+            url.searchParams.append('periodo', periodo);
+            
+            Object.keys(filtrosActivos).forEach(key => {
+                if (filtrosActivos[key]) {
+                    url.searchParams.append(key, filtrosActivos[key]);
+                }
+            });
+            
+            // Descargar archivo
+            window.open(url.toString(), '_blank');
+            
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = textoOriginal;
+                mostrarToast('Exportación', 'Archivo generado exitosamente', 'success');
+            }, 2000);
+        }
+
+        // Refrescar datos
+        function refrescarDatos() {
+            cargarValidaciones();
+            mostrarToast('Actualizado', 'Datos refrescados', 'success');
+        }
+
+        // Mostrar error
+        function mostrarError(mensaje) {
+            document.getElementById('validaciones_container').innerHTML = `
+                <div class="text-center text-red-500 py-12">
+                    <i class="fas fa-exclamation-triangle text-4xl mb-4"></i>
+                    <h3 class="text-lg font-medium mb-2">Error</h3>
+                    <p>${mensaje}</p>
+                    <button onclick="cargarValidaciones()" class="action-button mt-4">
+                        <i class="fas fa-retry mr-2"></i>Reintentar
+                    </button>
+                </div>
+            `;
+        }
+
+        // Función de toast
+        function mostrarToast(titulo, mensaje, tipo) {
+            const iconos = {
+                success: 'fas fa-check-circle text-green-500',
+                error: 'fas fa-exclamation-circle text-red-500',
+                info: 'fas fa-info-circle text-blue-500'
+            };
+
+            document.getElementById('toastIcon').className = iconos[tipo];
+            document.getElementById('toastTitle').textContent = titulo;
+            document.getElementById('toastMessage').textContent = mensaje;
+            
+            const toast = document.getElementById('toast');
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('modal_detalles').addEventListener('click', function(e) {
+            if (e.target === this) {
+                cerrarModal();
+            }
+        });
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+</body>
+</html>

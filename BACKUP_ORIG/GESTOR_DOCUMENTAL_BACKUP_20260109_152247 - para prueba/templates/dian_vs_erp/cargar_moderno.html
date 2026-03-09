@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargar Archivos - DIAN vs ERP</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .header-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .header-btn {
+            padding: 10px 20px;
+            border: 2px solid white;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .header-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+        
+        .header-btn.danger {
+            background: rgba(239,68,68,0.8);
+            border-color: rgba(239,68,68,1);
+        }
+        
+        .header-btn.danger:hover {
+            background: rgba(220,38,38,0.9);
+        }
+        
+        .content {
+            padding: 40px;
+        }
+        
+        .upload-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            border: 2px dashed #e0e7ff;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+        
+        .upload-section:hover {
+            border-color: #667eea;
+            background: #f1f5f9;
+        }
+        
+        .upload-section.dragover {
+            border-color: #667eea;
+            background: #e0e7ff;
+            transform: scale(1.02);
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .section-description {
+            color: #64748b;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .file-input-container {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px 25px;
+            background: #667eea;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            border: none;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .file-label:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
+        }
+        
+        .file-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+            color: #166534;
+            display: none;
+        }
+        
+        .file-info.show {
+            display: block;
+        }
+        
+        .progress-container {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 8px;
+            color: #374151;
+            font-weight: 500;
+        }
+        
+        .submit-container {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 15px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(16, 185, 129, 0.3);
+        }
+        
+        .submit-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .cancel-btn {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .cancel-btn:hover {
+            background: #4b5563;
+        }
+        
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .alert.success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+        
+        .alert.error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+        
+        .loading-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            max-width: 400px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📂 Cargar Archivos DIAN vs ERP</h1>
+            <p>Sube los archivos de DIAN, ERP y otros datos para el análisis</p>
+            <div class="header-actions">
+                <a class="header-btn" href="/dian_vs_erp/">← Volver al Visor</a>
+                <button class="header-btn danger" onclick="cerrarSesionManual()">🚪 Cerrar Sesión</button>
+            </div>
+        </div>
+        
+        <div class="content">
+            <form id="uploadForm" method="POST" enctype="multipart/form-data">
+                
+                <!-- DIAN -->
+                <div class="upload-section" ondrop="handleDrop(event, 'dian')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                    <div class="section-title">
+                        🏛️ Archivo DIAN
+                    </div>
+                    <div class="section-description">
+                        Archivo de facturas electrónicas reportadas a la DIAN. Formato: Excel o CSV.
+                    </div>
+                    <div class="file-input-container">
+                        <input type="file" id="dian" name="dian" class="file-input" accept=".xlsx,.xlsm,.xls,.csv" onchange="handleFileSelect(this)">
+                        <label for="dian" class="file-label">
+                            📁 Seleccionar Archivo DIAN
+                        </label>
+                    </div>
+                    <div class="file-info" id="dian-info"></div>
+                </div>
+                
+                <!-- ERP Financiero -->
+                <div class="upload-section" ondrop="handleDrop(event, 'erp_fn')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                    <div class="section-title">
+                        💰 ERP Financiero
+                    </div>
+                    <div class="section-description">
+                        Datos del módulo financiero del ERP. Incluye información contable y de pagos.
+                    </div>
+                    <div class="file-input-container">
+                        <input type="file" id="erp_fn" name="erp_fn" class="file-input" accept=".xlsx,.xlsm,.xls,.csv" onchange="handleFileSelect(this)">
+                        <label for="erp_fn" class="file-label">
+                            📁 Seleccionar ERP Financiero
+                        </label>
+                    </div>
+                    <div class="file-info" id="erp_fn-info"></div>
+                </div>
+                
+                <!-- ERP Comercial -->
+                <div class="upload-section" ondrop="handleDrop(event, 'erp_cm')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                    <div class="section-title">
+                        🛒 ERP Comercial
+                    </div>
+                    <div class="section-description">
+                        Datos del módulo comercial del ERP. Incluye ventas, facturación y clientes.
+                    </div>
+                    <div class="file-input-container">
+                        <input type="file" id="erp_cm" name="erp_cm" class="file-input" accept=".xlsx,.xlsm,.xls,.csv" onchange="handleFileSelect(this)">
+                        <label for="erp_cm" class="file-label">
+                            📁 Seleccionar ERP Comercial
+                        </label>
+                    </div>
+                    <div class="file-info" id="erp_cm-info"></div>
+                </div>
+                
+                <!-- Errores ERP -->
+                <div class="upload-section" ondrop="handleDrop(event, 'errores')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                    <div class="section-title">
+                        ❌ Errores ERP
+                    </div>
+                    <div class="section-description">
+                        Archivo con errores o excepciones del ERP que requieren revisión manual.
+                    </div>
+                    <div class="file-input-container">
+                        <input type="file" id="errores" name="errores" class="file-input" accept=".xlsx,.xlsm,.xls,.csv" onchange="handleFileSelect(this)">
+                        <label for="errores" class="file-label">
+                            📁 Seleccionar Errores ERP
+                        </label>
+                    </div>
+                    <div class="file-info" id="errores-info"></div>
+                </div>
+                
+                <!-- Acuses -->
+                <div class="upload-section" ondrop="handleDrop(event, 'acuses')" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)">
+                    <div class="section-title">
+                        📋 Acuses de Recibo
+                    </div>
+                    <div class="section-description">
+                        Archivos de acuses de recibo y confirmaciones de facturas electrónicas.
+                    </div>
+                    <div class="file-input-container">
+                        <input type="file" id="acuses" name="acuses" class="file-input" accept=".xlsx,.xlsm,.xls,.csv" onchange="handleFileSelect(this)">
+                        <label for="acuses" class="file-label">
+                            📁 Seleccionar Acuses
+                        </label>
+                    </div>
+                    <div class="file-info" id="acuses-info"></div>
+                </div>
+                
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text" id="progressText">Preparando subida...</div>
+                </div>
+                
+                <div class="alert" id="alertMessage"></div>
+                
+                <div class="submit-container">
+                    <button type="submit" class="submit-btn" id="submitBtn">
+                        📤 Subir y Procesar Archivos
+                    </button>
+                    <button type="button" class="cancel-btn" onclick="window.location.href='/dian_vs_erp/'">
+                        ↩️ Volver al Dashboard
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3>Procesando archivos...</h3>
+            <p id="loadingMessage">Convirtiendo archivos a CSV y actualizando base de datos...</p>
+        </div>
+    </div>
+    
+    <script>
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.currentTarget.classList.add('dragover');
+        }
+        
+        function handleDragLeave(event) {
+            event.currentTarget.classList.remove('dragover');
+        }
+        
+        function handleDrop(event, inputName) {
+            event.preventDefault();
+            event.currentTarget.classList.remove('dragover');
+            
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                const input = document.getElementById(inputName);
+                input.files = files;
+                handleFileSelect(input);
+            }
+        }
+        
+        function handleFileSelect(input) {
+            const file = input.files[0];
+            const infoDiv = document.getElementById(input.id + '-info');
+            
+            if (file) {
+                const fileSize = (file.size / (1024 * 1024)).toFixed(2);
+                const fileType = file.type || 'Desconocido';
+                
+                infoDiv.innerHTML = `
+                    <strong>Archivo seleccionado:</strong> ${file.name}<br>
+                    <strong>Tamaño:</strong> ${fileSize} MB<br>
+                    <strong>Tipo:</strong> ${fileType}
+                `;
+                infoDiv.classList.add('show');
+            } else {
+                infoDiv.classList.remove('show');
+            }
+            
+            // Verificar si hay al menos un archivo para habilitar el botón
+            checkFormValidity();
+        }
+        
+        function checkFormValidity() {
+            const inputs = document.querySelectorAll('input[type="file"]');
+            let hasFile = false;
+            
+            inputs.forEach(input => {
+                if (input.files.length > 0) {
+                    hasFile = true;
+                }
+            });
+            
+            document.getElementById('submitBtn').disabled = !hasFile;
+        }
+        
+        function showAlert(message, type) {
+            const alert = document.getElementById('alertMessage');
+            alert.textContent = message;
+            alert.className = `alert ${type}`;
+            alert.style.display = 'block';
+            
+            // Ocultar después de 5 segundos
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 5000);
+        }
+        
+        function updateProgress(percent, message) {
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            
+            progressContainer.style.display = 'block';
+            progressFill.style.width = percent + '%';
+            progressText.textContent = message;
+        }
+        
+        function hideProgress() {
+            document.getElementById('progressContainer').style.display = 'none';
+        }
+        
+        function showLoading(message = null) {
+            const overlay = document.getElementById('loadingOverlay');
+            const messageEl = document.getElementById('loadingMessage');
+            
+            if (message) {
+                messageEl.textContent = message;
+            }
+            
+            overlay.style.display = 'flex';
+        }
+        
+        function hideLoading() {
+            document.getElementById('loadingOverlay').style.display = 'none';
+        }
+        
+        // Manejar envío del formulario
+        document.getElementById('uploadForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const formData = new FormData();
+            const inputs = document.querySelectorAll('input[type="file"]');
+            let hasFiles = false;
+            
+            inputs.forEach(input => {
+                if (input.files.length > 0) {
+                    formData.append(input.name, input.files[0]);
+                    hasFiles = true;
+                }
+            });
+            
+            // ✅ PERMITIR procesar sin archivos (usará archivos existentes)
+            // if (!hasFiles) {
+            //     showAlert('Por favor, selecciona al menos un archivo.', 'error');
+            //     return;
+            // }
+            
+            try {
+                if (hasFiles) {
+                    showLoading('Subiendo archivos al servidor...');
+                    updateProgress(10, 'Iniciando subida...');
+                } else {
+                    showLoading('Procesando archivos existentes...');
+                    updateProgress(10, 'Usando archivos previamente cargados...');
+                }
+                
+                const response = await fetch('/dian_vs_erp/subir_archivos', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                updateProgress(70, 'Procesando archivos...');
+                
+                const result = await response.json();
+                
+                hideLoading();
+                hideProgress();
+                
+                if (response.ok) {
+                    showAlert('✅ ' + result.mensaje, 'success');
+                    
+                    // Limpiar formulario después de 2 segundos y redirigir
+                    setTimeout(() => {
+                        window.location.href = '/dian_vs_erp/';
+                    }, 2000);
+                } else {
+                    showAlert('❌ ' + (result.mensaje || result.error || 'Error al procesar archivos'), 'error');
+                }
+                
+            } catch (error) {
+                hideLoading();
+                hideProgress();
+                console.error('Error:', error);
+                showAlert('❌ Error de conexión: ' + error.message, 'error');
+            }
+        });
+        
+        // Verificar validez inicial del formulario
+        document.addEventListener('DOMContentLoaded', function() {
+            checkFormValidity();
+        });
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).\n\n' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+function cerrarSesionManual() {
+    // Confirmar antes de salir
+    if (!confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+        return;
+    }
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).then(() => {
+        console.log('✅ Sesión cerrada correctamente');
+        // Redirigir al login
+        window.location.href = '/';
+    }).catch(err => {
+        console.error('❌ Error al cerrar sesión:', err);
+        // Redirigir de todas formas
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+</body>
+</html>

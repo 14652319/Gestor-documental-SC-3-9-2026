@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reportes - DIAN vs ERP</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --brand-primary: #16a085;
+            --brand-secondary: #1abc9c;
+            --brand-dark: #138d75;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+        }
+
+        .report-option {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .report-option:hover {
+            border-color: var(--brand-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .action-button {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .action-button:hover {
+            background: linear-gradient(135deg, var(--brand-dark), var(--brand-primary));
+            transform: translateY(-1px);
+        }
+
+        .action-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 1rem 0;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--brand-primary), var(--brand-secondary));
+            transition: width 0.3s ease;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .report-preview {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .report-table th {
+            background: var(--brand-primary);
+            color: white;
+            padding: 8px 12px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .report-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .report-table tr:nth-child(even) {
+            background: #f8fafc;
+        }
+
+        .email-config {
+            background: #f0f9ff;
+            border: 1px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .tab-container {
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 1rem;
+        }
+
+        .tab {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #64748b;
+            transition: all 0.3s ease;
+        }
+
+        .tab.active {
+            color: var(--brand-primary);
+            border-bottom-color: var(--brand-primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center">
+                    <i class="fas fa-chart-bar text-3xl text-brand-primary mr-3"></i>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Reportes DIAN vs ERP</h1>
+                        <p class="text-sm text-gray-600">Generación y exportación de reportes</p>
+                    </div>
+                </div>
+                <div class="flex space-x-4">
+                    <button onclick="refrescarEstadisticas()" class="action-button">
+                        <i class="fas fa-sync-alt mr-2"></i>Refrescar
+                    </button>
+                    <a href="{{ url_for('dian_vs_erp.dashboard') }}" class="action-button">
+                        <i class="fas fa-arrow-left mr-2"></i>Volver al Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Estadísticas Generales -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="stat-box">
+                <div class="stat-number" id="stat-periodos">{{ total_periodos or 0 }}</div>
+                <div class="stat-label">
+                    <i class="fas fa-calendar-alt mr-1"></i>
+                    Periodos Procesados
+                </div>
+            </div>
+            
+            <div class="stat-box">
+                <div class="stat-number" id="stat-validaciones">{{ total_validaciones or 0 }}</div>
+                <div class="stat-label">
+                    <i class="fas fa-check-circle mr-1"></i>
+                    Total Validaciones
+                </div>
+            </div>
+            
+            <div class="stat-box">
+                <div class="stat-number" id="stat-coincidentes">{{ total_coincidentes or 0 }}</div>
+                <div class="stat-label">
+                    <i class="fas fa-thumbs-up mr-1"></i>
+                    Coincidentes
+                </div>
+            </div>
+            
+            <div class="stat-box">
+                <div class="stat-number" id="stat-discrepantes">{{ total_discrepantes or 0 }}</div>
+                <div class="stat-label">
+                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                    Discrepantes
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestañas de Reportes -->
+        <div class="dashboard-card">
+            <div class="tab-container">
+                <button class="tab active" onclick="cambiarTab('generacion')">
+                    <i class="fas fa-file-excel mr-2"></i>Generar Reportes
+                </button>
+                <button class="tab" onclick="cambiarTab('programados')">
+                    <i class="fas fa-clock mr-2"></i>Reportes Programados
+                </button>
+                <button class="tab" onclick="cambiarTab('historial')">
+                    <i class="fas fa-history mr-2"></i>Historial
+                </button>
+            </div>
+
+            <!-- Tab: Generación de Reportes -->
+            <div id="tab-generacion" class="tab-content active">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Panel de Configuración -->
+                    <div class="space-y-6">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">
+                            Configuración del Reporte
+                        </h3>
+
+                        <!-- Selección de Periodo -->
+                        <div>
+                            <label for="periodo_reporte" class="block text-sm font-medium text-gray-700 mb-2">
+                                Periodo
+                            </label>
+                            <select id="periodo_reporte" class="w-full p-3 border border-gray-300 rounded-lg">
+                                {% for periodo in periodos_disponibles %}
+                                    <option value="{{ periodo }}">{{ periodo }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Tipo de Reporte -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-3">
+                                Tipo de Reporte
+                            </label>
+                            <div class="space-y-3">
+                                <label class="flex items-center">
+                                    <input type="radio" name="tipo_reporte" value="completo" checked class="mr-2">
+                                    <span>Reporte Completo (Todas las validaciones)</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="tipo_reporte" value="coincidentes" class="mr-2">
+                                    <span>Solo Coincidentes</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="tipo_reporte" value="discrepantes" class="mr-2">
+                                    <span>Solo Discrepantes</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="radio" name="tipo_reporte" value="resumen" class="mr-2">
+                                    <span>Resumen Ejecutivo</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Formato de Exportación -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-3">
+                                Formato de Exportación
+                            </label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <input type="radio" name="formato" value="excel" checked class="mr-2">
+                                    <i class="fas fa-file-excel text-green-600 mr-2"></i>
+                                    <span>Excel (.xlsx)</span>
+                                </label>
+                                <label class="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <input type="radio" name="formato" value="csv" class="mr-2">
+                                    <i class="fas fa-file-csv text-blue-600 mr-2"></i>
+                                    <span>CSV</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Configuración de Email -->
+                        <div>
+                            <label class="flex items-center mb-3">
+                                <input type="checkbox" id="enviar_email" class="mr-2">
+                                <span class="font-medium text-gray-700">Enviar por correo electrónico</span>
+                            </label>
+                            
+                            <div id="email-config" class="email-config hidden">
+                                <div class="grid grid-cols-1 gap-3">
+                                    <div>
+                                        <label for="email_destinatarios" class="block text-sm font-medium text-gray-700 mb-1">
+                                            Destinatarios (separados por coma)
+                                        </label>
+                                        <input type="email" id="email_destinatarios" 
+                                               placeholder="correo1@ejemplo.com, correo2@ejemplo.com"
+                                               class="w-full p-2 border border-gray-300 rounded-lg">
+                                    </div>
+                                    <div>
+                                        <label for="email_asunto" class="block text-sm font-medium text-gray-700 mb-1">
+                                            Asunto
+                                        </label>
+                                        <input type="text" id="email_asunto" 
+                                               value="Reporte DIAN vs ERP - {{ fecha_actual }}"
+                                               class="w-full p-2 border border-gray-300 rounded-lg">
+                                    </div>
+                                    <div>
+                                        <label for="email_mensaje" class="block text-sm font-medium text-gray-700 mb-1">
+                                            Mensaje (opcional)
+                                        </label>
+                                        <textarea id="email_mensaje" rows="3" 
+                                                  placeholder="Adjunto encontrará el reporte de validación DIAN vs ERP..."
+                                                  class="w-full p-2 border border-gray-300 rounded-lg"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botón de Generación -->
+                        <button onclick="generarReporte()" id="btn-generar" class="w-full action-button text-lg py-4">
+                            <i class="fas fa-download mr-2"></i>
+                            Generar y Descargar Reporte
+                        </button>
+                    </div>
+
+                    <!-- Panel de Vista Previa -->
+                    <div>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-xl font-bold text-gray-900">Vista Previa</h3>
+                            <button onclick="cargarVistaPrevia()" class="text-brand-primary hover:text-brand-dark">
+                                <i class="fas fa-eye mr-1"></i>Actualizar Preview
+                            </button>
+                        </div>
+
+                        <div id="vista-previa" class="report-preview">
+                            <div class="text-center text-gray-500 py-8">
+                                <i class="fas fa-file-alt text-4xl mb-3 opacity-50"></i>
+                                <p>Vista previa del reporte</p>
+                                <button onclick="cargarVistaPrevia()" class="action-button mt-3">
+                                    Cargar Preview
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div id="progress-container" class="hidden mt-4">
+                            <div class="flex justify-between text-sm text-gray-600 mb-2">
+                                <span>Generando reporte...</span>
+                                <span id="progress-text">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: Reportes Programados -->
+            <div id="tab-programados" class="tab-content">
+                <div class="text-center text-gray-500 py-12">
+                    <i class="fas fa-clock text-4xl mb-4 opacity-50"></i>
+                    <h3 class="text-lg font-medium mb-2">Reportes Programados</h3>
+                    <p class="mb-4">Funcionalidad en desarrollo</p>
+                    <p class="text-sm">Próximamente: programación de reportes automáticos por periodo</p>
+                </div>
+            </div>
+
+            <!-- Tab: Historial -->
+            <div id="tab-historial" class="tab-content">
+                <div id="historial-container">
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                        <p>Cargando historial de reportes...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 hidden z-50">
+        <div class="dashboard-card p-4 min-w-80">
+            <div class="flex items-center">
+                <i id="toastIcon" class="text-2xl mr-3"></i>
+                <div>
+                    <div id="toastTitle" class="font-semibold"></div>
+                    <div id="toastMessage" class="text-sm text-gray-600"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let reporteEnGeneracion = false;
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            // Event listener para mostrar/ocultar configuración de email
+            document.getElementById('enviar_email').addEventListener('change', function() {
+                const emailConfig = document.getElementById('email-config');
+                if (this.checked) {
+                    emailConfig.classList.remove('hidden');
+                } else {
+                    emailConfig.classList.add('hidden');
+                }
+            });
+
+            // Cargar vista previa inicial
+            cargarVistaPrevia();
+
+            // Cargar historial
+            cargarHistorial();
+        });
+
+        // Cambiar tab activo
+        function cambiarTab(tabName) {
+            // Ocultar todos los tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Mostrar tab seleccionado
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            event.target.classList.add('active');
+
+            // Cargar datos específicos del tab
+            if (tabName === 'historial') {
+                cargarHistorial();
+            }
+        }
+
+        // Cargar vista previa del reporte
+        function cargarVistaPrevia() {
+            const periodo = document.getElementById('periodo_reporte').value;
+            const tipoReporte = document.querySelector('input[name="tipo_reporte"]:checked').value;
+
+            if (!periodo) {
+                document.getElementById('vista-previa').innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-exclamation-triangle text-4xl mb-3 opacity-50"></i>
+                        <p>Seleccione un periodo para ver la vista previa</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const container = document.getElementById('vista-previa');
+            container.innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                    <p>Cargando vista previa...</p>
+                </div>
+            `;
+
+            fetch(`/dian_vs_erp/api/preview_reporte?periodo=${periodo}&tipo=${tipoReporte}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        mostrarPreviewTabla(data.preview, container);
+                    } else {
+                        container.innerHTML = `
+                            <div class="text-center text-red-500 py-8">
+                                <i class="fas fa-exclamation-triangle text-4xl mb-3"></i>
+                                <p>Error: ${data.error}</p>
+                                <button onclick="cargarVistaPrevia()" class="action-button mt-3">
+                                    Reintentar
+                                </button>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    container.innerHTML = `
+                        <div class="text-center text-red-500 py-8">
+                            <i class="fas fa-exclamation-triangle text-4xl mb-3"></i>
+                            <p>Error de conexión</p>
+                            <button onclick="cargarVistaPrevia()" class="action-button mt-3">
+                                Reintentar
+                            </button>
+                        </div>
+                    `;
+                });
+        }
+
+        // Mostrar preview en formato tabla
+        function mostrarPreviewTabla(preview, container) {
+            if (!preview.datos || preview.datos.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 py-8">
+                        <i class="fas fa-inbox text-4xl mb-3 opacity-50"></i>
+                        <p>No hay datos para mostrar en este periodo</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const datos = preview.datos.slice(0, 10); // Solo mostrar primeras 10 filas
+            const columnas = preview.columnas || Object.keys(datos[0]);
+
+            let html = `
+                <div class="mb-3 text-sm text-gray-600 px-3 py-2 bg-blue-50 rounded">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    Mostrando ${datos.length} de ${preview.total || datos.length} registros
+                </div>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+            `;
+
+            columnas.forEach(col => {
+                html += `<th>${col}</th>`;
+            });
+
+            html += `</tr></thead><tbody>`;
+
+            datos.forEach(fila => {
+                html += '<tr>';
+                columnas.forEach(col => {
+                    let valor = fila[col] || '';
+                    if (typeof valor === 'number' && col.toLowerCase().includes('valor')) {
+                        valor = '$' + valor.toLocaleString('es-CO');
+                    } else if (typeof valor === 'string' && valor.includes('T') && valor.includes(':')) {
+                        // Formatear fechas
+                        valor = new Date(valor).toLocaleString('es-ES');
+                    }
+                    html += `<td>${valor}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+
+            if (preview.total > 10) {
+                html += `
+                    <div class="text-center text-gray-600 py-3 text-sm">
+                        ... y ${preview.total - 10} registros más
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // Generar reporte
+        function generarReporte() {
+            if (reporteEnGeneracion) return;
+
+            const periodo = document.getElementById('periodo_reporte').value;
+            const tipoReporte = document.querySelector('input[name="tipo_reporte"]:checked').value;
+            const formato = document.querySelector('input[name="formato"]:checked').value;
+            const enviarEmail = document.getElementById('enviar_email').checked;
+
+            if (!periodo) {
+                mostrarToast('Error', 'Seleccione un periodo', 'error');
+                return;
+            }
+
+            reporteEnGeneracion = true;
+            const btn = document.getElementById('btn-generar');
+            const textoOriginal = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Generando...';
+
+            // Mostrar progress bar
+            const progressContainer = document.getElementById('progress-container');
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            
+            progressContainer.classList.remove('hidden');
+
+            // Simular progreso
+            let progreso = 0;
+            const intervalo = setInterval(() => {
+                progreso += Math.random() * 15;
+                if (progreso > 90) progreso = 90;
+                
+                progressFill.style.width = progreso + '%';
+                progressText.textContent = Math.round(progreso) + '%';
+            }, 300);
+
+            // Preparar datos para el reporte
+            const datosReporte = {
+                periodo,
+                tipo: tipoReporte,
+                formato,
+                enviar_email: enviarEmail
+            };
+
+            if (enviarEmail) {
+                datosReporte.destinatarios = document.getElementById('email_destinatarios').value;
+                datosReporte.asunto = document.getElementById('email_asunto').value;
+                datosReporte.mensaje = document.getElementById('email_mensaje').value;
+            }
+
+            fetch('/dian_vs_erp/api/generar_reporte', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(datosReporte)
+            })
+            .then(response => {
+                if (formato === 'excel' && !enviarEmail) {
+                    // Descargar archivo directamente
+                    return response.blob().then(blob => {
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `reporte_dian_vs_erp_${periodo}_${tipoReporte}.xlsx`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
+                        
+                        return { success: true, message: 'Reporte descargado exitosamente' };
+                    });
+                } else {
+                    return response.json();
+                }
+            })
+            .then(data => {
+                clearInterval(intervalo);
+                progressFill.style.width = '100%';
+                progressText.textContent = '100%';
+
+                setTimeout(() => {
+                    reporteEnGeneracion = false;
+                    progressContainer.classList.add('hidden');
+                    btn.disabled = false;
+                    btn.innerHTML = textoOriginal;
+
+                    if (data.success) {
+                        mostrarToast('Reporte Generado', data.message, 'success');
+                        cargarHistorial(); // Actualizar historial
+                    } else {
+                        mostrarToast('Error', data.error || 'Error generando reporte', 'error');
+                    }
+                }, 1000);
+            })
+            .catch(error => {
+                clearInterval(intervalo);
+                reporteEnGeneracion = false;
+                progressContainer.classList.add('hidden');
+                btn.disabled = false;
+                btn.innerHTML = textoOriginal;
+                
+                mostrarToast('Error', 'Error de conexión', 'error');
+                console.error('Error:', error);
+            });
+        }
+
+        // Cargar historial de reportes
+        function cargarHistorial() {
+            const container = document.getElementById('historial-container');
+            
+            fetch('/dian_vs_erp/api/historial_reportes')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        mostrarHistorial(data.reportes, container);
+                    } else {
+                        container.innerHTML = `
+                            <div class="text-center text-gray-500 py-8">
+                                <i class="fas fa-exclamation-triangle text-4xl mb-3 opacity-50"></i>
+                                <p>Error cargando historial: ${data.error}</p>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => {
+                    container.innerHTML = `
+                        <div class="text-center text-red-500 py-8">
+                            <i class="fas fa-exclamation-triangle text-4xl mb-3"></i>
+                            <p>Error de conexión</p>
+                        </div>
+                    `;
+                });
+        }
+
+        // Mostrar historial de reportes
+        function mostrarHistorial(reportes, container) {
+            if (!reportes || reportes.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 py-12">
+                        <i class="fas fa-inbox text-4xl mb-4 opacity-50"></i>
+                        <h3 class="text-lg font-medium mb-2">Sin historial</h3>
+                        <p>No se han generado reportes aún</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="space-y-4">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Últimos Reportes Generados</h3>
+            `;
+
+            reportes.forEach(reporte => {
+                const fechaGeneracion = new Date(reporte.fecha_generacion).toLocaleString('es-ES');
+                const tipoLabel = {
+                    'completo': 'Completo',
+                    'coincidentes': 'Solo Coincidentes',
+                    'discrepantes': 'Solo Discrepantes',
+                    'resumen': 'Resumen Ejecutivo'
+                }[reporte.tipo] || reporte.tipo;
+
+                html += `
+                    <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50">
+                        <div class="flex justify-between items-start mb-2">
+                            <div>
+                                <h4 class="font-semibold text-gray-900">
+                                    Reporte ${tipoLabel} - ${reporte.periodo}
+                                </h4>
+                                <p class="text-sm text-gray-600">
+                                    Generado: ${fechaGeneracion} | 
+                                    Formato: ${reporte.formato.toUpperCase()} |
+                                    ${reporte.enviado_email ? 'Enviado por email' : 'Descargado'}
+                                </p>
+                            </div>
+                            <div class="flex space-x-2">
+                                ${reporte.archivo_path ? `
+                                <button onclick="descargarReporte('${reporte.id}')" 
+                                        class="text-brand-primary hover:text-brand-dark" title="Descargar">
+                                    <i class="fas fa-download"></i>
+                                </button>
+                                ` : ''}
+                                <button onclick="reenviarReporte('${reporte.id}')" 
+                                        class="text-blue-600 hover:text-blue-800" title="Reenviar por email">
+                                    <i class="fas fa-envelope"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        ${reporte.destinatarios_email ? `
+                        <div class="text-sm text-gray-600">
+                            <i class="fas fa-envelope mr-1"></i>
+                            Enviado a: ${reporte.destinatarios_email}
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Descargar reporte del historial
+        function descargarReporte(reporteId) {
+            window.open(`/dian_vs_erp/api/descargar_reporte/${reporteId}`, '_blank');
+        }
+
+        // Reenviar reporte por email
+        function reenviarReporte(reporteId) {
+            const destinatarios = prompt('Ingrese los destinatarios separados por coma:');
+            if (!destinatarios) return;
+
+            fetch('/dian_vs_erp/api/reenviar_reporte', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    reporte_id: reporteId,
+                    destinatarios: destinatarios
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarToast('Reporte Reenviado', 'Reporte enviado exitosamente', 'success');
+                } else {
+                    mostrarToast('Error', data.error, 'error');
+                }
+            })
+            .catch(error => {
+                mostrarToast('Error', 'Error de conexión', 'error');
+            });
+        }
+
+        // Refrescar estadísticas
+        function refrescarEstadisticas() {
+            fetch('/dian_vs_erp/api/estadisticas_generales')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const stats = data.estadisticas;
+                        document.getElementById('stat-periodos').textContent = stats.total_periodos || 0;
+                        document.getElementById('stat-validaciones').textContent = stats.total_validaciones || 0;
+                        document.getElementById('stat-coincidentes').textContent = stats.total_coincidentes || 0;
+                        document.getElementById('stat-discrepantes').textContent = stats.total_discrepantes || 0;
+                        
+                        mostrarToast('Actualizado', 'Estadísticas refrescadas', 'success');
+                    }
+                })
+                .catch(error => {
+                    mostrarToast('Error', 'Error actualizando estadísticas', 'error');
+                });
+        }
+
+        // Función de toast
+        function mostrarToast(titulo, mensaje, tipo) {
+            const iconos = {
+                success: 'fas fa-check-circle text-green-500',
+                error: 'fas fa-exclamation-circle text-red-500',
+                info: 'fas fa-info-circle text-blue-500'
+            };
+
+            document.getElementById('toastIcon').className = iconos[tipo];
+            document.getElementById('toastTitle').textContent = titulo;
+            document.getElementById('toastMessage').textContent = mensaje;
+            
+            const toast = document.getElementById('toast');
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 5000);
+        }
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+</body>
+</html>

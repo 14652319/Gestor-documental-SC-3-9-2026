@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Terceros - Dashboard</title>
+    <style>
+        /* ========================================================================= */
+        /*                           COLORES INSTITUCIONALES                        */
+        /* ========================================================================= */
+        :root {
+            --primary-green: #166534;
+            --primary-green-dark: #14532d;
+            --primary-green-light: #22c55e;
+            --secondary-orange: #f97316;
+            --secondary-orange-dark: #ea580c;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-yellow: #eab308;
+            --success-green: #10b981;
+            --warning-orange: #f59e0b;
+            --danger-red: #ef4444;
+            --info-blue: #06b6d4;
+            --dark-gray: #374151;
+            --light-gray: #f3f4f6;
+            --white: #ffffff;
+            --border-color: #d1d5db;
+        }
+
+        /* ========================================================================= */
+        /*                              RESET Y BASE                                */
+        /* ========================================================================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--light-gray) 0%, #e5e7eb 100%);
+            min-height: 100vh;
+            color: var(--dark-gray);
+        }
+
+        /* ========================================================================= */
+        /*                              HEADER FIJO                                 */
+        /* ========================================================================= */
+        .header-fijo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-titulo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header-titulo h1 {
+            color: var(--white);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .header-titulo .icono {
+            font-size: 2rem;
+            color: var(--secondary-orange);
+        }
+
+        .header-acciones {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .usuario-info {
+            color: var(--white);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-header {
+            background: var(--secondary-orange);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-header:hover {
+            background: var(--secondary-orange-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ========================================================================= */
+        /*                            CONTENEDOR PRINCIPAL                          */
+        /* ========================================================================= */
+        .contenedor-principal {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ========================================================================= */
+        /*                            TARJETAS DE ESTADÍSTICAS                     */
+        /* ========================================================================= */
+        .grid-estadisticas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .tarjeta-estadistica {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tarjeta-estadistica:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .tarjeta-estadistica::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-green), var(--accent-blue));
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-titulo {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--dark-gray);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-icono {
+            font-size: 1.5rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            background: var(--light-gray);
+        }
+
+        .stat-numero {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-green);
+            margin-bottom: 0.5rem;
+            line-height: 1;
+        }
+
+        .stat-descripcion {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 1rem;
+        }
+
+        .stat-progreso {
+            width: 100%;
+            height: 6px;
+            background: var(--light-gray);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .stat-progreso-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-green), var(--success-green));
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        /* ========================================================================= */
+        /*                            SECCIÓN DE ACCIONES                          */
+        /* ========================================================================= */
+        .acciones-principales {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .acciones-titulo {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--primary-green);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .grid-acciones {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .tarjeta-accion {
+            background: linear-gradient(135deg, var(--white) 0%, var(--light-gray) 100%);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tarjeta-accion:hover {
+            border-color: var(--primary-green);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(22, 101, 52, 0.15);
+        }
+
+        .tarjeta-accion:hover .accion-icono {
+            transform: scale(1.1);
+            color: var(--primary-green);
+        }
+
+        .accion-icono {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: var(--secondary-orange);
+            transition: all 0.3s ease;
+        }
+
+        .accion-titulo {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-green);
+            margin-bottom: 0.5rem;
+        }
+
+        .accion-descripcion {
+            font-size: 0.9rem;
+            color: #6b7280;
+            line-height: 1.4;
+        }
+
+        /* ========================================================================= */
+        /*                            RESPONSIVE DESIGN                             */
+        /* ========================================================================= */
+        @media (max-width: 768px) {
+            .header-fijo {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .contenedor-principal {
+                margin-top: 120px;
+                padding: 1rem;
+            }
+
+            .grid-estadisticas {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .grid-acciones {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .header-titulo h1 {
+                font-size: 1.2rem;
+            }
+
+            .stat-numero {
+                font-size: 2rem;
+            }
+        }
+
+        /* ========================================================================= */
+        /*                              ANIMACIONES                                */
+        /* ========================================================================= */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .tarjeta-estadistica,
+        .acciones-principales,
+        .tarjeta-accion {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .tarjeta-estadistica:nth-child(1) { animation-delay: 0.1s; }
+        .tarjeta-estadistica:nth-child(2) { animation-delay: 0.2s; }
+        .tarjeta-estadistica:nth-child(3) { animation-delay: 0.3s; }
+        .tarjeta-estadistica:nth-child(4) { animation-delay: 0.4s; }
+
+        /* ========================================================================= */
+        /*                              LOADING STATES                             */
+        /* ========================================================================= */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--white);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: skeleton-loading 1.5s infinite;
+        }
+
+        @keyframes skeleton-loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body>
+    <!-- ========================================================================= -->
+    <!--                              HEADER FIJO                                 -->
+    <!-- ========================================================================= -->
+    <header class="header-fijo">
+        <div class="header-titulo">
+            <span class="icono">👥</span>
+            <h1>Gestión de Terceros - Dashboard</h1>
+        </div>
+        <div class="header-acciones">
+            <div class="usuario-info">
+                <span>👤</span>
+                <span>{{ usuario }}</span>
+            </div>
+            <a href="/dashboard" class="btn-header">
+                <span>🏠</span>
+                Menú Principal
+            </a>
+        </div>
+    </header>
+
+    <!-- ========================================================================= -->
+    <!--                         CONTENEDOR PRINCIPAL                             -->
+    <!-- ========================================================================= -->
+    <div class="contenedor-principal">
+        <!-- ESTADÍSTICAS PRINCIPALES -->
+        <div class="grid-estadisticas" id="estadisticas-grid">
+            <!-- Las estadísticas se cargarán dinámicamente -->
+        </div>
+
+        <!-- ACCIONES PRINCIPALES -->
+        <div class="acciones-principales">
+            <h2 class="acciones-titulo">
+                <span>🚀</span>
+                Acciones Principales
+            </h2>
+            <div class="grid-acciones">
+                <div class="tarjeta-accion" onclick="navegarA('/terceros/consulta')">
+                    <div class="accion-icono">📋</div>
+                    <h3 class="accion-titulo">Consultar Terceros</h3>
+                    <p class="accion-descripcion">
+                        Listado completo con paginación avanzada, filtros y búsqueda
+                    </p>
+                </div>
+
+                <div class="tarjeta-accion" onclick="navegarA('/terceros/crear')">
+                    <div class="accion-icono">➕</div>
+                    <h3 class="accion-titulo">Crear Tercero</h3>
+                    <p class="accion-descripcion">
+                        Registro nuevo con información completa y campos extendidos
+                    </p>
+                </div>
+
+                <div class="tarjeta-accion" onclick="abrirNotificacionesMasivas()">
+                    <div class="accion-icono">📧</div>
+                    <h3 class="accion-titulo">Notificaciones Masivas</h3>
+                    <p class="accion-descripcion">
+                        Envío masivo de correos con control de bloques
+                    </p>
+                </div>
+
+                <div class="tarjeta-accion" onclick="abrirReportes()">
+                    <div class="accion-icono">📊</div>
+                    <h3 class="accion-titulo">Reportes y Analytics</h3>
+                    <p class="accion-descripcion">
+                        Estadísticas avanzadas y reportes detallados
+                    </p>
+                </div>
+
+                <div class="tarjeta-accion" onclick="abrirConfiguracion()">
+                    <div class="accion-icono">⚙️</div>
+                    <h3 class="accion-titulo">Configuración</h3>
+                    <p class="accion-descripcion">
+                        Ajustes del módulo y plantillas de notificaciones
+                    </p>
+                </div>
+
+                <div class="tarjeta-accion" onclick="abrirAuditoria()">
+                    <div class="accion-icono">🔍</div>
+                    <h3 class="accion-titulo">Auditoría</h3>
+                    <p class="accion-descripcion">
+                        Historial de cambios y trazabilidad completa
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================================
+        //                           CARGA DE DATOS
+        // =====================================================================
+        
+        async function cargarEstadisticas() {
+            try {
+                const response = await fetch('/terceros/api/estadisticas');
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarEstadisticas(data.data);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+                mostrarErrorEstadisticas();
+            }
+        }
+
+        function mostrarEstadisticas(stats) {
+            const container = document.getElementById('estadisticas-grid');
+            
+            // Calcular porcentajes
+            const porcentajeActivos = stats.total_terceros > 0 ? 
+                (stats.terceros_activos / stats.total_terceros * 100) : 0;
+            const porcentajeConDocs = stats.total_terceros > 0 ? 
+                (stats.terceros_con_documentacion / stats.total_terceros * 100) : 0;
+            
+            container.innerHTML = `
+                <div class="tarjeta-estadistica">
+                    <div class="stat-header">
+                        <span class="stat-titulo">Total Terceros</span>
+                        <span class="stat-icono" style="background: #e3f2fd; color: #1976d2;">👥</span>
+                    </div>
+                    <div class="stat-numero">${stats.total_terceros.toLocaleString()}</div>
+                    <div class="stat-descripcion">Terceros registrados en el sistema</div>
+                    <div class="stat-progreso">
+                        <div class="stat-progreso-fill" style="width: 100%"></div>
+                    </div>
+                </div>
+
+                <div class="tarjeta-estadistica">
+                    <div class="stat-header">
+                        <span class="stat-titulo">Terceros Activos</span>
+                        <span class="stat-icono" style="background: #e8f5e8; color: #2e7d32;">✅</span>
+                    </div>
+                    <div class="stat-numero">${stats.terceros_activos.toLocaleString()}</div>
+                    <div class="stat-descripcion">${porcentajeActivos.toFixed(1)}% del total activos</div>
+                    <div class="stat-progreso">
+                        <div class="stat-progreso-fill" style="width: ${porcentajeActivos}%; background: linear-gradient(90deg, #10b981, #22c55e)"></div>
+                    </div>
+                </div>
+
+                <div class="tarjeta-estadistica">
+                    <div class="stat-header">
+                        <span class="stat-titulo">Con Documentación</span>
+                        <span class="stat-icono" style="background: #fff3e0; color: #f57c00;">📄</span>
+                    </div>
+                    <div class="stat-numero">${stats.terceros_con_documentacion.toLocaleString()}</div>
+                    <div class="stat-descripcion">${porcentajeConDocs.toFixed(1)}% han cargado documentos</div>
+                    <div class="stat-progreso">
+                        <div class="stat-progreso-fill" style="width: ${porcentajeConDocs}%; background: linear-gradient(90deg, #f59e0b, #fbbf24)"></div>
+                    </div>
+                </div>
+
+                <div class="tarjeta-estadistica">
+                    <div class="stat-header">
+                        <span class="stat-titulo">Requieren Actualización</span>
+                        <span class="stat-icono" style="background: #fce4ec; color: #c2185b;">⚠️</span>
+                    </div>
+                    <div class="stat-numero">${stats.terceros_requieren_actualizacion.toLocaleString()}</div>
+                    <div class="stat-descripcion">Más de 365 días sin actualizar</div>
+                    <div class="stat-progreso">
+                        <div class="stat-progreso-fill" style="width: 75%; background: linear-gradient(90deg, #ef4444, #f87171)"></div>
+                    </div>
+                </div>
+
+                <div class="tarjeta-estadistica">
+                    <div class="stat-header">
+                        <span class="stat-titulo">Docs. Pendientes</span>
+                        <span class="stat-icono" style="background: #f3e5f5; color: #7b1fa2;">📋</span>
+                    </div>
+                    <div class="stat-numero">${stats.documentos_pendientes_aprobacion.toLocaleString()}</div>
+                    <div class="stat-descripcion">Documentos pendientes de aprobación</div>
+                    <div class="stat-progreso">
+                        <div class="stat-progreso-fill" style="width: 60%; background: linear-gradient(90deg, #8b5cf6, #a78bfa)"></div>
+                    </div>
+                </div>
+
+                <div class="tarjeta-estadistica">
+                    <div class="stat-header">
+                        <span class="stat-titulo">Notificaciones</span>
+                        <span class="stat-icono" style="background: #e1f5fe; color: #0277bd;">📧</span>
+                    </div>
+                    <div class="stat-numero">${stats.notificaciones_ultimo_mes.toLocaleString()}</div>
+                    <div class="stat-descripcion">Enviadas en el último mes</div>
+                    <div class="stat-progreso">
+                        <div class="stat-progreso-fill" style="width: 85%; background: linear-gradient(90deg, #06b6d4, #38bdf8)"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function mostrarErrorEstadisticas() {
+            const container = document.getElementById('estadisticas-grid');
+            container.innerHTML = `
+                <div class="tarjeta-estadistica">
+                    <div class="stat-header">
+                        <span class="stat-titulo">Error</span>
+                        <span class="stat-icono" style="background: #ffebee; color: #d32f2f;">❌</span>
+                    </div>
+                    <div class="stat-numero">--</div>
+                    <div class="stat-descripcion">No se pudieron cargar las estadísticas</div>
+                </div>
+            `;
+        }
+
+        // =====================================================================
+        //                           NAVEGACIÓN
+        // =====================================================================
+        
+        function navegarA(url) {
+            window.location.href = url;
+        }
+
+        function abrirNotificacionesMasivas() {
+            alert('🚧 Función de notificaciones masivas en desarrollo...');
+            // TODO: Implementar modal o página específica
+        }
+
+        function abrirReportes() {
+            alert('🚧 Sistema de reportes en desarrollo...');
+            // TODO: Implementar dashboard de reportes
+        }
+
+        function abrirConfiguracion() {
+            alert('🚧 Panel de configuración en desarrollo...');
+            // TODO: Implementar configuración del módulo
+        }
+
+        function abrirAuditoria() {
+            alert('🚧 Sistema de auditoría en desarrollo...');
+            // TODO: Implementar logs de auditoría
+        }
+
+        // =====================================================================
+        //                         INICIALIZACIÓN
+        // =====================================================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarEstadisticas();
+            
+            // Actualizar estadísticas cada 30 segundos
+            setInterval(cargarEstadisticas, 30000);
+        });
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

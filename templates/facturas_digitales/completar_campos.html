@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Completar Campos - Factura {{ factura.numero_factura }}</title>
+    <style>
+        :root {
+            --canaveral-green: #166534;
+            --canaveral-green-light: #22c55e;
+            --canaveral-yellow: #eab308;
+            --danger-red: #dc2626;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: var(--canaveral-green);
+            color: white;
+            padding: 25px 30px;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+        
+        .info-panel {
+            background: #f8fafc;
+            padding: 20px 30px;
+            border-bottom: 3px solid var(--canaveral-yellow);
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .info-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .info-value {
+            font-size: 1.05rem;
+            color: #1e293b;
+            font-weight: 600;
+        }
+        
+        .form-section {
+            padding: 30px;
+        }
+        
+        .form-title {
+            font-size: 1.3rem;
+            color: var(--canaveral-green);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+        
+        label {
+            font-weight: 600;
+            color: #334155;
+            font-size: 0.9rem;
+        }
+        
+        label .required {
+            color: var(--danger-red);
+            margin-left: 3px;
+        }
+        
+        select, textarea {
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--canaveral-green);
+            box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.1);
+        }
+        
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            margin: 20px 30px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .alert-warning {
+            background: #fef3c7;
+            border-left: 4px solid var(--canaveral-yellow);
+            color: #92400e;
+        }
+        
+        .alert-info {
+            background: #dbeafe;
+            border-left: 4px solid #3b82f6;
+            color: #1e40af;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            padding: 25px 30px;
+            background: #f8fafc;
+            border-top: 1px solid #e5e7eb;
+            justify-content: flex-end;
+        }
+        
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: var(--canaveral-green);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #15803d;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(22, 101, 52, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #475569;
+        }
+        
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+        
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .loading.active {
+            display: flex;
+        }
+        
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top: 5px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .campo-actual {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #fef3c7;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #92400e;
+            font-weight: 600;
+        }
+        
+        .campo-vacio {
+            display: inline-block;
+            padding: 6px 12px;
+            background: #fee2e2;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #991b1b;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>
+                <span>📝</span>
+                Completar Campos Faltantes
+            </h1>
+            <p>Factura: {{ factura.numero_factura }} - {{ factura.razon_social_proveedor }}</p>
+        </div>
+        
+        <!-- Info Panel -->
+        <div class="info-panel">
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">NIT Proveedor</span>
+                    <span class="info-value">{{ factura.nit_proveedor }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Número Factura</span>
+                    <span class="info-value">{{ factura.numero_factura }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Fecha Radicación</span>
+                    <span class="info-value">
+                        {% if factura.fecha_emision %}
+                            {{ factura.fecha_emision.strftime('%d/%m/%Y') }}
+                        {% else %}
+                            <span style="color: #dc2626;">⚠️ SIN FECHA</span>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Valor Total</span>
+                    <span class="info-value">${{ "{:,.2f}".format(factura.valor_total) }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Estado Actual</span>
+                    <span class="info-value">{{ factura.estado.upper() }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Alert de advertencia -->
+        <div class="alert alert-warning">
+            <span style="font-size: 1.5rem;">⚠️</span>
+            <div>
+                <strong>Importante:</strong> Al guardar, los archivos se moverán automáticamente de TEMPORALES a la ubicación final:
+                <br>
+                {% if factura.fecha_emision %}
+                    <code>EMPRESA/{{ factura.fecha_emision.year }}/{{ "{:02d}".format(factura.fecha_emision.month) }}/DEPARTAMENTO/FORMA_PAGO/</code>
+                    <br><small style="opacity: 0.8;">
+                        📅 Basado en la fecha de radicación: <strong>{{ factura.fecha_emision.strftime('%d/%m/%Y') }}</strong>
+                        <br>Ejemplo: <code>SC/{{ factura.fecha_emision.year }}/{{ "{:02d}".format(factura.fecha_emision.month) }}/TIC/CREDITO/</code>
+                    </small>
+                {% else %}
+                    <code>EMPRESA/AÑO/MES/DEPARTAMENTO/FORMA_PAGO/</code>
+                    <br><small style="color: #dc2626;">⚠️ La factura no tiene fecha de radicación. No se podrá determinar la ubicación final.</small>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Alert de información de campos actuales -->
+        <div class="alert alert-info">
+            <span style="font-size: 1.5rem;">ℹ️</span>
+            <div>
+                <strong>Campos actuales:</strong><br>
+                Empresa: {% if factura.empresa %}<span class="campo-actual">{{ factura.empresa }}</span>{% else %}<span class="campo-vacio">VACÍO</span>{% endif %} |
+                Departamento: {% if factura.departamento %}<span class="campo-actual">{{ factura.departamento }}</span>{% else %}<span class="campo-vacio">VACÍO</span>{% endif %} |
+                Tipo Doc: {% if factura.tipo_documento %}<span class="campo-actual">{{ factura.tipo_documento }}</span>{% else %}<span class="campo-vacio">VACÍO</span>{% endif %} |
+                Forma Pago: {% if factura.forma_pago %}<span class="campo-actual">{{ factura.forma_pago }}</span>{% else %}<span class="campo-vacio">VACÍO</span>{% endif %} |
+                Tipo Servicio: {% if factura.tipo_servicio %}<span class="campo-actual">{{ factura.tipo_servicio }}</span>{% else %}<span class="campo-vacio">VACÍO</span>{% endif %}
+            </div>
+        </div>
+        
+        <!-- Form Section -->
+        <div class="form-section">
+            <div class="form-title">
+                <span>📋</span>
+                Completar Información
+            </div>
+            
+            <form id="formCompletarCampos">
+                <div class="form-grid">
+                    <!-- Empresa -->
+                    <div class="form-group">
+                        <label for="empresa">
+                            Empresa <span class="required">*</span>
+                        </label>
+                        <select id="empresa" name="empresa" required>
+                            <option value="">Seleccione...</option>
+                            {% for emp in empresas %}
+                            <option value="{{ emp['codigo'] }}" {% if factura.empresa == emp['codigo'] %}selected{% endif %}>
+                                {{ emp['codigo'] }} - {{ emp['nombre'] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Departamento -->
+                    <div class="form-group">
+                        <label for="departamento">
+                            Departamento <span class="required">*</span>
+                        </label>
+                        <select id="departamento" name="departamento" required>
+                            <option value="">Seleccione...</option>
+                            {% for depto in departamentos %}
+                            <option value="{{ depto['sigla'] }}" {% if factura.departamento == depto['sigla'] %}selected{% endif %}>
+                                {{ depto['nombre'] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Tipo Documento -->
+                    <div class="form-group">
+                        <label for="tipoDocumento">
+                            Tipo Documento
+                        </label>
+                        <select id="tipoDocumento" name="tipoDocumento">
+                            <option value="">Seleccione...</option>
+                            {% for tipo in tipos_documento %}
+                            <option value="{{ tipo['sigla'] }}" {% if factura.tipo_documento == tipo['sigla'] %}selected{% endif %}>
+                                {{ tipo['nombre'] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Forma de Pago -->
+                    <div class="form-group">
+                        <label for="formaPago">
+                            Forma de Pago
+                        </label>
+                        <select id="formaPago" name="formaPago">
+                            <option value="">Seleccione...</option>
+                            {% for forma in formas_pago %}
+                            <option value="{{ forma['sigla'] }}" {% if factura.forma_pago == forma['sigla'] %}selected{% endif %}>
+                                {{ forma['nombre'] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Tipo de Servicio -->
+                    <div class="form-group">
+                        <label for="tipoServicio">
+                            Tipo de Servicio
+                        </label>
+                        <select id="tipoServicio" name="tipoServicio">
+                            <option value="">Seleccione...</option>
+                            {% for servicio in tipos_servicio %}
+                            <option value="{{ servicio['sigla'] }}" {% if factura.tipo_servicio == servicio['sigla'] %}selected{% endif %}>
+                                {{ servicio['nombre'] }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Observaciones -->
+                    <div class="form-group full-width">
+                        <label for="observaciones">
+                            Observaciones
+                        </label>
+                        <textarea id="observaciones" name="observaciones" placeholder="Notas adicionales (opcional)">{{ factura.observaciones if factura.observaciones else '' }}</textarea>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Button Group -->
+        <div class="button-group">
+            <button type="button" class="btn btn-secondary" onclick="volver()">
+                <span>↩️</span>
+                Cancelar
+            </button>
+            <button type="button" class="btn btn-primary" onclick="guardarCambios()">
+                <span>💾</span>
+                Actualizar y Mover Archivos
+            </button>
+        </div>
+    </div>
+    
+    <!-- Loading Spinner -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+    
+    <script>
+        // Datos de la factura desde el backend
+        const facturaData = {
+            nit: '{{ factura.nit_proveedor }}',
+            numeroFactura: '{{ factura.numero_factura }}',
+            {% if factura.fecha_emision %}
+            año: {{ factura.fecha_emision.year }},
+            mes: '{{ "{:02d}".format(factura.fecha_emision.month) }}'
+            {% else %}
+            año: new Date().getFullYear(),
+            mes: String(new Date().getMonth() + 1).padStart(2, '0')
+            {% endif %}
+        };
+        
+        function volver() {
+            window.location.href = '/facturas-digitales/dashboard';
+        }
+        
+        async function guardarCambios() {
+            const empresa = document.getElementById('empresa').value;
+            const departamento = document.getElementById('departamento').value;
+            const formaPago = document.getElementById('formaPago').value;
+            
+            // Validar campos obligatorios
+            if (!empresa || !departamento) {
+                alert('❌ Empresa y Departamento son obligatorios');
+                return;
+            }
+            
+            // Construir ruta REAL con TODOS los niveles incluyendo la carpeta final
+            const carpetaFactura = `${facturaData.nit}-${facturaData.numeroFactura}`;
+            const rutaCompleta = `${empresa}/${facturaData.año}/${facturaData.mes}/${departamento}/${formaPago}/${carpetaFactura}`;
+            
+            // Confirmar acción con la ruta REAL
+            const confirmacion = confirm(
+                '⚠️ ¿Está seguro?\n\n' +
+                'Los archivos se moverán de TEMPORALES a:\n' +
+                'D:\\facturas_digitales\\' + rutaCompleta + '\\\n\n' +
+                'Esta acción no se puede deshacer.'
+            );
+            
+            if (!confirmacion) return;
+            
+            // Mostrar loading
+            document.getElementById('loading').classList.add('active');
+            
+            try {
+                // Preparar datos
+                const formData = new FormData();
+                formData.append('empresa', empresa);
+                formData.append('departamento', departamento);
+                formData.append('tipoDocumento', document.getElementById('tipoDocumento').value);
+                formData.append('formaPago', document.getElementById('formaPago').value);
+                formData.append('tipoServicio', document.getElementById('tipoServicio').value);
+                formData.append('observaciones', document.getElementById('observaciones').value);
+                
+                // Enviar petición
+                const response = await fetch('/facturas-digitales/api/factura/{{ factura.id }}/actualizar', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ ' + result.message + '\n\nNueva ubicación:\n' + result.nueva_ruta);
+                    window.location.href = '/facturas-digitales/dashboard';
+                } else {
+                    alert('❌ Error: ' + result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al guardar cambios: ' + error.message);
+            } finally {
+                document.getElementById('loading').classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>

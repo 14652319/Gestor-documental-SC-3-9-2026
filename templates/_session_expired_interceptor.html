@@ -1,0 +1,28 @@
+<script>
+(function(){
+  if (window.__fetchInterceptorInstalled) return;
+  window.__fetchInterceptorInstalled = true;
+  const originalFetch = window.fetch ? window.fetch.bind(window) : null;
+  if (!originalFetch) return;
+  window.fetch = async (...args) => {
+    const res = await originalFetch(...args);
+    if (res && res.status === 401) {
+      try {
+        const clone = res.clone();
+        const ct = (clone.headers.get('content-type') || '').toLowerCase();
+        if (ct.includes('application/json')) {
+          const data = await clone.json();
+          if (data && (data.expired === true || data.ok === false)) {
+            const base = data.redirect || '/login';
+            const sep = base.includes('?') ? '&' : '?';
+            window.location.href = `${base}${sep}expired=1`;
+            return res;
+          }
+        }
+      } catch (e) { /* no-op */ }
+      window.location.href = '/login?expired=1';
+    }
+    return res;
+  };
+})();
+</script>

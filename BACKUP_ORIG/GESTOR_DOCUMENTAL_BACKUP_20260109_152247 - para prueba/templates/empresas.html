@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Empresas</title>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #dcfce7, #fefce8, #dbeafe);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #166534;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 28px;
+        }
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary { background: #facc15; color: #166534; }
+        .btn-primary:hover { background: #f59e0b; transform: translateY(-2px); }
+        .btn-secondary { background: #166534; color: white; }
+        .btn-secondary:hover { background: #14532d; transform: translateY(-2px); }
+        .btn-warn { background: #dc2626; color: white; }
+        .btn-warn:hover { background: #b91c1c; transform: translateY(-2px); }
+        .btn-success { background: #16a34a; color: white; }
+        .btn-success:hover { background: #15803d; transform: translateY(-2px); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th {
+            background: #f3f4f6;
+            font-weight: 700;
+            color: #166534;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        tr:hover {
+            background: #f9fafb;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-active { background: #d1fae5; color: #065f46; }
+        .badge-inactive { background: #fee2e2; color: #991b1b; }
+        
+        .action-btn {
+            padding: 6px 12px;
+            margin: 0 4px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .action-btn:hover { transform: scale(1.05); }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.show { display: flex; }
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            animation: slideDown 0.3s ease;
+        }
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal h2 {
+            color: #166534;
+            margin-bottom: 20px;
+            font-size: 22px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #166534;
+            box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.1);
+        }
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #6ee7b7;
+        }
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏢 Gestión de Empresas</h1>
+        
+        <div id="alertContainer"></div>
+        
+        <div class="toolbar">
+            <button class="btn btn-primary" onclick="abrirModalCrear()">➕ Nueva Empresa</button>
+            <a href="/dashboard" class="btn btn-warn">🏠 Volver al Menú</a>
+        </div>
+        
+        <table id="tablasEmpresas">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Sigla</th>
+                    <th>Nombre</th>
+                    <th>Estado</th>
+                    <th>Fecha Creación</th>
+                    <th>Última Actualización</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tbodyEmpresas">
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 30px; color: #6b7280;">
+                        Cargando empresas...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal Crear/Editar -->
+    <div id="modalEmpresa" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitulo">Nueva Empresa</h2>
+            <form id="formEmpresa" onsubmit="guardarEmpresa(event)">
+                <input type="hidden" id="empresaId">
+                
+                <div class="form-group">
+                    <label for="sigla">Sigla *</label>
+                    <input type="text" id="sigla" maxlength="10" required 
+                           style="text-transform: uppercase;" 
+                           placeholder="SC, LG">
+                </div>
+                
+                <div class="form-group">
+                    <label for="nombre">Nombre Completo *</label>
+                    <input type="text" id="nombre" maxlength="255" required 
+                           style="text-transform: uppercase;" 
+                           placeholder="SUPERTIENDAS CAÑAVERAL SAS">
+                </div>
+                
+                <div class="form-group">
+                    <label for="activo">Estado</label>
+                    <select id="activo" required>
+                        <option value="true">Activo</option>
+                        <option value="false">Inactivo</option>
+                    </select>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let dataTable;
+        
+        // Cargar empresas al inicio
+        $(document).ready(function() {
+            cargarEmpresas();
+        });
+        
+        function cargarEmpresas() {
+            $.ajax({
+                url: '/api/configuracion/empresas/listar',
+                type: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        renderizarEmpresas(response.data);
+                    } else {
+                        mostrarAlerta('Error al cargar empresas: ' + response.message, 'error');
+                    }
+                },
+                error: function(xhr) {
+                    mostrarAlerta('Error de conexión al cargar empresas', 'error');
+                    console.error(xhr);
+                }
+            });
+        }
+        
+        function renderizarEmpresas(empresas) {
+            const tbody = $('#tbodyEmpresas');
+            
+            if (empresas.length === 0) {
+                tbody.html('<tr><td colspan="7" style="text-align: center; padding: 30px; color: #6b7280;">No hay empresas registradas</td></tr>');
+                return;
+            }
+            
+            tbody.empty();
+            
+            empresas.forEach(empresa => {
+                const estadoBadge = empresa.activo 
+                    ? '<span class="badge badge-active">✓ Activo</span>' 
+                    : '<span class="badge badge-inactive">✗ Inactivo</span>';
+                
+                const fechaCreacion = empresa.fecha_creacion ? new Date(empresa.fecha_creacion).toLocaleDateString('es-ES') : 'N/A';
+                const fechaActualizacion = empresa.fecha_actualizacion ? new Date(empresa.fecha_actualizacion).toLocaleDateString('es-ES') : 'N/A';
+                
+                const row = `
+                    <tr>
+                        <td>${empresa.id}</td>
+                        <td><strong style="color: #166534;">${empresa.sigla}</strong></td>
+                        <td>${empresa.nombre}</td>
+                        <td>${estadoBadge}</td>
+                        <td>${fechaCreacion}</td>
+                        <td>${fechaActualizacion}</td>
+                        <td>
+                            <button class="action-btn btn-primary" onclick="abrirModalEditar(${empresa.id})" title="Editar">
+                                ✏️ Editar
+                            </button>
+                            <button class="action-btn ${empresa.activo ? 'btn-warn' : 'btn-success'}" 
+                                    onclick="toggleEmpresa(${empresa.id})" 
+                                    title="${empresa.activo ? 'Desactivar' : 'Activar'}">
+                                ${empresa.activo ? '❌ Desactivar' : '✓ Activar'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                
+                tbody.append(row);
+            });
+            
+            // Inicializar DataTable
+            if (dataTable) {
+                dataTable.destroy();
+            }
+            dataTable = $('#tablasEmpresas').DataTable({
+                language: { url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" },
+                pageLength: 25,
+                order: [[1, 'asc']]
+            });
+        }
+        
+        function abrirModalCrear() {
+            $('#modalTitulo').text('Nueva Empresa');
+            $('#empresaId').val('');
+            $('#sigla').val('').prop('disabled', false);
+            $('#nombre').val('');
+            $('#activo').val('true');
+            $('#modalEmpresa').addClass('show');
+        }
+        
+        function abrirModalEditar(id) {
+            $.ajax({
+                url: '/api/configuracion/empresas/listar',
+                type: 'GET',
+                success: function(response) {
+                    if (response.success) {
+                        const empresa = response.data.find(e => e.id === id);
+                        if (empresa) {
+                            $('#modalTitulo').text('Editar Empresa');
+                            $('#empresaId').val(empresa.id);
+                            $('#sigla').val(empresa.sigla).prop('disabled', true);
+                            $('#nombre').val(empresa.nombre);
+                            $('#activo').val(empresa.activo.toString());
+                            $('#modalEmpresa').addClass('show');
+                        }
+                    }
+                },
+                error: function(xhr) {
+                    mostrarAlerta('Error al cargar datos de la empresa', 'error');
+                }
+            });
+        }
+        
+        function cerrarModal() {
+            $('#modalEmpresa').removeClass('show');
+            $('#formEmpresa')[0].reset();
+        }
+        
+        function guardarEmpresa(event) {
+            event.preventDefault();
+            
+            const empresaId = $('#empresaId').val();
+            const esEdicion = empresaId !== '';
+            
+            const datos = {
+                sigla: $('#sigla').val().trim().toUpperCase(),
+                nombre: $('#nombre').val().trim().toUpperCase(),
+                activo: $('#activo').val() === 'true'
+            };
+            
+            const url = esEdicion 
+                ? `/api/configuracion/empresas/editar/${empresaId}`
+                : '/api/configuracion/empresas/crear';
+            
+            const method = esEdicion ? 'PUT' : 'POST';
+            
+            $.ajax({
+                url: url,
+                type: method,
+                contentType: 'application/json',
+                data: JSON.stringify(datos),
+                success: function(response) {
+                    if (response.success) {
+                        mostrarAlerta(response.message, 'success');
+                        cerrarModal();
+                        cargarEmpresas();
+                    } else {
+                        mostrarAlerta(response.message, 'error');
+                    }
+                },
+                error: function(xhr) {
+                    const mensaje = xhr.responseJSON?.message || 'Error al guardar empresa';
+                    mostrarAlerta(mensaje, 'error');
+                }
+            });
+        }
+        
+        function toggleEmpresa(id) {
+            if (!confirm('¿Está seguro de cambiar el estado de esta empresa?')) {
+                return;
+            }
+            
+            $.ajax({
+                url: `/api/configuracion/empresas/toggle/${id}`,
+                type: 'PATCH',
+                success: function(response) {
+                    if (response.success) {
+                        mostrarAlerta(response.message, 'success');
+                        cargarEmpresas();
+                    } else {
+                        mostrarAlerta(response.message, 'error');
+                    }
+                },
+                error: function(xhr) {
+                    mostrarAlerta('Error al cambiar estado de la empresa', 'error');
+                }
+            });
+        }
+        
+        function mostrarAlerta(mensaje, tipo) {
+            const alertClass = tipo === 'success' ? 'alert-success' : 'alert-error';
+            const alerta = `<div class="alert ${alertClass}">${mensaje}</div>`;
+            
+            $('#alertContainer').html(alerta);
+            
+            setTimeout(() => {
+                $('#alertContainer').empty();
+            }, 5000);
+            
+            // Scroll al inicio
+            $('html, body').animate({ scrollTop: 0 }, 300);
+        }
+        
+        // Cerrar modal al hacer clic fuera
+        $('#modalEmpresa').on('click', function(e) {
+            if (e.target.id === 'modalEmpresa') {
+                cerrarModal();
+            }
+        });
+        
+        // Cerrar modal con tecla ESC
+        $(document).on('keydown', function(e) {
+            if (e.key === 'Escape') {
+                cerrarModal();
+            }
+        });
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

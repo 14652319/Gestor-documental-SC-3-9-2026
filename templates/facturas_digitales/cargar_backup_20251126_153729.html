@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radicar Facturas Digitales - Gestor Documental</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root {
+            /* Modo Claro (por defecto) */
+            --bg-color: #f0f2f5;
+            --container-bg: #ffffff;
+            --text-color: #333;
+            --heading-color: #16A085;
+            --primary-btn-bg: #16A085;
+            --primary-btn-hover-bg: #128C7E;
+            --secondary-btn-bg: #e0e0e0;
+            --secondary-btn-hover-bg: #bdbdbd;
+            --border-color: #e0e0e0;
+            --shadow-color: rgba(0,0,0,0.1);
+        }
+
+        body.dark-mode {
+            /* Modo Oscuro */
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --heading-color: #81c784;
+            --primary-btn-bg: #66bb6a;
+            --primary-btn-hover-bg: #4caf50;
+            --secondary-btn-bg: #424242;
+            --secondary-btn-hover-bg: #616161;
+            --border-color: #333;
+            --shadow-color: rgba(0,0,0,0.3);
+            
+            input[type="date"]::-webkit-calendar-picker-indicator,
+            input[type="file"]::-webkit-file-upload-button {
+                filter: invert(1);
+            }
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s, color 0.3s;
+            display: flex;
+            justify-content: center;
+        }
+
+        .main-wrapper {
+            max-width: 1000px;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--container-bg);
+            box-shadow: 0 8px 24px var(--shadow-color);
+        }
+        
+        .header, .form-section {
+            padding: 30px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .header-info {
+            font-size: 1.1em;
+            color: var(--text-color);
+        }
+
+        h1, h2 {
+            text-align: center;
+            color: var(--heading-color);
+            font-weight: 600;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary-btn-bg);
+            color: var(--text-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--secondary-btn-hover-bg);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-btn-bg);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-btn-hover-bg);
+        }
+
+        .btn-primary:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .form-section {
+            flex-shrink: 0;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        @media (max-width: 1024px) {
+            form {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            form {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-color);
+            font-size: 0.9em;
+        }
+
+        input[type="text"], input[type="number"], input[type="date"], select, input[type="file"], textarea {
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9em;
+            width: 100%;
+            box-sizing: border-box;
+            background-color: var(--container-bg);
+            color: var(--text-color);
+            transition: border-color 0.3s;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, input[type="date"]:focus, select:focus, textarea:focus {
+            border-color: var(--primary-btn-bg);
+            outline: none;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+            gap: 10px;
+        }
+
+        .toggle-mode {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--secondary-btn-bg);
+            color: var(--text-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px var(--shadow-color);
+            transition: background 0.3s, color 0.3s;
+            z-index: 1000;
+        }
+
+        .toggle-mode:hover {
+            background: var(--secondary-btn-hover-bg);
+        }
+
+        .uppercase {
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+<div class="toggle-mode" onclick="toggleDarkMode()">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+</div>
+
+<div class="main-wrapper">
+    <div class="header">
+        <span class="header-info">Usuario: {{ session['usuario'] }} - NIT: {{ session.get('nit', 'N/A') }}</span>
+        <button type="button" class="btn btn-secondary" onclick="location.href='/facturas-digitales/'">Regresar</button>
+    </div>
+
+    <div class="form-section">
+        <h1>Radicar Facturas Digitales</h1>
+        <p style="text-align: center; color: var(--text-color); margin-bottom: 25px;">Completa los campos para cargar tu factura digital.</p>
+        
+        <form id="radicarForm">
+            <div class="form-group">
+                <label for="numero_factura">Número de Factura: *</label>
+                <input type="text" id="numero_factura" name="numero_factura" placeholder="Ej: FAC-2025-001" required class="uppercase">
+            </div>
+
+            <div class="form-group">
+                <label for="nit_proveedor">NIT Proveedor: *</label>
+                <input type="text" id="nit_proveedor" name="nit_proveedor" placeholder="Ej: 900123456" value="{{ session.get('nit', '') }}" required>
+            </div>
+
+            <div class="form-group">
+                <label for="razon_social">Razón Social: *</label>
+                <input type="text" id="razon_social" name="razon_social" placeholder="Nombre de la empresa" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="fecha_emision">Fecha Emisión: *</label>
+                <input type="date" id="fecha_emision" name="fecha_emision" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="fecha_vencimiento">Fecha Vencimiento:</label>
+                <input type="date" id="fecha_vencimiento" name="fecha_vencimiento">
+            </div>
+            
+            <div class="form-group">
+                <label for="valor_total">Valor Total: *</label>
+                <input type="number" id="valor_total" name="valor_total" placeholder="Ej: 1500000" step="0.01" min="0" required>
+            </div>
+
+            <div class="form-group">
+                <label for="valor_iva">Valor IVA:</label>
+                <input type="number" id="valor_iva" name="valor_iva" placeholder="Ej: 285000" step="0.01" min="0">
+            </div>
+
+            <div class="form-group">
+                <label for="archivo">Subir Archivo (PDF/XML/ZIP): *</label>
+                <input type="file" id="archivo" name="archivo" accept=".pdf,.xml,.zip,.png,.jpg,.jpeg" required>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="observaciones">Observaciones:</label>
+                <textarea id="observaciones" name="observaciones" placeholder="Notas adicionales (opcional)" rows="3"></textarea>
+            </div>
+        </form>
+        
+        <div class="btn-group">
+            <button type="button" class="btn btn-primary" id="btnCargar">📤 Cargar Factura</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Dark Mode Toggle
+    function toggleDarkMode() {
+        document.body.classList.toggle('dark-mode');
+        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+    }
+
+    // Cargar preferencia guardada
+    document.addEventListener('DOMContentLoaded', function() {
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+
+        // Uppercase automático
+        document.querySelectorAll('.uppercase').forEach(input => {
+            input.addEventListener('input', function() {
+                this.value = this.value.toUpperCase();
+            });
+        });
+
+        // Botón cargar
+        document.getElementById('btnCargar').addEventListener('click', async function() {
+            const form = document.getElementById('radicarForm');
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            if (!confirm('¿Desea cargar esta factura?')) {
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('numero_factura', document.getElementById('numero_factura').value);
+            formData.append('nit_proveedor', document.getElementById('nit_proveedor').value);
+            formData.append('razon_social_proveedor', document.getElementById('razon_social').value);
+            formData.append('fecha_emision', document.getElementById('fecha_emision').value);
+            formData.append('fecha_vencimiento', document.getElementById('fecha_vencimiento').value || '');
+            formData.append('valor_total', document.getElementById('valor_total').value);
+            formData.append('valor_iva', document.getElementById('valor_iva').value || '0');
+            formData.append('observaciones', document.getElementById('observaciones').value);
+            formData.append('archivo', document.getElementById('archivo').files[0]);
+
+            try {
+                this.disabled = true;
+                this.innerHTML = '⏳ Cargando...';
+
+                const response = await fetch('{{ url_for("facturas_digitales.cargar_factura_api") }}', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: '¡Factura cargada exitosamente!',
+                        text: `Número de factura: ${result.factura_id}`,
+                        confirmButtonColor: '#16A085'
+                    });
+                    window.location.href = '/facturas-digitales/';
+                } else {
+                    throw new Error(result.error || result.message || 'Error desconocido');
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                    confirmButtonColor: '#16A085'
+                });
+            } finally {
+                this.disabled = false;
+                this.innerHTML = '📤 Cargar Factura';
+            }
+        });
+    });
+</script>
+
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+</body>
+</html>

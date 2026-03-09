@@ -1,0 +1,55 @@
+============================================
+GUÍA DE INSTALACIÓN - GESTOR DOCUMENTAL
+============================================
+
+REQUISITOS:
+- Python 3.8+
+- PostgreSQL 17 o 18
+- Git (opcional)
+
+PASOS DE INSTALACIÓN:
+
+1. CLONAR/COPIAR ESTE PAQUETE:
+ - Copiar toda la carpeta a la ubicación deseada
+
+2. CREAR VIRTUALENV:
+   python -m venv .venv
+   .venv\Scripts\activate
+
+3. INSTALAR DEPENDENCIAS:
+   pip install -r requirements.txt
+
+4. CONFIGURAR BASE DE DATOS:
+   - Ejecutar: psql -U postgres -f sql\schema_core.sql
+- Editar .env (copiar desde .env.example)
+   - Configurar DATABASE_URL con tus credenciales
+
+5. INICIALIZAR BD:
+   python update_tables.py
+
+6. INICIAR SERVIDOR:
+   python app.py
+   O usar: iniciar_servidor.bat
+
+MÓDULOS INCLUIDOS:
+? Configuración (Centros, Tipos Documento)
+? Recibir Facturas
+? Relaciones de Facturas
+? Archivo Digital (Notas Contables)
+? Causaciones
+? Admin/Monitoreo
+? Admin/Usuarios y Permisos
+
+DOCUMENTACIÓN:
+- Ver carpeta docs/ para guías completas
+- Ver .github/copilot-instructions.md para detalles técnicos
+
+BACKUP DE BASE DE DATOS:
+- Incluido en este paquete: backup_gestor_documental.backup
+- Restaurar con:
+  pg_restore -U postgres -d gestor_documental backup_gestor_documental.backup
+
+SOPORTE:
+- Revisar logs en carpeta logs/
+- Ejecutar test_endpoints.py para verificar instalación
+

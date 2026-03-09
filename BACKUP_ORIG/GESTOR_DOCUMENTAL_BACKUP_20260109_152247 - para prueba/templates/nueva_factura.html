@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 Nueva Factura - Gestor Documental</title>
+    
+    <!-- 🍬 SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        /* =============================================
+           🎨 VARIABLES CSS (LIGHT & DARK MODE)
+           ============================================= */
+        :root {
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #e1e8ed;
+            --input-bg: #ffffff;
+            --input-border: #cbd5e0;
+            --brand-green: #166534;
+            --brand-green-dark: #14532d;
+            --brand-green-light: #dcfce7;
+            --red-error: #dc2626;
+            --red-light: #fef2f2;
+            --orange-warning: #ea580c;
+            --blue-info: #2563eb;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --border-color: #404040;
+            --input-bg: #3a3a3a;
+            --input-border: #505050;
+            --brand-green: #22c55e;
+            --brand-green-dark: #16a34a;
+            --brand-green-light: #14532d;
+            --red-error: #ef5350;
+            --red-light: #4a1f1f;
+            --orange-warning: #ff9800;
+            --blue-info: #42a5f5;
+        }
+
+        /* =============================================
+           📐 BASE STYLES
+           ============================================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* =============================================
+           🎯 HEADER FIJO
+           ============================================= */
+        .header {
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+            color: white;
+            padding: 15px 30px;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .dark-mode-toggle {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s;
+        }
+
+        .dark-mode-toggle:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .btn-salir {
+            background: var(--red-error);
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.2s;
+        }
+
+        .btn-salir:hover {
+            transform: scale(1.05);
+        }
+
+        /* =============================================
+           📋 FORMULARIO (STICKY TOP)
+           ============================================= */
+        .form-container {
+            background: var(--card-bg);
+            margin: 20px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 70px;
+            z-index: 900;
+            max-height: calc(100vh - 90px);
+            overflow-y: auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-color);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 10px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-size: 0.95em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--brand-green);
+        }
+
+        .form-group input[type="date"] {
+            min-width: 180px;
+        }
+
+        .form-group.col-2 {
+            grid-column: span 2;
+        }
+
+        .form-group.col-3 {
+            grid-column: span 3;
+        }
+
+        /* Observaciones horizontal */
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .required::after {
+            content: " *";
+            color: var(--red-error);
+        }
+
+        /* =============================================
+           🎯 BOTONES DE ACCIÓN
+           ============================================= */
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-primary {
+            background: var(--brand-green);
+            color: white;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--brand-green-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(22, 101, 52, 0.3);
+        }
+
+        .btn-warning {
+            background: var(--orange-warning);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--red-error);
+            color: white;
+        }
+
+        .btn-info {
+            background: var(--blue-info);
+            color: white;
+        }
+
+        /* =============================================
+           📊 TABLA DE FACTURAS (100% ANCHO + STICKY HEADERS)
+           ============================================= */
+        .table-container {
+            margin: 20px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .table-header {
+            background: var(--brand-green-light);
+            padding: 20px;
+            border-bottom: 2px solid var(--brand-green);
+        }
+
+        .table-header h3 {
+            color: var(--brand-green-dark);
+            font-size: 1.2em;
+            margin: 0;
+        }
+
+        .table-header .counter {
+            font-weight: bold;
+            color: var(--brand-green);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: 500px;
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        thead {
+            background: var(--brand-green-dark);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        th {
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.85em;
+            white-space: nowrap;
+            background: var(--brand-green-dark);
+            border-bottom: 2px solid var(--brand-green);
+            position: sticky;
+            top: 0;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s;
+        }
+
+        tbody tr:hover {
+            background: var(--brand-green-light);
+        }
+
+        tbody tr.duplicate {
+            background: var(--red-light);
+        }
+
+        tbody tr.has-observacion {
+            background: #fffbeb;
+        }
+
+        /* ✅ NUEVA: Clase para factura en edición */
+        tbody tr.factura-en-edicion {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%) !important;
+            border-left: 5px solid var(--orange-warning) !important;
+            box-shadow: 0 2px 8px rgba(255, 152, 0, 0.25);
+            animation: pulseEdit 1.5s ease-in-out;
+        }
+
+        @keyframes pulseEdit {
+            0%, 100% { box-shadow: 0 2px 8px rgba(255, 152, 0, 0.25); }
+            50% { box-shadow: 0 4px 16px rgba(255, 152, 0, 0.4); }
+        }
+        }
+
+        [data-theme="dark"] tbody tr.has-observacion {
+            background: #3a2f1a;
+        }
+
+        td {
+            padding: 10px;
+            font-size: 0.9em;
+        }
+
+        .btn-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2em;
+            padding: 5px;
+            transition: transform 0.2s;
+        }
+
+        .btn-action:hover {
+            transform: scale(1.2);
+        }
+
+        /* =============================================
+           💬 TOOLTIP PARA OBSERVACIONES
+           ============================================= */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 300px;
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            text-align: left;
+            border-radius: 8px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -150px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border: 2px solid var(--brand-green);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            font-size: 0.85em;
+            line-height: 1.4;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* =============================================
+           📱 RESPONSIVE
+           ============================================= */
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-group.col-2,
+            .form-group.col-3 {
+                grid-column: span 1;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* ✅ RESPONSIVE: Scroll horizontal en tabla */
+            .table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;  /* Smooth scroll iOS */
+            }
+
+            table {
+                min-width: 1200px;  /* Forzar scroll horizontal */
+            }
+
+            /* Mensaje de ayuda visual */
+            .table-wrapper::after {
+                content: '← Desliza horizontalmente para ver más columnas →';
+                display: block;
+                text-align: center;
+                padding: 8px;
+                color: #666;
+                font-size: 0.85em;
+                font-style: italic;
+                background: #f9f9f9;
+                border-top: 1px solid #ddd;
+            }
+        }
+
+        /* =============================================
+           🎨 MENSAJES
+           ============================================= */
+        .message {
+            display: none;
+            padding: 15px;
+            margin: 20px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .message.success {
+            background: var(--brand-green-light);
+            color: var(--brand-green-dark);
+            border-left: 4px solid var(--brand-green);
+        }
+
+        .message.error {
+            background: var(--red-light);
+            color: var(--red-error);
+            border-left: 4px solid var(--red-error);
+        }
+
+        .message.warning {
+            background: #fef3c7;
+            color: #92400e;
+            border-left: 4px solid var(--orange-warning);
+        }
+
+        /* =============================================
+           🔔 MODAL
+           ============================================= */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--text-color);
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        /* Scrollbar personalizado */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--border-color);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--brand-green);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-green-dark);
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER FIJO -->
+    <div class="header">
+        <h1>📝 Nueva Factura</h1>
+        <div class="header-actions">
+            <div class="user-info">
+                👤 {{ session.get('usuario') }} | NIT: {{ session.get('nit') }}
+            </div>
+            <button class="dark-mode-toggle" onclick="toggleDarkMode()">🌓 Modo</button>
+            <button class="btn-salir" onclick="confirmarSalida()">🏠 Volver al Menú</button>
+        </div>
+    </div>
+
+    <!-- MENSAJE -->
+    <div id="message" class="message"></div>
+
+    <!-- FORMULARIO (STICKY) -->
+    <div class="form-container">
+        <form id="registerForm">
+            <div class="form-grid" style="grid-template-columns: 1.8fr 0.9fr 1.2fr 1.5fr 2fr;">
+                <!-- Fila 1: Identificación factura + Empresa -->
+                <div class="form-group">
+                    <label for="nit_emisor" class="required">NIT Emisor</label>
+                    <input type="text" id="nit_emisor" name="nit_emisor" required 
+                           oninput="validarTerceroDebounce(); validarClaveFacturaDebounce(); validarFormulario()">
+                    <small id="razon-social" style="display: block; margin-top: 5px; font-weight: bold;"></small>
+                </div>
+                <div class="form-group">
+                    <label for="prefijo">Prefijo</label>
+                    <input type="text" id="prefijo" name="prefijo"
+                           oninput="this.value = this.value.toUpperCase(); validarClaveFacturaDebounce(); validarFormulario()">
+                </div>
+                <div class="form-group">
+                    <label for="folio" class="required">Folio</label>
+                    <input type="text" id="folio" name="folio" required
+                           oninput="validarClaveFacturaDebounce(); validarFormulario()">
+                </div>
+                <div class="form-group">
+                    <label for="empresa_id" class="required">Empresa</label>
+                    <select id="empresa_id" name="empresa_id" required onchange="validarFormulario()">
+                        <option value="">-- Seleccione --</option>
+                        {% for empresa in empresas %}
+                        <option value="{{ empresa.codigo }}">{{ empresa.codigo }} - {{ empresa.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="co" class="required">Centro Operación</label>
+                    <select id="co" name="co" required onchange="validarFormulario()">
+                        <option value="">-- Seleccione --</option>
+                        {% for co in centros_operacion %}
+                        <option value="{{ co.id }}">{{ co.codigo }} - {{ co.nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Fila 2: Fechas -->
+                <div class="form-group">
+                    <label for="fecha_expedicion" class="required">Fecha Expedición</label>
+                    <input type="date" id="fecha_expedicion" name="fecha_expedicion" required onchange="validarFormulario()">
+                </div>
+                <div class="form-group">
+                    <label for="fecha_radicacion" class="required">Fecha Radicación</label>
+                    <input type="date" id="fecha_radicacion" name="fecha_radicacion" required readonly
+                           value="{{ fecha_hoy }}"
+                           style="background: var(--gray-200); cursor: not-allowed;">
+                </div>
+                <div class="form-group">
+                    <label for="fecha_vencimiento">Fecha Vencimiento</label>
+                    <input type="date" id="fecha_vencimiento" name="fecha_vencimiento" onchange="validarFormulario()">
+                </div>
+
+                <!-- Fila 3: Valores monetarios -->
+                <div class="form-group">
+                    <label for="valor" class="required">Valor Bruto</label>
+                    <input type="text" id="valor" name="valor" required 
+                           oninput="formatearValor(this); calcularValorNeto(); validarFormulario()">
+                </div>
+                <div class="form-group">
+                    <label for="iva">IVA</label>
+                    <input type="text" id="iva" name="iva" value="0" 
+                           oninput="formatearValor(this); calcularValorNeto()">
+                </div>
+                <div class="form-group">
+                    <label for="valor_neto">💰 Valor Neto</label>
+                    <input type="text" id="valor_neto" name="valor_neto" readonly
+                           style="background: var(--brand-green-light); font-weight: bold; color: var(--brand-green-dark);">
+                </div>
+
+                <!-- Fila 4: Retenciones -->
+                <div class="form-group">
+                    <label for="retencion_fuente">Retención Fuente</label>
+                    <input type="text" id="retencion_fuente" name="retencion_fuente" value="0" 
+                           oninput="formatearValor(this); calcularValorNeto()">
+                </div>
+                <div class="form-group">
+                    <label for="rete_iva">Rete IVA</label>
+                    <input type="text" id="rete_iva" name="rete_iva" value="0" 
+                           oninput="formatearValor(this); calcularValorNeto()">
+                </div>
+                <div class="form-group">
+                    <label for="rete_ica">Rete ICA</label>
+                    <input type="text" id="rete_ica" name="rete_ica" value="0" 
+                           oninput="formatearValor(this); calcularValorNeto()">
+                </div>
+
+                <!-- Fila 5: Usuarios (NO OBLIGATORIOS) -->
+                <div class="form-group">
+                    <label for="usuario_solicita">Usuario Solicita</label>
+                    <input type="text" id="usuario_solicita" name="usuario_solicita"
+                           oninput="this.value = this.value.toUpperCase(); validarFormulario()">
+                </div>
+                <div class="form-group">
+                    <label for="usuario_compra">Comprador</label>
+                    <input type="text" id="usuario_compra" name="usuario_compra"
+                           oninput="this.value = this.value.toUpperCase(); validarFormulario()">
+                </div>
+                <div class="form-group">
+                    <label for="usuario_recibe">Quien Recibe</label>
+                    <input type="text" id="usuario_recibe" name="usuario_recibe"
+                           oninput="this.value = this.value.toUpperCase(); validarFormulario()">
+                </div>
+
+                <!-- Fila 6: Observaciones (HORIZONTAL - 100%) -->
+                <div class="form-group col-3">
+                    <label for="observaciones">📝 Observaciones (Opcional - máx 5000 caracteres)</label>
+                    <textarea id="observaciones" name="observaciones" maxlength="5000" rows="2"
+                              placeholder="Escriba observaciones aquí..."
+                              oninput="this.value = this.value.toUpperCase(); actualizarContadorObservaciones()"></textarea>
+                    <small id="obs-contador" style="color: var(--text-color); opacity: 0.7; font-size: 0.85em;">
+                        0 / 5000 caracteres
+                    </small>
+                </div>
+            </div>
+
+            <!-- BOTONES DE ACCIÓN -->
+            <div class="button-group">
+                <button type="button" class="btn btn-primary" onclick="adicionarFactura()">
+                    ➕ Adicionar
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="limpiarFormularioCompleto()" 
+                        title="Limpiar todos los campos y reiniciar validaciones">
+                    🔄 Limpiar Todo
+                </button>
+                <button type="button" id="btn-editar" class="btn btn-warning" onclick="editarSeleccionada()" disabled>
+                    ✏️ Editar
+                </button>
+                <button type="button" id="btn-borrar" class="btn btn-danger" onclick="borrarSeleccionadas()" disabled>
+                    🗑️ Borrar Seleccionadas
+                </button>
+                <button type="button" id="btn-guardar" class="btn btn-primary" onclick="guardarFacturas()" disabled>
+                    💾 Guardar Facturas
+                </button>
+                <button type="button" class="btn btn-info" onclick="exportarExcel()" disabled id="btn-exportar">
+                    📥 Exportar Excel
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- TABLA DE FACTURAS (100% ANCHO) -->
+    <div class="table-container">
+        <div class="table-header">
+            <h3>
+                📋 Facturas Adicionadas (<span id="contador-total">0</span>)
+                <span id="contador-seleccionadas" style="color: var(--orange-warning); font-size: 0.9em; margin-left: 10px;"></span>
+            </h3>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" id="select-all" onchange="toggleSelectAll()"></th>
+                        <th>NIT</th>
+                        <th>Razón Social</th>
+                        <th>Prefijo</th>
+                        <th>Folio</th>
+                        <th>Valor Neto</th>
+                        <th>Empresa</th>
+                        <th>C.O.</th>
+                        <th>Fecha Exp.</th>
+                        <th>Fecha Rad.</th>
+                        <th>Usuario Solicita</th>
+                        <th>Comprador</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="tabla-facturas">
+                    <tr>
+                        <td colspan="13" style="text-align: center; padding: 20px; color: var(--text-color); opacity: 0.6;">
+                            📋 No hay facturas en la lista temporal
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMACIÓN -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="modal-titulo"></div>
+            <div class="modal-body" id="modal-mensaje"></div>
+            <div class="modal-footer">
+                <button class="btn btn-danger" onclick="cerrarModal()">Cancelar</button>
+                <button class="btn btn-primary" onclick="ejecutarAccion()">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =============================================
+        // 🌐 VARIABLES GLOBALES
+        // =============================================
+        let listaFacturas = [];
+        let modoEdicion = false;
+        let indiceEdicion = null;
+        let accionPendiente = null;
+        let debounceTimer = null;
+
+        // =============================================
+        // 🎨 DARK MODE
+        // =============================================
+        function toggleDarkMode() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('tema', newTheme);
+        }
+
+        // =============================================
+        // 💰 FORMATEO DE VALORES
+        // =============================================
+        function formatearValor(input) {
+            let valor = input.value.replace(/[^\d]/g, '');
+            if (valor) {
+                valor = parseInt(valor).toLocaleString('es-CO');
+            }
+            input.value = valor;
+        }
+
+        function limpiarValor(valorFormateado) {
+            return parseFloat(valorFormateado.replace(/[^\d]/g, '')) || 0;
+        }
+
+        function calcularValorNeto() {
+            const vb = limpiarValor(document.getElementById('valor').value);
+            const iva = limpiarValor(document.getElementById('iva').value);
+            const rf = limpiarValor(document.getElementById('retencion_fuente').value);
+            const riva = limpiarValor(document.getElementById('rete_iva').value);
+            const rica = limpiarValor(document.getElementById('rete_ica').value);
+            
+            const valorNeto = vb + iva - rf - riva - rica;
+            document.getElementById('valor_neto').value = valorNeto.toLocaleString('es-CO');
+        }
+
+        // =============================================
+        // 📝 OBSERVACIONES
+        // =============================================
+        function actualizarContadorObservaciones() {
+            const textarea = document.getElementById('observaciones');
+            const contador = document.getElementById('obs-contador');
+            const length = textarea.value.length;
+            contador.textContent = `${length} / 5000 caracteres`;
+            
+            if (length > 4800) {
+                contador.style.color = 'var(--red-error)';
+            } else if (length > 4500) {
+                contador.style.color = 'var(--orange-warning)';
+            } else {
+                contador.style.color = 'var(--text-color)';
+            }
+        }
+
+        function prepararObservacionConTimestamp() {
+            const texto = document.getElementById('observaciones').value.trim();
+            if (!texto) return '';
+            
+            const ahora = new Date();
+            const fecha = ahora.toISOString().split('T')[0];
+            const hora = ahora.toTimeString().split(' ')[0].substring(0, 5);
+            const usuario = "{{ session.get('usuario') }}";
+            
+            return `${fecha} ${hora} | ${usuario}: ${texto}`;
+        }
+
+        // =============================================
+        // 🔍 VALIDACIÓN DE TERCERO (NIT → RAZÓN SOCIAL)
+        // =============================================
+        let debounceTimerTercero = null;
+        let razonSocialCache = null; // ✅ Guardar razón social validada
+
+        function validarTerceroDebounce() {
+            clearTimeout(debounceTimerTercero);
+            debounceTimerTercero = setTimeout(validarTercero, 500);
+        }
+
+        async function validarTercero() {
+            const nit = document.getElementById('nit_emisor').value.trim();
+            const razonSocialElement = document.getElementById('razon-social');
+
+            if (!nit) {
+                razonSocialElement.textContent = '';
+                razonSocialElement.style.color = '';
+                razonSocialCache = null; // ✅ Limpiar cache
+                window.terceroRequiereActualizacion = false; // 🆕 Resetear flag global
+                return;
+            }
+
+            try {
+                // ✅ Usar endpoint del módulo recibir_facturas
+                const response = await fetch(`/recibir_facturas/verificar_tercero?nit=${encodeURIComponent(nit)}`, {
+                    method: 'GET',
+                    headers: {'Content-Type': 'application/json'}
+                });
+                
+                const data = await response.json();
+
+                if (!data.existe) {
+                    razonSocialElement.textContent = '❌ NIT NO REGISTRADO';
+                    razonSocialElement.style.color = 'var(--red-error)';
+                    razonSocialCache = null;
+                    window.terceroRequiereActualizacion = false;
+                    mostrarMensaje('⚠️ El NIT no está registrado en el sistema', 'warning');
+                } else {
+                    // ✅ Tercero existe
+                    const razonSocial = data.razon_social;
+                    const diasAntiguedad = data.dias_antiguedad || 0;
+                    const requiereActualizacion = data.requiere_actualizacion || false;
+                    const fechaActualizacion = data.fecha_actualizacion;
+                    
+                    // 🆕 VALIDAR ANTIGÜEDAD DE DOCUMENTACIÓN
+                    // Verificar si hay razón social válida
+                    if (!razonSocial || razonSocial.includes('SIN RAZÓN SOCIAL')) {
+                        razonSocialElement.textContent = `⚠️ ${razonSocial || 'SIN RAZÓN SOCIAL'}`;
+                        razonSocialElement.style.color = 'var(--orange-warning)';
+                        razonSocialCache = razonSocial;
+                        window.terceroRequiereActualizacion = false;
+                        mostrarMensaje('⚠️ El tercero no tiene razón social registrada', 'warning');
+                    } else {
+                        // ✅ Formatear fecha de actualización
+                        let fechaTexto = '';
+                        if (fechaActualizacion) {
+                            const fecha = new Date(fechaActualizacion);
+                            const opciones = { day: '2-digit', month: 'short', year: 'numeric' };
+                            fechaTexto = fecha.toLocaleDateString('es-ES', opciones);
+                        }
+                        
+                        if (requiereActualizacion) {
+                            // ❌ ESCENARIO 3: VENCIDO (>= 365 días) - BLOQUEADO
+                            razonSocialElement.innerHTML = `
+                                ❌ <strong>${razonSocial}</strong> (DOCUMENTACIÓN VENCIDA)<br>
+                                <small style="font-size: 0.85em;">Última actualización: ${fechaTexto} (${diasAntiguedad} días)</small><br>
+                                <small style="font-size: 0.85em; color: var(--red-error);">🚫 BLOQUEADO: Requiere actualización de documentos</small>
+                            `;
+                            razonSocialElement.style.color = 'var(--red-error)';
+                            razonSocialCache = razonSocial;
+                            window.terceroRequiereActualizacion = true; // 🆕 Marcar como bloqueado
+                            mostrarMensaje('🚫 No se pueden registrar facturas hasta que el tercero actualice su documentación (>= 365 días)', 'error');
+                        } else if (diasAntiguedad >= 330) {
+                            // ⚠️ ESCENARIO 2: POR VENCER (330-364 días) - ADVERTENCIA
+                            const diasRestantes = 365 - diasAntiguedad;
+                            razonSocialElement.innerHTML = `
+                                ⚠️ <strong>${razonSocial}</strong> (ACTIVO - PRÓXIMO A VENCER)<br>
+                                <small style="font-size: 0.85em;">Última actualización: ${fechaTexto} (${diasAntiguedad} días)</small><br>
+                                <small style="font-size: 0.85em; color: var(--orange-warning);">⏰ Quedan ${diasRestantes} días para requerir actualización</small>
+                            `;
+                            razonSocialElement.style.color = 'var(--orange-warning)';
+                            razonSocialCache = razonSocial;
+                            window.terceroRequiereActualizacion = false;
+                            mostrarMensaje(`⚠️ Se recomienda solicitar actualización de documentos pronto (quedan ${diasRestantes} días)`, 'warning');
+                        } else {
+                            // ✅ ESCENARIO 1: ACTUALIZADO (< 330 días) - OK
+                            razonSocialElement.innerHTML = `
+                                ✅ <strong>${razonSocial}</strong> (ACTIVO)<br>
+                                <small style="font-size: 0.85em;">Última actualización: ${fechaTexto} (${diasAntiguedad} días)</small>
+                            `;
+                            razonSocialElement.style.color = 'var(--brand-green-dark)';
+                            razonSocialCache = razonSocial;
+                            window.terceroRequiereActualizacion = false;
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error validando tercero:', error);
+                razonSocialElement.textContent = '❌ Error al validar';
+                razonSocialElement.style.color = 'var(--red-error)';
+                razonSocialCache = null; // ✅ Error = no hay razón social
+                window.terceroRequiereActualizacion = false;
+            }
+        }
+
+        // =============================================
+        // ✅ VALIDAR FORMULARIO (HABILITAR BOTÓN ADICIONAR)
+        // =============================================
+        function validarFormulario() {
+            const botonAdicionar = document.querySelector('.btn-primary[onclick="adicionarFactura()"]');
+            
+            // Campos obligatorios
+            const nit = document.getElementById('nit_emisor').value.trim();
+            const folio = document.getElementById('folio').value.trim();
+            const co = document.getElementById('co').value;
+            const fechaExp = document.getElementById('fecha_expedicion').value;
+            const fechaRad = document.getElementById('fecha_radicacion').value;
+            const valor = document.getElementById('valor').value.trim();
+            
+            // ✅ Validar que exista razón social (campo crítico)
+            const razonValida = razonSocialCache !== null && razonSocialCache !== '';
+            
+            // 🆕 NUEVA VALIDACIÓN: Bloquear si tercero requiere actualización (>= 365 días)
+            const terceroBloqueado = window.terceroRequiereActualizacion === true;
+            
+            // Habilitar solo si TODOS los obligatorios están llenos + razón social válida + tercero NO bloqueado
+            const formularioValido = nit && folio && co && fechaExp && fechaRad && valor && razonValida && !terceroBloqueado;
+            
+            if (botonAdicionar) {
+                botonAdicionar.disabled = !formularioValido;
+                
+                // Feedback visual
+                if (!formularioValido) {
+                    botonAdicionar.style.opacity = '0.5';
+                    botonAdicionar.style.cursor = 'not-allowed';
+                    
+                    // 🆕 Tooltip si está bloqueado por antigüedad
+                    if (terceroBloqueado) {
+                        botonAdicionar.title = '🚫 Tercero con documentación vencida (>= 365 días). Debe actualizar antes de registrar facturas.';
+                    } else {
+                        botonAdicionar.title = '';
+                    }
+                } else {
+                    botonAdicionar.style.opacity = '1';
+                    botonAdicionar.style.cursor = 'pointer';
+                    botonAdicionar.title = '';
+                }
+            }
+        }
+
+        // =============================================
+        // ✅ VALIDACIÓN DE CLAVE FACTURA (DEBOUNCE)
+        // =============================================
+        let claveFacturaValida = false; // ✅ Flag para controlar validación
+
+        function validarClaveFacturaDebounce() {
+            clearTimeout(debounceTimer);
+            claveFacturaValida = false; // ✅ Resetear flag al cambiar
+            debounceTimer = setTimeout(validarClaveFactura, 500);
+        }
+
+        async function validarClaveFactura() {
+            const nit = document.getElementById('nit_emisor').value.trim();
+            const prefijo = document.getElementById('prefijo').value.trim();
+            const folio = document.getElementById('folio').value.trim();
+
+            if (!nit || !folio) {
+                claveFacturaValida = false;
+                return;
+            }
+
+            try {
+                console.log('🔍 Validando clave factura:', {nit, prefijo, folio}); // Debug
+
+                // ✅ CORRECCIÓN: Usar endpoint correcto con GET
+                const params = new URLSearchParams({nit, prefijo, folio});
+                const response = await fetch(`/recibir_facturas/validar_factura_registrada?${params}`, {
+                    method: 'GET'
+                });
+
+                const data = await response.json();
+
+                console.log('📊 Respuesta validación:', data); // Debug
+
+                // ✅ El endpoint retorna {registrada: true/false, mensaje: "..."}
+                if (data.registrada) {
+                    claveFacturaValida = false;
+                    deshabilitarCamposFormulario();  // ✅ Deshabilitar si está duplicada
+                    
+                    // 🚨 ALERTA GRANDE para facturas duplicadas
+                    Swal.fire({
+                        icon: 'error',
+                        title: '❌ FACTURA DUPLICADA',
+                        html: `
+                            <p style="font-size: 16px; margin: 15px 0;">
+                                La factura <b>${prefijo}${folio}</b> del NIT <b>${nit}</b><br>
+                                ya fue registrada anteriormente.
+                            </p>
+                            ${data.en_temporal ? '<p><b>📋 Está en LISTA TEMPORAL</b></p>' : ''}
+                            ${data.en_recibidas ? '<p><b>✅ Está en FACTURAS RECIBIDAS</b></p>' : ''}
+                            ${data.fecha_radicacion ? `<p>📅 Fecha: <b>${new Date(data.fecha_radicacion).toLocaleDateString('es-CO')}</b></p>` : ''}
+                        `,
+                        confirmButtonText: 'Entendido',
+                        confirmButtonColor: '#dc3545'
+                    });
+                    
+                    // Enfocar el campo folio para que corrija
+                    document.getElementById('folio').focus();
+                    document.getElementById('folio').select();
+                } else {
+                    claveFacturaValida = true;
+                    habilitarCamposFormulario();  // ✅ HABILITAR si está disponible
+                    // ✅ Mostrar mensaje discreto de éxito
+                    mostrarMensaje(`✅ Factura disponible`, 'success');
+                    console.log('✅ Factura disponible:', data.mensaje);
+                }
+            } catch (error) {
+                console.error('❌ Error validando clave:', error);
+                claveFacturaValida = false;
+                deshabilitarCamposFormulario();  // ✅ Deshabilitar en caso de error
+                mostrarMensaje('⚠️ Error al validar clave de factura', 'warning');
+            }
+        }
+
+        // =============================================
+        // 🔒 DESHABILITAR/HABILITAR CAMPOS
+        // =============================================
+        function deshabilitarCamposFormulario() {
+            const campos = [
+                'co', 'fecha_expedicion', 'fecha_vencimiento',
+                'valor', 'iva', 'retencion_fuente', 'rete_iva', 'rete_ica',
+                'usuario_solicita', 'usuario_compra', 'usuario_recibe', 
+                'observaciones'
+            ];
+            
+            campos.forEach(id => {
+                const elem = document.getElementById(id);
+                if (elem) {
+                    elem.disabled = true;
+                    elem.style.background = '#f5f5f5';
+                    elem.style.cursor = 'not-allowed';
+                    elem.style.opacity = '0.6';
+                }
+            });
+        }
+
+        function habilitarCamposFormulario() {
+            const campos = [
+                'co', 'fecha_expedicion', 'fecha_vencimiento',
+                'valor', 'iva', 'retencion_fuente', 'rete_iva', 'rete_ica',
+                'usuario_solicita', 'usuario_compra', 'usuario_recibe', 
+                'observaciones'
+            ];
+            
+            campos.forEach(id => {
+                const elem = document.getElementById(id);
+                if (elem) {
+                    elem.disabled = false;
+                    elem.style.background = '';
+                    elem.style.cursor = '';
+                    elem.style.opacity = '';
+                }
+            });
+        }
+
+        // =============================================
+        // ➕ ADICIONAR FACTURA
+        // =============================================
+        async function adicionarFactura() {
+            // ✅ VALIDACIÓN 1: Verificar razón social
+            if (!razonSocialCache) {
+                mostrarMensaje('❌ ERROR: Falta validar la razón social del NIT. Espere a que aparezca debajo del campo NIT.', 'error');
+                document.getElementById('nit_emisor').focus();
+                return;
+            }
+
+            // ✅ VALIDACIÓN 2: Verificar que la clave de factura esté validada
+            if (!claveFacturaValida && !modoEdicion) {
+                mostrarMensaje('❌ ERROR: Debe validar la clave de factura (NIT + Prefijo + Folio). Espere unos segundos después de completar los datos.', 'error');
+                document.getElementById('folio').focus();
+                return;
+            }
+
+            const form = document.getElementById('registerForm');
+            
+            // Validar solo campos que son required (ahora excluye usuario_solicita, comprador, quien_recibe)
+            const camposRequeridos = ['nit_emisor', 'folio', 'co', 'fecha_expedicion', 'fecha_radicacion', 'valor'];
+            let campoFaltante = false;
+            
+            for (const campo of camposRequeridos) {
+                const elemento = document.getElementById(campo);
+                if (!elemento.value.trim()) {
+                    mostrarMensaje(`❌ Campo obligatorio faltante: ${elemento.previousElementSibling.textContent}`, 'error');
+                    elemento.focus();
+                    campoFaltante = true;
+                    break;
+                }
+            }
+            
+            if (campoFaltante) return;
+
+            const facturaData = {
+                nit: document.getElementById('nit_emisor').value.trim(),
+                razon_social: razonSocialCache, // ✅ CRÍTICO: Incluir razón social del cache
+                prefijo: document.getElementById('prefijo').value.trim() || '',
+                folio: document.getElementById('folio').value.trim(),
+                empresa_id: document.getElementById('empresa_id').value, // ✅ CAMPO EMPRESA AGREGADO
+                centro_operacion_id: parseInt(document.getElementById('co').value),
+                fecha_expedicion: document.getElementById('fecha_expedicion').value,
+                fecha_radicacion: document.getElementById('fecha_radicacion').value,
+                fecha_vencimiento: document.getElementById('fecha_vencimiento').value || null,
+                valor_bruto: limpiarValor(document.getElementById('valor').value),
+                iva: limpiarValor(document.getElementById('iva').value),
+                retencion_fuente: limpiarValor(document.getElementById('retencion_fuente').value),
+                rete_iva: limpiarValor(document.getElementById('rete_iva').value),
+                rete_ica: limpiarValor(document.getElementById('rete_ica').value),
+                valor_neto: limpiarValor(document.getElementById('valor_neto').value),
+                usuario_solicita: document.getElementById('usuario_solicita').value.trim() || 'NA',
+                comprador: document.getElementById('usuario_compra').value.trim() || 'NA',  // ✅ CORRECTO: comprador no usuario_compra
+                quien_recibe: document.getElementById('usuario_recibe').value.trim() || 'NA',  // ✅ CORRECTO: quien_recibe no usuario_recibe
+                observaciones: document.getElementById('observaciones').value.trim().toUpperCase()  // ✅ NUEVO: Incluir observaciones desde el inicio
+            };
+
+            // ✅ Observaciones ya incluidas en facturaData arriba (línea 1018)
+
+            try {
+                let url, method, mensajeExito;
+                
+                if (modoEdicion && indiceEdicion !== null) {
+                    const facturaId = listaFacturas[indiceEdicion].id;
+                    url = `/recibir_facturas/actualizar_factura_temporal/${facturaId}`;
+                    method = 'PUT';
+                    mensajeExito = '✅ Factura actualizada exitosamente';
+                } else {
+                    url = '/recibir_facturas/guardar_factura_temporal';
+                    method = 'POST';
+                    mensajeExito = '✅ Factura agregada a la lista temporal';
+                }
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(facturaData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    mostrarMensaje(mensajeExito, 'success');
+                    await cargarFacturasTemporales();
+                    limpiarFormulario();
+                    
+                    if (modoEdicion) {
+                        cancelarEdicion();
+                    }
+                } else {
+                    mostrarMensaje(`❌ ${data.error || 'Error al procesar factura'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarMensaje('❌ Error de conexión al servidor', 'error');
+            }
+        }
+
+        // =============================================
+        // 📋 CARGAR FACTURAS
+        // =============================================
+        async function cargarFacturasTemporales() {
+            try {
+                // ✅ CORRECCIÓN: Endpoint sin /api/
+                const response = await fetch('/recibir_facturas/cargar_facturas_temporales');
+                const data = await response.json();
+
+                console.log('📊 Facturas cargadas:', data); // Debug
+
+                if (response.ok) {
+                    listaFacturas = data.facturas || [];
+                    console.log('✅ Total facturas:', listaFacturas.length); // Debug
+                    renderTabla();
+                    controlarBotones();
+                } else {
+                    console.error('❌ Error en respuesta:', data);
+                    mostrarMensaje('⚠️ Error al cargar facturas temporales', 'warning');
+                }
+            } catch (error) {
+                console.error('❌ Error cargando facturas:', error);
+                mostrarMensaje('❌ Error de conexión al cargar facturas', 'error');
+            }
+        }
+
+        // =============================================
+        // 📊 RENDERIZAR TABLA
+        // =============================================
+        function renderTabla() {
+            const tbody = document.getElementById('tabla-facturas');
+            
+            if (listaFacturas.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="13" style="text-align: center; padding: 20px; color: var(--text-color); opacity: 0.6;">
+                            📋 No hay facturas en la lista temporal
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('contador-total').textContent = '0';
+                document.getElementById('contador-seleccionadas').textContent = '';
+                document.getElementById('btn-guardar').disabled = true;
+                document.getElementById('btn-exportar').disabled = true;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            
+            listaFacturas.forEach((factura, index) => {
+                const tr = document.createElement('tr');
+                
+                // Marcar si tiene observaciones
+                if (factura.observaciones && factura.observaciones.trim()) {
+                    tr.classList.add('has-observacion');
+                }
+
+                const tieneObs = factura.observaciones && factura.observaciones.trim();
+                
+                tr.innerHTML = `
+                    <td><input type="checkbox" class="factura-checkbox" data-index="${index}" onchange="controlarBotones()"></td>
+                    <td>${factura.nit}</td>
+                    <td>${factura.razon_social || 'N/A'}</td>
+                    <td>${factura.prefijo || ''}</td>
+                    <td>${factura.folio}</td>
+                    <td><strong>${parseFloat(factura.valor_neto || 0).toLocaleString('es-CO')}</strong></td>
+                    <td><strong>${factura.empresa_id || 'N/A'}</strong></td>
+                    <td>${factura.centro_operacion_codigo || 'N/A'}</td>
+                    <td>${factura.fecha_expedicion}</td>
+                    <td>${factura.fecha_radicacion}</td>
+                    <td>${factura.usuario_solicita || 'NA'}</td>
+                    <td>${factura.comprador || 'NA'}</td>
+                    <td style="white-space: nowrap;">
+                        <button class="btn-action" onclick="editarFactura(${index})" title="Editar">✏️</button>
+                        <button class="btn-action" onclick="borrarFactura(${index})" title="Borrar">🗑️</button>
+                        ${tieneObs ? `
+                            <span class="tooltip">
+                                <button class="btn-action" style="color: var(--brand-green);" title="Ver Observaciones">💬</button>
+                                <span class="tooltiptext">${factura.observaciones.split('\n').join('<br>')}</span>
+                            </span>
+                        ` : ''}
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+
+            document.getElementById('contador-total').textContent = listaFacturas.length;
+            controlarBotones();
+        }
+
+        // =============================================
+        // 🎯 CONTROLAR BOTONES
+        // =============================================
+        function controlarBotones() {
+            const checkboxes = document.querySelectorAll('.factura-checkbox:checked');
+            const count = checkboxes.length;
+
+            const contadorSpan = document.getElementById('contador-seleccionadas');
+            if (count > 0) {
+                contadorSpan.textContent = `✓ ${count} seleccionada${count > 1 ? 's' : ''}`;
+            } else {
+                contadorSpan.textContent = '';
+            }
+
+            document.getElementById('btn-editar').disabled = count !== 1;
+            document.getElementById('btn-borrar').disabled = count === 0;
+            document.getElementById('btn-guardar').disabled = count === 0;
+            document.getElementById('btn-exportar').disabled = count === 0; // ✅ Solo habilitar si hay selección
+        }
+
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('select-all');
+            const checkboxes = document.querySelectorAll('.factura-checkbox');
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+            controlarBotones();
+        }
+
+        // =============================================
+        // ✏️ EDITAR
+        // =============================================
+        function editarSeleccionada() {
+            const checkboxes = document.querySelectorAll('.factura-checkbox:checked');
+            if (checkboxes.length !== 1) return;
+            
+            const index = parseInt(checkboxes[0].dataset.index);
+            editarFactura(index);
+        }
+
+        function editarFactura(index) {
+            const factura = listaFacturas[index];
+
+            // ✅ 1. DESMARCAR TODOS LOS CHECKBOXES
+            document.querySelectorAll('.factura-checkbox').forEach(cb => {
+                cb.checked = false;
+            });
+
+            // ✅ 2. REMOVER CLASE DE EDICIÓN DE TODAS LAS FILAS
+            document.querySelectorAll('tbody tr').forEach(tr => {
+                tr.classList.remove('factura-en-edicion');
+            });
+
+            // ✅ 3. AGREGAR CLASE A LA FILA ACTUAL
+            const filas = document.querySelectorAll('tbody tr');
+            if (filas[index]) {
+                filas[index].classList.add('factura-en-edicion');
+            }
+
+            // ✅ 4. HABILITAR TODOS LOS CAMPOS DEL FORMULARIO (CRÍTICO - FALTABA ESTO)
+            habilitarCamposFormulario();
+
+            // Cargar datos en formulario
+            document.getElementById('nit_emisor').value = factura.nit;
+            document.getElementById('prefijo').value = factura.prefijo || '';
+            document.getElementById('folio').value = factura.folio;
+            document.getElementById('empresa_id').value = factura.empresa_id || '';
+            document.getElementById('co').value = factura.centro_operacion_id;
+            document.getElementById('fecha_expedicion').value = factura.fecha_expedicion;
+            document.getElementById('fecha_radicacion').value = factura.fecha_radicacion;
+            document.getElementById('fecha_vencimiento').value = factura.fecha_vencimiento || '';
+            document.getElementById('valor').value = parseFloat(factura.valor_bruto).toLocaleString('es-CO');
+            document.getElementById('iva').value = parseFloat(factura.iva || 0).toLocaleString('es-CO');
+            document.getElementById('retencion_fuente').value = parseFloat(factura.retencion_fuente || 0).toLocaleString('es-CO');
+            document.getElementById('rete_iva').value = parseFloat(factura.rete_iva || 0).toLocaleString('es-CO');
+            document.getElementById('rete_ica').value = parseFloat(factura.rete_ica || 0).toLocaleString('es-CO');
+            document.getElementById('usuario_solicita').value = factura.usuario_solicita || '';
+            document.getElementById('usuario_compra').value = factura.comprador || '';  // ✅ CORRECTO: "comprador"
+            document.getElementById('usuario_recibe').value = factura.quien_recibe || '';  // ✅ CORRECTO: "quien_recibe"
+
+            calcularValorNeto();
+
+            // ✅ 5. CARGAR OBSERVACIONES SI EXISTEN
+            if (factura.observaciones && factura.observaciones.trim()) {
+                document.getElementById('observaciones').value = factura.observaciones;
+                actualizarContadorObservaciones();
+            } else {
+                document.getElementById('observaciones').value = '';
+                document.getElementById('obs-contador').textContent = '0 / 5000 caracteres';
+            }
+
+            modoEdicion = true;
+            indiceEdicion = index;
+
+            // ✅ 6. CAMBIAR BOTÓN A "ACTUALIZAR DATOS"
+            const botonAdicionar = document.querySelector('.btn-primary[onclick="adicionarFactura()"]');
+            if (botonAdicionar) {
+                botonAdicionar.innerHTML = '💾 Actualizar Datos';
+                botonAdicionar.style.background = 'var(--orange-warning)';
+                botonAdicionar.disabled = false;
+            }
+
+            // ✅ 7. Cargar razón social en cache y mostrar
+            razonSocialCache = factura.razon_social;
+            document.getElementById('razon-social').textContent = `✅ ${factura.razon_social}`;
+            
+            // ✅ 8. Marcar clave como válida (es edición, no nuevo)
+            claveFacturaValida = true;
+
+            // ✅ 9. Actualizar control de botones
+            controlarBotones();
+
+            // ✅ 10. Scroll al inicio para ver el formulario
+            window.scrollTo({top: 0, behavior: 'smooth'});
+            
+            console.log('✅ Modo edición activado - Campos habilitados');
+        }
+
+        function cancelarEdicion() {
+            // ✅ 1. REMOVER CLASE DE EDICIÓN DE TODAS LAS FILAS
+            document.querySelectorAll('tbody tr').forEach(tr => {
+                tr.classList.remove('factura-en-edicion');
+            });
+
+            modoEdicion = false;
+            indiceEdicion = null;
+            
+            // ✅ 2. RESTAURAR BOTÓN A "ADICIONAR"
+            const botonAdicionar = document.querySelector('.btn-primary[onclick="adicionarFactura()"]');
+            if (botonAdicionar) {
+                botonAdicionar.innerHTML = '➕ Adicionar';
+                botonAdicionar.style.background = 'var(--brand-green)';
+            }
+            
+            limpiarFormulario();
+        }
+
+        // =============================================
+        // 🗑️ BORRAR
+        // =============================================
+        function borrarFactura(index) {
+            const factura = listaFacturas[index];
+            
+            accionPendiente = async () => {
+                try {
+                    const response = await fetch(`/recibir_facturas/borrar_factura_temporal/${factura.id}`, {
+                        method: 'DELETE'
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        mostrarMensaje('✅ Factura eliminada', 'success');
+                        await cargarFacturasTemporales();
+                    } else {
+                        mostrarMensaje('❌ Error al eliminar factura', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    mostrarMensaje('❌ Error de conexión', 'error');
+                }
+            };
+
+            mostrarModal('🗑️ Confirmar Eliminación', '¿Está seguro de eliminar esta factura?');
+        }
+
+        function borrarSeleccionadas() {
+            const checkboxes = document.querySelectorAll('.factura-checkbox:checked');
+            
+            if (checkboxes.length === 0) {
+                mostrarMensaje('⚠️ Seleccione al menos una factura para borrar', 'warning');
+                return;
+            }
+
+            accionPendiente = async () => {
+                const facturasIds = Array.from(checkboxes).map(cb => {
+                    const index = parseInt(cb.dataset.index);
+                    return listaFacturas[index].id;
+                });
+
+                try {
+                    const promises = facturasIds.map(id => 
+                        fetch(`/recibir_facturas/borrar_factura_temporal/${id}`, {method: 'DELETE'})
+                    );
+
+                    await Promise.all(promises);
+                    mostrarMensaje(`✅ Se eliminaron ${facturasIds.length} facturas`, 'success');
+                    await cargarFacturasTemporales();
+                } catch (error) {
+                    console.error('Error:', error);
+                    mostrarMensaje('❌ Error al eliminar facturas', 'error');
+                }
+            };
+
+            mostrarModal('🗑️ Confirmar Eliminación', `¿Está seguro de eliminar ${checkboxes.length} factura(s)?`);
+        }
+
+        // =============================================
+        // 💾 GUARDAR FACTURAS
+        // =============================================
+        function guardarFacturas() {
+            const checkboxes = document.querySelectorAll('.factura-checkbox:checked');
+            
+            if (checkboxes.length === 0) {
+                mostrarMensaje('⚠️ Seleccione al menos una factura para guardar', 'warning');
+                return;
+            }
+
+            accionPendiente = async () => {
+                const facturas_ids = Array.from(checkboxes).map(cb => {
+                    const index = parseInt(cb.dataset.index);
+                    return listaFacturas[index].id;
+                });
+
+                try {
+                    const response = await fetch('/recibir_facturas/guardar_facturas_masivo', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({facturas_ids})
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        mostrarMensaje(
+                            `✅ ${data.guardadas} factura(s) guardadas en facturas_recibidas. ${data.duplicadas > 0 ? `⚠️ ${data.duplicadas} duplicadas omitidas.` : ''}`,
+                            'success'
+                        );
+                        
+                        await cargarFacturasTemporales();
+                    } else {
+                        mostrarMensaje(`❌ ${data.error || 'Error al guardar facturas'}`, 'error');
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    mostrarMensaje('❌ Error de conexión al servidor', 'error');
+                }
+            };
+
+            mostrarModal(
+                '💾 Confirmar Guardado',
+                `¿Está seguro de guardar ${checkboxes.length} factura(s) definitivamente? 
+
+Esta acción moverá las facturas de la lista temporal a facturas recibidas y NO podrán ser modificadas.`
+            );
+        }
+
+        // =============================================
+        // 📥 EXPORTAR EXCEL
+        // =============================================
+        async function exportarExcel() {
+            const checkboxes = document.querySelectorAll('.factura-checkbox:checked');
+            
+            if (checkboxes.length === 0) {
+                mostrarMensaje('⚠️ Selecciona al menos una factura para exportar', 'warning');
+                return;
+            }
+            
+            try {
+                // ✅ NUEVO: Usar endpoint /api/exportar_temporales
+                const ids = Array.from(checkboxes).map(cb => {
+                    const index = parseInt(cb.dataset.index);
+                    return listaFacturas[index].id;
+                });
+                
+                console.log('📊 Exportando facturas con IDs:', ids);
+                
+                const response = await fetch('/recibir_facturas/api/exportar_temporales', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ ids: ids })
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const downloadUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    a.download = `facturas_temporales_${new Date().getTime()}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    window.URL.revokeObjectURL(downloadUrl);
+                    
+                    mostrarMensaje(`✅ Excel generado con ${ids.length} facturas`, 'success');
+                } else {
+                    const error = await response.json();
+                    mostrarMensaje(`❌ Error: ${error.error || 'Error al exportar Excel'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error al exportar:', error);
+                mostrarMensaje('❌ Error de conexión al exportar', 'error');
+            }
+        }
+
+        // =============================================
+        // 🧹 LIMPIAR FORMULARIO
+        // =============================================
+        function limpiarFormulario() {
+            document.getElementById('registerForm').reset();
+            
+            // ✅ Restablecer fecha de radicación a HOY (siempre)
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha_radicacion').value = hoy;
+            
+            document.getElementById('observaciones').value = '';
+            document.getElementById('obs-contador').textContent = '0 / 5000 caracteres';
+            
+            // ✅ Limpiar validaciones
+            document.getElementById('razon-social').textContent = '';
+            razonSocialCache = null;
+            claveFacturaValida = false;
+            
+            // ✅ Validar formulario (deshabilitar botón Adicionar)
+            validarFormulario();
+            
+            if (modoEdicion) {
+                modoEdicion = false;
+                indiceEdicion = null;
+            }
+        }
+
+        // =============================================
+        // 🔄 LIMPIAR FORMULARIO COMPLETO (con confirmación)
+        // =============================================
+        function limpiarFormularioCompleto() {
+            console.log('🔄 Función limpiarFormularioCompleto() ejecutándose...');
+            
+            Swal.fire({
+                title: '¿Limpiar todo y recargar página?',
+                html: 'Se recargará la página completa.<br><br><b>IMPORTANTE:</b> Las facturas temporales guardadas en la base de datos <b>NO se perderán</b>, pero los datos del formulario actual sin guardar <b>sí se perderán</b>.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '✅ Sí, recargar',
+                cancelButtonText: '❌ Cancelar',
+                confirmButtonColor: 'var(--brand-green)',
+                cancelButtonColor: '#6c757d'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log('✅ Usuario confirmó recargar página');
+                    // ✅ NUEVO: Simplemente recargar la página (equivalente a Ctrl+Shift+R)
+                    location.reload();
+                }
+            });
+        }
+
+        // =============================================
+        // 💬 MENSAJES
+        // =============================================
+        function mostrarMensaje(texto, tipo) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = texto;
+            messageDiv.className = `message ${tipo}`;
+            messageDiv.style.display = 'block';
+
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // =============================================
+        // 🔔 MODAL
+        // =============================================
+        function mostrarModal(titulo, mensaje) {
+            document.getElementById('modal-titulo').textContent = titulo;
+            document.getElementById('modal-mensaje').innerHTML = mensaje;
+            document.getElementById('modal').style.display = 'block';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal').style.display = 'none';
+            accionPendiente = null;
+        }
+
+        async function ejecutarAccion() {
+            if (accionPendiente) {
+                await accionPendiente();
+                cerrarModal();
+            }
+        }
+
+        // =============================================
+        // 🚪 SALIR
+        // =============================================
+        function confirmarSalida() {
+            if (listaFacturas.length > 0) {
+                if (confirm('⚠️ Hay facturas en la lista temporal. ¿Está seguro de salir?')) {
+                    window.location.href = '/dashboard';
+                }
+            } else {
+                window.location.href = '/dashboard';
+            }
+        }
+
+        // =============================================
+        // 🚀 INICIALIZACIÓN
+        // =============================================
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cargar tema guardado
+            const temaGuardado = localStorage.getItem('tema') || 'light';
+            if (temaGuardado === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+            }
+
+            // ✅ Setear fecha de radicación a HOY (siempre, por si el template falla)
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha_radicacion').value = hoy;
+
+            // ✅ NUEVO: Deshabilitar campos hasta validar clave (NIT+Prefijo+Folio)
+            deshabilitarCamposFormulario();
+
+            // Cargar facturas temporales
+            cargarFacturasTemporales();
+            
+            // ✅ Validar formulario al inicio (deshabilitar botón Adicionar)
+            validarFormulario();
+            
+            // ✅ NUEVO: Event listener para observaciones - activar botón Actualizar
+            document.getElementById('observaciones').addEventListener('input', () => {
+                if (modoEdicion) {
+                    validarFormulario(); // Re-validar para habilitar botón Actualizar
+                    console.log('📝 Observaciones modificadas - validando formulario');
+                }
+            });
+        });
+    </script>
+
+    <!-- ✅ INACTIVITY WARNING MODAL (25 MIN CON ADVERTENCIA 1 MIN ANTES) -->
+    {% include '_inactivity_warning.html' %}
+
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+    {% include '_session_expired_interceptor.html' %}
+  </body>
+  </html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explorador de Archivos - Facturas Físicas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        .breadcrumb {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .carpeta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .carpeta-card {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .carpeta-card:hover {
+            background: #e8f4f8;
+            border-color: #17a2b8;
+            transform: translateY(-2px);
+        }
+        .carpeta-icon {
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .carpeta-info {
+            text-align: center;
+        }
+        .archivo-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        .archivo-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s;
+        }
+        .archivo-card:hover {
+            background: #f0f8ff;
+            border-color: #007bff;
+        }
+        .archivo-icon {
+            font-size: 2em;
+            min-width: 50px;
+            text-align: center;
+        }
+        .archivo-info {
+            flex: 1;
+        }
+        .archivo-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn:hover { transform: translateY(-1px); }
+        .stats-bar {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-around;
+            text-align: center;
+        }
+        .stat-item {
+            flex: 1;
+        }
+        .search-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .search-input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #666;
+        }
+        @media (max-width: 768px) {
+            .carpeta-grid { grid-template-columns: 1fr; }
+            .archivo-list { grid-template-columns: 1fr; }
+            .header { flex-direction: column; gap: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>📁 Explorador de Archivos</h1>
+                <p>Navegación por estructura de facturas físicas</p>
+            </div>
+            <div>
+                <a href="/" class="btn btn-secondary">🏠 Dashboard</a>
+                <button class="btn btn-info" onclick="actualizarExploracion()">🔄 Actualizar</button>
+            </div>
+        </div>
+
+        <div class="breadcrumb">
+            📍 <strong>Ubicación:</strong> 
+            {% for item in ruta_breadcrumb %}
+                {% if not loop.last %}
+                    <a href="/explorar{{ item.url }}" style="color: #007bff; text-decoration: none;">{{ item.nombre }}</a> /
+                {% else %}
+                    <span style="color: #666;">{{ item.nombre }}</span>
+                {% endif %}
+            {% endfor %}
+        </div>
+
+        {% if estadisticas %}
+        <div class="stats-bar">
+            <div class="stat-item">
+                <h4>📁 {{ estadisticas.total_carpetas }}</h4>
+                <p>Carpetas</p>
+            </div>
+            <div class="stat-item">
+                <h4>📄 {{ estadisticas.total_archivos }}</h4>
+                <p>Archivos</p>
+            </div>
+            <div class="stat-item">
+                <h4>💾 {{ estadisticas.tamaño_total }}</h4>
+                <p>Tamaño Total</p>
+            </div>
+            <div class="stat-item">
+                <h4>🏢 {{ estadisticas.terceros_unicos }}</h4>
+                <p>Terceros</p>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="search-bar">
+            <input type="text" class="search-input" id="busqueda" placeholder="Buscar por NIT, prefijo, folio o nombre de archivo..." onkeyup="filtrarElementos()">
+            <button class="btn btn-primary" onclick="buscarArchivos()">🔍 Buscar</button>
+        </div>
+
+        {% if carpetas %}
+        <h3>📁 Carpetas ({{ carpetas|length }})</h3>
+        <div class="carpeta-grid" id="carpetas-container">
+            {% for carpeta in carpetas %}
+            <div class="carpeta-card" onclick="navegarACarpeta('{{ carpeta.ruta }}')" data-nombre="{{ carpeta.nombre|lower }}">
+                <div class="carpeta-icon">📁</div>
+                <div class="carpeta-info">
+                    <h4>{{ carpeta.nombre }}</h4>
+                    <p>{{ carpeta.archivos_count }} archivos</p>
+                    <p>{{ carpeta.tamaño }}</p>
+                    <small>{{ carpeta.fecha_modificacion }}</small>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if archivos %}
+        <h3>📄 Archivos ({{ archivos|length }})</h3>
+        <div class="archivo-list" id="archivos-container">
+            {% for archivo in archivos %}
+            <div class="archivo-card" data-nombre="{{ archivo.nombre|lower }}">
+                <div class="archivo-icon">
+                    {% if archivo.extension == '.pdf' %}📄
+                    {% elif archivo.extension == '.xml' %}📋
+                    {% elif archivo.extension == '.zip' %}📦
+                    {% else %}📄{% endif %}
+                </div>
+                <div class="archivo-info">
+                    <h5>{{ archivo.nombre }}</h5>
+                    <p>{{ archivo.tamaño }} - {{ archivo.fecha_modificacion }}</p>
+                    {% if archivo.clave_busqueda %}
+                    <small style="color: #007bff;">{{ archivo.clave_busqueda }}</small>
+                    {% endif %}
+                </div>
+                <div class="archivo-actions">
+                    <a href="/descargar_archivo{{ archivo.ruta_completa }}" class="btn btn-primary">⬇️ Descargar</a>
+                    {% if archivo.extension == '.pdf' %}
+                    <a href="/ver_pdf{{ archivo.ruta_completa }}" class="btn btn-info" target="_blank">👁️ Ver</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if not carpetas and not archivos %}
+        <div class="empty-state">
+            <h3>📭 Carpeta Vacía</h3>
+            <p>No se encontraron archivos ni carpetas en esta ubicación.</p>
+            <button class="btn btn-warning" onclick="window.history.back()">← Volver</button>
+        </div>
+        {% endif %}
+
+        {% if ruta_actual != '/' %}
+        <div style="text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <button class="btn btn-secondary" onclick="subirNivel()">↗️ Subir Nivel</button>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function navegarACarpeta(ruta) {
+            window.location.href = `/explorar${ruta}`;
+        }
+
+        function subirNivel() {
+            const rutaActual = '{{ ruta_actual }}';
+            const rutaPadre = rutaActual.substring(0, rutaActual.lastIndexOf('/')) || '/';
+            window.location.href = `/explorar${rutaPadre}`;
+        }
+
+        function filtrarElementos() {
+            const busqueda = document.getElementById('busqueda').value.toLowerCase();
+            
+            // Filtrar carpetas
+            const carpetas = document.querySelectorAll('.carpeta-card');
+            carpetas.forEach(carpeta => {
+                const nombre = carpeta.getAttribute('data-nombre');
+                carpeta.style.display = nombre.includes(busqueda) ? 'block' : 'none';
+            });
+
+            // Filtrar archivos
+            const archivos = document.querySelectorAll('.archivo-card');
+            archivos.forEach(archivo => {
+                const nombre = archivo.getAttribute('data-nombre');
+                archivo.style.display = nombre.includes(busqueda) ? 'flex' : 'none';
+            });
+        }
+
+        function buscarArchivos() {
+            const termino = document.getElementById('busqueda').value;
+            if (termino.trim()) {
+                window.location.href = `/buscar_archivos?q=${encodeURIComponent(termino)}`;
+            }
+        }
+
+        function actualizarExploracion() {
+            if (confirm('¿Desea actualizar la exploración de archivos? Esto puede tomar unos momentos.')) {
+                fetch('/api/actualizar_exploracion', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Exploración actualizada correctamente.');
+                        location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    alert('Error al actualizar: ' + error);
+                });
+            }
+        }
+
+        // Permitir navegación con teclado
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && document.activeElement.id === 'busqueda') {
+                buscarArchivos();
+            }
+        });
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

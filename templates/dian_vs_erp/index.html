@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard Control de Facturas - DIAN vs ERP</title>
+  <link href="https://cdn.jsdelivr.net/npm/tabulator-tables@5.4.4/dist/css/tabulator_midnight.min.css" rel="stylesheet">
+  <style>
+    body{margin:0;background:#121212;color:#e0e0e0;font-family:Segoe UI,Tahoma,Arial,sans-serif;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+    .header,.controls,.uploads,.plantillas,.footer{padding:10px 20px}
+    .header{background:#1f1f1f;display:flex;justify-content:space-between;align-items:center}
+    .controls,.uploads,.plantillas{background:#1a1a1a;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+    input[type="date"],input[type="text"],input[type="file"]{background:#1f1f1f;color:#fff;border:1px solid #333;padding:6px;border-radius:6px}
+    button,.plantillas a,.btn-exit{padding:8px 14px;border-radius:6px;border:none;cursor:pointer}
+    button,.plantillas a{background:#2563eb;color:#fff;text-decoration:none}
+    .btn-exit{background:#dc2626;color:#fff}.btn-exit:hover{background:#b91c1c}
+    .table-container{flex:1;overflow:auto;padding:0 20px}
+    /* Modal progreso */
+    .modal{position:fixed;inset:0;background:#0008;display:none;align-items:center;justify-content:center;z-index:9999}
+    .card{background:#1f1f1f;border:1px solid #333;border-radius:10px;padding:18px;min-width:360px;box-shadow:0 10px 30px #000}
+    .bar{height:10px;background:#333;border-radius:10px;overflow:hidden}
+    .bar>div{height:100%;width:0;background:#22c55e;transition:width .25s}
+    .hint{opacity:.85;font-size:.9rem}
+    /* Filtros Excel-like */
+    .filter-chip{font-size:.78rem;background:#2a2a2a;border:1px solid #3b3b3b;padding:2px 6px;border-radius:4px;cursor:pointer}
+    .filter-panel{position:absolute;background:#1e1e1e;border:1px solid #444;border-radius:8px;padding:8px;z-index:99;display:none;max-height:260px;overflow:auto;min-width:220px}
+    .filter-panel input[type="text"]{width:100%;margin-bottom:6px}
+    /* Estadísticas */
+    .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;padding:15px 20px;background:#1a1a1a}
+    .stat-card{background:#1f1f1f;border:1px solid #333;border-radius:8px;padding:15px;text-align:center}
+    .stat-number{font-size:2rem;font-weight:bold;color:#22c55e;margin-bottom:5px}
+    .stat-label{color:#999;font-size:0.9rem}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>📊 Dashboard Control Facturas DIAN vs ERP</h1>
+    <div class="user">👤 {{ usuario }} 
+      <a href="/" class="btn-exit">🏠 Dashboard Principal</a>
+      <a href="#" class="btn-exit">Salir</a>
+    </div>
+  </div>
+
+  <!-- Estadísticas -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-number">{{ estadisticas.get('total_dian', 0)|number_format }}</div>
+      <div class="stat-label">Facturas DIAN</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ estadisticas.get('total_erp', 0)|number_format }}</div>
+      <div class="stat-label">Registros ERP</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ estadisticas.get('matches_dian_erp', 0)|number_format }}</div>
+      <div class="stat-label">Matches DIAN ↔ ERP</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-number">{{ estadisticas.get('dian_con_modulo', 0)|number_format }}</div>
+      <div class="stat-label">Con Módulo Asignado</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <label>📅 Fecha Inicial <input type="date" id="fechaInicio"></label>
+    <label>📅 Fecha Final <input type="date" id="fechaFin"></label>
+    <label>🔍 Buscar <input type="text" id="searchInput" placeholder="Buscar..." oninput="filtrarTabla()"></label>
+    <button id="exportBtn">📥 Exportar Seleccionadas a Excel</button>
+    <button onclick="window.location.href='/dian_vs_erp/reportes_dinamicos'" style="background:#9b59b6;color:#fff;padding:10px 15px;border:none;border-radius:6px;cursor:pointer;font-weight:bold">📊 Reportes Dinámicos</button>
+    <button onclick="window.location.href='/dian_vs_erp/cargar'">📂 Cargar Archivos</button>
+  </div>
+
+  <div class="uploads">
+    <label>📁 DIAN <input type="file" id="archivoDian" accept=".xlsx,.xlsm,.xls,.csv"></label>
+    <label>📁 ERP Financiero <input type="file" id="archivoERPFinanciero" accept=".xlsx,.xlsm,.xls,.csv"></label>
+    <label>📁 ERP Comercial <input type="file" id="archivoERPComercial" accept=".xlsx,.xlsm,.xls,.csv"></label>
+    <label>📁 Errores ERP <input type="file" id="archivoErroresERP" accept=".xlsx,.xlsm,.xls,.csv"></label>
+    <label>📁 Acuses <input type="file" id="archivoAcuses" accept=".xlsx,.xlsm,.xls,.csv"></label>
+    <button onclick="cargarArchivos()">📂 Cargar & Procesar</button>
+    <button onclick="window.location.href='/dian_vs_erp/api/forzar_procesar'">⚙️ Forzar Procesar</button>
+  </div>
+
+  <div class="table-container">
+    <div id="tablaFacturas"></div>
+  </div>
+
+  <div class="footer">
+    <span id="contadorSeleccionados">0 seleccionadas</span>
+  </div>
+
+  <!-- Modal progreso -->
+  <div class="modal" id="modal">
+    <div class="card">
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+        <div>⚙️</div>
+        <div><strong id="p_title">Procesando...</strong> <span id="p_pct" style="opacity:.8"></span></div>
+      </div>
+      <div class="bar"><div id="p_bar"></div></div>
+      <div class="hint" id="p_hint" style="margin-top:8px">Subiendo/Convirtiendo a CSV...</div>
+    </div>
+  </div>
+
+  <!-- 📊 Librería XLSX para exportar Excel -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <!-- 📋 Librería Tabulator -->
+  <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@5.4.4/dist/js/tabulator.min.js"></script>
+  <script>
+    let table;
+
+    function showProgress(title, pct, hint){
+      const m = document.getElementById('modal');
+      m.style.display = 'flex';
+      document.getElementById('p_title').textContent = title || 'Procesando...';
+      document.getElementById('p_pct').textContent = pct!=null ? ` ${pct}%` : '';
+      document.getElementById('p_bar').style.width = (pct||0) + '%';
+      if(hint) document.getElementById('p_hint').textContent = hint;
+    }
+    
+    function hideProgress(){ 
+      document.getElementById('modal').style.display = 'none'; 
+    }
+
+    async function cargarArchivos(){
+      const formData = new FormData();
+      const files = {
+        dian: document.getElementById("archivoDian").files[0],
+        erp_fn: document.getElementById("archivoERPFinanciero").files[0],
+        erp_cm: document.getElementById("archivoERPComercial").files[0],
+        errores: document.getElementById("archivoErroresERP").files[0],
+        acuses: document.getElementById("archivoAcuses").files[0],
+      };
+      
+      let alguno=false; 
+      for(const k in files){ 
+        if(files[k]){ 
+          formData.append(k, files[k]); 
+          alguno=true; 
+        } 
+      }
+      
+      if(!alguno){ 
+        alert("⚠️ Selecciona al menos un archivo."); 
+        return; 
+      }
+
+      showProgress("Subiendo archivos", 0, "Convirtiendo a CSV...");
+      
+      try {
+        const response = await fetch('/dian_vs_erp/subir_archivos', {
+          method: 'POST',
+          body: formData
+        });
+        
+        const result = await response.json();
+        
+        hideProgress();
+        
+        if (response.ok) {
+          alert("✅ " + result.mensaje);
+          // Recargar datos
+          await cargarDatos();
+        } else {
+          alert("❌ " + result.mensaje);
+        }
+        
+      } catch (error) {
+        hideProgress();
+        console.error('Error:', error);
+        alert("❌ Error al cargar archivos: " + error.message);
+      }
+    }
+
+    async function cargarDatos(){
+      showProgress("Cargando datos", null, "Leyendo maestro consolidado...");
+      
+      try {
+        const response = await fetch('/dian_vs_erp/api/dian');
+        const datos = await response.json();
+        
+        hideProgress();
+        
+        if (Array.isArray(datos)) {
+          if(table) {
+            table.setData(datos);
+          } else {
+            inicializarTabla(datos);
+          }
+          actualizarContador();
+        } else {
+          console.error('Error en API:', datos.error);
+          alert("❌ " + (datos.error || "Error al cargar datos"));
+        }
+        
+      } catch (error) {
+        hideProgress();
+        console.error('Error cargando datos:', error);
+        alert("❌ Error de conexión: " + error.message);
+      }
+    }
+
+    function inicializarTabla(datos) {
+      table = new Tabulator("#tablaFacturas", {
+        data: datos,
+        selectable: true,
+        layout: "fitData",
+        pagination: "local",
+        paginationSize: 100,
+        columns: [
+          {formatter:"rowSelection", titleFormatter:"rowSelection", hozAlign:"center", headerSort:false, width:40},
+          {title:"NIT Emisor", field:"nit_emisor", width:120},
+          {title:"Nombre Emisor", field:"nombre_emisor", width:250},
+          {title:"Prefijo", field:"prefijo", width:80},
+          {title:"Folio", field:"folio", width:100},
+          {title:"Fecha Emisión", field:"fecha_emision", width:120},
+          {title:"Valor", field:"valor", width:120, formatter:"money", hozAlign:"right"},
+          {title:"Estado Contable", field:"estado_contable", width:130},
+          {title:"Módulo", field:"modulo", width:100},
+          {title:"Días", field:"dias_desde_emision", width:80, hozAlign:"center"},
+          {title:"CUFE", field:"cufe", width:200, formatter:function(cell){
+            const val = cell.getValue();
+            return val ? val.substring(0, 20) + "..." : "";
+          }}
+        ]
+      });
+
+      table.on("rowSelectionChanged", actualizarContador);
+    }
+
+    function actualizarContador(){
+      if(table) {
+        const selected = table.getSelectedData();
+        document.getElementById("contadorSeleccionados").textContent = `${selected.length} seleccionadas`;
+      }
+    }
+
+    function filtrarTabla(){
+      const buscar = document.getElementById("searchInput").value;
+      if(table) {
+        if(buscar) {
+          table.setFilter([
+            {field:"nit_emisor", type:"like", value:buscar},
+            {field:"nombre_emisor", type:"like", value:buscar},
+            {field:"prefijo", type:"like", value:buscar},
+            {field:"folio", type:"like", value:buscar}
+          ], "or");
+        } else {
+          table.clearFilter();
+        }
+      }
+    }
+
+    // ===== EXPORTAR SELECCIONADAS =====
+    // Event listener para el botón de exportar
+    document.getElementById("exportBtn").addEventListener("click", function(){
+      if(!table) {
+        alert("⚠️ La tabla aún no está cargada. Por favor espera.");
+        return;
+      }
+      
+      const seleccionadas = table.getSelectedData();
+      
+      if(seleccionadas.length === 0) {
+        alert("⚠️ No has seleccionado ninguna factura.\n\nPor favor, marca las casillas de las facturas que deseas exportar.");
+        return;
+      }
+      
+      console.log(`Exportando ${seleccionadas.length} facturas seleccionadas...`);
+      table.download("xlsx", "DIAN_vs_ERP_Seleccionadas.xlsx", {sheetName:"Seleccionadas"});
+    });
+
+    // Cargar datos al inicializar
+    document.addEventListener('DOMContentLoaded', cargarDatos);
+  </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+</body>
+</html>

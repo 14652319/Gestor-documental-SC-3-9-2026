@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revisar Documentos - {{ radicado }}</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <style>
+        /* Tooltips personalizados para observaciones */
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip-text {
+            visibility: hidden;
+            background-color: #1f2937;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 0.75rem;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            min-width: 250px;
+            max-width: 400px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            font-size: 0.875rem;
+            line-height: 1.5;
+            opacity: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+        
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1f2937 transparent transparent transparent;
+        }
+        
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER FIJO -->
+    <header class="header-fijo">
+        <div>
+            <h1>
+                <span class="logo">🏢</span>
+                Supertiendas Cañaveral
+            </h1>
+            <div class="breadcrumb">
+                👥 Terceros <span>›</span> 📋 Radicados <span>›</span> 📄 Revisar Documentos
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <!-- Usuario Logueado -->
+            <div style="display: flex; align-items: center; gap: 0.5rem; background-color: #f8f9fa; padding: 0.5rem 1rem; border-radius: 0.375rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" style="height: 1.25rem; width: 1.25rem; color: #6c757d;" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                <span style="font-size: 0.875rem; font-weight: 700; color: #166534;">{{ session['usuario'] | upper }}</span>
+            </div>
+            <button class="btn btn-secondary" onclick="window.location.href='/dashboard'">
+                🏠 Menu Principal
+            </button>
+            <button class="btn btn-primary" onclick="volverALista()">
+                ← Volver a Lista
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="contenedor-principal">
+        <!-- INFO DEL RADICADO + BOTONES GLOBALES -->
+        <div class="tarjeta">
+            <div class="tarjeta-header">
+                <h2>📋 Radicado: <span id="numero-radicado">{{ radicado }}</span></h2>
+            </div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
+                <div>
+                    <strong>NIT:</strong>
+                    <span id="nit-proveedor">-</span>
+                </div>
+                <div>
+                    <strong>Nombre:</strong>
+                    <span id="nombre-proveedor">-</span>
+                </div>
+                <div>
+                    <strong>Total Documentos:</strong>
+                    <span id="total-documentos">0</span>
+                </div>
+                <div>
+                    <strong>Aprobados:</strong>
+                    <span id="documentos-aprobados" style="color: #10b981; font-weight: 600;">0</span>
+                </div>
+            </div>
+            
+            <!-- BOTONES GLOBALES (se activan cuando todos tienen estado) -->
+            <div id="contenedor-botones-globales" style="display: none; padding-top: 1.5rem; border-top: 2px solid #e5e7eb;">
+                <div class="alerta alerta-info" id="alerta-decision" style="margin-bottom: 1rem;">
+                    <span>ℹ️</span>
+                    <strong>Todos los documentos tienen estado asignado. Ahora puedes decidir el estado final del radicado:</strong>
+                </div>
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button class="btn btn-success" onclick="abrirModalDecision('aprobado')" title="Aprobar radicado completo">
+                        ✅ Aprobar Radicado
+                    </button>
+                    <button class="btn btn-warning" onclick="abrirModalDecision('aprobado_condicionado')" title="Aprobar con condiciones">
+                        ⚠️ Aprobar Condicionado
+                    </button>
+                    <button class="btn btn-danger" onclick="abrirModalDecision('rechazado')" title="Rechazar radicado">
+                        ❌ Rechazar Radicado
+                    </button>
+                </div>
+                
+                <!-- Botón Crear Tercero (aparece después de asignar estado final) -->
+                <div id="contenedor-crear-tercero" style="display: none; margin-top: 1.5rem;">
+                    <div class="alerta alerta-success" style="margin-bottom: 1.5rem;">
+                        <span>✅</span>
+                        <strong>Estado del radicado actualizado correctamente.</strong> 
+                        Ahora puedes crear el tercero en el sistema.
+                    </div>
+                    <button class="btn btn-primary" onclick="irACrearTercero()" 
+                            style="font-size: 1.1rem; padding: 0.75rem 2rem;">
+                        👤 Crear Tercero
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ALERTAS -->
+        <div id="contenedor-alertas"></div>
+
+        <!-- LOADING -->
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <p>Cargando documentos...</p>
+        </div>
+
+        <!-- GRID DE DOCUMENTOS Y VISOR -->
+        <div class="grid-2col" id="contenedor-documentos" style="display: none;">
+            <!-- LISTA DE DOCUMENTOS -->
+            <div class="tarjeta" id="panel-documentos">
+                <div class="tarjeta-header">
+                    <h2>📄 Documentos a Revisar</h2>
+                </div>
+                <div id="lista-documentos">
+                    <!-- Se llena con JavaScript -->
+                </div>
+            </div>
+
+            <!-- DIVISOR REDIMENSIONABLE -->
+            <div class="resizer" id="resizer"></div>
+
+            <!-- VISOR DE PDF -->
+            <div class="tarjeta" id="panel-visor">
+                <div class="tarjeta-header">
+                    <h2>👁️ Visualizador de Documento</h2>
+                </div>
+                <div id="visor-pdf" class="pdf-viewer">
+                    <div style="display: flex; align-items: center; justify-content: center; height: 100%; color: #6b7280;">
+                        <div style="text-align: center;">
+                            <p style="font-size: 3rem; margin-bottom: 1rem;">📄</p>
+                            <p>Selecciona un documento para visualizarlo</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PARA DECISIñ“N FINAL DEL RADICADO -->
+    <div id="modal-decision" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 id="modal-titulo">Decisión del Radicado</h3>
+                <button class="modal-close" onclick="cerrarModalDecision()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="alerta" id="modal-alerta" style="display: none; margin-bottom: 1rem;">
+                    <span>š ï¸</span>
+                    <span id="modal-mensaje-alerta"></span>
+                </div>
+                
+                <!-- Observaciones -->
+                <div style="margin-bottom: 1rem;">
+                    <label for="observacion-global" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">
+                        Observaciones: <span id="observacion-requerida" style="color: #ef4444;"></span>
+                    </label>
+                    <textarea 
+                        id="observacion-global" 
+                        rows="5" 
+                        placeholder="Escribe las observaciones para el proveedor..."
+                        style="width: 100%; padding: 0.75rem; border: 2px solid #e5e7eb; border-radius: 6px; font-size: 0.95rem; resize: vertical;">
+                    </textarea>
+                </div>
+                
+                <!-- Checkbox enviar correo -->
+                <div style="margin-bottom: 1.5rem;">
+                    <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+                        <input type="checkbox" id="enviar-correo-proveedor" checked style="width: 18px; height: 18px; cursor: pointer;">
+                        <span>📧 Enviar confirmación por correo electrónico al proveedor</span>
+                    </label>
+                </div>
+                
+                <!-- Botones de acción -->
+                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                    <button class="btn btn-secondary" onclick="cerrarModalDecision()">
+                        Cancelar
+                    </button>
+                    <button id="btn-confirmar-decision" class="btn" onclick="confirmarDecisionRadicado()">
+                        Confirmar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== VARIABLES GLOBALES ====================
+        const radicado = '{{ radicado }}';
+        let documentos = [];
+        let decisionActual = null;  // 'aprobado', 'rechazado', 'aprobado_condicionado'
+        let documentoActual = null;
+        let estadoRadicado = null;  // Estado final del radicado (si ya existe)
+
+        // ==================== CARGAR DOCUMENTOS ====================
+        async function cargarDocumentos() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('contenedor-documentos').style.display = 'none';
+                
+                const response = await fetch(`/sagrilaft/api/radicados/${radicado}/documentos`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    documentos = data.documentos;
+                    estadoRadicado = data.estado_radicado;  // Guardar estado del radicado
+                    
+                    document.getElementById('nit-proveedor').textContent = data.nit;
+                    document.getElementById('nombre-proveedor').textContent = data.nombre;
+                    document.getElementById('total-documentos').textContent = documentos.length;
+                    
+                    renderizarDocumentos();
+                    verificarTodosAprobados();
+                    verificarEstadoFinalExistente();  // Verificar si ya tiene estado final
+                    
+                    document.getElementById('loading').style.display = 'none';
+                    document.getElementById('contenedor-documentos').style.display = 'grid';
+                } else {
+                    mostrarAlerta('error', 'Error al cargar documentos: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('error', 'Error de conexiñ³n con el servidor');
+            }
+        }
+
+        // ==================== RENDERIZAR DOCUMENTOS ====================
+        function renderizarDocumentos() {
+            const contenedor = document.getElementById('lista-documentos');
+            contenedor.innerHTML = '';
+            
+            documentos.forEach(doc => {
+                const item = document.createElement('div');
+                item.className = `documento-item ${doc.estado}`;
+                item.id = `doc-${doc.id}`;
+                
+                // Badge de estado
+                let estadoBadge = '';
+                
+                // 🔍 DEBUG: Mostrar observación en consola
+                if (doc.observacion) {
+                    console.log(`📄 ${doc.tipo_documento} (${doc.estado}): "${doc.observacion}"`);
+                }
+                
+                // Crear badge con o sin tooltip según tenga observación
+                if (doc.estado === 'aprobado') {
+                    if (doc.observacion && doc.observacion.trim() !== '') {
+                        estadoBadge = `
+                            <div class="tooltip-container">
+                                <span class="badge badge-aprobado">✅ Aprobado ⓘ</span>
+                                <span class="tooltip-text">${doc.observacion}</span>
+                            </div>
+                        `;
+                    } else {
+                        estadoBadge = '<span class="badge badge-aprobado">✅ Aprobado</span>';
+                    }
+                } else if (doc.estado === 'rechazado') {
+                    if (doc.observacion && doc.observacion.trim() !== '') {
+                        estadoBadge = `
+                            <div class="tooltip-container">
+                                <span class="badge badge-rechazado">❌ Rechazado ⓘ</span>
+                                <span class="tooltip-text">Motivo: ${doc.observacion}</span>
+                            </div>
+                        `;
+                    } else {
+                        estadoBadge = '<span class="badge badge-rechazado">❌ Rechazado</span>';
+                    }
+                } else if (doc.estado === 'aprobado_condicionado') {
+                    if (doc.observacion && doc.observacion.trim() !== '') {
+                        estadoBadge = `
+                            <div class="tooltip-container">
+                                <span class="badge badge-condicionado">⚠️ Condicionado ⓘ</span>
+                                <span class="tooltip-text">Condiciones: ${doc.observacion}</span>
+                            </div>
+                        `;
+                    } else {
+                        estadoBadge = '<span class="badge badge-condicionado">⚠️ Condicionado</span>';
+                    }
+                } else {
+                    estadoBadge = '<span class="badge badge-pendiente">⏳ Pendiente</span>';
+                }
+                
+                item.innerHTML = `
+                    <div class="documento-header">
+                        <div>
+                            <div class="documento-nombre">${doc.tipo_documento}</div>
+                            <div style="font-size: 0.85rem; color: #6b7280; margin-top: 0.25rem;">
+                                ${doc.nombre_archivo}
+                            </div>
+                        </div>
+                        <div>${estadoBadge}</div>
+                    </div>
+                    
+                    <div class="documento-actions">
+                        <button class="btn btn-primary btn-small" onclick="visualizarDocumento(${doc.id}, '${doc.nombre_archivo}')">
+                            👁️ Visualizar
+                        </button>
+                        <button class="btn btn-success btn-small" onclick="aprobarDocumento(${doc.id})">
+                            ✅ Aprobar
+                        </button>
+                        <button class="btn btn-warning btn-small" onclick="toggleObservacion(${doc.id})">
+                            ⚠️ Condicionar
+                        </button>
+                        <button class="btn btn-danger btn-small" onclick="rechazarDocumento(${doc.id})">
+                            ❌ Rechazar
+                        </button>
+                    </div>
+                    
+                    <textarea 
+                        id="obs-${doc.id}" 
+                        class="observacion-input" 
+                        placeholder="Escriba la observación o condición aquí..."
+                        rows="3"
+                    >${doc.observacion || ''}</textarea>
+                `;
+                
+                contenedor.appendChild(item);
+            });
+        }
+
+        // ==================== VISUALIZAR DOCUMENTO ====================
+        function visualizarDocumento(docId, nombreArchivo) {
+            documentoActual = docId;
+            const visor = document.getElementById('visor-pdf');
+            visor.innerHTML = `
+                <iframe src="/sagrilaft/api/documentos/${docId}/visualizar#toolbar=1&navpanes=1&view=FitH" 
+                        title="${nombreArchivo}"></iframe>
+            `;
+        }
+
+        // ==================== APROBAR DOCUMENTO ====================
+        async function aprobarDocumento(docId) {
+            try {
+                const response = await fetch(`/sagrilaft/api/documentos/${docId}/estado`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ estado: 'aprobado' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Actualizar estado local
+                    const doc = documentos.find(d => d.id === docId);
+                    if (doc) {
+                        doc.estado = 'aprobado';
+                        doc.observacion = '';
+                    }
+                    
+                    renderizarDocumentos();
+                    verificarTodosAprobados();
+                    mostrarAlerta('success', 'Documento aprobado correctamente');
+                } else {
+                    mostrarAlerta('error', 'Error al aprobar documento');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('error', 'Error de conexión');
+            }
+        }
+
+        // ==================== RECHAZAR DOCUMENTO ====================
+        async function rechazarDocumento(docId) {
+            // Solicitar motivo del rechazo
+            const motivo = prompt('¿Por qué rechazas este documento? (Requerido para el proveedor):');
+            
+            if (!motivo || motivo.trim() === '') {
+                alert('Debes especificar el motivo del rechazo.');
+                return;
+            }
+            
+            if (!confirm(`¿Confirmar rechazo del documento?\nMotivo: ${motivo}`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/sagrilaft/api/documentos/${docId}/estado`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        estado: 'rechazado',
+                        observacion: motivo.trim()
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const doc = documentos.find(d => d.id === docId);
+                    if (doc) {
+                        doc.estado = 'rechazado';
+                        doc.observacion = motivo.trim();
+                    }
+                    
+                    renderizarDocumentos();
+                    verificarTodosAprobados();
+                    mostrarAlerta('warning', 'Documento rechazado');
+                } else {
+                    mostrarAlerta('error', 'Error al rechazar documento');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('error', 'Error de conexión');
+            }
+        }
+
+        // ==================== TOGGLE OBSERVACIÓN (DEPRECADO) ====================
+        // Esta funciñ³n ya no se usa, ahora aprobarCondicionado usa prompt directamente
+        function toggleObservacion(docId) {
+            // Llamar directamente a aprobarCondicionado
+            aprobarCondicionado(docId);
+        }
+
+        // ==================== APROBAR CONDICIONADO ====================
+        async function aprobarCondicionado(docId, observacion) {
+            // Si no viene observación, pedirla con prompt
+            if (!observacion) {
+                observacion = prompt('Aprobado Condicionado: ¿Qué ajustes se requieren? (Requerido):');
+                
+                if (!observacion || observacion.trim() === '') {
+                    alert('Debes especificar los ajustes requeridos.');
+                    return;
+                }
+                
+                if (!confirm(`¿Aprobar condicionado este documento?\nAjustes: ${observacion}`)) {
+                    return;
+                }
+            }
+            
+            if (!observacion.trim()) {
+                mostrarAlerta('warning', 'Debe escribir una observación para aprobar condicionado');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/sagrilaft/api/documentos/${docId}/estado`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        estado: 'aprobado_condicionado',
+                        observacion: observacion 
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const doc = documentos.find(d => d.id === docId);
+                    if (doc) {
+                        doc.estado = 'aprobado_condicionado';
+                        doc.observacion = observacion;
+                    }
+                    
+                    renderizarDocumentos();
+                    verificarTodosAprobados();
+                    mostrarAlerta('info', 'Documento aprobado condicionado');
+                } else {
+                    mostrarAlerta('error', 'Error al guardar estado');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('error', 'Error de conexión');
+            }
+        }
+
+        // ==================== VERIFICAR TODOS CON ESTADO ====================
+        function verificarTodosAprobados() {
+            const aprobados = documentos.filter(d => d.estado === 'aprobado').length;
+            document.getElementById('documentos-aprobados').textContent = aprobados;
+            
+            // Verificar si TODOS tienen algñºn estado asignado (no pendientes)
+            const todosConEstado = documentos.every(d => d.estado !== 'pendiente');
+            const contenedorBotonesGlobales = document.getElementById('contenedor-botones-globales');
+            
+            if (todosConEstado && documentos.length > 0) {
+                // Mostrar botones globales para decisión final
+                contenedorBotonesGlobales.style.display = 'block';
+            } else {
+                contenedorBotonesGlobales.style.display = 'none';
+            }
+        }
+        
+        // ==================== VERIFICAR ESTADO FINAL EXISTENTE ====================
+        function verificarEstadoFinalExistente() {
+            // Si el radicado YA tiene un estado final (aprobado, rechazado, aprobado_condicionado)
+            const estadosFinales = ['aprobado', 'rechazado', 'aprobado_condicionado'];
+            
+            if (estadoRadicado && estadosFinales.includes(estadoRadicado)) {
+                // Ocultar botones de decisión
+                const alertaDecision = document.getElementById('alerta-decision');
+                if (alertaDecision) {
+                    alertaDecision.style.display = 'none';
+                }
+                
+                // Ocultar botones globales de decisión
+                const botonesDecision = document.querySelectorAll('#contenedor-botones-globales > div:first-child > button');
+                botonesDecision.forEach(btn => {
+                    btn.style.display = 'none';
+                });
+                
+                // Mostrar botón Crear Tercero automáticamente
+                const btnCrearTercero = document.getElementById('contenedor-crear-tercero');
+                if (btnCrearTercero) {
+                    btnCrearTercero.style.display = 'block';
+                }
+                
+                console.log(`✅ Radicado ya tiene estado final: ${estadoRadicado}. Botón 'Crear Tercero' mostrado automáticamente.`);
+            }
+        }
+
+        // ==================== CREAR TERCERO ====================
+        async function crearTercero() {
+            if (!confirm('¿Todos los documentos estñ¡n correctos? Se crearñ¡ el tercero en el sistema.')) {
+                return;
+            }
+            
+            try {
+                // Actualizar estado del radicado a aprobado
+                const response = await fetch(`/sagrilaft/api/radicados/${radicado}/estado`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ estado: 'aprobado' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarAlerta('success', 'Radicado aprobado. Redirigiendo a Crear Tercero...');
+                    
+                    // Esperar 2 segundos y redirigir
+                    setTimeout(() => {
+                        // TODO: Cambiar esta URL por la real del módulo de terceros
+                        window.location.href = '/terceros/crear';
+                    }, 2000);
+                } else {
+                    mostrarAlerta('error', 'Error al aprobar radicado');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('error', 'Error de conexión');
+            }
+        }
+
+        // ==================== VOLVER A LISTA ====================
+        function volverALista() {
+            window.location.href = '/sagrilaft/radicados';
+        }
+
+        // ==================== MODAL DE DECISIñ“N FINAL ====================
+        function abrirModalDecision(decision) {
+            decisionActual = decision;
+            const modal = document.getElementById('modal-decision');
+            const titulo = document.getElementById('modal-titulo');
+            const btnConfirmar = document.getElementById('btn-confirmar-decision');
+            const observacionRequerida = document.getElementById('observacion-requerida');
+            const alertaDiv = document.getElementById('modal-alerta');
+            const mensajeAlerta = document.getElementById('modal-mensaje-alerta');
+            
+            // Configurar título y botón según decisión
+            if (decision === 'aprobado') {
+                titulo.textContent = '✅ Aprobar Radicado';
+                btnConfirmar.className = 'btn btn-success';
+                btnConfirmar.textContent = 'Aprobar Radicado';
+                observacionRequerida.textContent = '(opcional)';
+                alertaDiv.style.display = 'none';
+            } else if (decision === 'rechazado') {
+                titulo.textContent = '❌ Rechazar Radicado';
+                btnConfirmar.className = 'btn btn-danger';
+                btnConfirmar.textContent = 'Rechazar Radicado';
+                observacionRequerida.textContent = '(requerido)';
+                alertaDiv.style.display = 'block';
+                alertaDiv.className = 'alerta alerta-error';
+                mensajeAlerta.textContent = '⚠️ Debes explicar el motivo del rechazo para que el proveedor pueda corregir.';
+            } else if (decision === 'aprobado_condicionado') {
+                titulo.textContent = '⚠️ Aprobar Condicionado';
+                btnConfirmar.className = 'btn btn-warning';
+                btnConfirmar.textContent = 'Aprobar Condicionado';
+                observacionRequerida.textContent = '(requerido)';
+                alertaDiv.style.display = 'block';
+                alertaDiv.className = 'alerta alerta-warning';
+                mensajeAlerta.textContent = '⚠️ Debes especificar las condiciones que debe cumplir el proveedor.';
+            }
+            
+            // Limpiar campo de observación
+            document.getElementById('observacion-global').value = '';
+            
+            // Mostrar modal
+            modal.style.display = 'flex';
+        }
+
+        function cerrarModalDecision() {
+            document.getElementById('modal-decision').style.display = 'none';
+            decisionActual = null;
+        }
+
+        async function confirmarDecisionRadicado() {
+            const observacion = document.getElementById('observacion-global').value.trim();
+            const enviarCorreo = document.getElementById('enviar-correo-proveedor').checked;
+            
+            // Validar observación requerida
+            if ((decisionActual === 'rechazado' || decisionActual === 'aprobado_condicionado') && !observacion) {
+                alert(`Las observaciones son requeridas para ${decisionActual === 'rechazado' ? 'rechazar' : 'aprobar condicionado'} el radicado.`);
+                return;
+            }
+            
+            // Confirmar acción
+            const mensajes = {
+                aprobado: '¿Confirmar aprobación del radicado? Se creará el tercero en el sistema.',
+                rechazado: '¿Confirmar rechazo del radicado? El proveedor deberá volver a registrarse.',
+                aprobado_condicionado: '¿Confirmar aprobación condicionada? El proveedor recibirá las observaciones.'
+            };
+            
+            if (!confirm(mensajes[decisionActual])) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/sagrilaft/api/radicados/${radicado}/estado`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        estado: decisionActual,
+                        observacion: observacion,
+                        enviar_correo: enviarCorreo,
+                        usuario: 'Administrador'  // TODO: obtener usuario de sesiñ³n
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    cerrarModalDecision();
+                    
+                    let mensaje = `Radicado ${decisionActual === 'aprobado' ? 'aprobado' : decisionActual === 'rechazado' ? 'rechazado' : 'aprobado con condiciones'}`;
+                    if (data.correo_enviado) {
+                        mensaje += '. Correo enviado al proveedor.';
+                    }
+                    
+                    mostrarAlerta('success', mensaje);
+                    
+                    // Ocultar botones de decisión y mostrar botón Crear Tercero
+                    const alertaDecision = document.getElementById('alerta-decision');
+                    if (alertaDecision) {
+                        alertaDecision.style.display = 'none';
+                    }
+                    
+                    const btnCrearTercero = document.getElementById('contenedor-crear-tercero');
+                    if (btnCrearTercero) {
+                        btnCrearTercero.style.display = 'block';
+                    }
+                    
+                    // NO redirigir automáticamente - dejar que usuario use botón Crear Tercero
+                } else {
+                    mostrarAlerta('error', 'Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('error', 'Error de conexiñ³n');
+            }
+        }
+
+        // ==================== MOSTRAR ALERTAS ====================
+        function mostrarAlerta(tipo, mensaje) {
+            const contenedor = document.getElementById('contenedor-alertas');
+            const iconos = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+            
+            const alerta = document.createElement('div');
+            alerta.className = `alerta alerta-${tipo}`;
+            alerta.innerHTML = `
+                <span style="font-size: 1.5rem;">${iconos[tipo]}</span>
+                <span>${mensaje}</span>
+            `;
+            
+            contenedor.appendChild(alerta);
+            
+            setTimeout(() => {
+                alerta.remove();
+            }, 5000);
+        }
+
+        // ==================== CREAR TERCERO ====================
+        function irACrearTercero() {
+            const radicado = window.location.pathname.split('/').pop();
+            window.location.href = `http://127.0.0.1:8099/terceros/crear?radicado=${radicado}`;
+        }
+        
+        // ==================== DIVISOR REDIMENSIONABLE ====================
+        function initResizer() {
+            const resizer = document.getElementById('resizer');
+            const panelIzq = document.getElementById('panel-documentos');
+            const panelDer = document.getElementById('panel-visor');
+            const contenedor = document.getElementById('contenedor-documentos');
+            
+            if (!resizer || !panelIzq || !panelDer || !contenedor) return;
+            
+            let isResizing = false;
+            let startX = 0;
+            let startWidthIzq = 0;
+            
+            resizer.addEventListener('mousedown', (e) => {
+                isResizing = true;
+                startX = e.clientX;
+                startWidthIzq = panelIzq.offsetWidth;
+                
+                // Cambiar cursor globalmente
+                document.body.style.cursor = 'col-resize';
+                document.body.style.userSelect = 'none';
+                
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isResizing) return;
+                
+                const deltaX = e.clientX - startX;
+                const nuevoAnchoIzq = startWidthIzq + deltaX;
+                const anchoContenedor = contenedor.offsetWidth;
+                
+                // Limites: minimo 25%, maximo 75%
+                const minWidth = anchoContenedor * 0.25;
+                const maxWidth = anchoContenedor * 0.75;
+                
+                if (nuevoAnchoIzq >= minWidth && nuevoAnchoIzq <= maxWidth) {
+                    const porcentaje = (nuevoAnchoIzq / anchoContenedor) * 100;
+                    panelIzq.style.flex = `0 0 ${porcentaje}%`;
+                }
+            });
+            
+            document.addEventListener('mouseup', () => {
+                if (isResizing) {
+                    isResizing = false;
+                    document.body.style.cursor = '';
+                    document.body.style.userSelect = '';
+                }
+            });
+        }
+        
+        // ==================== INICIALIZAR ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarDocumentos();
+            initResizer();  // Inicializar divisor redimensionable
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+

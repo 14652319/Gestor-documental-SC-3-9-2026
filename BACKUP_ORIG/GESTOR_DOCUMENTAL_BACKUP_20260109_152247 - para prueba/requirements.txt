@@ -1,0 +1,83 @@
+# =============================================
+# ?? REQUIREMENTS.TXT - GESTOR DOCUMENTAL
+# =============================================
+# Generado: 5 de Febrero 2025
+# Python: 3.8+
+
+# ===== CORE FRAMEWORK =====
+flask==3.0.0
+werkzeug==3.0.1
+
+# ===== BASE DE DATOS =====
+flask_sqlalchemy==3.1.1
+psycopg2-binary==2.9.9
+sqlalchemy==2.0.23
+
+# ===== SEGURIDAD =====
+flask_bcrypt==1.0.1
+flask_cors==4.0.0
+
+# ===== EMAIL =====
+flask_mail==0.9.1
+
+# ===== VARIABLES DE ENTORNO =====
+python-dotenv==1.0.0
+
+# ===== HTTP REQUESTS =====
+requests==2.31.0
+
+# ===== EXCEL Y ARCHIVOS =====
+openpyxl==3.1.2
+pandas==2.1.3
+xlsxwriter==3.1.9
+
+# ===== PDF =====
+fpdf2==2.7.6
+reportlab==4.0.7
+
+# ===== SERVIDOR DE PRODUCCI�N =====
+gunicorn==21.2.0
+
+# ===== PROGRAMACI�N DE TAREAS =====
+schedule==1.2.0
+
+# ===== UTILIDADES DE FECHA Y HORA =====
+python-dateutil==2.8.2
+
+# ===== PROCESAMIENTO DE DATOS =====
+numpy==1.24.3
+polars==0.20.2  # Para el módulo DIAN vs ERP - Procesamiento de alto rendimiento
+
+# ===== MONITOREO Y SISTEMA =====
+psutil==5.9.6
+
+# ===== LOGGING AVANZADO =====
+colorlog==6.8.0
+
+# ===== VALIDACI�N DE DATOS =====
+email-validator==2.1.0
+
+# ===== TIMEZONE =====
+pytz==2023.3
+
+# ===== TESTING (OPCIONAL) =====
+pytest==7.4.3
+pytest-flask==1.3.0
+
+# ===== FORMATOS DE SERIALIZACI�N =====
+python-multipart==0.0.6
+
+# ===== PDF PROCESSING =====
+PyPDF2==3.0.1
+
+# ===== CACHÉ (OPCIONAL) =====
+flask-caching==2.1.0
+
+# ===== RATE LIMITING (OPCIONAL - Seguridad Futura) =====
+flask-limiter==3.5.0
+
+# ===== NOTAS =====
+# - Mantener versiones espec�ficas para estabilidad
+# - Actualizar solo despu�s de testing
+# - Ejecutar: pip install -r requirements.txt
+# - Para actualizar: pip install --upgrade -r requirements.txt

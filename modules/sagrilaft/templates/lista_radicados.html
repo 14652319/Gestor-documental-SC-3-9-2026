@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Radicados Pendientes - Supertiendas Cañaveral</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <style>
+        /* 💡 ESTILOS PARA TOOLTIPS DE OBSERVACIONES */
+        .tooltip-container {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+        
+        .tooltip-text {
+            visibility: hidden;
+            background-color: #1f2937;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 12px 16px;
+            position: absolute;
+            z-index: 9999;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 320px;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        }
+        
+        .tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1f2937 transparent transparent transparent;
+        }
+        
+        .tooltip-container:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Para badges con icono info */
+        .badge {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER FIJO -->
+    <header class="header-fijo">
+        <div>
+            <h1>
+                <span class="logo">🏢</span>
+                Supertiendas Cañaveral
+            </h1>
+            <div class="breadcrumb">
+                👥 Terceros <span>›</span> 📋 Radicados Pendientes
+            </div>
+        </div>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <!-- Usuario Logueado -->
+            <div style="display: flex; align-items: center; gap: 0.5rem; background-color: #f8f9fa; padding: 0.5rem 1rem; border-radius: 0.375rem;">
+                <svg xmlns="http://www.w3.org/2000/svg" style="height: 1.25rem; width: 1.25rem; color: #6c757d;" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                <span style="font-size: 0.875rem; font-weight: 700; color: #166534;">{{ session['usuario'] | upper }}</span>
+            </div>
+            <button class="btn btn-secondary" onclick="window.location.href='/dashboard'">
+                ← Volver al Menu Principal
+            </button>
+            <button class="btn btn-primary" onclick="location.reload()">
+                🔄 Actualizar
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <div class="contenedor-principal">
+        <!-- TARJETA DE ESTADÍSTICAS -->
+        <div class="tarjeta">
+            <div class="tarjeta-header">
+                <h2>📊 Resumen de Radicados</h2>
+                <div class="tarjeta-stats">
+                    <div class="stat">
+                        <strong id="total-radicados">0</strong>
+                        <span>Total</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="pendientes">0</strong>
+                        <span>Pendientes</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="aprobados">0</strong>
+                        <span>Aprobados</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="condicionados">0</strong>
+                        <span>Condicionados</span>
+                    </div>
+                    <div class="stat">
+                        <strong id="rechazados">0</strong>
+                        <span>Rechazados</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ALERTAS -->
+        <div id="contenedor-alertas"></div>
+
+        <!-- LOADING -->
+        <div id="loading" class="loading">
+            <div class="loading-spinner"></div>
+            <p>Cargando radicados...</p>
+        </div>
+
+        <!-- TARJETA DE TABLA -->
+        <div class="tarjeta" id="tarjeta-tabla" style="display: none;">
+            <div class="tarjeta-header">
+                <h2>📋 Lista de Radicados (Ordenados: Más Antiguo → Más Reciente)</h2>
+                <div style="display: flex; gap: 1rem;">
+                    <button id="btn-exportar-excel" class="btn btn-success" onclick="exportarExcel()" style="display: none;" title="Exportar selección a Excel">
+                        📊 Exportar Excel (<span id="count-seleccionados">0</span>)
+                    </button>
+                    <button id="btn-descargar-docs" class="btn btn-primary" onclick="descargarDocumentos()" style="display: none;" title="Descargar carpeta con documentos">
+                        📦 Descargar Documentos
+                    </button>
+                </div>
+            </div>
+            
+            <div style="overflow-x: auto;">
+                <table class="tabla-radicados">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px; text-align: center;">
+                                <input type="checkbox" id="check-all" onchange="toggleSelectAll()" title="Seleccionar todos">
+                            </th>
+                            <th style="cursor: pointer;" onclick="ordenar('fecha')" title="Click para ordenar">Fecha <span id="sort-fecha">⬍</span></th>
+                            <th style="cursor: pointer;" onclick="ordenar('radicado')" title="Click para ordenar">RAD <span id="sort-radicado">⬍</span></th>
+                            <th style="cursor: pointer;" onclick="ordenar('nit')" title="Click para ordenar">NIT <span id="sort-nit">⬍</span></th>
+                            <th style="cursor: pointer;" onclick="ordenar('nombre')" title="Click para ordenar">Nombre / Razón Social <span id="sort-nombre">⬍</span></th>
+                            <th style="cursor: pointer;" onclick="ordenar('dias_desde_radicado')" title="Click para ordenar">Días Desde Radicado <span id="sort-dias_desde_radicado">⬍</span></th>
+                            <th style="cursor: pointer;" onclick="ordenar('estado')" title="Click para ordenar">Estado <span id="sort-estado">⬍</span></th>
+                            <th style="cursor: pointer;" onclick="ordenar('proxima_actualizacion')" title="Click para ordenar">Próxima Actualización <span id="sort-proxima_actualizacion">⬍</span></th>
+                            <th style="cursor: pointer;" onclick="ordenar('dias_para_actualizacion')" title="Click para ordenar">Días Restantes <span id="sort-dias_para_actualizacion">⬍</span></th>
+                            <th>Acciones</th>
+                        </tr>
+                        <tr class="filtros-row">
+                            <th></th>
+                            <th><input type="text" id="filtro-fecha" class="filtro-input" placeholder="Filtrar..." onkeyup="aplicarFiltros()"></th>
+                            <th><input type="text" id="filtro-radicado" class="filtro-input" placeholder="Filtrar..." onkeyup="aplicarFiltros()"></th>
+                            <th><input type="text" id="filtro-nit" class="filtro-input" placeholder="Filtrar..." onkeyup="aplicarFiltros()"></th>
+                            <th><input type="text" id="filtro-nombre" class="filtro-input" placeholder="Filtrar..." onkeyup="aplicarFiltros()"></th>
+                            <th>
+                                <select id="filtro-dias-desde" class="filtro-input" onchange="aplicarFiltros()">
+                                    <option value="">Todos</option>
+                                    <option value="reciente">🟢 Reciente (< 30 días)</option>
+                                    <option value="medio">🟡 Medio (30-90 días)</option>
+                                    <option value="antiguo">🔴 Antiguo (> 90 días)</option>
+                                </select>
+                            </th>
+                            <th>
+                                <select id="filtro-estado" class="filtro-input" onchange="aplicarFiltros()">
+                                    <option value="">Todos</option>
+                                    <option value="pendiente">Pendiente</option>
+                                    <option value="aprobado">Aprobado</option>
+                                    <option value="aprobado_condicionado">Condicionado</option>
+                                    <option value="rechazado">Rechazado</option>
+                                </select>
+                            </th>
+                            <th><input type="text" id="filtro-proxima-actualizacion" class="filtro-input" placeholder="Filtrar..." onkeyup="aplicarFiltros()"></th>
+                            <th>
+                                <select id="filtro-dias-restantes" class="filtro-input" onchange="aplicarFiltros()">
+                                    <option value="">Todos</option>
+                                    <option value="critico">🔴 Crítico (< 30 días)</option>
+                                    <option value="alerta">🟡 Alerta (30-90 días)</option>
+                                    <option value="normal">🟢 Normal (> 90 días)</option>
+                                </select>
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-body">
+                        <!-- Se llena con JavaScript -->
+                    </tbody>
+                </table>
+                
+                <!-- CONTROLES DE PAGINACIÓN -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding: 1rem; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb;">
+                    <!-- Selector de registros por página -->
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <label for="registros-por-pagina" style="font-weight: 600; color: #166534;">Mostrar:</label>
+                        <select id="registros-por-pagina" onchange="cambiarRegistrosPorPagina()" style="padding: 0.5rem 1rem; border: 2px solid #166534; border-radius: 6px; font-size: 1rem; font-weight: 600; background: white; cursor: pointer;">
+                            <option value="50">50 registros</option>
+                            <option value="100">100 registros</option>
+                            <option value="200">200 registros</option>
+                            <option value="500" selected>500 registros</option>
+                            <option value="1000">1000 registros</option>
+                            <option value="2000">2000 registros</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Información de página actual -->
+                    <div style="font-weight: 600; color: #374151;">
+                        <span id="info-paginacion">Mostrando 1-0 de 0 registros</span>
+                    </div>
+                    
+                    <!-- Botones de navegación -->
+                    <div style="display: flex; gap: 0.5rem;">
+                        <button id="btn-primera-pagina" onclick="irAPrimeraPagina()" style="padding: 0.5rem 1rem; border: 2px solid #166534; background: white; color: #166534; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#166534'; this.style.color='white'" onmouseout="this.style.background='white'; this.style.color='#166534'">
+                            ⏮️ Primera
+                        </button>
+                        <button id="btn-anterior" onclick="paginaAnterior()" style="padding: 0.5rem 1rem; border: 2px solid #166534; background: white; color: #166534; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#166534'; this.style.color='white'" onmouseout="this.style.background='white'; this.style.color='#166534'">
+                            ◀️ Anterior
+                        </button>
+                        <span style="padding: 0.5rem 1rem; background: #166534; color: white; border-radius: 6px; font-weight: 600; min-width: 100px; text-align: center;">
+                            Página <span id="pagina-actual">1</span> de <span id="total-paginas">1</span>
+                        </span>
+                        <button id="btn-siguiente" onclick="paginaSiguiente()" style="padding: 0.5rem 1rem; border: 2px solid #166534; background: white; color: #166534; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#166534'; this.style.color='white'" onmouseout="this.style.background='white'; this.style.color='#166534'">
+                            Siguiente ▶️
+                        </button>
+                        <button id="btn-ultima-pagina" onclick="irAUltimaPagina()" style="padding: 0.5rem 1rem; border: 2px solid #166534; background: white; color: #166534; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s;" onmouseover="this.style.background='#166534'; this.style.color='white'" onmouseout="this.style.background='white'; this.style.color='#166534'">
+                            Última ⏭️
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== VARIABLES GLOBALES ====================
+        let radicados = [];
+        let radicadosFiltrados = [];
+        let paginaActual = 1;
+        let registrosPorPagina = 500;
+
+        // ==================== CARGAR RADICADOS ====================
+        async function cargarRadicados() {
+            console.log('🔵 Iniciando carga de radicados...');
+            try {
+                const loadingEl = document.getElementById('loading');
+                const tablaEl = document.getElementById('tarjeta-tabla');
+                
+                if (loadingEl) loadingEl.style.display = 'block';
+                if (tablaEl) tablaEl.style.display = 'none';
+                
+                console.log('🔵 Llamando a API...');
+                const response = await fetch('/sagrilaft/api/radicados/pendientes');
+                console.log('🔵 Respuesta recibida:', response.status, response.ok);
+                
+                const data = await response.json();
+                console.log('🔵 Datos JSON:', data);
+                
+                if (data.success && Array.isArray(data.radicados)) {
+                    radicados = data.radicados;
+                    radicadosFiltrados = [...radicados];
+                    console.log('✅ Radicados cargados:', radicados.length);
+                    
+                    renderizarTabla();
+                    actualizarEstadisticas();
+                    
+                    if (loadingEl) loadingEl.style.display = 'none';
+                    if (tablaEl) tablaEl.style.display = 'block';
+                } else {
+                    console.error('❌ Respuesta inválida:', data);
+                    alert('Error: La respuesta del servidor no es válida');
+                }
+            } catch (error) {
+                console.error('❌ ERROR CRÍTICO:', error);
+                alert('Error de conexión: ' + error.message);
+                const loadingEl = document.getElementById('loading');
+                if (loadingEl) {
+                    loadingEl.innerHTML = '<h3 style="color:red;">❌ Error: ' + error.message + '</h3>';
+                }
+            }
+        }
+
+        // ==================== FUNCIONES DE PAGINACIÓN ====================
+        
+        function actualizarInfoPaginacion() {
+            const totalRegistros = radicadosFiltrados.length;
+            const totalPaginas = Math.ceil(totalRegistros / registrosPorPagina);
+            const inicio = (paginaActual - 1) * registrosPorPagina + 1;
+            const fin = Math.min(paginaActual * registrosPorPagina, totalRegistros);
+            
+            document.getElementById('info-paginacion').textContent = 
+                `Mostrando ${inicio}-${fin} de ${totalRegistros} registros`;
+            document.getElementById('pagina-actual').textContent = paginaActual;
+            document.getElementById('total-paginas').textContent = totalPaginas || 1;
+        }
+        
+        function actualizarBotonesPaginacion() {
+            const totalPaginas = Math.ceil(radicadosFiltrados.length / registrosPorPagina);
+            
+            document.getElementById('btn-primera-pagina').disabled = paginaActual === 1;
+            document.getElementById('btn-anterior').disabled = paginaActual === 1;
+            document.getElementById('btn-siguiente').disabled = paginaActual >= totalPaginas;
+            document.getElementById('btn-ultima-pagina').disabled = paginaActual >= totalPaginas;
+            
+            // Estilos para botones deshabilitados
+            [document.getElementById('btn-primera-pagina'),
+             document.getElementById('btn-anterior'),
+             document.getElementById('btn-siguiente'),
+             document.getElementById('btn-ultima-pagina')].forEach(btn => {
+                if (btn.disabled) {
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                } else {
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                }
+            });
+        }
+        
+        function cambiarRegistrosPorPagina() {
+            registrosPorPagina = parseInt(document.getElementById('registros-por-pagina').value);
+            paginaActual = 1;
+            renderizarTabla();
+        }
+        
+        function paginaAnterior() {
+            if (paginaActual > 1) {
+                paginaActual--;
+                renderizarTabla();
+                scrollToTop();
+            }
+        }
+        
+        function paginaSiguiente() {
+            const totalPaginas = Math.ceil(radicadosFiltrados.length / registrosPorPagina);
+            if (paginaActual < totalPaginas) {
+                paginaActual++;
+                renderizarTabla();
+                scrollToTop();
+            }
+        }
+        
+        function irAPrimeraPagina() {
+            paginaActual = 1;
+            renderizarTabla();
+            scrollToTop();
+        }
+        
+        function irAUltimaPagina() {
+            const totalPaginas = Math.ceil(radicadosFiltrados.length / registrosPorPagina);
+            paginaActual = totalPaginas;
+            renderizarTabla();
+            scrollToTop();
+        }
+        
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ==================== RENDERIZAR TABLA (CON PAGINACIÓN) ====================
+        function renderizarTabla() {
+            const tbody = document.getElementById('tabla-body');
+            tbody.innerHTML = '';
+            
+            if (radicadosFiltrados.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="10" style="text-align: center; padding: 2rem; color: #6b7280;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
+                            <strong style="font-size: 1.2rem;">No hay radicados para mostrar</strong>
+                            <p style="margin-top: 0.5rem;">Prueba ajustando los filtros</p>
+                        </td>
+                    </tr>
+                `;
+                
+                document.getElementById('info-paginacion').textContent = 'Mostrando 0-0 de 0 registros';
+                document.getElementById('pagina-actual').textContent = '1';
+                document.getElementById('total-paginas').textContent = '1';
+                return;
+            }
+            
+            // Calcular registros de la página actual
+            const inicio = (paginaActual - 1) * registrosPorPagina;
+            const fin = Math.min(inicio + registrosPorPagina, radicadosFiltrados.length);
+            const radicadosPagina = radicadosFiltrados.slice(inicio, fin);
+            
+            radicadosPagina.forEach(rad => {
+                const tr = document.createElement('tr');
+                
+                // Badge de estado
+                let badgeClass = 'badge-pendiente';
+                let estadoTexto = 'Pendiente';
+                
+                if (rad.estado === 'aprobado') {
+                    badgeClass = 'badge-aprobado';
+                    estadoTexto = 'Aprobado';
+                } else if (rad.estado === 'rechazado') {
+                    badgeClass = 'badge-rechazado';
+                    estadoTexto = 'Rechazado';
+                } else if (rad.estado === 'aprobado_condicionado') {
+                    badgeClass = 'badge-condicionado';
+                    estadoTexto = 'Aprobado Condicionado';
+                }
+                
+                // Columna de estado con tooltip si hay observación
+                let estadoHTML = `<span class="badge ${badgeClass}">${estadoTexto}</span>`;
+                
+                // Mostrar tooltip para cualquier estado que tenga observación
+                if (rad.observacion && rad.observacion.trim() !== '') {
+                    estadoHTML = `
+                        <div class="tooltip-container">
+                            <span class="badge ${badgeClass}">${estadoTexto} ⓘ</span>
+                            <span class="tooltip-text">${rad.observacion}</span>
+                        </div>
+                    `;
+                }
+                
+                // Color de días restantes
+                let colorDiasRestantes = '#6b7280';
+                if (rad.dias_para_actualizacion < 30) {
+                    colorDiasRestantes = '#ef4444'; // Rojo
+                } else if (rad.dias_para_actualizacion < 90) {
+                    colorDiasRestantes = '#f59e0b'; // Amarillo
+                } else {
+                    colorDiasRestantes = '#10b981'; // Verde
+                }
+                
+                tr.innerHTML = `
+                    <td style="text-align: center;">
+                        <input type="checkbox" class="check-rad" data-radicado="${rad.radicado}" onchange="actualizarBotones()">
+                    </td>
+                    <td>${rad.fecha_solicitud}</td>
+                    <td><strong>${rad.radicado}</strong></td>
+                    <td>${rad.nit}</td>
+                    <td>${rad.nombre}</td>
+                    <td style="text-align: center;">
+                        <strong>${rad.dias_desde_radicado}</strong> días
+                    </td>
+                    <td>${estadoHTML}</td>
+                    <td>${rad.proxima_actualizacion}</td>
+                    <td style="text-align: center; color: ${colorDiasRestantes}; font-weight: 600;">
+                        ${rad.dias_para_actualizacion} días
+                    </td>
+                    <td style="text-align: center;">
+                        <button class="btn btn-icon btn-small" 
+                                onclick="verDetalles('${rad.radicado}')" 
+                                title="Ver y revisar documentos">
+                            👁️
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+            
+            // Actualizar información de paginación
+            actualizarInfoPaginacion();
+            actualizarBotonesPaginacion();
+        }
+        
+        // ==================== FUNCIONES DE PAGINACIÓN ====================
+        
+        function actualizarInfoPaginacion() {
+            const totalRegistros = radicadosFiltrados.length;
+            const totalPaginas = Math.ceil(totalRegistros / registrosPorPagina);
+            const inicio = (paginaActual - 1) * registrosPorPagina + 1;
+            const fin = Math.min(paginaActual * registrosPorPagina, totalRegistros);
+            
+            document.getElementById('info-paginacion').textContent = 
+                `Mostrando ${inicio}-${fin} de ${totalRegistros} registros`;
+            document.getElementById('pagina-actual').textContent = paginaActual;
+            document.getElementById('total-paginas').textContent = totalPaginas || 1;
+        }
+        
+        function actualizarBotonesPaginacion() {
+            const totalPaginas = Math.ceil(radicadosFiltrados.length / registrosPorPagina);
+            
+            document.getElementById('btn-primera-pagina').disabled = paginaActual === 1;
+            document.getElementById('btn-anterior').disabled = paginaActual === 1;
+            document.getElementById('btn-siguiente').disabled = paginaActual >= totalPaginas;
+            document.getElementById('btn-ultima-pagina').disabled = paginaActual >= totalPaginas;
+            
+            // Estilos para botones deshabilitados
+            [document.getElementById('btn-primera-pagina'),
+             document.getElementById('btn-anterior'),
+             document.getElementById('btn-siguiente'),
+             document.getElementById('btn-ultima-pagina')].forEach(btn => {
+                if (btn.disabled) {
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                } else {
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                }
+            });
+        }
+        
+        function cambiarRegistrosPorPagina() {
+            registrosPorPagina = parseInt(document.getElementById('registros-por-pagina').value);
+            paginaActual = 1; // Volver a primera página
+            renderizarTabla();
+        }
+        
+        function paginaAnterior() {
+            if (paginaActual > 1) {
+                paginaActual--;
+                renderizarTabla();
+                scrollToTop();
+            }
+        }
+        
+        function paginaSiguiente() {
+            const totalPaginas = Math.ceil(radicadosFiltrados.length / registrosPorPagina);
+            if (paginaActual < totalPaginas) {
+                paginaActual++;
+                renderizarTabla();
+                scrollToTop();
+            }
+        }
+        
+        function irAPrimeraPagina() {
+            paginaActual = 1;
+            renderizarTabla();
+            scrollToTop();
+        }
+        
+        function irAUltimaPagina() {
+            const totalPaginas = Math.ceil(radicadosFiltrados.length / registrosPorPagina);
+            paginaActual = totalPaginas;
+            renderizarTabla();
+            scrollToTop();
+        }
+        
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ==================== ACTUALIZAR ESTADÍSTICAS ====================
+        function actualizarEstadisticas() {
+            const total = radicados.length;
+            const pendientes = radicados.filter(r => r.estado === 'pendiente').length;
+            const aprobados = radicados.filter(r => r.estado === 'aprobado').length;
+            const condicionados = radicados.filter(r => r.estado === 'aprobado_condicionado').length;
+            const rechazados = radicados.filter(r => r.estado === 'rechazado').length;
+            
+            document.getElementById('total-radicados').textContent = total;
+            document.getElementById('pendientes').textContent = pendientes;
+            document.getElementById('aprobados').textContent = aprobados;
+            document.getElementById('condicionados').textContent = condicionados;
+            document.getElementById('rechazados').textContent = rechazados;
+        }
+
+        // ==================== VER DETALLES ====================
+        function verDetalles(radicado) {
+            window.location.href = `/sagrilaft/revisar/${radicado}`;
+        }
+
+        // ==================== SELECCIÓN Y BOTONES ====================
+        let ordenActual = { columna: null, ascendente: true };
+
+        function toggleSelectAll() {
+            const checkAll = document.getElementById('check-all');
+            const checks = document.querySelectorAll('.check-rad');
+            checks.forEach(check => {
+                check.checked = checkAll.checked;
+            });
+            actualizarBotones();
+        }
+
+        function actualizarBotones() {
+            const checks = document.querySelectorAll('.check-rad:checked');
+            const count = checks.length;
+            
+            document.getElementById('count-seleccionados').textContent = count;
+            document.getElementById('btn-exportar-excel').style.display = count > 0 ? 'block' : 'none';
+            document.getElementById('btn-descargar-docs').style.display = count === 1 ? 'block' : 'none';
+        }
+
+        // ==================== ORDENAMIENTO ====================
+        function ordenar(columna) {
+            // Si es la misma columna, cambiar dirección
+            if (ordenActual.columna === columna) {
+                ordenActual.ascendente = !ordenActual.ascendente;
+            } else {
+                ordenActual.columna = columna;
+                ordenActual.ascendente = true;
+            }
+            
+            // Limpiar iconos de ordenamiento
+            document.querySelectorAll('[id^="sort-"]').forEach(span => {
+                span.textContent = '⇕';
+            });
+            
+            // Actualizar icono de columna actual
+            const icono = ordenActual.ascendente ? '↑' : '↓';
+            document.getElementById(`sort-${columna}`).textContent = icono;
+            
+            // Ordenar array
+            radicadosFiltrados.sort((a, b) => {
+                let valorA = a[columna];
+                let valorB = b[columna];
+                
+                // Convertir a números si es numérico
+                if (typeof valorA === 'number' && typeof valorB === 'number') {
+                    return ordenActual.ascendente ? valorA - valorB : valorB - valorA;
+                }
+                
+                // Comparación de strings
+                valorA = String(valorA).toLowerCase();
+                valorB = String(valorB).toLowerCase();
+                
+                if (valorA < valorB) return ordenActual.ascendente ? -1 : 1;
+                if (valorA > valorB) return ordenActual.ascendente ? 1 : -1;
+                return 0;
+            });
+            
+            // Resetear a primera página al ordenar
+            paginaActual = 1;
+            
+            renderizarTabla();
+        }
+
+        // ==================== FILTROS ====================
+        function aplicarFiltros() {
+            const filtros = {
+                fecha: document.getElementById('filtro-fecha').value.toLowerCase(),
+                radicado: document.getElementById('filtro-radicado').value.toLowerCase(),
+                nit: document.getElementById('filtro-nit').value.toLowerCase(),
+                nombre: document.getElementById('filtro-nombre').value.toLowerCase(),
+                diasDesde: document.getElementById('filtro-dias-desde').value,
+                estado: document.getElementById('filtro-estado').value.toLowerCase(),
+                proximaActualizacion: document.getElementById('filtro-proxima-actualizacion').value.toLowerCase(),
+                diasRestantes: document.getElementById('filtro-dias-restantes').value
+            };
+            
+            radicadosFiltrados = radicados.filter(rad => {
+                // Filtro de días desde radicado
+                let cumpleDiasDesde = true;
+                if (filtros.diasDesde !== '') {
+                    const dias = rad.dias_desde_radicado;
+                    if (filtros.diasDesde === 'reciente') {
+                        cumpleDiasDesde = dias < 30;
+                    } else if (filtros.diasDesde === 'medio') {
+                        cumpleDiasDesde = dias >= 30 && dias <= 90;
+                    } else if (filtros.diasDesde === 'antiguo') {
+                        cumpleDiasDesde = dias > 90;
+                    }
+                }
+                
+                // Filtro de días restantes
+                let cumpleDiasRestantes = true;
+                if (filtros.diasRestantes !== '') {
+                    const dias = rad.dias_para_actualizacion;
+                    if (filtros.diasRestantes === 'critico') {
+                        cumpleDiasRestantes = dias < 30;
+                    } else if (filtros.diasRestantes === 'alerta') {
+                        cumpleDiasRestantes = dias >= 30 && dias <= 90;
+                    } else if (filtros.diasRestantes === 'normal') {
+                        cumpleDiasRestantes = dias > 90;
+                    }
+                }
+                
+                return (
+                    rad.fecha_solicitud.toLowerCase().includes(filtros.fecha) &&
+                    rad.radicado.toLowerCase().includes(filtros.radicado) &&
+                    rad.nit.toLowerCase().includes(filtros.nit) &&
+                    rad.nombre.toLowerCase().includes(filtros.nombre) &&
+                    cumpleDiasDesde &&
+                    (filtros.estado === '' || rad.estado === filtros.estado) &&
+                    rad.proxima_actualizacion.toLowerCase().includes(filtros.proximaActualizacion) &&
+                    cumpleDiasRestantes
+                );
+            });
+            
+            // Resetear a primera página cuando se aplican filtros
+            paginaActual = 1;
+            
+            renderizarTabla();
+        }
+
+        // ==================== EXPORTAR EXCEL ====================
+        async function exportarExcel() {
+            const checks = document.querySelectorAll('.check-rad:checked');
+            const radicadosSeleccionados = Array.from(checks).map(check => check.dataset.radicado);
+            
+            if (radicadosSeleccionados.length === 0) {
+                mostrarAlerta('warning', 'Selecciona al menos un radicado');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/sagrilaft/api/radicados/exportar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ radicados: radicadosSeleccionados })
+                });
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `Radicados_${new Date().toISOString().split('T')[0]}.xlsx`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    mostrarAlerta('success', `Excel generado con ${radicadosSeleccionados.length} radicado(s)`);
+                } else {
+                    mostrarAlerta('error', 'Error al generar Excel');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('error', 'Error de conexión');
+            }
+        }
+
+        // ==================== DESCARGAR DOCUMENTOS ====================
+        async function descargarDocumentos() {
+            const checks = document.querySelectorAll('.check-rad:checked');
+            if (checks.length !== 1) return;
+            
+            const radicado = checks[0].dataset.radicado;
+            
+            try {
+                window.location.href = `/sagrilaft/api/radicados/${radicado}/descargar_documentos`;
+                mostrarAlerta('info', 'Descargando documentos...');
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('error', 'Error al descargar documentos');
+            }
+        }
+
+        // ==================== MOSTRAR ALERTAS ====================
+        function mostrarAlerta(tipo, mensaje) {
+            const contenedor = document.getElementById('contenedor-alertas');
+            const iconos = {
+                success: '✅',
+                error: '❌',
+                warning: '⚠️',
+                info: 'ℹ️'
+            };
+            
+            const alerta = document.createElement('div');
+            alerta.className = `alerta alerta-${tipo}`;
+            alerta.innerHTML = `
+                <span style="font-size: 1.5rem;">${iconos[tipo]}</span>
+                <span>${mensaje}</span>
+            `;
+            
+            contenedor.appendChild(alerta);
+            
+            setTimeout(() => {
+                alerta.remove();
+            }, 5000);
+        }
+
+        // ==================== INICIALIZAR ====================
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarRadicados();
+            
+            // Auto-refresh cada 30 segundos (preservando selecciones)
+            setInterval(() => {
+                // Guardar checkboxes seleccionados
+                const seleccionados = Array.from(document.querySelectorAll('.check-rad:checked'))
+                    .map(check => check.dataset.radicado);
+                
+                // Recargar datos
+                cargarRadicados().then(() => {
+                    // Restaurar selecciones
+                    seleccionados.forEach(radicado => {
+                        const checkbox = document.querySelector(`.check-rad[data-radicado="${radicado}"]`);
+                        if (checkbox) checkbox.checked = true;
+                    });
+                    
+                    // Actualizar botones según selección restaurada
+                    actualizarBotonesAccion();
+                });
+            }, 30000);
+        });
+    </script>
+</body>
+</html>

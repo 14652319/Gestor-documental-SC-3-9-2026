@@ -1,0 +1,76 @@
+Mapeo de Decoradores para FACTURAS_DIGITALES
+====================================================
+
+RUTAS SIN DECORADOR (18):
+
+1. /api/empresas (listar_empresas)
+   → Uso: Consulta catálogo de empresas
+   → Decorador: @requiere_permiso('facturas_digitales', 'consultar_facturas')
+
+2. /api/usuario-actual (obtener_usuario_actual)
+   → Uso: Obtiene usuario de sesión (básico)
+   → Decorador: @requiere_permiso('facturas_digitales', 'acceder_modulo')
+
+3. /api/buscar-tercero (buscar_tercero)
+   → Uso: Buscar tercero por NIT
+   → Decorador: @requiere_permiso('facturas_digitales', 'validar_tercero')
+
+4. /validar_factura_registrada (validar_factura_registrada)
+   → Uso: Valida duplicados
+   → Decorador: @requiere_permiso('facturas_digitales', 'verificar_duplicados')
+
+5. /api/validar-duplicada (validar_duplicada)
+   → Uso: Valida duplicados (API)
+   → Decorador: @requiere_permiso('facturas_digitales', 'verificar_duplicados')
+
+6. /api/cargar-factura (cargar_factura_api)
+   → Uso: Carga factura nueva
+   → Decorador: @requiere_permiso('facturas_digitales', 'cargar_factura')
+
+7. /listado (listado)
+   → Uso: Vista listado de facturas
+   → Decorador: @requiere_permiso_html('facturas_digitales', 'consultar_facturas')
+
+8. /api/facturas (get_facturas_api)
+   → Uso: API listado de facturas
+   → Decorador: @requiere_permiso('facturas_digitales', 'consultar_facturas')
+
+9. /detalle/<int:id> (detalle)
+   → Uso: Vista detalle de factura
+   → Decorador: @requiere_permiso_html('facturas_digitales', 'ver_detalle_factura')
+
+10. /descargar/<int:id> (descargar) [primera aparición]
+    → Uso: Descargar soportes
+    → Decorador: @requiere_permiso_html('facturas_digitales', 'descargar_soportes')
+
+11. /api/cambiar-estado/<int:id> (cambiar_estado_api)
+    → Uso: Cambiar estado de factura
+    → Decorador: @requiere_permiso('facturas_digitales', 'cambiar_estado')
+
+12. /configuracion (configuracion)
+    → Uso: Vista configuración de rutas
+    → Decorador: @requiere_permiso_html('facturas_digitales', 'configurar_rutas')
+
+13. /api/actualizar-ruta (actualizar_ruta_api)
+    → Uso: Actualizar configuración de ruta
+    → Decorador: @requiere_permiso('facturas_digitales', 'configurar_rutas')
+
+14. /api/radicar (radicar_factura)
+    → Uso: Radicar factura para firma
+    → Decorador: @requiere_permiso('facturas_digitales', 'enviar_a_firmar')
+
+15. /ver-pdf/<int:id> (ver_pdf)
+    → Uso: Ver PDF en visor
+    → Decorador: @requiere_permiso_html('facturas_digitales', 'ver_detalle_factura')
+
+16. /abrir-adobe/<int:id> (abrir_adobe)
+    → Uso: Abrir en Adobe Reader
+    → Decorador: @requiere_permiso_html('facturas_digitales', 'ver_detalle_factura')
+
+17. /enviar-firmar/<int:id> (enviar_firmar)
+    → Uso: Enviar a Adobe Sign
+    → Decorador: @requiere_permiso('facturas_digitales', 'enviar_a_firmar')
+
+18. /descargar/<int:id> (descargar_factura) [segunda aparición línea 1204]
+    → Uso: Descargar factura completa
+    → Decorador: @requiere_permiso_html('facturas_digitales', 'descargar_soportes')

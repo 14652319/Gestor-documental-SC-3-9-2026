@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>DIAN vs ERP — Cargar y Procesar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* ===== COLORES INSTITUCIONALES SUPERTIENDAS CAÑAVERAL ===== */
+    :root{
+      /* Fondos oscuros (modo dark por defecto) */
+      --bg:#1a1f2e; --panel:#252b3b; --hdr:#151924; --bd:#3a4254;
+      /* Verde corporativo SC (consistente en ambos modos) */
+      --green-bright:#00d084; --green-primary:#00c875; --green-header:#2d5016;
+      /* Textos modo oscuro */
+      --txt:#e8eaed; --muted:#9fb0c7;
+      /* Colores de acción */
+      --danger:#e94444; --info:#2563eb; --gold:#fdd835;
+    }
+    
+    /* ===== MODO CLARO (LIGHT MODE) ===== */
+    body.light-mode{
+      /* Fondos claros con toque verde suave */
+      --bg:#f0f9f4; --panel:#f8fdfb; --hdr:#e8f5f0; --bd:#d4e8dd;
+      /* Verde corporativo (consistente) */
+      --green-bright:#00d084; --green-primary:#00c875; --green-header:#2d5016;
+      /* Textos modo claro */
+      --txt:#2c3e50; --muted:#6c757d;
+      /* Colores de acción (ajustados) */
+      --danger:#e94444; --info:#2563eb; --gold:#f9a825;
+    }
+    
+    /* Toggle Switch para cambio de modo */
+    .theme-toggle{
+      position:relative;display:inline-flex;align-items:center;gap:8px;
+      background:var(--panel);border:1px solid var(--bd);
+      border-radius:20px;padding:4px 12px 4px 8px;cursor:pointer;
+      transition:all 0.3s ease;color:var(--txt);
+    }
+    .theme-toggle:hover{
+      border-color:var(--green-primary);
+      background:rgba(0,200,117,0.1);
+      transform:translateY(-1px);
+    }
+    .theme-toggle input{display:none}
+    .theme-icon{font-size:18px;transition:transform 0.3s ease}
+    .theme-toggle:hover .theme-icon{transform:scale(1.15) rotate(20deg)}
+    
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
+    
+    /* Banner superior verde corporativo */
+    .banner-green{
+      background:linear-gradient(135deg, var(--green-bright) 0%, #00a86b 100%);
+      padding:6px 14px;text-align:center;font-weight:600;font-size:13px;
+      box-shadow:0 2px 8px rgba(0,208,132,0.3);
+      color:#fff;
+    }
+    
+    .page{display:flex;flex-direction:column;min-height:100vh}
+    .top{position:sticky;top:0;z-index:20;background:linear-gradient(180deg,var(--hdr),#0f141e);border-bottom:1px solid #1f2737}
+    .row{display:flex;gap:10px;align-items:center;padding:10px 14px}
+    .spacer{flex:1}
+    
+    /* Botones con colores corporativos */
+    .btn{
+      border:1px solid var(--bd);background:var(--panel);color:#fff;
+      padding:8px 12px;border-radius:8px;cursor:pointer;text-decoration:none;
+      display:inline-block;transition:all 0.2s ease;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+    .btn.primary{
+      background:var(--green-primary);border:1px solid #00a86b;
+    }
+    .btn.primary:hover{
+      background:#00a86b;box-shadow:0 4px 12px rgba(0,200,117,0.3);
+    }
+    .btn.light{background:var(--panel);border-color:var(--bd)}
+    .btn.danger{background:var(--danger);border:1px solid #c93434}
+    .btn.danger:hover{background:#c93434}
+    
+    .wrap{max-width:980px;margin:18px auto;padding:0 14px}
+    .card{
+      background:var(--panel);border:1px solid var(--bd);
+      border-radius:12px;padding:16px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.2);
+    }
+    label{display:flex;align-items:center;gap:8px;margin:6px 0}
+    input[type="file"]{
+      background:var(--panel);color:var(--txt);border:1px solid var(--bd);
+      border-radius:8px;padding:8px;width:100%;
+    }
+    .hint{font-size:.92rem;color:var(--muted)}
+    
+    /* Ajustes modo claro - tonos verdes suaves */
+    body.light-mode .btn{color:var(--txt)}
+    body.light-mode .btn.primary,body.light-mode .btn.danger{color:#fff}
+    body.light-mode .banner-green{box-shadow:0 2px 8px rgba(0,208,132,0.4)}
+    body.light-mode .hint{color:#6c757d}
+    body.light-mode .top{background:linear-gradient(180deg,#e8f5f0,#f0f9f4);border-bottom:1px solid #d4e8dd}
+    body.light-mode .footer{background:linear-gradient(0deg,#e8f5f0,#f0f9f4);border-top:1px solid #d4e8dd}
+    body.light-mode .card{background:#f8fdfb;border:1px solid #d4e8dd;box-shadow:0 2px 8px rgba(0,208,132,0.08)}
+    body.light-mode input[type="file"]{background:#f8fdfb;border:1px solid #c8e6d7}
+    body.light-mode input[type="file"]:focus{border-color:var(--green-primary)}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .footer{
+      position:sticky;bottom:0;
+      background:linear-gradient(0deg,var(--hdr),#0f131c);
+      border-top:1px solid #1f2737;padding:8px 14px;
+      display:flex;align-items:center;gap:10px;
+    }
+    
+    /* Overlay progreso con barra verde corporativa */
+    .overlay{position:fixed;inset:0;background:#0008;display:none;place-items:center;z-index:99}
+    .pbox{
+      background:var(--panel);border:1px solid var(--bd);
+      border-radius:12px;padding:18px;min-width:360px;
+      box-shadow:0 20px 60px #0008;
+    }
+    .bar{height:10px;background:#28334d;border-radius:10px;overflow:hidden;margin-top:8px}
+    .bar>div{
+      height:100%;width:0;
+      background:var(--green-primary);
+      transition:width .25s ease;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <!-- Banner verde corporativo -->
+  <div class="banner-green">
+    ✅ Modulo de Carga -  Supertiendas Cañaveral SAS
+  </div>
+  
+  <div class="top">
+    <div class="row">
+      <div style="font-weight:800">📂 DIAN vs ERP — Cargar y Procesar</div>
+      <div class="spacer"></div>
+      
+      <!-- Toggle de tema claro/oscuro -->
+      <label class="theme-toggle" title="Cambiar tema claro/oscuro">
+        <input type="checkbox" id="themeToggle">
+        <span class="theme-icon">🌙</span>
+        <span style="font-size:13px;font-weight:500">Tema</span>
+      </label>
+      
+      <div style="color:#a9bad5">👤 {{ usuario }}</div>
+      <a class="btn light" href="/dian_vs_erp/visor_v2">← Volver al Visor V2</a>
+      <a class="btn danger" href="/dashboard">⬅️ Volver al Menú</a>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="card">
+      <div class="hint" style="margin-bottom:10px">
+        Sube los archivos correspondientes. Se validarán encabezados y se convertirán a CSV normalizado.  
+        Campos únicos: DIAN/Acuses por <b>CUFE</b>; ERP por <b>NIT+Prefijo+Folio completo</b>. Para el cruce se usa <b>NIT+Prefijo+Folio (8 últimos sin ceros)</b>.
+      </div>
+      <div class="grid">
+        <label>📁 DIAN <input id="dian" type="file" accept=".xlsx,.xlsm,.xls,.csv"></label>
+        <label>📁 Acuses (SIESA) <input id="acuses" type="file" accept=".xlsx,.xlsm,.xls,.csv"></label>
+
+        <label>📁 ERP Financiero <input id="erp_fn" type="file" accept=".xlsx,.xlsm,.xls,.csv"></label>
+        <label>📁 ERP Comercial <input id="erp_cm" type="file" accept=".xlsx,.xlsm,.xls,.csv"></label>
+
+        <label>📁 ERP Errores <input id="errores" type="file" accept=".xlsx,.xlsm,.xls,.csv"></label>
+        <div>
+          <div class="hint">Plantillas:</div>
+          <div style="display:flex;gap:8px;margin-top:6px">
+            <a class="btn" href="/dian_vs_erp/descargar_plantilla/dian">📥 DIAN</a>
+            <a class="btn" href="/dian_vs_erp/descargar_plantilla/erp">📥 ERP</a>
+            <a class="btn" href="/dian_vs_erp/descargar_plantilla/acuses">📥 Acuses</a>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:14px">
+        <button class="btn primary" id="btnProcesar">Procesar & Consolidar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <span class="hint">Consejo: puedes subir solo lo que cambió (no es obligatorio subir los 5 cada vez).</span>
+    <div class="spacer"></div>
+    <a class="btn light" href="/dian_vs_erp/visor_v2">← Volver al Visor V2</a>
+    <a class="btn danger" href="/dashboard">⬅️ Volver al Menú</a>
+  </div>
+</div>
+
+<!-- Overlay progreso -->
+<div class="overlay" id="ov">
+  <div class="pbox">
+    <div id="ptitle"><b>Procesando…</b> <span id="ppct" style="opacity:.8"></span></div>
+    <div class="bar"><div id="pbar"></div></div>
+    <div id="phint" class="hint" style="margin-top:6px">Subiendo/validando encabezados…</div>
+  </div>
+</div>
+
+<script>
+  const btn = document.getElementById('btnProcesar');
+  const ov  = document.getElementById('ov');
+  const pbar= document.getElementById('pbar');
+  const ppct= document.getElementById('ppct');
+  const phint= document.getElementById('phint');
+
+  function setProgress(p, hint){
+    pbar.style.width = p + '%';
+    ppct.textContent = ' ' + p + '%';
+    if(hint) phint.textContent = hint;
+  }
+  function show(){ ov.style.display='grid'; setProgress(5,'Subiendo archivos…'); }
+  function hide(){ ov.style.display='none'; }
+
+  btn.addEventListener('click', async ()=>{
+    const form = new FormData();
+    const files = {
+      dian: document.getElementById('dian').files[0],
+      erp_fn: document.getElementById('erp_fn').files[0],
+      erp_cm: document.getElementById('erp_cm').files[0],
+      errores: document.getElementById('errores').files[0],
+      acuses: document.getElementById('acuses').files[0],
+    };
+    let alguno=false;
+    for(const k in files){ if(files[k]){ form.append(k, files[k]); alguno=true; } }
+    if(!alguno){ alert('⚠️ Selecciona al menos un archivo.'); return; }
+
+    try{
+      show();
+      const res = await fetch("/dian_vs_erp/api/subir_archivos", { method:'POST', body:form });
+      setProgress(70,'Convirtiendo a CSV y normalizando…');
+      const data = await res.json().catch(()=>({mensaje:'Respuesta inválida'}));
+      if(!res.ok) throw new Error(data.mensaje || 'Error al procesar');
+      setProgress(95,'Actualizando maestro…');
+      alert(data.mensaje || 'Procesado correctamente.');
+      setProgress(100,'Listo.');
+    }catch(err){
+      alert('❌ ' + err.message);
+    }finally{
+      setTimeout(hide, 450);
+    }
+  });
+  
+  // ===== TOGGLE TEMA CLARO/OSCURO =====
+  const themeToggle = document.getElementById("themeToggle");
+  const themeIcon = document.querySelector(".theme-icon");
+  
+  // Cargar preferencia guardada
+  const savedTheme = localStorage.getItem("theme") || "dark";
+  if(savedTheme === "light"){
+    document.body.classList.add("light-mode");
+    themeToggle.checked = true;
+    themeIcon.textContent = "☀️";
+  }
+  
+  // Cambiar tema
+  themeToggle.addEventListener("change", function(){
+    if(this.checked){
+      document.body.classList.add("light-mode");
+      themeIcon.textContent = "☀️";
+      localStorage.setItem("theme", "light");
+    } else {
+      document.body.classList.remove("light-mode");
+      themeIcon.textContent = "🌙";
+      localStorage.setItem("theme", "dark");
+    }
+  });
+</script>
+    {% include '_session_expired_interceptor.html' %}
+  </body>
+</html>

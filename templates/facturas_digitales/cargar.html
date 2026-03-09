@@ -1,0 +1,1812 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <title>Radicación Facturas Digitales</title>
+    <style>
+        :root {
+            --primary: #166534;
+            --primary-dark: #14532d;
+            --primary-light: #22c55e;
+            --bg: #f9fafb;
+            --card-bg: white;
+            --text: #111827;
+            --text-secondary: #6b7280;
+            --border: #e5e7eb;
+            --success: #22c55e;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+        
+        [data-theme="dark"] {
+            --bg: #111827;
+            --card-bg: #1f2937;
+            --text: #f9fafb;
+            --text-secondary: #9ca3af;
+            --border: #374151;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 { font-size: 1.5rem; font-weight: 600; }
+        .header-subtitle { font-size: 0.875rem; opacity: 0.9; }
+        
+        .header-right {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .theme-toggle {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 2rem;
+            padding: 0.25rem;
+            display: flex;
+            gap: 0.25rem;
+            cursor: pointer;
+        }
+        
+        .theme-btn {
+            padding: 0.25rem 0.5rem;
+            border-radius: 1.5rem;
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+        }
+        
+        .theme-btn.active {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-secondary { background: var(--text-secondary); color: white; }
+        .btn-secondary:hover { opacity: 0.9; }
+        .btn-success { background: var(--success); color: white; padding: 0.75rem 1.5rem; font-size: 1rem; }
+        .btn-success:hover { background: #16a34a; }
+        .btn-success:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        .container {
+            max-width: 95%;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .card-form {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            margin-bottom: 1rem;
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .form-grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        
+        .form-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+        
+        .form-grid-5 {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+        }
+        
+        /* Responsivo para el nuevo layout de 3 líneas */
+        @media (max-width: 1600px) {
+            /* Línea 1: Ajustar columnas */
+            .form-grid[style*="150px 300px 100px 120px 150px 170px"] {
+                grid-template-columns: 120px 250px 80px 100px 160px 150px !important;
+            }
+            /* Línea 2: Ajustar columnas */
+            .form-grid[style*="170px repeat(4, 150px) repeat(3, 150px)"] {
+                grid-template-columns: 150px repeat(4, 140px) repeat(3, 140px) !important;
+            }
+        }
+        
+        @media (max-width: 1400px) {
+            /* Línea 1: 3 columnas por fila */
+            .form-grid[style*="150px 300px 100px 120px 150px 170px"] {
+                grid-template-columns: repeat(3, 1fr) !important;
+            }
+            /* Línea 2: 4 columnas por fila */
+            .form-grid[style*="170px repeat(4, 150px) repeat(3, 150px)"] {
+                grid-template-columns: repeat(4, 1fr) !important;
+            }
+        }
+        
+        @media (max-width: 1200px) {
+            .form-grid-5 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .form-grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            /* Línea 1 y 2: 2 columnas por fila */
+            .form-grid[style*="150px 300px 100px 120px 150px 170px"],
+            .form-grid[style*="170px repeat(4, 150px) repeat(3, 150px)"] {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .form-grid,
+            .form-grid-2,
+            .form-grid-3,
+            .form-grid-4,
+            .form-grid-5 {
+                grid-template-columns: 1fr !important;
+            }
+            .container {
+                max-width: 100%;
+                padding: 0.5rem;
+            }
+            .card {
+                padding: 1rem;
+            }
+            .header-right {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+        
+        .archivos-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+        
+        @media (max-width: 1024px) {
+            .archivos-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .obs-archivos-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 1rem;
+        }
+        
+        @media (max-width: 1024px) {
+            .obs-archivos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Ocultar campos para usuarios externos */
+        body.usuario-externo .solo-interno {
+            display: none !important;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .form-group label {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text);
+        }
+        
+        .required::after { content: ' *'; color: var(--error); }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.625rem;
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            background: var(--card-bg);
+            color: var(--text);
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.1);
+        }
+        
+        .form-group input:read-only {
+            background: var(--bg);
+            cursor: not-allowed;
+        }
+        
+        .file-upload-zone {
+            border: 2px dashed var(--border);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .file-upload-zone p {
+            margin: 0;
+            font-size: 0.875rem;
+        }
+        
+        .file-upload-zone small {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        .file-upload-zone:hover {
+            border-color: var(--primary);
+            background: rgba(22, 101, 52, 0.05);
+        }
+        
+        .file-upload-zone.dragover {
+            border-color: var(--primary);
+            background: rgba(22, 101, 52, 0.1);
+        }
+        
+        .file-upload-zone.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: var(--bg);
+            border-color: var(--border);
+        }
+        
+        .file-upload-zone.disabled:hover {
+            border-color: var(--border);
+            background: var(--bg);
+        }
+        
+        .file-info {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: var(--bg);
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+        }
+        
+        .anexos-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+        }
+        
+        .anexo-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: var(--bg);
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+        }
+        
+        .table-container { overflow-x: auto; margin-top: 1.5rem; }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        th {
+            background: var(--bg);
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        tr:hover { background: var(--bg); }
+        
+        .checkbox {
+            width: 1.25rem;
+            height: 1.25rem;
+            cursor: pointer;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 0.375rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .alert-success { background: #d1fae5; color: #065f46; }
+        .alert-error { background: #fee2e2; color: #991b1b; }
+        .alert-warning { background: #fef3c7; color: #92400e; }
+        
+        .hidden { display: none !important; }
+        
+        .autocomplete-results {
+            position: absolute;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 0.375rem;
+            max-height: 200px;
+            overflow-y: auto;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            top: 100%;
+            margin-top: 0.25rem;
+        }
+        
+        .autocomplete-item {
+            padding: 0.75rem;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .autocomplete-item:hover { background: var(--bg); }
+        .autocomplete-item:last-child { border-bottom: none; }
+
+        /* MODAL DE FACTURA DUPLICADA */
+        .modal-duplicada {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .modal-content-duplicada {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-icon-error {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 1rem;
+            background: #dc2626;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            font-weight: bold;
+        }
+
+        .modal-title-duplicada {
+            color: #dc2626;
+            font-size: 1.75rem;
+            margin: 0.5rem 0;
+            font-weight: bold;
+        }
+
+        .modal-body-duplicada {
+            margin: 1.5rem 0;
+            color: #333;
+        }
+
+        .modal-body-duplicada p {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .detalles-duplicada {
+            background: #f3f4f6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #dc2626;
+            text-align: left;
+        }
+
+        .detalles-duplicada p {
+            margin: 0.5rem 0;
+            font-size: 0.95rem;
+        }
+
+        .detalles-duplicada strong {
+            color: #dc2626;
+        }
+
+        .btn-modal-entendido {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-modal-entendido:hover {
+            background: #b91c1c;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <div>
+                <h1>📄 Radicación de Facturas Digitales</h1>
+                <div class="header-subtitle">Sistema de Gestión Documental</div>
+            </div>
+            <div class="header-right">
+                <div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; background: rgba(255,255,255,0.1); border-radius: 0.5rem;">
+                    <span style="font-size: 1.2rem;">👤</span>
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-size: 0.75rem; opacity: 0.8;">Usuario:</span>
+                        <span id="userDisplay" style="font-weight: 600; font-size: 0.875rem;">Cargando...</span>
+                    </div>
+                </div>
+                <div class="theme-toggle" onclick="toggleTheme()">
+                    <button class="theme-btn" id="btnLight">☀️</button>
+                    <button class="theme-btn" id="btnDark">🌙</button>
+                </div>
+                <button class="btn btn-secondary" onclick="window.location.href='{{ url_for('facturas_digitales.dashboard_facturas') }}'">← Volver</button>
+                <button class="btn btn-secondary" onclick="cerrarSesion()">Cerrar Sesión</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div id="alertContainer"></div>
+
+        <div class="card card-form">
+            <h2 class="card-title">Datos de la Factura Digital</h2>
+            
+            <!-- MENSAJE DE INSTRUCCIÓN -->
+            <div style="background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%); border-left: 4px solid #ff9800; padding: 0.75rem 1rem; border-radius: 0.375rem; margin-bottom: 1rem;">
+                <p style="margin: 0; font-size: 0.875rem; color: #856404;">
+                    <strong>⚠️ IMPORTANTE:</strong> Ingrese <strong>NIT, Prefijo (opcional) y No. Factura</strong>, luego presione <strong>Tab</strong> o <strong>Enter</strong> para validar. 
+                    Los demás campos se habilitarán solo si la factura <strong>NO está duplicada</strong>.
+                </p>
+            </div>
+            
+            <form id="formFactura">
+                <!-- ============================================= -->
+                <!-- 📋 LÍNEA 1: Datos Básicos del Tercero y Factura -->
+                <!-- ============================================= -->
+                <div class="form-grid" style="grid-template-columns: 150px 300px 100px 120px 180px 170px;">
+                    <div class="form-group">
+                        <label class="required">NIT EMISOR</label>
+                        <input type="text" id="nitEmisor" required autocomplete="off" style="text-transform: uppercase;">
+                        <div id="autocompleteResults" class="autocomplete-results hidden"></div>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">NOMBRE O RAZÓN SOCIAL</label>
+                        <input type="text" id="razonSocial" readonly style="text-transform: uppercase;">
+                    </div>
+                    <div class="form-group">
+                        <label>PREFIJO</label>
+                        <input type="text" id="prefijo" style="text-transform: uppercase;">
+                    </div>
+                    <div class="form-group">
+                        <label class="required">No. FACTURA</label>
+                        <input type="text" id="folio" required style="text-transform: uppercase;">
+                    </div>
+                    <div class="form-group solo-interno">
+                        <label class="required">EMPRESA</label>
+                        <select id="empresa" required disabled>
+                            <option value="">Seleccione...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">FECHA EXPEDICIÓN</label>
+                        <input type="date" id="fechaExpedicion" required disabled>
+                    </div>
+                </div>
+
+                <!-- ============================================= -->
+                <!-- 📋 LÍNEA 2: Datos Complementarios y Valores -->
+                <!-- ============================================= -->
+                <div class="form-grid" style="margin-top: 1rem; grid-template-columns: 170px repeat(4, 150px) repeat(3, 150px);">
+                    <div class="form-group">
+                        <label>FECHA RADICACIÓN</label>
+                        <input type="date" id="fechaRadicacion" readonly>
+                    </div>
+                    <div class="form-group solo-interno">
+                        <label class="required">TIPO DOCUMENTO</label>
+                        <select id="tipoDocumento" required disabled>
+                            <option value="">⏳ Cargando...</option>
+                        </select>
+                    </div>
+                    <div class="form-group solo-interno">
+                        <label class="required">FORMA DE PAGO</label>
+                        <select id="formaPago" required disabled>
+                            <option value="">⏳ Cargando...</option>
+                        </select>
+                    </div>
+                    <div class="form-group solo-interno">
+                        <label class="required">TIPO DE SERVICIO</label>
+                        <select id="tipoServicio" required disabled>
+                            <option value="">⏳ Cargando...</option>
+                        </select>
+                    </div>
+                    <div class="form-group solo-interno">
+                        <label class="required">DEPARTAMENTO</label>
+                        <select id="departamento" required disabled>
+                            <option value="">⏳ Cargando...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">VALOR BRUTO</label>
+                        <input type="number" id="valorBruto" step="0.01" required disabled>
+                    </div>
+                    <div class="form-group">
+                        <label>VALOR IVA</label>
+                        <input type="number" id="valorIva" step="0.01" value="0" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label class="required">VALOR TOTAL</label>
+                        <input type="number" id="valorTotal" step="0.01" readonly>
+                    </div>
+                </div>
+
+                <!-- ============================================= -->
+                <!-- 📋 LÍNEA 3: Observaciones y Archivos -->
+                <!-- ============================================= -->
+
+                <div class="obs-archivos-grid" style="margin-top: 1rem;">
+                    <div class="form-group">
+                        <label>OBSERVACIONES</label>
+                        <textarea id="observaciones" rows="2" maxlength="5000" style="height: 100%; min-height: 60px; text-transform: uppercase;" disabled></textarea>
+                        <small style="color: var(--text-secondary);"><span id="charCount">0</span> / 5000 caracteres</small>
+                    </div>
+
+                    <div class="archivos-container">
+                        <div class="form-group">
+                            <label class="required">ARCHIVO PRINCIPAL</label>
+                            <div class="file-upload-zone disabled" id="zonaPrincipal">
+                                <p>📄 PDF</p>
+                                <small>Max 50MB</small>
+                            </div>
+                            <input type="file" id="archivoPrincipal" accept=".pdf" class="hidden" required disabled>
+                            <div id="infoPrincipal" class="file-info hidden"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>ANEXOS</label>
+                            <div class="file-upload-zone disabled" id="zonaAnexos">
+                                <p>📎 Archivos</p>
+                                <small>Max 100MB</small>
+                            </div>
+                            <input type="file" id="archivosAnexos" accept=".pdf,.zip,.jpg,.jpeg,.png" multiple class="hidden" disabled>
+                            <div id="listaAnexos" class="anexos-list hidden"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>SEG. SOCIAL</label>
+                            <div class="file-upload-zone disabled" id="zonaSeguridadSocial">
+                                <p>🏥 PDF</p>
+                                <small>Max 20MB</small>
+                            </div>
+                            <input type="file" id="archivoSeguridadSocial" accept=".pdf" class="hidden" disabled>
+                            <div id="infoSeguridadSocial" class="file-info hidden"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">Limpiar Formulario</button>
+                    <button type="button" id="btnAdicionar" class="btn btn-success" onclick="adicionarFactura()" disabled>➕ Adicionar Factura al Listado</button>
+                </div>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Facturas Pendientes de Radicación</h2>
+            <div class="table-container">
+                <table id="tablaFacturas">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;"><input type="checkbox" class="checkbox" id="selectAll" onchange="toggleSelectAll()"></th>
+                            <th style="width: 110px;">NIT</th>
+                            <th style="width: 130px;">Prefijo-Folio</th>
+                            <th style="width: 130px;">Valor Total</th>
+                            <th style="width: 300px;">Proveedor: Empresa</th>
+                            <th style="width: 130px;">Departamento</th>
+                            <th style="width: 160px;">Archivos</th>
+                            <th style="width: 100px; text-align: center;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bodyFacturas">
+                        <tr>
+                            <td colspan="9" style="text-align: center; color: var(--text-secondary);">
+                                No hay facturas en el listado temporal
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="btn-group">
+                <button type="button" class="btn btn-secondary" onclick="limpiarListado()">Limpiar Listado</button>
+                <button type="button" class="btn btn-success" id="btnRadicar" onclick="radicarFacturas()" disabled>📋 Radicar Facturas Seleccionadas</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE FACTURA DUPLICADA -->
+    <div id="modalDuplicada" class="modal-duplicada hidden">
+        <div class="modal-content-duplicada">
+            <div class="modal-icon-error">✖</div>
+            <h2 class="modal-title-duplicada">❌ FACTURA DUPLICADA</h2>
+            <div class="modal-body-duplicada">
+                <p id="mensajeDuplicada"></p>
+                <div id="detallesDuplicada" class="detalles-duplicada"></div>
+            </div>
+            <button class="btn-modal-entendido" onclick="cerrarModalDuplicada()">Entendido</button>
+        </div>
+    </div>
+
+    <script>
+        let facturasTemporales = [];
+        let anexosTemp = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarTemaGuardado();
+            cargarUsuarioActual();
+            cargarEmpresas();
+            cargarTipoDocumento();
+            cargarFormaPago();
+            cargarTipoServicio();
+            cargarDepartamentos();
+            establecerFechaRadicacion();
+            setupFileUploads();
+            setupAutocomplete();
+            setupCalculos();
+            setupValidacionDuplicados();
+            document.getElementById('observaciones').addEventListener('input', function() {
+                document.getElementById('charCount').textContent = this.value.length;
+            });
+
+            // 🔧 DETECTAR MODO EDICIÓN
+            detectarModoEdicion();
+        });
+
+        function cargarUsuarioActual() {
+            const usuario = "{{ usuario|default('Usuario') }}";
+            const tipoUsuario = "{{ tipo_usuario|default('interno') }}";
+            
+            if (usuario && usuario !== 'Usuario') {
+                document.getElementById('userDisplay').textContent = usuario.toUpperCase();
+            } else {
+                document.getElementById('userDisplay').textContent = 'USUARIO';
+            }
+            
+            // Agregar clase al body según tipo de usuario
+            if (tipoUsuario === 'externo') {
+                document.body.classList.add('usuario-externo');
+                console.log('🔒 Usuario EXTERNO detectado - Ocultando campos internos');
+                
+                // Remover atributo required de campos ocultos
+                document.querySelectorAll('.solo-interno select, .solo-interno input').forEach(el => {
+                    el.removeAttribute('required');
+                    el.disabled = true;
+                });
+                
+                // ✅ PRELLENAR NIT PARA USUARIOS EXTERNOS
+                const nitUsuario = "{{ nit_usuario|default('') }}";
+                if (nitUsuario && nitUsuario !== '') {
+                    const inputNit = document.getElementById('nitEmisor');
+                    if (inputNit) {
+                        inputNit.value = nitUsuario;
+                        inputNit.readOnly = true; // No permitir edición
+                        inputNit.style.backgroundColor = '#f3f4f6';
+                        inputNit.style.cursor = 'not-allowed';
+                        console.log('✅ NIT prellenado para usuario externo:', nitUsuario);
+                        
+                        // Validar automáticamente el NIT después de 1 segundo
+                        setTimeout(async () => {
+                            console.log('🔍 Validando NIT automáticamente...');
+                            await buscarTerceroPorNIT(nitUsuario);
+                        }, 1000);
+                    }
+                }
+            } else {
+                document.body.classList.add('usuario-interno');
+                console.log('✅ Usuario INTERNO detectado - Mostrando todos los campos');
+            }
+        }
+
+        function cargarTemaGuardado() {
+            const tema = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', tema);
+            actualizarBotonesTema(tema);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            actualizarBotonesTema(newTheme);
+        }
+
+        function actualizarBotonesTema(tema) {
+            document.getElementById('btnLight').classList.toggle('active', tema === 'light');
+            document.getElementById('btnDark').classList.toggle('active', tema === 'dark');
+        }
+
+        function establecerFechaRadicacion() {
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fechaRadicacion').value = hoy;
+        }
+
+        async function cargarEmpresas() {
+            try {
+                const response = await fetch('/facturas-digitales/api/empresas');
+                const data = await response.json();
+                const select = document.getElementById('empresa');
+                select.innerHTML = '<option value="">Seleccione...</option>';
+                data.empresas.forEach(emp => {
+                    select.innerHTML += `<option value="${emp.sigla}">${emp.nombre}</option>`;
+                });
+            } catch (error) {
+                console.error('Error cargando empresas:', error);
+            }
+        }
+
+        // ========================================
+        // CARGAR CATÁLOGOS DESDE BASE DE DATOS
+        // ========================================
+        async function cargarTipoDocumento() {
+            try {
+                const response = await fetch('/facturas-digitales/configuracion/api/activos/tipo-documento');
+                const data = await response.json();
+                if (data.success) {
+                    const select = document.getElementById('tipoDocumento');
+                    select.innerHTML = '<option value="">Seleccione...</option>';
+                    data.data.forEach(item => {
+                        select.innerHTML += `<option value="${item.sigla}">${item.descripcion}</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error cargando tipos de documento:', error);
+            }
+        }
+
+        async function cargarFormaPago() {
+            try {
+                const response = await fetch('/facturas-digitales/configuracion/api/activos/forma-pago');
+                const data = await response.json();
+                if (data.success) {
+                    const select = document.getElementById('formaPago');
+                    select.innerHTML = '<option value="">Seleccione...</option>';
+                    data.data.forEach(item => {
+                        select.innerHTML += `<option value="${item.sigla}">${item.descripcion}</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error cargando formas de pago:', error);
+            }
+        }
+
+        async function cargarTipoServicio() {
+            try {
+                const response = await fetch('/facturas-digitales/configuracion/api/activos/tipo-servicio');
+                const data = await response.json();
+                if (data.success) {
+                    const select = document.getElementById('tipoServicio');
+                    select.innerHTML = '<option value="">Seleccione...</option>';
+                    data.data.forEach(item => {
+                        select.innerHTML += `<option value="${item.sigla}">${item.descripcion}</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error cargando tipos de servicio:', error);
+            }
+        }
+
+        async function cargarDepartamentos() {
+            try {
+                const response = await fetch('/facturas-digitales/configuracion/api/activos/departamento');
+                const data = await response.json();
+                if (data.success) {
+                    const select = document.getElementById('departamento');
+                    select.innerHTML = '<option value="">Seleccione...</option>';
+                    data.data.forEach(item => {
+                        select.innerHTML += `<option value="${item.sigla}">${item.nombre}</option>`;
+                    });
+                }
+            } catch (error) {
+                console.error('Error cargando departamentos:', error);
+            }
+        }
+
+        function setupAutocomplete() {
+            const input = document.getElementById('nitEmisor');
+            const results = document.getElementById('autocompleteResults');
+            const razonSocialInput = document.getElementById('razonSocial');
+            let timeout;
+
+            input.addEventListener('input', function() {
+                clearTimeout(timeout);
+                const nit = this.value.trim();
+                
+                // Limpiar razón social si el NIT cambia
+                razonSocialInput.value = '';
+                
+                if (nit.length < 3) {
+                    results.classList.add('hidden');
+                    return;
+                }
+
+                timeout = setTimeout(async () => {
+                    await buscarTerceroPorNIT(nit);
+                }, 500);
+            });
+
+            // ✅ REMOVIDO: blur event que causaba llamadas duplicadas
+
+            document.addEventListener('click', function(e) {
+                if (!input.contains(e.target) && !results.contains(e.target)) {
+                    results.classList.add('hidden');
+                }
+            });
+        }
+
+        async function buscarTerceroPorNIT(nit) {
+            const results = document.getElementById('autocompleteResults');
+            const razonSocialInput = document.getElementById('razonSocial');
+            
+            try {
+                // 🔧 Usar endpoint del módulo Facturas Digitales (accesible para usuarios externos)
+                const response = await fetch(`/facturas-digitales/api/buscar-tercero?nit=${nit}`);
+                const data = await response.json();
+                
+                if (response.ok && data.existe) {
+                    // Tercero encontrado
+                    seleccionarTercero(nit, data.razon_social);
+                    results.classList.add('hidden');
+                    
+                    // 🆕 VALIDACIÓN DE ANTIGÜEDAD CON 3 ESCENARIOS
+                    const diasAntiguedad = data.dias_antiguedad || 0;
+                    const requiereActualizacion = data.requiere_actualizacion || false;
+                    
+                    // Formatear fecha
+                    let fechaTexto = '';
+                    if (data.fecha_actualizacion) {
+                        const fecha = new Date(data.fecha_actualizacion);
+                        const opciones = { day: '2-digit', month: 'short', year: 'numeric' };
+                        fechaTexto = fecha.toLocaleDateString('es-ES', opciones);
+                    }
+                    
+                    if (requiereActualizacion) {
+                        // ❌ ESCENARIO 3: VENCIDO (>= 365 días) - BLOQUEADO
+                        mostrarAlerta(
+                            `❌ TERCERO BLOQUEADO: ${data.razon_social}\n` +
+                            `Última actualización: ${fechaTexto} (${diasAntiguedad} días)\n` +
+                            `🚫 No se pueden registrar facturas hasta actualizar documentación`,
+                            'error'
+                        );
+                        razonSocialInput.value = ''; // Limpiar para bloquear
+                        document.getElementById('nitEmisor').value = '';
+                    } else if (diasAntiguedad >= 330) {
+                        // ⚠️ ESCENARIO 2: POR VENCER (330-364 días) - ADVERTENCIA
+                        const diasRestantes = 365 - diasAntiguedad;
+                        mostrarAlerta(
+                            `⚠️ TERCERO PRÓXIMO A VENCER: ${data.razon_social}\n` +
+                            `Última actualización: ${fechaTexto} (${diasAntiguedad} días)\n` +
+                            `⏰ Quedan ${diasRestantes} días para requerir actualización`,
+                            'warning'
+                        );
+                    } else {
+                        // ✅ ESCENARIO 1: ACTUALIZADO (< 330 días) - OK
+                        mostrarAlerta(
+                            `✅ Tercero encontrado: ${data.razon_social}\n` +
+                            `Última actualización: ${fechaTexto} (${diasAntiguedad} días)`,
+                            'success'
+                        );
+                    }
+                } else if (response.status === 404) {
+                    // NIT no encontrado
+                    results.classList.add('hidden');
+                    razonSocialInput.value = '';
+                    mostrarAlerta(`⚠️ NIT ${nit} no encontrado en la tabla de terceros. Debe registrar el tercero primero.`, 'warning');
+                } else {
+                    // Error en la respuesta
+                    results.classList.add('hidden');
+                    razonSocialInput.value = '';
+                    mostrarAlerta(`❌ ${data.mensaje || 'Error al buscar el tercero'}`, 'error');
+                }
+            } catch (error) {
+                console.error('Error buscando tercero:', error);
+                results.classList.add('hidden');
+                razonSocialInput.value = '';
+                mostrarAlerta('❌ Error de conexión al buscar el tercero', 'error');
+            }
+        }
+
+        function seleccionarTercero(nit, razonSocial) {
+            document.getElementById('nitEmisor').value = nit.toUpperCase();
+            document.getElementById('razonSocial').value = razonSocial.toUpperCase();
+            document.getElementById('autocompleteResults').classList.add('hidden');
+        }
+
+        function setupCalculos() {
+            document.getElementById('valorBruto').addEventListener('input', calcularTotal);
+            document.getElementById('valorIva').addEventListener('input', calcularTotal);
+        }
+
+        function calcularTotal() {
+            const bruto = parseFloat(document.getElementById('valorBruto').value) || 0;
+            const iva = parseFloat(document.getElementById('valorIva').value) || 0;
+            document.getElementById('valorTotal').value = (bruto + iva).toFixed(2);
+        }
+
+        function setupFileUploads() {
+            setupFileZone('zonaPrincipal', 'archivoPrincipal', 'infoPrincipal', false);
+            setupFileZone('zonaAnexos', 'archivosAnexos', 'listaAnexos', true);
+            setupFileZone('zonaSeguridadSocial', 'archivoSeguridadSocial', 'infoSeguridadSocial', false);
+        }
+
+        function setupFileZone(zoneId, inputId, infoId, multiple) {
+            const zone = document.getElementById(zoneId);
+            const input = document.getElementById(inputId);
+            const info = document.getElementById(infoId);
+
+            zone.addEventListener('click', () => input.click());
+
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('dragover');
+            });
+
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('dragover');
+            });
+
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('dragover');
+                input.files = e.dataTransfer.files;
+                mostrarInfoArchivo(inputId, infoId, multiple);
+            });
+
+            input.addEventListener('change', () => {
+                mostrarInfoArchivo(inputId, infoId, multiple);
+            });
+        }
+
+        function mostrarInfoArchivo(inputId, infoId, multiple) {
+            const input = document.getElementById(inputId);
+            const info = document.getElementById(infoId);
+            
+            if (input.files.length > 0) {
+                if (multiple) {
+                    anexosTemp = Array.from(input.files);
+                    info.innerHTML = anexosTemp.map((f, i) => 
+                        `<div class="anexo-item">
+                            <span>${f.name} (${(f.size / 1024 / 1024).toFixed(2)} MB)</span>
+                            <button type="button" class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="removerAnexo(${i})">✕</button>
+                        </div>`
+                    ).join('');
+                    info.classList.remove('hidden');
+                } else {
+                    const file = input.files[0];
+                    info.innerHTML = `<strong>${file.name}</strong> (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+                    info.classList.remove('hidden');
+                }
+            }
+        }
+
+        function removerAnexo(index) {
+            anexosTemp.splice(index, 1);
+            const info = document.getElementById('listaAnexos');
+            if (anexosTemp.length === 0) {
+                info.classList.add('hidden');
+                document.getElementById('archivosAnexos').value = '';
+            } else {
+                mostrarInfoArchivo('archivosAnexos', 'listaAnexos', true);
+            }
+        }
+
+        function setupValidacionDuplicados() {
+            const nit = document.getElementById('nitEmisor');
+            const prefijo = document.getElementById('prefijo');
+            const folio = document.getElementById('folio');
+            
+            // Validar cuando se completen los 3 campos (blur de los 3 campos)
+            nit.addEventListener('blur', validarLlaveFactura);
+            prefijo.addEventListener('blur', validarLlaveFactura);
+            folio.addEventListener('blur', validarLlaveFactura);
+            
+            // También validar con Enter en cualquiera de los 3 campos
+            nit.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    validarLlaveFactura();
+                }
+            });
+            prefijo.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    validarLlaveFactura();
+                }
+            });
+            folio.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    validarLlaveFactura();
+                }
+            });
+        }
+
+        async function validarLlaveFactura() {
+            const nit = document.getElementById('nitEmisor').value.trim();
+            const prefijo = document.getElementById('prefijo').value.trim().toUpperCase();
+            const folio = document.getElementById('folio').value.trim();
+
+            // CRÍTICO: Si faltan NIT o Folio, bloquear campos
+            if (!nit || !folio) {
+                bloquearCamposFormulario();
+                return;
+            }
+
+            try {
+                // 1. Validar en lista temporal local primero
+                const duplicadaLocal = facturasTemporales.some(f => 
+                    f.nit === nit && 
+                    f.prefijo.toUpperCase() === prefijo && 
+                    f.folio === folio
+                );
+                
+                if (duplicadaLocal) {
+                    bloquearCamposFormulario(); // ❌ BLOQUEAR si es duplicada
+                    mostrarModalDuplicada(
+                        `La factura ${prefijo}${folio} del NIT ${nit}`,
+                        'ya fue registrada anteriormente.',
+                        '📋 Está en LISTA TEMPORAL LOCAL',
+                        new Date().toLocaleDateString('es-CO')
+                    );
+                    return;
+                }
+
+                // 2. Validar en base de datos (facturas_digitales, facturas_recibidas, temporal BD)
+                const response = await fetch(
+                    `/facturas-digitales/validar_factura_registrada?nit=${nit}&prefijo=${prefijo}&folio=${folio}`
+                );
+                const data = await response.json();
+
+                if (data.registrada) {
+                    bloquearCamposFormulario(); // ❌ BLOQUEAR si es duplicada
+                    mostrarModalDuplicada(
+                        `La factura ${prefijo}${folio} del NIT ${nit}`,
+                        'ya fue registrada anteriormente.',
+                        data.en_digitales ? '📋 FACTURAS DIGITALES' : 
+                        data.en_recibidas ? '📋 FACTURAS RECIBIDAS' : 
+                        '📋 LISTA TEMPORAL (BD)',
+                        data.fecha
+                    );
+                } else {
+                    // ✅ CLAVE ÚNICA - DESBLOQUEAR campos
+                    desbloquearCamposFormulario();
+                    mostrarAlerta(`✅ Factura ${prefijo}${folio} disponible para registrar`, 'success');
+                }
+            } catch (error) {
+                console.error('Error al validar factura:', error);
+                bloquearCamposFormulario(); // Por seguridad, bloquear en caso de error
+                mostrarAlerta('❌ Error al validar factura duplicada', 'error');
+            }
+        }
+
+        function mostrarModalDuplicada(factura, mensaje, ubicacion, fecha) {
+            const modal = document.getElementById('modalDuplicada');
+            const mensajeElement = document.getElementById('mensajeDuplicada');
+            const detallesElement = document.getElementById('detallesDuplicada');
+            
+            mensajeElement.textContent = factura;
+            detallesElement.innerHTML = `
+                <p><strong>Estado:</strong> ${mensaje}</p>
+                <p><strong>Ubicación:</strong> ${ubicacion}</p>
+                <p><strong>Fecha:</strong> ${fecha}</p>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function cerrarModalDuplicada() {
+            const modal = document.getElementById('modalDuplicada');
+            modal.classList.add('hidden');
+        }
+
+        // ========================================
+        // FUNCIONES DE BLOQUEO/DESBLOQUEO DE CAMPOS
+        // ========================================
+        function bloquearCamposFormulario() {
+            // Bloquear todos los campos excepto NIT, Prefijo y Folio
+            document.getElementById('empresa').disabled = true;
+            document.getElementById('fechaExpedicion').disabled = true;
+            document.getElementById('tipoDocumento').disabled = true;
+            document.getElementById('formaPago').disabled = true;
+            document.getElementById('tipoServicio').disabled = true;
+            document.getElementById('departamento').disabled = true;
+            document.getElementById('valorBruto').disabled = true;
+            document.getElementById('valorIva').disabled = true;
+            document.getElementById('observaciones').disabled = true;
+            
+            // Bloquear inputs de archivos
+            document.getElementById('archivoPrincipal').disabled = true;
+            document.getElementById('archivosAnexos').disabled = true;
+            document.getElementById('archivoSeguridadSocial').disabled = true;
+            
+            // Bloquear zonas de drag & drop (visual)
+            document.getElementById('zonaPrincipal').classList.add('disabled');
+            document.getElementById('zonaAnexos').classList.add('disabled');
+            document.getElementById('zonaSeguridadSocial').classList.add('disabled');
+            
+            // Bloquear botón de adicionar
+            document.getElementById('btnAdicionar').disabled = true;
+        }
+
+        function desbloquearCamposFormulario() {
+            // Desbloquear todos los campos
+            document.getElementById('empresa').disabled = false;
+            document.getElementById('fechaExpedicion').disabled = false;
+            document.getElementById('tipoDocumento').disabled = false;
+            document.getElementById('formaPago').disabled = false;
+            document.getElementById('tipoServicio').disabled = false;
+            document.getElementById('departamento').disabled = false;
+            document.getElementById('valorBruto').disabled = false;
+            document.getElementById('valorIva').disabled = false;
+            document.getElementById('observaciones').disabled = false;
+            
+            // Desbloquear inputs de archivos
+            document.getElementById('archivoPrincipal').disabled = false;
+            document.getElementById('archivosAnexos').disabled = false;
+            document.getElementById('archivoSeguridadSocial').disabled = false;
+            
+            // Desbloquear zonas de drag & drop (visual)
+            document.getElementById('zonaPrincipal').classList.remove('disabled');
+            document.getElementById('zonaAnexos').classList.remove('disabled');
+            document.getElementById('zonaSeguridadSocial').classList.remove('disabled');
+            
+            // Desbloquear botón de adicionar
+            document.getElementById('btnAdicionar').disabled = false;
+        }
+
+        async function adicionarFactura() {
+            const form = document.getElementById('formFactura');
+            
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            const nit = document.getElementById('nitEmisor').value.trim();
+            const prefijo = document.getElementById('prefijo').value.trim().toUpperCase();
+            const folio = document.getElementById('folio').value.trim();
+
+            // Validar duplicado antes de adicionar
+            try {
+                // 1. Validar en lista temporal local
+                const duplicadaLocal = facturasTemporales.some(f => 
+                    f.nit === nit && 
+                    f.prefijo.toUpperCase() === prefijo && 
+                    f.folio === folio
+                );
+                
+                if (duplicadaLocal) {
+                    mostrarModalDuplicada(
+                        `La factura ${prefijo}${folio} del NIT ${nit}`,
+                        'ya fue registrada anteriormente.',
+                        '📋 Está en LISTA TEMPORAL LOCAL',
+                        new Date().toLocaleDateString('es-CO')
+                    );
+                    return;
+                }
+
+                // 2. Validar en base de datos
+                const response = await fetch(
+                    `/facturas-digitales/validar_factura_registrada?nit=${nit}&prefijo=${prefijo}&folio=${folio}`
+                );
+                const data = await response.json();
+
+                if (data.registrada) {
+                    mostrarModalDuplicada(
+                        `La factura ${prefijo}${folio} del NIT ${nit}`,
+                        'ya fue registrada anteriormente.',
+                        data.en_digitales ? '📋 FACTURAS DIGITALES' : 
+                        data.en_recibidas ? '📋 FACTURAS RECIBIDAS' : 
+                        '📋 LISTA TEMPORAL (BD)',
+                        data.fecha
+                    );
+                    return;
+                }
+            } catch (error) {
+                console.error('Error validando duplicado:', error);
+                mostrarAlerta('Error al validar duplicado', 'error');
+                return;
+            }
+
+            const factura = {
+                id: Date.now(),
+                nit: nit,
+                razonSocial: document.getElementById('razonSocial').value,
+                prefijo: prefijo,
+                folio: folio,
+                empresa: document.getElementById('empresa').options[document.getElementById('empresa').selectedIndex].text,
+                empresaId: document.getElementById('empresa').value,
+                fechaExpedicion: document.getElementById('fechaExpedicion').value,
+                fechaRadicacion: document.getElementById('fechaRadicacion').value,
+                tipoDocumento: document.getElementById('tipoDocumento').value,
+                formaPago: document.getElementById('formaPago').value,
+                tipoServicio: document.getElementById('tipoServicio').value,
+                departamento: document.getElementById('departamento').value,
+                valorBruto: parseFloat(document.getElementById('valorBruto').value),
+                valorIva: parseFloat(document.getElementById('valorIva').value),
+                valorTotal: parseFloat(document.getElementById('valorTotal').value),
+                observaciones: document.getElementById('observaciones').value,
+                archivoPrincipal: document.getElementById('archivoPrincipal').files[0],
+                anexos: [...anexosTemp],
+                seguridadSocial: document.getElementById('archivoSeguridadSocial').files[0] || null
+            };
+
+            facturasTemporales.push(factura);
+            mostrarFacturas();
+            limpiarFormulario();
+            mostrarAlerta('Factura adicionada al listado correctamente', 'success');
+        }
+
+        function mostrarFacturas() {
+            const tbody = document.getElementById('bodyFacturas');
+            
+            if (facturasTemporales.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-secondary);">No hay facturas en el listado temporal</td></tr>`;
+                document.getElementById('btnRadicar').disabled = true;
+                return;
+            }
+
+            tbody.innerHTML = facturasTemporales.map(f => `
+                <tr>
+                    <td><input type="checkbox" class="checkbox factura-check" value="${f.id}"></td>
+                    <td>${f.nit}</td>
+                    <td>${f.prefijo ? f.prefijo + '-' : ''}${f.folio}</td>
+                    <td style="text-align: right;">$${f.valorTotal.toLocaleString('es-CO', {minimumFractionDigits: 2})}</td>
+                    <td title="${f.razonSocial}">
+                        <div style="font-weight: 600; color: #166534; font-size: 0.95em; margin-bottom: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${f.razonSocial}</div>
+                        <div style="font-size: 0.85em; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${f.empresa || 'Sin empresa'}</div>
+                    </td>
+                    <td>${f.departamento}</td>
+                    <td>Principal${f.anexos.length > 0 ? ` + ${f.anexos.length}` : ''}${f.seguridadSocial ? ' + SS' : ''}</td>
+                    <td style="text-align: center; white-space: nowrap; padding: 4px;"><button type="button" class="btn btn-secondary" style="padding: 4px 8px; font-size: 0.75rem; display: inline-block; margin: 0 2px;" onclick="removerFactura(${f.id})">✕</button></td>
+                </tr>
+            `).join('');
+
+            document.getElementById('btnRadicar').disabled = false;
+        }
+
+        function removerFactura(id) {
+            facturasTemporales = facturasTemporales.filter(f => f.id !== id);
+            mostrarFacturas();
+        }
+
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.factura-check');
+            checkboxes.forEach(cb => cb.checked = selectAll.checked);
+        }
+
+        async function radicarFacturas() {
+            const checkboxes = document.querySelectorAll('.factura-check:checked');
+            
+            if (checkboxes.length === 0) {
+                mostrarAlerta('Debe seleccionar al menos una factura', 'warning');
+                return;
+            }
+
+            if (!confirm(`¿Está seguro de radicar ${checkboxes.length} factura(s)?`)) {
+                return;
+            }
+
+            const idsSeleccionados = Array.from(checkboxes).map(cb => parseInt(cb.value));
+            const facturasRadicar = facturasTemporales.filter(f => idsSeleccionados.includes(f.id));
+
+            // 🔧 RASTREAR FACTURAS EXITOSAS Y FALLIDAS
+            const facturasExitosas = [];
+            const facturasFallidas = [];
+
+            for (const factura of facturasRadicar) {
+                const formData = new FormData();
+                
+                Object.keys(factura).forEach(key => {
+                    if (key !== 'archivoPrincipal' && key !== 'anexos' && key !== 'seguridadSocial' && key !== 'id' && key !== 'empresa' && key !== 'empresaId') {
+                        formData.append(key, factura[key]);
+                    }
+                });
+                
+                // Enviar empresaId como 'empresa' (la sigla, no el nombre completo)
+                formData.append('empresa', factura.empresaId);
+
+                formData.append('archivo_principal', factura.archivoPrincipal);
+                factura.anexos.forEach((anexo, i) => {
+                    formData.append(`anexo_${i}`, anexo);
+                });
+                if (factura.seguridadSocial) {
+                    formData.append('seguridad_social', factura.seguridadSocial);
+                }
+
+                try {
+                    const response = await fetch('/facturas-digitales/api/radicar', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // ✅ ÉXITO: Marcar para eliminar
+                        facturasExitosas.push(factura.id);
+                        console.log(`✅ Factura ${factura.folio} radicada correctamente`);
+                    } else {
+                        // ❌ ERROR: Mantener en el listado
+                        facturasFallidas.push({id: factura.id, error: data.message});
+                        mostrarAlerta(`❌ Error radicando factura ${factura.folio}: ${data.message}`, 'error');
+                    }
+                } catch (error) {
+                    // ❌ EXCEPCIÓN: Mantener en el listado
+                    console.error('Error:', error);
+                    facturasFallidas.push({id: factura.id, error: error.message});
+                    mostrarAlerta(`❌ Error de conexión radicando factura ${factura.folio}`, 'error');
+                }
+            }
+
+            // 🔧 SOLO ELIMINAR FACTURAS EXITOSAS
+            if (facturasExitosas.length > 0) {
+                facturasTemporales = facturasTemporales.filter(f => !facturasExitosas.includes(f.id));
+                mostrarFacturas();
+                mostrarAlerta(`✅ ${facturasExitosas.length} factura(s) radicada(s) correctamente`, 'success');
+            }
+
+            // ⚠️ MOSTRAR RESUMEN SI HAY FALLOS
+            if (facturasFallidas.length > 0) {
+                console.warn('Facturas fallidas:', facturasFallidas);
+                mostrarAlerta(`⚠️ ${facturasFallidas.length} factura(s) NO fueron radicadas. Revise los errores.`, 'warning');
+            }
+        }
+
+        function limpiarFormulario() {
+            // 🔒 PRESERVAR NIT Y RAZÓN SOCIAL PARA USUARIOS EXTERNOS
+            const tipoUsuario = "{{ tipo_usuario|default('interno') }}";
+            const nitUsuario = "{{ nit_usuario|default('') }}";
+            const inputNit = document.getElementById('nitEmisor');
+            const razonSocialInput = document.getElementById('razonSocial');
+            
+            // Guardar valores si es usuario externo
+            const preservarNit = (tipoUsuario === 'externo' && nitUsuario);
+            const nitGuardado = preservarNit ? inputNit.value : '';
+            const razonGuardada = preservarNit ? razonSocialInput.value : '';
+            
+            // Limpiar formulario
+            document.getElementById('formFactura').reset();
+            razonSocialInput.value = '';
+            document.getElementById('infoPrincipal').classList.add('hidden');
+            document.getElementById('listaAnexos').classList.add('hidden');
+            document.getElementById('infoSeguridadSocial').classList.add('hidden');
+            anexosTemp = [];
+            establecerFechaRadicacion();
+            document.getElementById('charCount').textContent = '0';
+            
+            // ✅ RESTAURAR NIT Y RAZÓN SOCIAL PARA USUARIOS EXTERNOS
+            if (preservarNit) {
+                inputNit.value = nitGuardado;
+                razonSocialInput.value = razonGuardada;
+                inputNit.readOnly = true;
+                inputNit.style.backgroundColor = '#f3f4f6';
+                inputNit.style.cursor = 'not-allowed';
+                console.log('✅ NIT preservado después de limpiar:', nitGuardado);
+            }
+            
+            // IMPORTANTE: Volver a bloquear campos después de limpiar
+            bloquearCamposFormulario();
+        }
+
+        function limpiarListado() {
+            if (facturasTemporales.length > 0 && !confirm('¿Está seguro de limpiar el listado?')) {
+                return;
+            }
+            facturasTemporales = [];
+            mostrarFacturas();
+        }
+
+        function mostrarAlerta(mensaje, tipo) {
+            const container = document.getElementById('alertContainer');
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${tipo}`;
+            alert.textContent = mensaje;
+            container.appendChild(alert);
+            setTimeout(() => alert.remove(), 5000);
+        }
+
+        function cerrarSesion() {
+            fetch('/api/auth/logout', { method: 'POST' })
+                .then(() => window.location.href = '/');
+        }
+
+        // ✏️ ========== SISTEMA DE EDICIÓN DE FACTURAS (USUARIO INTERNO) ==========
+        
+        let modoEdicion = false;
+        let facturaEditandoId = null;
+
+        function detectarModoEdicion() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const editarId = urlParams.get('editar');
+            
+            if (editarId) {
+                console.log('✏️ MODO EDICIÓN activado para factura ID:', editarId);
+                modoEdicion = true;
+                facturaEditandoId = editarId;
+                
+                // Ocultar sección de listado temporal (no necesario en edición)
+                const seccionListado = document.querySelector('.card:has(#tablaFacturas)');
+                if (seccionListado) {
+                    seccionListado.style.display = 'none';
+                }
+                
+                // Cargar datos de la factura
+                setTimeout(() => {
+                    cargarFacturaParaEditar(editarId);
+                }, 1000); // Esperar a que se carguen los catálogos
+            }
+        }
+
+        async function cargarFacturaParaEditar(id) {
+            try {
+                console.log('📥 Cargando factura para editar, ID:', id);
+                
+                const response = await fetch(`/facturas-digitales/api/factura/${id}`);
+                const data = await response.json();
+                
+                if (!data.success) {
+                    mostrarAlerta('❌ Error cargando factura: ' + data.message, 'error');
+                    console.error('Error:', data.message);
+                    return;
+                }
+                
+                const f = data.factura;
+                console.log('✅ Datos de factura recibidos:', f);
+                
+                // Llenar todos los campos del formulario
+                document.getElementById('nitEmisor').value = f.nit || '';
+                document.getElementById('nitEmisor').readOnly = true;
+                document.getElementById('razonSocial').value = f.razon_social || '';
+                document.getElementById('prefijo').value = f.prefijo || '';
+                document.getElementById('folio').value = f.folio || '';
+                document.getElementById('empresaSelect').value = f.empresa || '';
+                document.getElementById('fechaExpedicion').value = f.fecha_expedicion || '';
+                document.getElementById('fechaRadicacion').value = f.fecha_radicacion || '';
+                document.getElementById('tipoDocumento').value = f.tipo_documento || '';
+                document.getElementById('formaPago').value = f.forma_pago || '';
+                document.getElementById('tipoServicio').value = f.tipo_servicio || '';
+                document.getElementById('departamento').value = f.departamento || '';
+                document.getElementById('valorBruto').value = f.valor_bruto || '';
+                document.getElementById('valorIva').value = f.valor_iva || '';
+                document.getElementById('valorTotal').value = f.valor_total || '';
+                document.getElementById('observaciones').value = f.observaciones || '';
+                
+                // Actualizar contador de caracteres
+                document.getElementById('charCount').textContent = (f.observaciones || '').length;
+                
+                // Mostrar archivos existentes
+                mostrarArchivosExistentes(f.archivos);
+                
+                // Cambiar botón a modo actualización
+                const btnAgregar = document.getElementById('btnAgregarFactura');
+                if (btnAgregar) {
+                    btnAgregar.textContent = '🔄 Actualizar Documento';
+                    btnAgregar.onclick = function(e) {
+                        e.preventDefault();
+                        actualizarFactura(id);
+                    };
+                    btnAgregar.classList.add('btn-warning');
+                }
+                
+                mostrarAlerta('✅ Factura cargada para edición. Complete los campos faltantes y haga clic en "Actualizar Documento".', 'info');
+                
+            } catch (error) {
+                console.error('❌ Error al cargar factura:', error);
+                mostrarAlerta('❌ Error de conexión al cargar factura: ' + error.message, 'error');
+            }
+        }
+
+        function mostrarArchivosExistentes(archivos) {
+            console.log('📎 Mostrando archivos existentes:', archivos);
+            
+            // Buscar o crear contenedores de información de archivos
+            let infoPrincipal = document.getElementById('infoPrincipal');
+            let listaAnexos = document.getElementById('listaAnexos');
+            let infoSS = document.getElementById('infoSeguridadSocial');
+            
+            // Si no existen, crearlos
+            if (!infoPrincipal) {
+                infoPrincipal = document.createElement('div');
+                infoPrincipal.id = 'infoPrincipal';
+                infoPrincipal.style.marginTop = '10px';
+                document.querySelector('label[for="pdfPrincipal"]').parentElement.appendChild(infoPrincipal);
+            }
+            
+            if (!listaAnexos) {
+                listaAnexos = document.createElement('div');
+                listaAnexos.id = 'listaAnexos';
+                listaAnexos.style.marginTop = '10px';
+                const anexosSection = document.querySelector('.anexos-container');
+                if (anexosSection) {
+                    anexosSection.appendChild(listaAnexos);
+                }
+            }
+            
+            if (!infoSS) {
+                infoSS = document.createElement('div');
+                infoSS.id = 'infoSeguridadSocial';
+                infoSS.style.marginTop = '10px';
+                document.querySelector('label[for="pdfSeguridadSocial"]').parentElement.appendChild(infoSS);
+            }
+            
+            // Mostrar archivo principal
+            if (archivos.principal) {
+                infoPrincipal.innerHTML = `
+                    <div style="padding: 10px; background: #e8f5e9; border-radius: 4px; border: 2px solid #4caf50;">
+                        <strong>✅ Archivo principal existente:</strong><br>
+                        <span style="font-family: monospace; color: #166534;">${archivos.principal}</span>
+                        <div style="font-size: 0.85em; color: #666; margin-top: 5px;">
+                            Este archivo se mantendrá al actualizar (no es necesario cargarlo nuevamente)
+                        </div>
+                    </div>`;
+                infoPrincipal.classList.remove('hidden');
+            }
+            
+            // Mostrar anexos
+            if (archivos.anexos && archivos.anexos.length > 0) {
+                listaAnexos.innerHTML = `
+                    <div style="padding: 10px; background: #e3f2fd; border-radius: 4px; border: 2px solid #2196f3;">
+                        <strong>📎 Anexos existentes (${archivos.anexos.length}):</strong><br>
+                        ${archivos.anexos.map(a => `
+                            <div style="padding: 4px 8px; margin: 4px 0; background: white; border-radius: 3px;">
+                                ${a}
+                            </div>
+                        `).join('')}
+                        <div style="font-size: 0.85em; color: #666; margin-top: 5px;">
+                            Estos archivos se mantendrán. Puede agregar más anexos si lo necesita.
+                        </div>
+                    </div>`;
+                listaAnexos.classList.remove('hidden');
+            }
+            
+            // Mostrar seguridad social
+            if (archivos.seguridad_social) {
+                infoSS.innerHTML = `
+                    <div style="padding: 10px; background: #fff3e0; border-radius: 4px; border: 2px solid #ff9800;">
+                        <strong>🏥 Seguridad Social existente:</strong><br>
+                        <span style="font-family: monospace; color: #e65100;">${archivos.seguridad_social}</span>
+                        <div style="font-size: 0.85em; color: #666; margin-top: 5px;">
+                            Este archivo se mantendrá al actualizar
+                        </div>
+                    </div>`;
+                infoSS.classList.remove('hidden');
+            }
+        }
+
+        async function actualizarFactura(id) {
+            console.log('🔄 Actualizando factura ID:', id);
+            
+            // Validar campos obligatorios para completar
+            const empresa = document.getElementById('empresaSelect').value;
+            const departamento = document.getElementById('departamento').value;
+            const formaPago = document.getElementById('formaPago').value;
+            const tipoDocumento = document.getElementById('tipoDocumento').value;
+            const tipoServicio = document.getElementById('tipoServicio').value;
+            
+            if (!empresa || !departamento || !formaPago || !tipoDocumento || !tipoServicio) {
+                mostrarAlerta('❌ Por favor complete todos los campos obligatorios (Empresa, Departamento, Forma de Pago, Tipo Documento, Tipo Servicio)', 'error');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('empresa', empresa);
+            formData.append('departamento', departamento);
+            formData.append('formaPago', formaPago);
+            formData.append('tipoDocumento', tipoDocumento);
+            formData.append('tipoServicio', tipoServicio);
+            formData.append('observaciones', document.getElementById('observaciones').value);
+            
+            try {
+                mostrarAlerta('⏳ Actualizando factura...', 'info');
+                
+                const response = await fetch(`/facturas-digitales/api/factura/${id}/actualizar`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarAlerta('✅ Factura actualizada correctamente. Archivos movidos a ubicación final. Redirigiendo al dashboard...', 'success');
+                    console.log('✅ Factura actualizada exitosamente');
+                    
+                    setTimeout(() => {
+                        window.location.href = '/facturas-digitales/dashboard';
+                    }, 2000);
+                } else {
+                    mostrarAlerta('❌ Error al actualizar: ' + data.message, 'error');
+                    console.error('Error:', data.message);
+                }
+            } catch (error) {
+                console.error('❌ Error de conexión:', error);
+                mostrarAlerta('❌ Error de conexión al actualizar factura: ' + error.message, 'error');
+            }
+        }
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+</body>
+</html>

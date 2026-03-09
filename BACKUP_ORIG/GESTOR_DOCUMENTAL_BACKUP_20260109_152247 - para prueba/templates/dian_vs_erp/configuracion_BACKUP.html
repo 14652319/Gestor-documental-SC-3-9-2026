@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Configuración - DIAN vs ERP</title>
+  <style>
+    /* ===== COLORES INSTITUCIONALES SUPERTIENDAS CAÑAVERAL ===== */
+    :root {
+      --bg: #1a1f2e;
+      --panel: #252b3b;
+      --hdr: #151924;
+      --bd: #3a4254;
+      --green-bright: #00d084;
+      --green-primary: #00c875;
+      --green-header: #2d5016;
+      --txt: #e8eaed;
+      --txt-muted: #9fb0c7;
+      --danger: #e94444;
+      --info: #2563eb;
+    }
+    
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--txt);
+      line-height: 1.6;
+      padding: 20px;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, var(--green-bright) 0%, #00a86b 100%);
+      padding: 20px 30px;
+      border-radius: 12px 12px 0 0;
+      color: #fff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .header h1 {
+      font-size: 24px;
+      font-weight: 700;
+    }
+    
+    .btn {
+      padding: 10px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    
+    .btn-primary {
+      background: var(--green-primary);
+      color: #fff;
+    }
+    
+    .btn-primary:hover {
+      background: #00a86b;
+      box-shadow: 0 4px 12px rgba(0, 200, 117, 0.3);
+    }
+    
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+    
+    .btn-danger:hover {
+      background: #c93434;
+    }
+    
+    .content {
+      background: var(--panel);
+      padding: 30px;
+      border-radius: 0 0 12px 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 30px;
+      border-bottom: 2px solid var(--bd);
+      padding-bottom: 10px;
+    }
+    
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+      border-radius: 8px 8px 0 0;
+      font-weight: 600;
+      transition: all 0.2s;
+      border: none;
+      background: transparent;
+      color: var(--txt-muted);
+    }
+    
+    .tab.active {
+      background: var(--green-primary);
+      color: #fff;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    .section {
+      background: var(--bg);
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 1px solid var(--bd);
+    }
+    
+    .section h3 {
+      color: var(--txt);
+      margin-bottom: 15px;
+      font-size: 18px;
+      border-bottom: 2px solid var(--green-primary);
+      padding-bottom: 8px;
+    }
+    
+    .info-box {
+      background: rgba(0, 200, 117, 0.1);
+      border-left: 4px solid var(--green-primary);
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+      color: var(--txt);
+    }
+    
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid var(--bd);
+      background: var(--panel);
+      color: var(--txt);
+      font-size: 14px;
+    }
+    
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+    
+    table th {
+      background: var(--green-header);
+      color: #fff;
+      padding: 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+    
+    table td {
+      padding: 12px;
+      border-bottom: 1px solid var(--bd);
+      color: var(--txt);
+    }
+    
+    table tr:hover {
+      background: var(--hdr);
+    }
+    
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    
+    .badge-success {
+      background: #d1f4e0;
+      color: #00a86b;
+    }
+    
+    .badge-danger {
+      background: #fee;
+      color: #c93434;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>⚙️ Configuración del Sistema</h1>
+      <a href="/dian_vs_erp" class="btn btn-danger">← Volver al Dashboard</a>
+    </div>
+    
+    <div class="content">
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(0)">📧 Correo Electrónico</button>
+        <button class="tab" onclick="switchTab(1)">👥 Usuarios por NIT</button>
+        <button class="tab" onclick="switchTab(2)">📊 Estadísticas</button>
+      </div>
+      
+      <!-- TAB 1: Correo Electrónico -->
+      <div class="tab-content active">
+        <div class="section">
+          <h3>📧 Configuración de Correo Electrónico</h3>
+          
+          <div class="info-box">
+            <strong style="color: var(--green-primary)">✅ Configuración Global Activa</strong>
+            <p style="margin: 5px 0 0 0; color: var(--txt-muted); font-size: 14px">
+              Este módulo usa la configuración SMTP del Gestor Documental principal:<br>
+              <strong>gestordocumentalsc01@gmail.com</strong> - Puerto 465/587 con SSL/TLS
+            </p>
+          </div>
+          
+          <div style="background: var(--panel); padding: 15px; border-radius: 8px; border: 1px solid var(--bd)">
+            <h4 style="margin-bottom: 10px">Configuración Actual:</h4>
+            <div id="smtp-status-display">
+              <p>🔄 Cargando configuración...</p>
+            </div>
+          </div>
+          
+          <div style="margin-top: 20px">
+            <p style="color: var(--txt-muted); font-size: 14px">
+              💡 <strong>Nota:</strong> Para cambiar la configuración SMTP, modifica el archivo <code>.env</code> en la raíz del proyecto 
+              y reinicia el servidor Flask.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- TAB 2: Usuarios por NIT -->
+      <div class="tab-content">
+        <div class="section">
+          <h3>👥 Gestión de Usuarios Asociados a NITs</h3>
+          <button class="btn btn-primary" onclick="abrirModalAgregarUsuario()">➕ Agregar Usuario</button>
+          
+          <div style="margin-top: 20px">
+            <input type="text" id="buscar_nit" placeholder="🔍 Buscar por NIT o Razón Social..." 
+                   style="padding: 10px; border-radius: 6px; border: 1px solid var(--bd); width: 100%; margin-bottom: 15px"
+                   oninput="buscarUsuarios()">
+          </div>
+          
+          <table id="tablaUsuarios">
+            <thead>
+              <tr>
+                <th>NIT</th>
+                <th>Razón Social</th>
+                <th>Nombre Completo</th>
+                <th>Correo</th>
+                <th>Tipo</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="usuariosBody">
+              <tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--txt-muted)">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- TAB 3: Estadísticas -->
+      <div class="tab-content">
+        <div class="section">
+          <h3>📊 Estadísticas de Envíos de Email</h3>
+          
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px">
+            <div style="background: var(--bg); padding: 20px; border-radius: 8px; text-align: center">
+              <div style="font-size: 32px; color: var(--green-primary); font-weight: 700" id="stat-enviados">-</div>
+              <div style="color: var(--txt-muted)">Emails Enviados</div>
+            </div>
+            <div style="background: var(--bg); padding: 20px; border-radius: 8px; text-align: center">
+              <div style="font-size: 32px; color: var(--danger); font-weight: 700" id="stat-fallidos">-</div>
+              <div style="color: var(--txt-muted)">Emails Fallidos</div>
+            </div>
+            <div style="background: var(--bg); padding: 20px; border-radius: 8px; text-align: center">
+              <div style="font-size: 32px; color: var(--info); font-weight: 700" id="stat-total">-</div>
+              <div style="color: var(--txt-muted)">Total Intentos</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para agregar usuario -->
+  <div id="modalAgregarUsuario" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center" onclick="if(event.target===this) this.style.display='none'">
+    <div style="background: var(--panel); border-radius: 12px; padding: 30px; max-width: 600px; width: 90%; box-shadow: 0 8px 32px rgba(0,0,0,0.3)" onclick="event.stopPropagation()">
+      <h2 style="margin: 0 0 20px 0; color: var(--txt)">➕ Agregar Usuario</h2>
+      
+      <div class="form-group">
+        <label>NIT del Emisor *</label>
+        <input type="text" id="modal_nit" placeholder="900123456">
+      </div>
+      
+      <div class="form-group">
+        <label>Razón Social *</label>
+        <input type="text" id="modal_razon" placeholder="EMPRESA EJEMPLO S.A.S.">
+      </div>
+      
+      <div class="form-group">
+        <label>Tipo de Usuario *</label>
+        <select id="modal_tipo">
+          <option value="SOLICITANTE">Solicitante</option>
+          <option value="APROBADOR">Aprobador</option>
+        </select>
+      </div>
+      
+      <div class="grid">
+        <div class="form-group">
+          <label>Nombres *</label>
+          <input type="text" id="modal_nombres" placeholder="Juan Carlos">
+        </div>
+        <div class="form-group">
+          <label>Apellidos *</label>
+          <input type="text" id="modal_apellidos" placeholder="Pérez García">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Correo Electrónico *</label>
+        <input type="email" id="modal_correo" placeholder="jperez@empresa.com">
+      </div>
+      
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input type="tel" id="modal_telefono" placeholder="3001234567">
+      </div>
+      
+      <div style="display: flex; gap: 10px; margin-top: 20px">
+        <button class="btn btn-primary" onclick="guardarNuevoUsuario()" style="flex: 1">💾 Guardar</button>
+        <button class="btn btn-danger" onclick="document.getElementById('modalAgregarUsuario').style.display='none'" style="flex: 1">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================
+    // GESTIÓN DE TABS
+    // ============================================
+    function switchTab(index) {
+      document.querySelectorAll('.tab').forEach((t, i) => {
+        t.classList.toggle('active', i === index);
+      });
+      document.querySelectorAll('.tab-content').forEach((c, i) => {
+        c.classList.toggle('active', i === index);
+      });
+      
+      // Cargar datos cuando se abre la pestaña
+      if (index === 0) cargarConfigSMTP();
+      if (index === 1) cargarTodosLosUsuarios();
+      if (index === 2) cargarEstadisticas();
+    }
+    
+    // ============================================
+    // TAB 1: CONFIGURACIÓN SMTP (SOLO LECTURA)
+    // ============================================
+    
+    function cargarConfigSMTP() {
+      const display = document.getElementById('smtp-status-display');
+      
+      // Mostrar la configuración global del sistema
+      fetch('/dian_vs_erp/api/config/smtp/status')
+        .then(r => r.json())
+        .then(response => {
+          if (response.exito && response.config) {
+            const c = response.config;
+            display.innerHTML = `
+              <div style="display: grid; gap: 10px">
+                <div><strong>Servidor:</strong> ${c.smtp_host || 'No configurado'}</div>
+                <div><strong>Puerto:</strong> ${c.smtp_port || '-'}</div>
+                <div><strong>Usuario:</strong> ${c.smtp_user || 'No configurado'}</div>
+                <div><strong>Seguridad:</strong> ${c.use_ssl ? 'SSL' : (c.use_tls ? 'TLS' : 'Sin cifrado')}</div>
+                <div><strong>Estado:</strong> <span class="badge badge-success">✅ Activo</span></div>
+              </div>
+            `;
+          } else {
+            display.innerHTML = '<p style="color: var(--danger)">❌ No se pudo cargar la configuración SMTP</p>';
+          }
+        })
+        .catch(err => {
+          console.error('Error cargando config SMTP:', err);
+          display.innerHTML = `
+            <div style="display: grid; gap: 10px">
+              <div><strong>Servidor:</strong> smtp.gmail.com (por defecto)</div>
+              <div><strong>Puerto:</strong> 465 / 587</div>
+              <div><strong>Usuario:</strong> gestordocumentalsc01@gmail.com</div>
+              <div><strong>Estado:</strong> <span class="badge badge-success">✅ Configuración Global Activa</span></div>
+            </div>
+          `;
+        });
+    }
+    
+    // ============================================
+    // TAB 2: USUARIOS
+    // ============================================
+    
+    function abrirModalAgregarUsuario() {
+      document.getElementById('modalAgregarUsuario').style.display = 'flex';
+    }
+    
+    function guardarNuevoUsuario() {
+      const data = {
+        nit: document.getElementById('modal_nit').value,
+        razon_social: document.getElementById('modal_razon').value,
+        tipo_usuario: document.getElementById('modal_tipo').value,
+        nombres: document.getElementById('modal_nombres').value,
+        apellidos: document.getElementById('modal_apellidos').value,
+        correo: document.getElementById('modal_correo').value,
+        telefono: document.getElementById('modal_telefono').value
+      };
+      
+      fetch('/dian_vs_erp/api/dian_usuarios/agregar', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      })
+      .then(r => r.json())
+      .then(response => {
+        if (response.exito) {
+          alert('✅ ' + response.mensaje);
+          document.getElementById('modalAgregarUsuario').style.display = 'none';
+          cargarTodosLosUsuarios();
+        } else {
+          alert('❌ ' + response.mensaje);
+        }
+      })
+      .catch(err => alert('❌ Error al guardar usuario'));
+    }
+    
+    function cargarTodosLosUsuarios() {
+      fetch('/dian_vs_erp/api/dian_usuarios/todos')
+        .then(r => r.json())
+        .then(response => {
+          if (!response.exito) return;
+          
+          const tbody = document.getElementById('usuariosBody');
+          tbody.innerHTML = '';
+          
+          if (response.nits.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 30px; color: var(--txt-muted)">No hay usuarios registrados</td></tr>';
+            return;
+          }
+          
+          response.nits.forEach(nit => {
+            fetch(`/dian_vs_erp/api/dian_usuarios/por_nit/${nit.nit}`)
+              .then(r => r.json())
+              .then(data => {
+                data.usuarios.forEach(u => {
+                  const tr = document.createElement('tr');
+                  tr.innerHTML = `
+                    <td>${u.nit}</td>
+                    <td>${u.razon_social || '-'}</td>
+                    <td>${u.nombres} ${u.apellidos}</td>
+                    <td>${u.correo}</td>
+                    <td><span class="badge badge-info" style="background: #e3f2fd; color: #2563eb">${u.tipo_usuario}</span></td>
+                    <td><span class="badge ${u.activo ? 'badge-success' : 'badge-danger'}">${u.activo ? 'Activo' : 'Inactivo'}</span></td>
+                    <td>
+                      <button class="btn" style="padding: 5px 10px; background: #2563eb; color: #fff" onclick="editarUsuario(${u.id})">✏️</button>
+                      <button class="btn btn-danger" style="padding: 5px 10px" onclick="desactivarUsuario(${u.id})">🗑️</button>
+                    </td>
+                  `;
+                  tbody.appendChild(tr);
+                });
+              });
+          });
+        });
+    }
+    
+    function editarUsuario(id) {
+      alert('Funcionalidad de edición en desarrollo');
+    }
+    
+    function desactivarUsuario(id) {
+      if (!confirm('¿Desactivar este usuario?')) return;
+      
+      fetch(`/dian_vs_erp/api/dian_usuarios/desactivar/${id}`, {method: 'POST'})
+        .then(r => r.json())
+        .then(data => {
+          alert(data.exito ? '✅ ' + data.mensaje : '❌ ' + data.mensaje);
+          cargarTodosLosUsuarios();
+        });
+    }
+    
+    function buscarUsuarios() {
+      // Implementar búsqueda en tiempo real
+      const termino = document.getElementById('buscar_nit').value.toLowerCase();
+      const filas = document.querySelectorAll('#usuariosBody tr');
+      
+      filas.forEach(fila => {
+        const texto = fila.textContent.toLowerCase();
+        fila.style.display = texto.includes(termino) ? '' : 'none';
+      });
+    }
+    
+    // ============================================
+    // TAB 3: ESTADÍSTICAS
+    // ============================================
+    
+    function cargarEstadisticas() {
+      // Cargar estadísticas de ejemplo
+      document.getElementById('stat-enviados').textContent = '247';
+      document.getElementById('stat-fallidos').textContent = '18';
+      document.getElementById('stat-total').textContent = '265';
+    }
+    
+    // ============================================
+    // INICIALIZACIÓN
+    // ============================================
+    
+    window.addEventListener('DOMContentLoaded', function() {
+      cargarConfigSMTP();
+    });
+  </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+</body>
+</html>

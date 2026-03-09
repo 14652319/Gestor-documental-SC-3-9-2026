@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="version-timestamp" content="04-ENE-2026-14:45:00">
+    <title>🚀🚀🚀 SELECCIÓN MÚLTIPLE ACTIVA v3.0 🚀🚀🚀 | DIAN vs ERP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg: #1a1f2e;
+            --panel: #252b3b;
+            --hdr: #151924;
+            --bd: #3a4254;
+            --green-bright: #00d084;
+            --green-primary: #00c875;
+            --green-header: #2d5016;
+            --txt: #e8eaed;
+            --txt-muted: #9fb0c7;
+            --danger: #e94444;
+            --info: #2563eb;
+        }
+
+        body.light-mode {
+            --bg: #f8fafc;
+            --panel: #ffffff;
+            --hdr: #f1f5f9;
+            --bd: #e2e8f0;
+            --txt: #1a202c;
+            --txt-muted: #718096;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+            background: var(--bg);
+            color: var(--txt);
+            line-height: 1.6;
+            padding: 20px;
+            transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--green-bright) 0%, #00a86b 100%);
+            padding: 20px 30px;
+            border-radius: 12px 12px 0 0;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .main-card {
+            background: var(--panel);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            overflow: hidden;
+            border: 1px solid var(--bd);
+        }
+
+        .card {
+            background: var(--panel);
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid var(--bd);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--green-primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: var(--green-bright);
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .theme-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .theme-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.2);
+            transition: 0.4s;
+            border-radius: 30px;
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background: #fff;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background: var(--green-bright);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(30px);
+        }
+
+        .theme-icon {
+            font-size: 18px;
+            margin-left: 10px;
+        }
+        .upload-zone {
+            border: 3px dashed var(--bd);
+            border-radius: 12px;
+            background: var(--hdr);
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--green-primary);
+            background: var(--panel);
+        }
+
+        .upload-zone.dragover {
+            border-color: var(--green-bright);
+            background: rgba(0, 200, 117, 0.1);
+            transform: scale(1.02);
+        }
+
+        .file-preview {
+            background: var(--hdr);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-left: 4px solid var(--green-primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--bd);
+        }
+
+        .progress-container {
+            background: var(--hdr);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            display: none;
+            border: 1px solid var(--bd);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bd);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 0.5rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--green-primary), var(--green-bright));
+            transition: width 0.3s ease;
+        }
+
+        .file-type-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-dian {
+            background: rgba(231, 76, 60, 0.1);
+            color: #e74c3c;
+            border: 1px solid rgba(231, 76, 60, 0.3);
+        }
+
+        .badge-erp {
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+            border: 1px solid rgba(37, 99, 235, 0.3);
+        }
+
+        .status-success {
+            color: var(--green-primary);
+        }
+
+        .status-error {
+            color: var(--danger);
+        }
+
+        .status-warning {
+            color: #f39c12;
+        }
+
+        .grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .grid-2 {
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        }
+
+        .grid-1 {
+            grid-template-columns: 1fr;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--bd);
+            border-radius: 8px;
+            background: var(--hdr);
+            color: var(--txt);
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--green-primary);
+        }
+
+        .label {
+            display: block;
+            color: var(--txt);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: rgba(0, 200, 117, 0.1);
+            color: var(--green-primary);
+            border-left-color: var(--green-primary);
+        }
+
+        .alert-error {
+            background: rgba(231, 76, 60, 0.1);
+            color: var(--danger);
+            border-left-color: var(--danger);
+        }
+
+        .alert-info {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--info);
+            border-left-color: var(--info);
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--panel);
+            border: 1px solid var(--bd);
+            border-radius: 8px;
+            padding: 16px;
+            min-width: 300px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+            z-index: 1000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-1 {
+            flex: 1;
+        }
+
+        .items-center {
+            align-items: center;
+        }
+
+        .justify-between {
+            justify-content: space-between;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mb-2 { margin-bottom: 8px; }
+        .mb-4 { margin-bottom: 16px; }
+        .mb-6 { margin-bottom: 24px; }
+        .mt-4 { margin-top: 16px; }
+        .mt-8 { margin-top: 32px; }
+        .mr-2 { margin-right: 8px; }
+        .ml-2 { margin-left: 8px; }
+
+        .text-sm { font-size: 14px; }
+        .text-lg { font-size: 18px; }
+        .text-xl { font-size: 20px; }
+        .text-2xl { font-size: 24px; }
+
+        .font-medium { font-weight: 500; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+
+        .px-8 { padding-left: 32px; padding-right: 32px; }
+        .py-4 { padding-top: 16px; padding-bottom: 16px; }
+        .py-8 { padding-top: 32px; padding-bottom: 32px; }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .upload-zone {
+                padding: 2rem 1rem;
+            }
+            
+            .container {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-card">
+            <!-- Header -->
+            <div class="header">
+                <div class="flex items-center">
+                    <i class="fas fa-upload text-3xl mr-3"></i>
+                    <div>
+                        <h1 class="text-2xl font-bold">� SELECCIÓN MÚLTIPLE ACTIVA v3.0 🚀</h1>
+                        <p class="text-sm" style="opacity: 0.9; color: #00ff00; font-weight: bold;">✅ Ctrl+Clic para seleccionar varios archivos | ✅ Ctrl+A para todos</p>
+                    </div>
+                </div>
+                <div class="theme-controls">
+                    <label class="theme-toggle">
+                        <input type="checkbox" id="themeToggle">
+                        <span class="slider"></span>
+                    </label>
+                    <span class="theme-icon">🌙</span>
+                    <a href="/dian_vs_erp/visor_v2" class="btn btn-primary">📊 Volver al Visor V2</a>
+                </div>
+            </div>
+            
+            <!-- Botones de Plantillas Excel -->
+            <div style="padding: 20px 30px 0 30px;">
+                <div style="background: var(--panel); border: 1px solid var(--bd); border-radius: 8px; padding: 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem;">
+                    <span style="font-weight: 600; color: var(--green-primary);">📋 Plantillas Excel:</span>
+                    <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                        <a href="/dian_vs_erp/descargar_plantilla/dian" class="btn btn-secondary" style="font-size: 0.9rem;">📥 Plantilla DIAN</a>
+                        <a href="/dian_vs_erp/descargar_plantilla/erp" class="btn btn-secondary" style="font-size: 0.9rem;">📥 Plantilla ERP</a>
+                        <a href="/dian_vs_erp/descargar_plantilla/acuses" class="btn btn-secondary" style="font-size: 0.9rem;">📥 Plantilla Acuses</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contenido Principal -->
+            <div style="padding: 30px;">
+                <!-- Mensajes Flash -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ 'error' if category == 'error' else 'success' if category == 'success' else 'info' }}">
+                                <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'check-circle' if category == 'success' else 'info-circle' }} mr-2"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+
+                <div class="grid grid-2">
+                    <!-- Panel de Carga DIAN -->
+                    <div class="card">
+                        <div class="mb-6">
+                            <h2 class="text-xl font-bold mb-2">
+                                <i class="fas fa-file-invoice text-red-500 mr-2"></i>
+                                Reportes DIAN
+                            </h2>
+                            <p class="text-sm" style="color: var(--txt-muted);">Archivos de facturas reportadas ante la DIAN</p>
+                        </div>
+
+                        <form id="formDian" enctype="multipart/form-data">
+                            <!-- Periodo -->
+                            <div class="mb-4">
+                                <label for="periodoDian" class="label">
+                                    Periodo (YYYY-MM)
+                                </label>
+                                <input type="month" id="periodoDian" name="periodo" class="form-input" required>
+                            </div>
+
+                            <!-- Zona de Drag & Drop -->
+                            <div class="upload-zone" id="uploadZoneDian" 
+                                 ondrop="manejarDrop(event, 'dian')" 
+                                 ondragover="event.preventDefault()" 
+                                 ondragenter="event.preventDefault()"
+                                 onclick="abrirSelectorArchivos('dian')">
+                                
+                                <i class="fas fa-cloud-upload-alt text-4xl mb-4" style="color: var(--txt-muted);"></i>
+                                <h3 class="text-lg font-semibold mb-2">🎯 Arrastra MÚLTIPLES archivos aquí</h3>
+                                <p class="mb-4" style="color: var(--txt-muted);">o haz clic para seleccionar <strong style="color: #00ff00;">VARIOS archivos (Ctrl+Clic)</strong></p>
+                                <p class="text-sm" style="color: var(--txt-muted);">DIAN, Acuses o Errores | Excel (.xlsx, .xlsm) o CSV</p>
+                                
+                                <input type="file" id="fileDian" name="dian" 
+                                       accept=".xlsx,.xlsm,.csv" 
+                                       class="hidden" 
+                                       multiple
+                                       onchange="mostrarArchivoSeleccionado(this, 'dian')">
+                                <input type="file" id="fileAcuses" name="acuses" 
+                                       accept=".xlsx,.xlsm,.csv" 
+                                       class="hidden" 
+                                       multiple
+                                       style="display:none;">
+                                <input type="file" id="fileErrores" name="errores" 
+                                       accept=".xlsx,.xlsm,.csv" 
+                                       class="hidden" 
+                                       multiple
+                                       style="display:none;">
+                            </div>
+
+                            <!-- Preview del archivo seleccionado -->
+                            <div id="previewDian" class="hidden"></div>
+
+                            <!-- Botón de carga -->
+                            <button type="button" id="btnCargarDian" onclick="cargarArchivo('dian')" 
+                                    class="btn btn-primary mt-4" style="width: 100%;" disabled>
+                                <i class="fas fa-upload mr-2"></i>
+                                Cargar Reporte DIAN
+                            </button>
+                        </form>
+
+                        <!-- Progress Bar DIAN -->
+                        <div id="progressDian" class="progress-container">
+                            <div class="flex justify-between text-sm mb-2" style="color: var(--txt-muted);">
+                                <span>Cargando archivo DIAN...</span>
+                                <span id="progressTextDian">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="progressFillDian" class="progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Panel de Carga ERP -->
+                    <div class="card">
+                        <div class="mb-6">
+                            <h2 class="text-xl font-bold mb-2">
+                                <i class="fas fa-database text-blue-500 mr-2"></i>
+                                Facturas ERP
+                            </h2>
+                            <p class="text-sm" style="color: var(--txt-muted);">Archivos de facturas desde el sistema ERP interno</p>
+                        </div>
+
+                        <form id="formErp" enctype="multipart/form-data">
+                            <!-- Periodo -->
+                            <div class="mb-4">
+                                <label for="periodoErp" class="label">
+                                    Periodo (YYYY-MM)
+                                </label>
+                                <input type="month" id="periodoErp" name="periodo" class="form-input" required>
+                            </div>
+
+                            <!-- Zona de Drag & Drop -->
+                            <div class="upload-zone" id="uploadZoneErp" 
+                                 ondrop="manejarDrop(event, 'erp')" 
+                                 ondragover="event.preventDefault()" 
+                                 ondragenter="event.preventDefault()"
+                                 onclick="abrirSelectorArchivos('erp')">
+                                
+                                <i class="fas fa-cloud-upload-alt text-4xl mb-4" style="color: var(--txt-muted);"></i>
+                                <h3 class="text-lg font-semibold mb-2">Arrastra archivos aquí</h3>
+                                <p class="mb-4" style="color: var(--txt-muted);">o haz clic para seleccionar</p>
+                                <p class="text-sm" style="color: var(--txt-muted);">ERP Financiero o Comercial | Excel (.xlsx, .xlsm) o CSV</p>
+                                
+                                <input type="file" id="fileErpFn" name="erp_fn" 
+                                       accept=".xlsx,.xlsm,.csv" 
+                                       class="hidden" 
+                                       multiple
+                                       onchange="mostrarArchivoSeleccionado(this, 'erp')">
+                                <input type="file" id="fileErpCm" name="erp_cm" 
+                                       accept=".xlsx,.xlsm,.csv" 
+                                       class="hidden" 
+                                       multiple
+                                       onchange="mostrarArchivoSeleccionado(this, 'erp')">
+                            </div>
+
+                            <!-- Preview del archivo seleccionado -->
+                            <div id="previewErp" class="hidden"></div>
+
+                            <!-- Botón de carga -->
+                            <button type="button" id="btnCargarErp" onclick="cargarArchivo('erp')" 
+                                    class="btn btn-primary mt-4" style="width: 100%;" disabled>
+                                <i class="fas fa-upload mr-2"></i>
+                                Cargar Facturas ERP
+                            </button>
+                        </form>
+
+                        <!-- Progress Bar ERP -->
+                        <div id="progressErp" class="progress-container">
+                            <div class="flex justify-between text-sm mb-2" style="color: var(--txt-muted);">
+                                <span>Cargando archivo ERP...</span>
+                                <span id="progressTextErp">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div id="progressFillErp" class="progress-fill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Archivos Cargados Recientemente -->
+                <div class="card mt-8">
+                    <h3 class="text-xl font-bold mb-4">
+                        <i class="fas fa-history mr-2" style="color: var(--green-primary);"></i>
+                        Archivos Cargados Recientemente
+                    </h3>
+                    
+                    <div id="archivosRecientes">
+                        <!-- Contenido dinámico cargado via JavaScript -->
+                        <div class="text-center py-8" style="color: var(--txt-muted);">
+                            <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                            <p>Cargando historial de archivos...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón de Validación -->
+                <div class="text-center mt-8">
+                    <button id="btnEjecutarValidacion" onclick="ejecutarValidacion()" 
+                            class="btn btn-primary text-lg px-8 py-4" disabled>
+                        <i class="fas fa-play mr-2"></i>
+                        Ejecutar Validación
+                    </button>
+                    <p class="text-sm mt-2" style="color: var(--txt-muted);">
+                        Se requieren archivos DIAN y ERP del mismo periodo
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <div class="flex items-center">
+            <i id="toastIcon" class="text-2xl mr-3"></i>
+            <div>
+                <div id="toastTitle" class="font-semibold"></div>
+                <div id="toastMessage" class="text-sm" style="color: var(--txt-muted);"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====================================
+        // TOGGLE TEMA CLARO/OSCURO
+        // ====================================
+        const themeToggle = document.getElementById("themeToggle");
+        const themeIcon = document.querySelector(".theme-icon");
+
+        // Cargar preferencia guardada
+        const savedTheme = localStorage.getItem("theme") || "dark";
+        if(savedTheme === "light"){
+            document.body.classList.add("light-mode");
+            themeToggle.checked = true;
+            themeIcon.textContent = "☀️";
+        }
+
+        // Cambiar tema
+        themeToggle.addEventListener("change", function(){
+            if(this.checked){
+                document.body.classList.add("light-mode");
+                themeIcon.textContent = "☀️";
+                localStorage.setItem("theme", "light");
+            } else {
+                document.body.classList.remove("light-mode");
+                themeIcon.textContent = "🌙";
+                localStorage.setItem("theme", "dark");
+            }
+        });
+
+        // Variables globales
+        let archivosRecientesData = [];
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            // Establecer fecha actual por defecto
+            const fechaActual = new Date().toISOString().slice(0, 7);
+            document.getElementById('periodoDian').value = fechaActual;
+            document.getElementById('periodoErp').value = fechaActual;
+            
+            // Cargar archivos recientes
+            cargarArchivosRecientes();
+            
+            // Verificar si se puede ejecutar validación
+            verificarValidacionDisponible();
+        });
+
+        // Arrays temporales para almacenar archivos
+        let archivosDian = [];
+        let archivosErp = [];
+
+        // Manejar drag and drop
+        function manejarDrop(e, tipo) {
+            e.preventDefault();
+            const zona = document.getElementById(`uploadZone${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`);
+            zona.classList.remove('dragover');
+            
+            const archivos = Array.from(e.dataTransfer.files);
+            
+            if (archivos.length > 0) {
+                // Agregar archivos al array correspondiente
+                if (tipo === 'dian') {
+                    archivosDian = archivosDian.concat(archivos);
+                    mostrarArchivosAcumulados('dian', archivosDian);
+                } else {
+                    archivosErp = archivosErp.concat(archivos);
+                    mostrarArchivosAcumulados('erp', archivosErp);
+                }
+            }
+        }
+        
+        // Mostrar archivos acumulados
+        function mostrarArchivosAcumulados(tipo, archivos) {
+            const previewId = `preview${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`;
+            const btnId = `btnCargar${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`;
+            
+            const preview = document.getElementById(previewId);
+            
+            // Calcular tamaño total
+            let tamanioTotal = 0;
+            for (let i = 0; i < archivos.length; i++) {
+                tamanioTotal += archivos[i].size;
+            }
+            
+            // Generar HTML para múltiples archivos
+            let archivosHTML = '';
+            for (let i = 0; i < archivos.length; i++) {
+                const archivo = archivos[i];
+                archivosHTML += `
+                    <div class="file-preview" style="margin-bottom: 8px; padding: 8px; background: var(--hdr); border-radius: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <div class="flex-1">
+                            <div style="display: flex; align-items: center; margin-bottom: 4px;">
+                                <i class="fas fa-file-excel mr-2" style="color: var(--green-primary);"></i>
+                                <span style="font-size: 0.9rem; font-weight: 500;">${archivo.name}</span>
+                                <span style="display: inline-block; padding: 2px 8px; background: var(--green-primary); color: white; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">${tipo.toUpperCase()}</span>
+                            </div>
+                            <div style="font-size: 0.85rem; color: var(--txt-muted);">
+                                ${(archivo.size / 1024 / 1024).toFixed(2)} MB
+                            </div>
+                        </div>
+                        <button type="button" onclick="eliminarArchivo('${tipo}', ${i})" style="color: var(--danger); background: none; border: none; cursor: pointer; padding: 4px 8px; font-size: 1.2rem;" title="Eliminar">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                `;
+            }
+            
+            preview.innerHTML = `
+                <div style="padding: 12px; background: var(--panel); border: 1px solid var(--bd); border-radius: 8px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid var(--bd);">
+                        <div>
+                            <strong style="font-size: 1.1rem; color: var(--green-primary);">${archivos.length} archivo(s) seleccionado(s)</strong>
+                            <div style="font-size: 0.9rem; color: var(--txt-muted); margin-top: 4px;">
+                                Tamaño total: ${(tamanioTotal / 1024 / 1024).toFixed(2)} MB
+                            </div>
+                        </div>
+                        <button type="button" onclick="limpiarArchivo('${tipo}')" style="color: var(--danger); background: var(--hdr); border: 1px solid var(--danger); padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                            <i class="fas fa-times mr-2"></i>Limpiar todo
+                        </button>
+                    </div>
+                    <div style="max-height: 400px; overflow-y: auto;">
+                        ${archivosHTML}
+                    </div>
+                </div>
+            `;
+            
+            preview.classList.remove('hidden');
+            document.getElementById(btnId).disabled = false;
+        }
+        
+        // Eliminar archivo individual
+        function eliminarArchivo(tipo, index) {
+            if (tipo === 'dian') {
+                archivosDian.splice(index, 1);
+                if (archivosDian.length > 0) {
+                    mostrarArchivosAcumulados('dian', archivosDian);
+                } else {
+                    limpiarArchivo('dian');
+                }
+            } else {
+                archivosErp.splice(index, 1);
+                if (archivosErp.length > 0) {
+                    mostrarArchivosAcumulados('erp', archivosErp);
+                } else {
+                    limpiarArchivo('erp');
+                }
+            }
+        }
+
+        // Efectos visuales para drag and drop
+        document.addEventListener('dragover', function(e) {
+            e.preventDefault();
+        });
+
+        document.getElementById('uploadZoneDian').addEventListener('dragenter', function() {
+            this.classList.add('dragover');
+        });
+
+        document.getElementById('uploadZoneDian').addEventListener('dragleave', function() {
+            this.classList.remove('dragover');
+        });
+
+        document.getElementById('uploadZoneErp').addEventListener('dragenter', function() {
+            this.classList.add('dragover');
+        });
+
+        document.getElementById('uploadZoneErp').addEventListener('dragleave', function() {
+            this.classList.remove('dragover');
+        });
+
+        // Función para abrir selector de archivos con opciones
+        function abrirSelectorArchivos(seccion) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.multiple = true;
+            input.accept = '.xlsx,.xlsm,.csv';
+            
+            input.onchange = function(e) {
+                const nuevosArchivos = Array.from(e.target.files);
+                
+                if (seccion === 'dian') {
+                    archivosDian = archivosDian.concat(nuevosArchivos);
+                    mostrarArchivosAcumulados('dian', archivosDian);
+                } else {
+                    archivosErp = archivosErp.concat(nuevosArchivos);
+                    mostrarArchivosAcumulados('erp', archivosErp);
+                }
+            };
+            
+            input.click();
+        }
+
+        // Mostrar preview del archivo seleccionado
+        function mostrarArchivoSeleccionado(input, tipo) {
+            const archivos = input.files;
+            if (archivos.length === 0) return;
+
+            const previewId = `preview${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`;
+            const btnId = `btnCargar${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`;
+            
+            const preview = document.getElementById(previewId);
+            
+            // Calcular tamaño total
+            let tamanioTotal = 0;
+            for (let i = 0; i < archivos.length; i++) {
+                tamanioTotal += archivos[i].size;
+            }
+            
+            // Generar HTML para múltiples archivos
+            let archivosHTML = '';
+            for (let i = 0; i < archivos.length; i++) {
+                const archivo = archivos[i];
+                archivosHTML += `
+                    <div class="file-preview" style="margin-bottom: 8px;">
+                        <div class="flex-1">
+                            <div class="flex items-center mb-1">
+                                <i class="fas fa-file-excel mr-2" style="color: var(--green-primary);"></i>
+                                <span class="font-medium" style="font-size: 0.9rem;">${archivo.name}</span>
+                                <span class="file-type-badge badge-${tipo} ml-2">${tipo.toUpperCase()}</span>
+                            </div>
+                            <div class="text-sm" style="color: var(--txt-muted);">
+                                ${(archivo.size / 1024 / 1024).toFixed(2)} MB
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            preview.innerHTML = `
+                <div style="padding: 12px; background: var(--panel); border: 1px solid var(--bd); border-radius: 8px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div>
+                            <strong>${archivos.length} archivo(s) seleccionado(s)</strong>
+                            <div class="text-sm" style="color: var(--txt-muted); margin-top: 4px;">
+                                Tamaño total: ${(tamanioTotal / 1024 / 1024).toFixed(2)} MB
+                            </div>
+                        </div>
+                        <button type="button" onclick="limpiarArchivo('${tipo}')" style="color: var(--danger);" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">
+                            <i class="fas fa-times"></i> Limpiar todo
+                        </button>
+                    </div>
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        ${archivosHTML}
+                    </div>
+                </div>
+            `;
+            
+            preview.classList.remove('hidden');
+            document.getElementById(btnId).disabled = false;
+        }
+
+        // Limpiar archivo seleccionado
+        function limpiarArchivo(tipo) {
+            const previewId = `preview${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`;
+            const btnId = `btnCargar${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`;
+            
+            // Limpiar array
+            if (tipo === 'dian') {
+                archivosDian = [];
+            } else {
+                archivosErp = [];
+            }
+            
+            document.getElementById(previewId).classList.add('hidden');
+            document.getElementById(previewId).innerHTML = '';
+            document.getElementById(btnId).disabled = true;
+        }
+
+        // Cargar archivo
+        function cargarArchivo(tipo) {
+            const formId = `form${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`;
+            const form = document.getElementById(formId);
+            const formData = new FormData(form);
+            
+            // Agregar archivos del array al FormData
+            const archivos = tipo === 'dian' ? archivosDian : archivosErp;
+            
+            if (archivos.length === 0) {
+                mostrarToast('Error', 'No hay archivos seleccionados', 'error');
+                return;
+            }
+            
+            // Agregar cada archivo con el nombre de campo correcto
+            archivos.forEach(archivo => {
+                formData.append('dian', archivo);  // Siempre usar 'dian' como nombre de campo por ahora
+            });
+            
+            const progressContainer = document.getElementById(`progress${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`);
+            const progressFill = document.getElementById(`progressFill${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`);
+            const progressText = document.getElementById(`progressText${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`);
+            const btn = document.getElementById(`btnCargar${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`);
+            
+            // Mostrar progress bar
+            progressContainer.style.display = 'block';
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>Cargando...`;
+            
+            // Simular progreso (en un sistema real, esto vendría del servidor)
+            let progreso = 0;
+            const intervalo = setInterval(() => {
+                progreso += Math.random() * 20;
+                if (progreso > 90) progreso = 90;
+                
+                progressFill.style.width = progreso + '%';
+                progressText.textContent = Math.round(progreso) + '%';
+            }, 200);
+
+            fetch(`/dian_vs_erp/api/subir_archivos`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                clearInterval(intervalo);
+                progressFill.style.width = '100%';
+                progressText.textContent = '100%';
+                
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fas fa-upload mr-2"></i>Cargar ${tipo === 'dian' ? 'Reporte DIAN' : 'Facturas ERP'}`;
+                    
+                    if (data.mensaje) {
+                        mostrarToast('Carga Exitosa', data.mensaje, 'success');
+                        limpiarArchivo(tipo);
+                        cargarArchivosRecientes();
+                        verificarValidacionDisponible();
+                    } else {
+                        mostrarToast('Error de Carga', data.error || 'Error desconocido', 'error');
+                    }
+                }, 1000);
+            })
+            .catch(error => {
+                clearInterval(intervalo);
+                progressContainer.style.display = 'none';
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-upload mr-2"></i>Cargar ${tipo === 'dian' ? 'Reporte DIAN' : 'Facturas ERP'}`;
+                
+                mostrarToast('Error', 'Error de conexión', 'error');
+            });
+        }
+
+        // Cargar archivos recientes
+        function cargarArchivosRecientes() {
+            fetch('/dian_vs_erp/api/archivos_recientes')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        archivosRecientesData = data.archivos;
+                        mostrarArchivosRecientes(data.archivos);
+                    } else {
+                        document.getElementById('archivosRecientes').innerHTML = 
+                            '<div class="text-center py-4" style="color: var(--txt-muted);">No se pudieron cargar los archivos recientes</div>';
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('archivosRecientes').innerHTML = 
+                        '<div class="text-center py-4" style="color: var(--danger);">Error cargando archivos recientes</div>';
+                });
+        }
+
+        // Mostrar archivos recientes
+        function mostrarArchivosRecientes(archivos) {
+            const container = document.getElementById('archivosRecientes');
+            
+            if (archivos.length === 0) {
+                container.innerHTML = '<div class="text-center py-4" style="color: var(--txt-muted);">No hay archivos cargados recientemente</div>';
+                return;
+            }
+
+            let html = '<div class="grid grid-2">';
+            
+            archivos.forEach(archivo => {
+                const fechaCarga = new Date(archivo.fecha_carga).toLocaleString('es-ES');
+                const tipo = archivo.tipo.toUpperCase();
+                const badgeClass = archivo.tipo === 'dian' ? 'badge-dian' : 'badge-erp';
+                const estado = archivo.procesado ? 'Procesado' : 'Pendiente';
+                const estadoClass = archivo.procesado ? 'status-success' : 'status-warning';
+                
+                html += `
+                    <div class="file-preview">
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-medium">${archivo.nombre_archivo}</span>
+                                <span class="file-type-badge ${badgeClass}">${tipo}</span>
+                            </div>
+                            <div class="text-sm" style="color: var(--txt-muted);">
+                                <div>Periodo: ${archivo.periodo}</div>
+                                <div>Cargado: ${fechaCarga}</div>
+                                <div>Registros: ${archivo.total_registros || 0}</div>
+                                <div class="${estadoClass}">${estado}</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <button onclick="verDetalles('${archivo.id}')" style="color: var(--info);" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" title="Ver detalles">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                            <button onclick="eliminarArchivo('${archivo.id}')" style="color: var(--danger);" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'" title="Eliminar">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Verificar si se puede ejecutar validación
+        function verificarValidacionDisponible() {
+            const periodoActual = document.getElementById('periodoDian').value;
+            if (!periodoActual) return;
+            
+            fetch(`/dian_vs_erp/api/verificar_archivos/${periodoActual}`)
+                .then(response => response.json())
+                .then(data => {
+                    const btn = document.getElementById('btnEjecutarValidacion');
+                    if (data.success && data.dian_disponible && data.erp_disponible) {
+                        btn.disabled = false;
+                        btn.innerHTML = `<i class="fas fa-play mr-2"></i>Ejecutar Validación (${periodoActual})`;
+                    } else {
+                        btn.disabled = true;
+                        btn.innerHTML = `<i class="fas fa-play mr-2"></i>Ejecutar Validación`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error verificando archivos:', error);
+                });
+        }
+
+        // Ejecutar validación
+        function ejecutarValidacion() {
+            const periodo = document.getElementById('periodoDian').value;
+            if (!periodo) {
+                mostrarToast('Error', 'Seleccione un periodo', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('btnEjecutarValidacion');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>Ejecutando Validación...`;
+
+            fetch(`/dian_vs_erp/api/ejecutar_validacion/${periodo}`, {
+                method: 'POST'
+            })
+            .then(response => response.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-play mr-2"></i>Ejecutar Validación`;
+                
+                if (data.success) {
+                    mostrarToast('Validación Iniciada', data.message, 'success');
+                    setTimeout(() => {
+                        window.location.href = '/dian_vs_erp/validaciones?periodo=' + periodo;
+                    }, 2000);
+                } else {
+                    mostrarToast('Error', data.error, 'error');
+                }
+            })
+            .catch(error => {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fas fa-play mr-2"></i>Ejecutar Validación`;
+                mostrarToast('Error', 'Error de conexión', 'error');
+            });
+        }
+
+        // Ver detalles de archivo
+        function verDetalles(archivoId) {
+            window.open(`/dian_vs_erp/archivo_detalles/${archivoId}`, '_blank');
+        }
+
+        // Eliminar archivo
+        function eliminarArchivo(archivoId) {
+            if (!confirm('¿Está seguro de eliminar este archivo?')) return;
+            
+            fetch(`/dian_vs_erp/api/eliminar_archivo/${archivoId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    mostrarToast('Archivo Eliminado', data.message, 'success');
+                    cargarArchivosRecientes();
+                    verificarValidacionDisponible();
+                } else {
+                    mostrarToast('Error', data.error, 'error');
+                }
+            })
+            .catch(error => {
+                mostrarToast('Error', 'Error de conexión', 'error');
+            });
+        }
+
+        // Función de toast
+        function mostrarToast(titulo, mensaje, tipo) {
+            const iconos = {
+                success: 'fas fa-check-circle status-success',
+                error: 'fas fa-exclamation-circle status-error',
+                info: 'fas fa-info-circle',
+                warning: 'fas fa-exclamation-triangle status-warning'
+            };
+
+            document.getElementById('toastIcon').className = iconos[tipo] || iconos['info'];
+            document.getElementById('toastTitle').textContent = titulo;
+            document.getElementById('toastMessage').textContent = mensaje;
+            
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
+        }
+
+        // Sincronizar periodos
+        document.getElementById('periodoDian').addEventListener('change', function() {
+            document.getElementById('periodoErp').value = this.value;
+            verificarValidacionDisponible();
+        });
+
+        document.getElementById('periodoErp').addEventListener('change', function() {
+            document.getElementById('periodoDian').value = this.value;
+            verificarValidacionDisponible();
+        });
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+</body>
+</html>

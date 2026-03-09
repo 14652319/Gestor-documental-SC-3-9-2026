@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Gestor Documental - causaciones </title>
+    <!-- Frameworks y Librerías -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    
+    <!-- Fuentes personalizadas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Estilos CSS de la Aplicación -->
+    <style>
+        /* ==========================================================================
+        1. Paleta de Colores y Variables Globales (versión con más contraste)
+        ========================================================================== */
+        :root {
+            --bg-primary: #0d0d0d;      /* Negro más profundo █ */
+            --bg-secondary: #1c1c1c;    /* Gris carbón █ */
+            --bg-tertiary: #2e2e2e;     /* Gris oscuro █ */
+            --bg-header: rgba(18,18,18,0.9); /* Negro translúcido fuerte █ */
+
+            --border-primary: #3d3d3d;  /* Gris medio █ */
+            --border-secondary: #555555;/* Gris claro █ */
+
+            --text-primary: #ffffff;    /* Blanco puro █ */
+            --text-secondary: #d0d0d0;  /* Gris claro más visible █ */
+            --text-accent: #20c997;     /* Verde aqua brillante █ */
+
+            --brand-primary: #20c997;   /* Verde aqua █ */
+            --brand-secondary: #1aa079; /* Verde más oscuro █ */
+
+            --resizer-handle: #888888;  /* Gris claro visible █ */
+
+            --state-approved-bg: rgba(32, 201, 151, 0.25);  /* Fondo verde aprobado █ */
+            --state-approved-text: #20c997;                 /* Texto verde aqua █ */
+
+            --state-rejected-bg: rgba(255, 71, 87, 0.25);   /* Fondo rojo rechazado █ */
+            --state-rejected-text: #ff4757;                 /* Texto rojo brillante █ */
+
+            --state-novelty-bg: rgba(255, 165, 2, 0.25);    /* Fondo naranja novedad █ */
+            --state-novelty-text: #ffa502;                  /* Texto naranja █ */
+
+            --state-special-bg: rgba(255, 211, 42, 0.25);   /* Fondo amarillo especial █ */
+            --state-special-text: #ffd32a;                  /* Texto amarillo █ */
+
+            --state-default-bg: rgba(160, 160, 160, 0.25);  /* Fondo gris por defecto █ */
+            --state-default-text: #cfcfcf;                  /* Texto gris claro █ */
+
+            --shadow-color: rgba(0,0,0,0.5); /* Sombras más profundas █ */
+        }
+
+        /* ==========================================================================
+           2. Estilos Base y Efecto Aurora
+           ========================================================================== */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 15px; /* Aumento para mayor comodidad */
+            overflow: hidden;
+            position: relative;
+        }
+        /* Efecto Aurora de Fondo: añade un toque dinámico y moderno */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 15% 25%, rgba(32, 201, 151, 0.35), transparent 55%),
+                        radial-gradient(circle at 85% 75%, rgba(0, 123, 255, 0.35), transparent 55%),
+                        radial-gradient(circle at 50% 50%, rgba(186, 85, 211, 0.25), transparent 60%);
+
+            animation: aurora 20s infinite linear;
+            z-index: -1;
+        }
+        @keyframes aurora {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Estilos de la barra de scroll */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-secondary); border-radius: 4px; border: 2px solid var(--bg-primary); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+        /* ==========================================================================
+           3. Estilos de Componentes Específicos
+           ========================================================================== */
+        .visor-iframe.cargando { opacity: 0.2; transition: opacity 0.3s ease-in-out; }
+        
+        .lista-item.seleccionado {
+            background-color: var(--brand-secondary);
+            border-color: var(--brand-primary) !important;
+            box-shadow: 0 0 20px rgba(32, 201, 151, 0.5);
+            color: white;
+        }
+        .lista-item.seleccionado .text-text-secondary { color: #e0e0e0; }
+        .lista-item.seleccionado .text-text-accent { color: white; }
+        
+        /* Estilos para resize */
+        body.resizing * { 
+            pointer-events: none; 
+            user-select: none; 
+            cursor: col-resize !important;
+        }
+        
+        #resizer {
+            cursor: col-resize;
+            position: relative;
+        }
+        
+        #resizer:hover {
+            background-color: var(--brand-primary) !important;
+        }
+        
+        /* Panel de información */
+        #info-panel {
+            transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .lista-item { animation: fadeInUp 0.5s ease-out forwards; }
+
+        /* Estilos para las etiquetas de estado (Aprobado, Rechazado, etc.) */
+        .state-badge { font-weight: 600; padding: 2px 10px; border-radius: 9999px; font-size: 0.8em; }
+        .state-aprobado { background-color: var(--state-approved-bg); color: var(--state-approved-text); }
+        .state-rechazado { background-color: var(--state-rejected-bg); color: var(--state-rejected-text); }
+        .state-novedad { background-color: var(--state-novelty-bg); color: var(--state-novelty-text); }
+        .state-especial { background-color: var(--state-special-bg); color: var(--state-special-text); }
+        .state-default { background-color: var(--state-default-bg); color: var(--state-default-text); }
+        
+        /* Estilos para los campos de formulario */
+        .form-input {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border-color: var(--border-primary);
+        }
+        .form-input option {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        /* Estilos para las notificaciones Toast */
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; }
+        .toast { background-color: var(--bg-tertiary); color: var(--text-primary); padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 12px var(--shadow-color); display: flex; align-items: center; gap: 10px; transform: translateY(120%); animation: slideInUp 0.5s forwards; margin-bottom: 10px; }
+        @keyframes slideInUp { from { transform: translateY(120%); } to { transform: translateY(0); } }
+
+        /* Estilos para los botones de acción (Ver, Renombrar, Borrar) */
+        .action-btn {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all 0.2s ease-in-out;
+            transform: scale(1);
+        }
+        .action-btn:hover { color: white; transform: scale(1.05); }
+        .action-btn:active { transform: scale(0.95); transition-duration: 0.1s; }
+        
+        .ver-pdf:hover {
+            background-color: var(--brand-secondary) !important;
+        }
+        #sede-selector-panel {
+            background-color: var(--bg-secondary) !important;
+            backdrop-filter: none !important; /* anula el desenfoque heredado */
+        }
+
+        /* ========================================================================== 
+        Ajustes Responsivos adicionales para móviles
+        ========================================================================== */
+        @media (max-width: 768px) {
+        body {
+            font-size: 13px; /* 🔹 Letra más compacta */
+        }
+
+        /* Ajustar inputs y selects para que no sean tan altos */
+        .form-input, 
+        header form button {
+            padding: 6px 10px !important;
+            font-size: 13px !important;
+        }
+
+        /* El visor PDF debe ocupar un bloque definido */
+        iframe#visor-pdf {
+            min-height: 70vh !important; /* 🔹 al menos 70% de la pantalla */
+            height: auto !important;
+        }
+
+        /* La lista que va encima no debe comerse toda la pantalla */
+        aside {
+            max-height: 40vh; /* 🔹 límite para que deje espacio al visor */
+            overflow-y: auto;
+        }
+
+        /* Texto de los listados más compacto */
+        .lista-item p {
+            font-size: 12px !important;
+        }
+        .state-badge {
+            font-size: 0.7em !important;
+            padding: 1px 6px;
+        }
+        
+        /* Apila los botones verticalmente con espacio entre ellos */
+        .lista-item .flex-col {
+            flex-direction: column !important;
+            align-items: stretch !important;
+        }
+        .lista-item .action-btn {
+            width: 100%;
+            text-align: center;
+            justify-content: center;
+            margin-bottom: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 
+      ==========================================================================
+      HEADER: Contiene los filtros principales y acciones globales
+      ==========================================================================
+    -->
+    <header class="sticky top-0 z-20 bg-header backdrop-blur-xl border-b border-border-primary p-3 transition-colors">
+        <div class="container mx-auto flex justify-between items-center gap-4 flex-wrap">
+            <form id="main-form" method="get" class="flex items-center gap-4 flex-wrap">
+                <!-- Selector de Sedes Personalizado -->
+                <div class="relative">
+                    <label class="text-sm font-medium text-text-secondary">Sede(s):</label>
+                    <button type="button" id="sede-selector-btn" class="form-input border rounded-md text-sm p-2 mt-1 focus:ring-2 focus:ring-brand-primary transition-colors w-48 text-left flex justify-between items-center">
+                        <span id="sede-selector-text">Seleccionar...</span>
+                        <svg class="w-4 h-4 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <!-- Panel de sedes con fondo sólido y opacidad completa -->
+                    <div id="sede-selector-panel" class="hidden absolute z-30 mt-2 w-64 bg-bg-secondary border border-border-primary rounded-lg shadow-2xl p-2">
+                        <input type="text" id="sede-search" class="form-input w-full p-2 mb-2 text-sm border rounded-md" placeholder="Buscar sede...">
+                        <div class="flex justify-between mb-2">
+                            <button type="button" id="sede-select-all" class="text-xs text-brand-primary hover:underline">Todos</button>
+                            <button type="button" id="sede-clear-all" class="text-xs text-red-500 hover:underline">Ninguno</button>
+                        </div>
+                        <div id="sede-options-container" class="max-h-48 overflow-y-auto">
+                            <!-- Opciones inyectadas por JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                 <!-- Selector de Carpetas -->
+                 <div class="flex flex-col">
+                    <label for="carpeta" class="text-sm font-medium text-text-secondary">Carpeta:</label>
+                    <select name="carpeta" onchange="this.form.submit()" class="form-input border rounded-md text-sm p-2 mt-1 focus:ring-2 focus:ring-brand-primary transition-colors">
+                        <option value="__all__" {% if ruta_relativa == "__all__" %}selected{% endif %}>Todas</option>
+                        {% for c in carpetas %}<option value="{{ c }}" {% if c == ruta_relativa %}selected{% endif %}>{{ c }}</option>{% endfor %}
+                    </select>
+                </div>
+                <!-- Campo de Filtro de Texto -->
+                <div class="flex flex-col">
+                    <label for="filtro" class="text-sm font-medium text-text-secondary">Filtro:</label>
+                    <input type="text" name="filtro" value="{{ filtro }}" class="form-input border rounded-md text-sm p-2 mt-1 focus:ring-2 focus:ring-brand-primary w-32 transition-colors">
+                </div>
+                <!-- Selector de Paginación -->
+                 <div class="flex flex-col">
+                    <label for="por_pagina" class="text-sm font-medium text-text-secondary">Mostrar:</label>
+                    <select name="por_pagina" onchange="this.form.submit()" class="form-input border rounded-md text-sm p-2 mt-1 focus:ring-2 focus:ring-brand-primary transition-colors">
+                        <option value="50" {% if por_pagina==50 %}selected{% endif %}>50</option>
+                        <option value="70" {% if por_pagina==70 %}selected{% endif %}>70</option>
+                        <option value="100" {% if por_pagina==100 %}selected{% endif %}>100</option>
+                    </select>
+                </div>
+                <!-- Botón de Búsqueda Principal -->
+                <button type="submit" class="self-end bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white font-bold py-2 px-5 rounded-md text-sm transition-all transform hover:scale-105 shadow-lg hover:shadow-cyan-500/50 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    Buscar
+                </button>
+            </form>
+            <!-- Acciones Globales del Usuario -->
+            <div class="flex items-center gap-4 self-end">
+                <div class="flex items-center gap-2 bg-bg-secondary px-3 py-2 rounded-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-text-secondary" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                    <span class="text-sm font-bold text-text-accent">{{ session['usuario'] | upper }}</span>
+                </div>
+                <a href="{{ url_for('dashboard') }}" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md text-sm transition-all transform hover:scale-105 shadow-md">Salir</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 
+      ==========================================================================
+      CONTENEDOR PRINCIPAL: Layout de dos columnas redimensionable
+      ==========================================================================
+    -->
+    <div id="main-container" class="grid h-[calc(100vh-88px)]" style="grid-template-columns: 40% 6px 1fr;">
+        <!-- Columna de la Lista de Archivos -->
+        <aside class="bg-bg-primary overflow-y-auto transition-colors">
+            <div class="sticky top-0 bg-header backdrop-blur-xl z-10 p-3 border-b border-border-primary transition-colors">
+                 <div class="flex justify-between items-center text-sm">
+                     <div class="font-semibold text-text-secondary">
+                        📄 Mostrando {{ archivos|length }} de {{ cantidad_archivos }}
+                     </div>
+                     <!-- Controles de Paginación -->
+                     <div class="flex justify-center items-center gap-2">
+                        <a href="?pagina=1&por_pagina={{ por_pagina }}&carpeta={{ ruta_relativa }}&filtro={{ filtro }}{% for s in sede %}&sede={{ s }}{% endfor %}" class="px-2 py-1 rounded hover:bg-border-secondary transition-colors {% if pagina <= 1 %}text-text-secondary pointer-events-none{% endif %}">«</a>
+                        <a href="?pagina={{ pagina - 1 }}&por_pagina={{ por_pagina }}&carpeta={{ ruta_relativa }}&filtro={{ filtro }}{% for s in sede %}&sede={{ s }}{% endfor %}" class="px-2 py-1 rounded hover:bg-border-secondary transition-colors {% if pagina <= 1 %}text-text-secondary pointer-events-none{% endif %}">‹</a>
+                        <span class="font-semibold text-text-primary">Página {{ pagina }}/{{ total_paginas }}</span>
+                        <a href="?pagina={{ pagina + 1 }}&por_pagina={{ por_pagina }}&carpeta={{ ruta_relativa }}&filtro={{ filtro }}{% for s in sede %}&sede={{ s }}{% endfor %}" class="px-2 py-1 rounded hover:bg-border-secondary transition-colors {% if pagina >= total_paginas %}text-text-secondary pointer-events-none{% endif %}">›</a>
+                        <a href="?pagina={{ total_paginas }}&por_pagina={{ por_pagina }}&carpeta={{ ruta_relativa }}&filtro={{ filtro }}{% for s in sede %}&sede={{ s }}{% endfor %}" class="px-2 py-1 rounded hover:bg-border-secondary transition-colors {% if pagina >= total_paginas %}text-text-secondary pointer-events-none{% endif %}">»</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Lista de Documentos (renderizada por el servidor) -->
+            <ul id="lista-documentos" class="p-2 space-y-2">
+                {% for item in archivos %}
+                    {% set nombre = item.archivo.split('/')[-1] %}
+                    {% set estado = estados.get(nombre, {}) %}
+                    {% set ruta_completa = (item.sede ~ '/' ~ item.archivo) | replace('\\', '/') %}
+                    <li data-archivo="{{ ruta_completa }}" style="opacity:1;"
+                        class="lista-item bg-bg-tertiary border border-border-primary rounded-lg p-3 transition-all duration-300 hover:border-brand-primary hover:shadow-lg
+                        {% if ruta_completa == archivo_actual %}seleccionado{% endif %}">
+                        
+                        <div class="flex justify-between items-start">
+                             <div class="flex-1 min-w-0">
+                                <p class="text-base font-bold truncate text-text-accent" title="{{ nombre }}">{{ nombre }}</p>
+                                <p class="text-sm text-text-secondary mt-1">🗓 {{ item.fecha }}</p>
+                            </div>
+                            {% if estado.estado %}
+                            <span class="state-badge ml-2
+                                {% if estado.estado == 'Aprobado' %}state-aprobado
+                                {% elif estado.estado == 'Rechazado' %}state-rechazado
+                                {% elif estado.estado == 'Novedad' %}state-novedad
+                                {% elif estado.estado == 'Especial' %}state-especial
+                                {% else %}state-default{% endif %}">
+                                {{ estado.estado }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                    <!-- ***** BLOQUE DE BOTONES RESPONSIVO ***** -->
+                    <div class="flex flex-col items-stretch gap-2 mt-3 pt-3 border-t border-border-primary md:flex-row md:items-center md:justify-end">
+                        <button type="button" class="ver-pdf action-btn font-semibold py-1 px-3 rounded-md text-sm flex items-center justify-center gap-1.5"
+                        data-url="{{ url_for('causaciones.servir_pdf', sede=sede_archivo, archivo=archivo) }}"
+                        data-archivo-completo="{{ ruta_completa }}"
+                        data-ruta-real="{{ item.sede }}/{{ item.archivo }}"
+                        data-usuario="{{ session['usuario'] }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                            Ver
+                        </button>
+                        <a href="{{ url_for('causaciones.renombrar', archivo=archivo, sede=sede_archivo, carpeta=ruta_relativa, filtro=filtro, pagina=pagina, por_pagina=por_pagina) }}"
+                        class="renombrar-btn action-btn hover:bg-blue-600 font-semibold py-1 px-3 rounded-md text-sm flex items-center justify-center gap-1.5"
+                        data-archivo-completo="{{ ruta_completa }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>
+                            Renombrar
+                        </a>
+                    </div>
+                    <!-- ***** FIN BLOQUE RESPONSIVO ***** -->
+                    </li>
+                {% endfor %}
+            </ul>
+        </aside>
+
+        <!-- Divisor Vertical Arrastrable -->
+        <div id="resizer" class="group bg-border-secondary hover:bg-brand-primary cursor-col-resize transition-colors duration-200 w-[6px] flex items-center justify-center" title="Arrastra para redimensionar">
+             <div class="w-1 h-10 bg-resizer-handle rounded-full transition-colors group-hover:bg-white/50"></div>
+        </div>
+
+        <!-- Columna del Visor de PDF -->
+        <main class="bg-bg-secondary h-full transition-colors flex flex-col">
+            <!-- Visor PDF -->
+            <div class="flex-1 relative">
+                <iframe id="visor-pdf" class="w-full h-full border-none visor-iframe" src=""></iframe>
+            </div>
+            
+            <!-- Panel de Información del Archivo -->
+            <div id="info-panel" class="bg-bg-tertiary border-t border-border-primary p-3 transition-all duration-300" style="max-height: 0; overflow: hidden; opacity: 0;">
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-sm font-semibold text-text-primary mb-1">📄 Información del Documento</h4>
+                        <p class="text-xs text-text-secondary truncate" title="" id="info-nombre">
+                            <span class="font-medium text-text-accent">Nombre:</span> <span id="info-nombre-valor">-</span>
+                        </p>
+                        <p class="text-xs text-text-secondary mt-1" title="" id="info-ruta">
+                            <span class="font-medium text-text-accent">Ruta:</span> <span id="info-ruta-valor" class="break-all">-</span>
+                        </p>
+                    </div>
+                    <button type="button" id="close-info-panel" class="flex-shrink-0 text-text-secondary hover:text-text-primary transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Contenedor para Notificaciones -->
+    <div id="toast-container"></div>
+    
+    <script>
+        // Pasa los datos del servidor a variables JS de forma segura y directa
+        const allSedesData = {{ sedes | tojson | safe }};
+        const initialSelectedSedes = {{ sede | tojson | safe }};
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // ==========================================================================
+        // 1. NOTIFICACIONES TOAST
+        // ==========================================================================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            let icon = '';
+            if(type === 'success') icon = '✅';
+            if(type === 'error') icon = '❌';
+            if(type === 'warn') icon = '⚠️';
+            toast.className = 'toast';
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.5s forwards';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+        
+        // ==========================================================================
+        // 2. SELECTOR DE SEDES PERSONALIZADO
+        // ==========================================================================
+        const sedeBtn = document.getElementById('sede-selector-btn');
+        const sedePanel = document.getElementById('sede-selector-panel');
+        const sedeSearch = document.getElementById('sede-search');
+        const sedeOptionsContainer = document.getElementById('sede-options-container');
+        const sedeSelectAll = document.getElementById('sede-select-all');
+        const sedeClearAll = document.getElementById('sede-clear-all');
+        const sedeSelectorText = document.getElementById('sede-selector-text');
+        const mainForm = document.getElementById('main-form');
+        
+        const allSedes = allSedesData.map(s => ({ value: s, text: s }));
+        let selectedSedes = new Set(initialSelectedSedes);
+
+        function renderSedeOptions(filter = '') {
+            sedeOptionsContainer.innerHTML = '';
+            allSedes.forEach(sede => {
+                if (sede.text.toLowerCase().includes(filter.toLowerCase())) {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'flex items-center p-2 hover:bg-bg-secondary rounded-md cursor-pointer';
+                    optionDiv.innerHTML = `
+                        <input type="checkbox" id="sede-${sede.value}" value="${sede.value}" class="h-4 w-4 rounded border-border-secondary text-brand-primary focus:ring-brand-primary" ${selectedSedes.has(sede.value) ? 'checked' : ''}>
+                        <label for="sede-${sede.value}" class="ml-3 text-sm text-text-primary cursor-pointer">${sede.text}</label>
+                    `;
+                    sedeOptionsContainer.appendChild(optionDiv);
+                }
+            });
+        }
+
+        function updateSedeSelectorText() {
+            if (selectedSedes.size === 0) {
+                sedeSelectorText.textContent = 'Ninguna sede';
+            } else if (selectedSedes.has('Todo') || selectedSedes.size === allSedes.length -1) {
+                 sedeSelectorText.textContent = 'Todas las sedes';
+            } else if (selectedSedes.size === 1) {
+                sedeSelectorText.textContent = selectedSedes.values().next().value;
+            } else {
+                sedeSelectorText.textContent = `${selectedSedes.size} sedes seleccionadas`;
+            }
+            // Actualiza los inputs ocultos para el envío del formulario
+            document.querySelectorAll('input[name="sede"]').forEach(i => i.remove());
+            selectedSedes.forEach(val => {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'sede';
+                hiddenInput.value = val;
+                mainForm.appendChild(hiddenInput);
+            });
+        }
+
+        sedeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sedePanel.classList.toggle('hidden');
+            if(!sedePanel.classList.contains('hidden')) renderSedeOptions();
+        });
+
+        sedeSearch.addEventListener('keyup', () => renderSedeOptions(sedeSearch.value));
+
+        sedeOptionsContainer.addEventListener('change', e => {
+            if(e.target.type === 'checkbox') {
+                if (e.target.checked) selectedSedes.add(e.target.value);
+                else selectedSedes.delete(e.target.value);
+                updateSedeSelectorText();
+            }
+        });
+        
+        sedeSelectAll.addEventListener('click', () => {
+            allSedes.forEach(s => selectedSedes.add(s.value));
+            renderSedeOptions(sedeSearch.value); updateSedeSelectorText();
+        });
+        
+        sedeClearAll.addEventListener('click', () => {
+            selectedSedes.clear();
+            renderSedeOptions(sedeSearch.value); updateSedeSelectorText();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!sedeBtn.contains(e.target) && !sedePanel.contains(e.target)) {
+                sedePanel.classList.add('hidden');
+            }
+        });
+
+        updateSedeSelectorText();
+
+        // ==========================================================================
+        // 3. LÓGICA DEL DIVISOR REDIMENSIONABLE
+        // ==========================================================================
+        const mainContainer = document.getElementById('main-container');
+        const resizer = document.getElementById('resizer');
+        const savedWidth = localStorage.getItem('asideWidth');
+        if (savedWidth) mainContainer.style.gridTemplateColumns = `${savedWidth} 6px 1fr`;
+        let isResizing = false;
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            document.body.classList.add('resizing');
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', stopResize);
+        });
+        function handleMouseMove(e) {
+            if (!isResizing) return;
+            let newWidth = (e.clientX / window.innerWidth) * 100;
+            if (newWidth < 20) newWidth = 20;
+            if (newWidth > 70) newWidth = 70;
+            mainContainer.style.gridTemplateColumns = `${newWidth}% 6px 1fr`;
+        }
+        function stopResize() {
+            isResizing = false;
+            document.body.classList.remove('resizing');
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', stopResize);
+            const currentWidth = mainContainer.style.gridTemplateColumns.split(' ')[0];
+            localStorage.setItem('asideWidth', currentWidth);
+        }
+
+        // ==========================================================================
+        // 4. VISUALIZACIÓN DE PDF
+        // ==========================================================================
+        const visor = document.getElementById('visor-pdf');
+        const infoPanel = document.getElementById('info-panel');
+        const infoNombreValor = document.getElementById('info-nombre-valor');
+        const infoRutaValor = document.getElementById('info-ruta-valor');
+        const infoRutaContainer = document.getElementById('info-ruta');
+        
+        let ultimoPdfCargado = null; // Guardar último PDF cargado
+        
+        function mostrarPDF(url, archivoCompleto, usuario, rutaReal) {
+            if (!visor) {
+                console.error('❌ Visor de PDF no encontrado'); 
+                return;
+            }
+            
+            // Solo prevenir si es el MISMO PDF que ya está cargado
+            if (ultimoPdfCargado === url) {
+                console.log('ℹ️ PDF ya cargado, omitiendo recarga');
+                return;
+            }
+            
+            console.log('🔄 Cargando PDF:', url);
+            ultimoPdfCargado = url;
+            
+            // Cargar PDF INMEDIATAMENTE sin delays
+            visor.classList.add('cargando');
+            visor.src = url + '?t=' + Date.now(); // Cachebuster
+            
+            visor.onload = () => {
+                visor.classList.remove('cargando');
+                console.log('✅ PDF cargado exitosamente');
+            };
+            
+            visor.onerror = () => {
+                visor.classList.remove('cargando');
+                ultimoPdfCargado = null; // Permitir reintento
+                console.error('❌ Error cargando PDF:', url);
+                alert('Error al cargar el PDF. Intenta de nuevo.');
+            };
+
+            // Marcar en la UI el documento seleccionado
+            document.querySelectorAll('.lista-item.seleccionado').forEach(el => el.classList.remove('seleccionado'));
+            const li = document.querySelector(`li[data-archivo="${CSS.escape(archivoCompleto.replace(/\\/g, '/'))}"]`);
+            if (li) li.classList.add('seleccionado');
+            
+            // Mostrar panel de información
+            if (infoPanel && infoNombreValor && infoRutaValor) {
+                const nombreArchivo = archivoCompleto.split('/').pop() || archivoCompleto.split('\\').pop();
+                infoNombreValor.textContent = nombreArchivo;
+                infoRutaValor.textContent = rutaReal || archivoCompleto;
+                infoRutaContainer.title = rutaReal || archivoCompleto;
+                
+                // Animar apertura del panel
+                infoPanel.style.maxHeight = '120px';
+                infoPanel.style.opacity = '1';
+            }
+        }
+        
+        // Cerrar panel de información
+        document.getElementById('close-info-panel')?.addEventListener('click', () => {
+            if (infoPanel) {
+                infoPanel.style.maxHeight = '0';
+                infoPanel.style.opacity = '0';
+            }
+        });
+
+        // ==========================================================================
+        // 5. MANEJO DE EVENTOS CONSOLIDADO (SIN DUPLICACIONES)
+        // ==========================================================================
+        let ultimoClick = 0;
+        const DELAY_CLICK = 100; // Reducido a 100ms para mejor respuesta
+        
+        function manejarClickSeguro(callback) {
+            const ahora = Date.now();
+            if (ahora - ultimoClick < DELAY_CLICK) {
+                console.log('🚫 Click duplicado ignorado');
+                return false;
+            }
+            ultimoClick = ahora;
+            return callback();
+        }
+        
+        // ==========================================================================
+        // ÚNICO EVENT LISTENER PARA TODOS LOS CLICKS (CON CAPTURE PARA PRIORIDAD)
+        // ==========================================================================
+        document.body.addEventListener('click', (e) => {
+            // Manejo de clicks en botones Ver PDF
+            const verPdfBtn = e.target.closest('.ver-pdf');
+            if (verPdfBtn) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation(); // Detener TODOS los otros listeners
+                
+                // Ejecutar INMEDIATAMENTE
+                sessionStorage.setItem('scrollPos', document.querySelector('aside')?.scrollTop || 0);
+                
+                const url = verPdfBtn.dataset.url;
+                const archivoCompleto = verPdfBtn.dataset.archivoCompleto;
+                const usuario = verPdfBtn.dataset.usuario;
+                const rutaReal = verPdfBtn.dataset.rutaReal || archivoCompleto;
+                
+                console.log('🎯 Click en Ver PDF:', url);
+                mostrarPDF(url, archivoCompleto, usuario, rutaReal);
+                return false; // Detener completamente la propagación
+            }
+            
+            // Manejo de clicks en botones Renombrar
+            const renombrarBtn = e.target.closest('.renombrar-btn');
+            if (renombrarBtn) {
+                return manejarClickSeguro(() => {
+                    console.log('🎯 Click en Renombrar');
+                    sessionStorage.setItem('scrollPos', document.querySelector('aside')?.scrollTop || 0);
+                    // No preventDefault aquí ya que necesita la navegación
+                    return true;
+                });
+            }
+        }, { passive: false }); // Permitir preventDefault
+
+        // ==========================================================================
+        // 6. RESTAURAR SCROLL Y CONFIGURAR LISTENERS DIRECTOS
+        // ==========================================================================
+        (function restaurarEstadoLista(){
+            const cont = document.querySelector('aside'); if (!cont) return;
+            const saved = sessionStorage.getItem('scrollPos');
+            if (saved !== null) { cont.scrollTop = parseInt(saved, 10); sessionStorage.removeItem('scrollPos'); }
+        })();
+        
+        // ==========================================================================
+        // 7. EVENT LISTENERS DIRECTOS EN BOTONES (MÁXIMA PRIORIDAD)
+        // ==========================================================================
+        (function configurarListenersDirectos() {
+            const botones = document.querySelectorAll('.ver-pdf');
+            console.log(`📌 Configurando ${botones.length} botones Ver PDF con listener directo`);
+            
+            botones.forEach((btn, index) => {
+                // Remover cualquier listener previo
+                btn.removeEventListener('click', btn._handlerPdf);
+                
+                // Crear handler único
+                btn._handlerPdf = function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    
+                    const url = this.dataset.url;
+                    const archivoCompleto = this.dataset.archivoCompleto;
+                    const usuario = this.dataset.usuario;
+                    const rutaReal = this.dataset.rutaReal || archivoCompleto;
+                    
+                    console.log(`🚀 Listener directo - Botón ${index + 1} clickeado:`, url);
+                    mostrarPDF(url, archivoCompleto, usuario, rutaReal);
+                    
+                    return false;
+                };
+                
+                // Agregar listener con capture para máxima prioridad
+                btn.addEventListener('click', btn._handlerPdf, { capture: true });
+            });
+        })();
+    });
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Token de Firma Digital - Relación</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 0; }
+        .container { max-width: 520px; margin: 40px auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 32px; }
+        .header { background: #198754; color: #fff; border-radius: 8px 8px 0 0; padding: 18px 0; text-align: center; }
+        .header h2 { margin: 0; font-size: 1.5em; }
+        .token-box { background: #e9f7ef; border: 2px solid #198754; border-radius: 8px; text-align: center; margin: 28px 0 18px 0; padding: 18px; }
+        .token-label { font-size: 1.1em; color: #198754; margin-bottom: 8px; }
+        .token-value { font-size: 2.5em; font-weight: bold; color: #198754; letter-spacing: 2px; }
+        .info { margin: 18px 0; }
+        .info-block { background: #fff3cd; color: #856404; border-radius: 6px; padding: 10px 14px; margin-bottom: 10px; font-size: 1em; }
+        .security-block { background: #d1ecf1; color: #0c5460; border-radius: 6px; padding: 10px 14px; margin-bottom: 10px; font-size: 1em; }
+        .warning-block { background: #f8d7da; color: #721c24; border-radius: 6px; padding: 10px 14px; margin-bottom: 10px; font-size: 1em; }
+        .footer { text-align: center; color: #888; font-size: 0.95em; margin-top: 28px; }
+        .relacion { font-weight: bold; color: #198754; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>🔏 Token de Firma Digital</h2>
+        </div>
+        <p>Hola, <span class="relacion">{{usuario}}</span></p>
+        <p>Se ha solicitado la firma digital para la relación <span class="relacion">{{numero_relacion}}</span>.</p>
+        <div class="token-box">
+            <div class="token-label">Tu Token de Firma Digital</div>
+            <div class="token-value">{{token}}</div>
+        </div>
+        <div class="info">
+            <div class="info-block">⏰ <b>Importante:</b> Este token expira el <b>{{expiracion}}</b>.</div>
+            <div class="security-block">🔐 <b>Seguridad:</b> Tienes un máximo de <b>3 intentos</b> para ingresar el token correctamente.</div>
+            <div class="warning-block">❗ <b>¿No solicitaste esta firma?</b> Si no reconoces esta solicitud, ignora este correo y la relación permanecerá sin cambios.</div>
+        </div>
+        <div class="footer">
+            Supertiendas Cañaveral SAS<br>
+            Gestor Documental - Sistema de Autenticación Segura
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 Renombrar Documento - Gestor Documental</title>
+    <style>
+        /* ========================================
+           🎨 COLORES INSTITUCIONALES
+           ======================================== */
+        :root {
+            /* Verde Corporativo Supertiendas Cañaveral */
+            --brand-green: #166534;
+            --brand-green-dark: #14532d;
+            --brand-green-light: #22c55e;
+            
+            /* Modo Claro */
+            --bg-primary-light: #ffffff;
+            --bg-secondary-light: #f9fafb;
+            --text-primary-light: #111827;
+            --text-secondary-light: #6b7280;
+            --border-light: #e5e7eb;
+            --input-bg-light: #ffffff;
+            --input-border-light: #d1d5db;
+            
+            /* Modo Oscuro */
+            --bg-primary-dark: #1f2937;
+            --bg-secondary-dark: #111827;
+            --text-primary-dark: #f9fafb;
+            --text-secondary-dark: #d1d5db;
+            --border-dark: #374151;
+            --input-bg-dark: #374151;
+            --input-border-dark: #4b5563;
+            
+            /* Alertas */
+            --warning: #f59e0b;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        /* Tema Claro (por defecto) */
+        body {
+            --bg-primary: var(--bg-primary-light);
+            --bg-secondary: var(--bg-secondary-light);
+            --text-primary: var(--text-primary-light);
+            --text-secondary: var(--text-secondary-light);
+            --border-color: var(--border-light);
+            --input-bg: var(--input-bg-light);
+            --input-border: var(--input-border-light);
+        }
+
+        /* Tema Oscuro */
+        body.dark-mode {
+            --bg-primary: var(--bg-primary-dark);
+            --bg-secondary: var(--bg-secondary-dark);
+            --text-primary: var(--text-primary-dark);
+            --text-secondary: var(--text-secondary-dark);
+            --border-color: var(--border-dark);
+            --input-bg: var(--input-bg-dark);
+            --input-border: var(--input-border-dark);
+        }
+
+        /* ========================================
+           🎯 ESTILOS GENERALES
+           ======================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* ========================================
+           🎨 HEADER CON TOGGLE
+           ======================================== */
+        .header {
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .theme-toggle {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: background 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* ========================================
+           📦 CONTENEDOR PRINCIPAL
+           ======================================== */
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--bg-primary);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        /* ========================================
+           📝 FORMULARIO
+           ======================================== */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        input[type="file"] {
+            width: 100%;
+            padding: 12px 15px;
+            background: var(--input-bg);
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="file"]:focus {
+            outline: none;
+            border-color: var(--brand-green);
+        }
+
+        /* Checkbox y Radio */
+        .checkbox-wrapper,
+        .radio-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .checkbox-wrapper:hover,
+        .radio-wrapper:hover {
+            background: var(--input-bg);
+        }
+
+        input[type="checkbox"],
+        input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--brand-green);
+        }
+
+        /* ========================================
+           🎨 BOTONES
+           ======================================== */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--brand-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--brand-green-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(22, 101, 52, 0.3);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+
+        .btn-back {
+            background: var(--warning);
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ========================================
+           🔄 SPINNER Y ANIMACIONES
+           ======================================== */
+        .spinner {
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========================================
+           💡 ALERTAS
+           ======================================== */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: flex;
+            align-items: start;
+            gap: 12px;
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 4px solid var(--warning);
+            color: var(--warning);
+        }
+
+        .alert strong {
+            font-weight: 700;
+        }
+
+        /* ========================================
+           📱 RESPONSIVE
+           ======================================== */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ========================================
+         🎨 HEADER CON TOGGLE
+         ======================================== -->
+    <div class="header">
+        <h1>
+            <span>📝</span>
+            <span>Renombrar Documento</span>
+        </h1>
+        <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle-btn">
+            🌙
+        </button>
+    </div>
+
+    <!-- ========================================
+         📦 CONTENEDOR PRINCIPAL
+         ======================================== -->
+    <div class="container">
+        <h2 style="color: var(--text-primary); margin-bottom: 10px;">📄 Documento Actual</h2>
+        <p style="color: var(--text-secondary); margin-bottom: 30px; font-size: 1.1rem;">
+            <strong>{{ nombre_actual }}</strong>
+        </p>
+
+        <form method="post" enctype="multipart/form-data" id="form-renombrar">
+            <!-- Nuevo Nombre -->
+            <div class="form-group">
+                <label for="nuevo_nombre">✏️ Nuevo nombre del documento:</label>
+                <input type="text" 
+                       name="nuevo_nombre" 
+                       id="nuevo_nombre"
+                       value="{{ nombre_sugerido }}" 
+                       placeholder="Ingrese el nuevo nombre (sin espacios)..."
+                       required>
+                <small style="color: var(--text-secondary); font-size: 0.9rem;">
+                    💡 Se eliminan automáticamente todos los espacios del nombre
+                </small>
+            </div>
+
+            <!-- Archivos Adicionales -->
+            <div class="form-group">
+                <label for="archivos_adicionales">📎 Seleccionar otros PDF's para unir (Opcional):</label>
+                <input type="file" 
+                       name="archivos_adicionales" 
+                       id="archivos_adicionales"
+                       multiple 
+                       accept=".pdf">
+            </div>
+
+            <!-- Opción de Descarga -->
+            <div class="form-group">
+                <label class="checkbox-wrapper">
+                    <input type="checkbox" name="descargar_copia" value="1">
+                    <span>💾 ¿Desea descargar una copia después de guardar?</span>
+                </label>
+            </div>
+
+            <!-- Destino del Archivo -->
+            <div class="form-group">
+                <label style="margin-bottom: 15px;">📂 ¿Dónde desea guardar el archivo?</label>
+                
+                <label class="radio-wrapper">
+                    <input type="radio" name="carpeta_destino" value="original" checked>
+                    <span>📋 Carpeta Original (Para <strong style="color: var(--warning);">Revisión</strong>)</span>
+                </label>
+
+                <label class="radio-wrapper">
+                    <input type="radio" name="carpeta_destino" value="causadas">
+                    <span>✅ Carpeta Definitiva (<strong style="color: var(--success);">Causadas</strong>)</span>
+                </label>
+            </div>
+
+            <!-- Campos Hidden -->
+            <input type="hidden" name="keep_sede" value="{{ sede }}" id="sede">
+            <input type="hidden" name="keep_carpeta" value="{{ carpeta }}" id="carpeta">
+            <input type="hidden" name="keep_filtro" value="{{ filtro }}">
+            <input type="hidden" name="keep_pagina" value="{{ pagina }}">
+            <input type="hidden" name="keep_por_pagina" value="{{ por_pagina }}">
+            <input type="hidden" id="archivo" value="{{ nombre_actual }}">
+
+            <!-- Botones de Acción -->
+            <div style="display: flex; gap: 15px; margin-top: 30px; flex-wrap: wrap;">
+                <button type="submit" class="btn btn-primary" id="boton-renombrar">
+                    <span id="spinner" style="display:none;" class="spinner">🔄</span>
+                    <span id="texto-boton">💾 Renombrar y Guardar</span>
+                </button>
+
+                <button type="button" class="btn btn-success" onclick="descargarCopiaEditable()">
+                    📥 Descargar Copia Editable
+                </button>
+
+                <a href="{{ url_for('causaciones.index', sede=sede, carpeta=carpeta, filtro=filtro, pagina=pagina, por_pagina=por_pagina) }}" 
+                   class="btn-back">
+                    ⏪ Volver al Listado
+                </a>
+            </div>
+        </form>
+
+        <!-- Alerta Informativa -->
+        <div class="alert alert-warning">
+            <span style="font-size: 1.5rem;">⚠️</span>
+            <div>
+                <strong>Importante:</strong> Si haces clic en "Abrir" desde el navegador, el archivo se mostrará como no editable.
+                Abre el archivo desde la <strong>carpeta de descargas</strong> con <strong>Adobe Acrobat</strong> para poder editarlo correctamente.
+            </div>
+        </div>
+    </div>
+
+<script>
+    // ========================================
+    // 🎨 TOGGLE DE TEMA CLARO/OSCURO
+    // ========================================
+    function toggleTheme() {
+        const body = document.body;
+        const btn = document.getElementById('theme-toggle-btn');
+        
+        body.classList.toggle('dark-mode');
+        
+        // Guardar preferencia en localStorage
+        if (body.classList.contains('dark-mode')) {
+            localStorage.setItem('theme', 'dark');
+            btn.textContent = '☀️';
+        } else {
+            localStorage.setItem('theme', 'light');
+            btn.textContent = '🌙';
+        }
+    }
+
+    // Cargar tema guardado al iniciar
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('theme');
+        const btn = document.getElementById('theme-toggle-btn');
+        
+        if (savedTheme === 'dark') {
+            document.body.classList.add('dark-mode');
+            btn.textContent = '☀️';
+        } else {
+            btn.textContent = '🌙';
+        }
+    });
+
+    // ========================================
+    // 📝 CONTROL DEL FORMULARIO DE RENOMBRAR
+    // ========================================
+    document.getElementById('form-renombrar').addEventListener('submit', function(e) {
+        const nombreNuevo = document.getElementById('nuevo_nombre').value.trim();
+        const carpetaDestino = document.querySelector('input[name="carpeta_destino"]:checked').value;
+
+        // Validar que el nombre no esté vacío
+        if (!nombreNuevo) {
+            e.preventDefault();
+            alert("⚠️ Debe ingresar un nombre para el documento.");
+            return;
+        }
+
+        // Confirmación diferente según la acción
+        let mensaje = '';
+        if (carpetaDestino === 'causadas') {
+            mensaje = '¿Confirma mover el archivo a la carpeta CAUSADAS con el nombre: ' + nombreNuevo + '.pdf?';
+        } else {
+            mensaje = '¿Confirma renombrar el archivo a: ' + nombreNuevo + '.pdf?';
+        }
+        
+        if (!confirm(mensaje)) {
+            e.preventDefault();
+            return;
+        }
+
+        // Mostrar spinner y deshabilitar botón
+        const boton = document.getElementById('boton-renombrar');
+        const texto = document.getElementById('texto-boton');
+        const spinner = document.getElementById('spinner');
+
+        texto.innerText = '💾 Guardando...';
+        spinner.style.display = 'inline-block';
+        boton.disabled = true;
+
+        // Re-habilitar después de 5 segundos (por si falla)
+        setTimeout(() => {
+            boton.disabled = false;
+            texto.innerText = '💾 Renombrar y Guardar';
+            spinner.style.display = 'none';
+        }, 5000);
+    });
+
+    // ========================================
+    // 📥 FUNCIÓN PARA DESCARGAR COPIA EDITABLE
+    // ========================================
+    function descargarCopiaEditable() {
+        const sede = document.getElementById("sede").value;
+        const carpeta = (document.getElementById("carpeta").value || "").trim();
+        const archivo = document.getElementById("archivo").value.trim();
+
+        if (!sede || !archivo) {
+            alert("❌ No se pudo determinar el archivo para descargar.");
+            return;
+        }
+
+        const relativo = carpeta ? `${carpeta}/${archivo}` : archivo;
+        const parts = relativo.split('/').map(encodeURIComponent).join('/');
+        const url = `/descargar_copia_editable/${encodeURIComponent(sede)}/${parts}`;
+
+        console.log('📥 Descargando copia editable:', url);
+        window.location.href = url;
+    }
+
+    // ========================================
+    // ⏱️ CONTROL DE INACTIVIDAD (20 MIN)
+    // ========================================
+    let inactivityTimer;
+    const INACTIVITY_TIME = 20 * 60 * 1000; // 20 minutos
+
+    function resetInactivityTimer() {
+        clearTimeout(inactivityTimer);
+        inactivityTimer = setTimeout(() => {
+            alert("⚠️ Tu sesión ha caducado por inactividad. Debes volver a iniciar sesión.");
+            window.location.href = "/login";
+        }, INACTIVITY_TIME);
+    }
+
+    // Eventos que reinician el timer
+    ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(eventType => {
+        document.addEventListener(eventType, resetInactivityTimer, false);
+    });
+
+    // Iniciar timer al cargar página
+    resetInactivityTimer();
+</script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

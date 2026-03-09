@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📄 Radicación de Facturas Digitales - Gestor Documental</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-bg: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --border-color: #e2e8f0;
+            --input-bg: #f7fafc;
+            --primary-color: #667eea;
+            --success-color: #48bb78;
+            --warning-color: #ed8936;
+            --danger-color: #f56565;
+            --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header-bar {
+            background: white;
+            padding: 20px 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow);
+        }
+
+        .header-info {
+            font-size: 0.95em;
+            color: var(--text-secondary);
+        }
+
+        .header-info strong {
+            color: var(--primary-color);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-regresar {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-regresar:hover {
+            background: #e53e3e;
+            transform: translateY(-2px);
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: var(--bg-gradient);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+
+        .card-header h1 {
+            font-size: 1.8em;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .card-header p {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+
+        .card-body {
+            padding: 30px;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.95em;
+        }
+
+        .alert-info {
+            background: #e6f7ff;
+            border-left: 4px solid #1890ff;
+            color: #0050b3;
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-size: 1.2em;
+            font-weight: 600;
+            margin: 25px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-grid-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .form-grid-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .form-grid-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .form-group label .required {
+            color: var(--danger-color);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.95em;
+            transition: all 0.3s;
+            background: var(--input-bg);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .file-upload-area {
+            border: 3px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+            background: var(--input-bg);
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--primary-color);
+            background: white;
+        }
+
+        .file-upload-area.drag-over {
+            border-color: var(--success-color);
+            background: rgba(72, 187, 120, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            padding: 14px 30px;
+            font-size: 1em;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #5a67d8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: var(--warning-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: #dd6b20;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #38a169;
+        }
+
+        /* TABLA DE FACTURAS ADICIONADAS */
+        .facturas-list {
+            margin-top: 30px;
+            background: var(--input-bg);
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .facturas-list h3 {
+            color: var(--primary-color);
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .facturas-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .facturas-table thead {
+            background: var(--bg-gradient);
+            color: white;
+        }
+
+        .facturas-table thead th {
+            padding: 12px 10px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .facturas-table tbody td {
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9em;
+        }
+
+        .facturas-table tbody tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(72, 187, 120, 0.15);
+            color: var(--success-color);
+        }
+
+        .btn-icon {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: all 0.3s;
+        }
+
+        .btn-edit {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #dd6b20;
+        }
+
+        .btn-delete {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #e53e3e;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+            opacity: 0.3;
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-grid,
+            .form-grid-2,
+            .form-grid-3,
+            .form-grid-4 {
+                grid-template-columns: 1fr;
+            }
+
+            .header-bar {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .facturas-table {
+                font-size: 0.85em;
+            }
+
+            .facturas-table thead th,
+            .facturas-table tbody td {
+                padding: 8px 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER BAR -->
+        <div class="header-bar">
+            <div class="header-info">
+                Usuario: <strong id="usuario-header">{{ session['usuario'] }}</strong> | 
+                NIT: <strong id="nit-header">{{ session['nit'] }}</strong>
+            </div>
+            <a href="{{ url_for('facturas_digitales.dashboard_facturas') }}" class="btn btn-regresar">
+                ← Regresar
+            </a>
+        </div>
+
+        <!-- MAIN CARD -->
+        <div class="main-card">
+            <div class="card-header">
+                <h1>📄 Radicación de Facturas Digitales</h1>
+                <p>Complete todos los campos marcados con (*) para radicar la factura</p>
+            </div>
+
+            <div class="card-body">
+                <!-- ALERTA INFORMATIVA -->
+                <div class="alert alert-info">
+                    <span style="font-size: 1.5em;">ℹ️</span>
+                    <div>
+                        <strong>Instrucciones:</strong> Las facturas se adicionan a la lista inferior. Seleccione una o varias y presione "Radicar Facturas" para finalizar.
+                    </div>
+                </div>
+
+                <form id="formFactura">
+                    <!-- SECCIÓN 1: VALIDACIÓN INICIAL (NIT-PREFIJO-FOLIO) -->
+                    <div class="section-title">
+                        🔍 Paso 1: Validación de Documento
+                    </div>
+
+                    <div class="form-grid form-grid-4">
+                        <div class="form-group">
+                            <label>
+                                📋 Fecha de Radicación <span class="required">*</span>
+                                <span style="color: var(--text-secondary); font-size: 0.85em; font-weight: 400;">
+                                    (ℹ️ Ayuda: autocompletada)
+                                </span>
+                            </label>
+                            <input type="datetime-local" id="fecha_radicacion" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                🏢 Empresa <span class="required">*</span>
+                            </label>
+                            <select id="empresa" required>
+                                <option value="">-- Seleccione --</option>
+                                <option value="SC">SC - SUPERTIENDAS CAÑAVERAL</option>
+                                <option value="LG">LG - LA GALERIA Y CIA</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                🏬 Departamento <span class="required">*</span>
+                            </label>
+                            <select id="departamento" required>
+                                <option value="">-- Seleccione --</option>
+                                <option value="TECNOLOGIA">TECNOLOGIA</option>
+                                <option value="FINANCIERO">FINANCIERO</option>
+                                <option value="OPERACIONES">OPERACIONES</option>
+                                <option value="ADMINISTRATIVO">ADMINISTRATIVO</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                💳 Prefijo <span class="required">*</span>
+                                <span style="color: var(--text-secondary); font-size: 0.85em; font-weight: 400;">
+                                    (ℹ️ Ej: FE, DS, NC)
+                                </span>
+                            </label>
+                            <input type="text" id="prefijo" placeholder="FE" required style="text-transform: uppercase;">
+                        </div>
+                    </div>
+
+                    <div class="form-grid form-grid-3">
+                        <div class="form-group">
+                            <label>
+                                🔢 Folio <span class="required">*</span>
+                                <span style="color: var(--text-secondary); font-size: 0.85em; font-weight: 400;">
+                                    (ℹ️ Número de factura)
+                                </span>
+                            </label>
+                            <input type="text" id="folio" placeholder="15" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                🆔 NIT Proveedor <span class="required">*</span>
+                                <span style="color: var(--text-secondary); font-size: 0.85em; font-weight: 400;">
+                                    (ℹ️ Ayuda: busca razón social)
+                                </span>
+                            </label>
+                            <input type="text" id="nit_proveedor" placeholder="805013653" required>
+                        </div>
+
+                        <div class="form-group" style="display: flex; align-items: flex-end;">
+                            <button type="button" class="btn btn-secondary" id="btnValidar" style="width: 100%;">
+                                🔎 Validar Documento
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            🏢 Razón Social <span class="required">*</span>
+                        </label>
+                        <input type="text" id="razon_social" placeholder="Se autocompletará al buscar el NIT" readonly style="background: #f0f0f0;">
+                    </div>
+
+                    <!-- SECCIÓN 2: INFORMACIÓN DEL DOCUMENTO (DESHABILITADA HASTA VALIDAR) -->
+                    <div class="section-title">
+                        📋 Paso 2: Información del Documento
+                    </div>
+
+                    <div class="form-grid form-grid-3">
+                        <div class="form-group">
+                            <label>
+                                📅 Fecha de Expedición <span class="required">*</span>
+                            </label>
+                            <input type="date" id="fecha_emision" required disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                📄 Tipo de Documento <span class="required">*</span>
+                            </label>
+                            <select id="tipo_documento" required disabled>
+                                <option value="">-- Seleccione --</option>
+                                <option value="Factura de Venta">Factura de Venta</option>
+                                <option value="Nota Crédito">Nota Crédito</option>
+                                <option value="Nota Débito">Nota Débito</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                🛠️ Tipo de Servicio <span class="required">*</span>
+                            </label>
+                            <select id="tipo_servicio" required disabled>
+                                <option value="">-- Seleccione --</option>
+                                <option value="Servicio">Servicio</option>
+                                <option value="Compra">Compra</option>
+                                <option value="Ambas">Ambas</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN 3: VALORES -->
+                    <div class="section-title">
+                        💰 Paso 3: Valores
+                    </div>
+
+                    <div class="form-grid form-grid-2">
+                        <div class="form-group">
+                            <label>
+                                💵 Valor Total <span class="required">*</span>
+                            </label>
+                            <input type="number" id="valor_total" placeholder="1500000" step="0.01" required disabled>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                📊 Valor IVA
+                            </label>
+                            <input type="number" id="valor_iva" placeholder="285000" step="0.01" disabled>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN 4: FORMA DE PAGO -->
+                    <div class="section-title">
+                        💳 Paso 4: Forma de Pago
+                    </div>
+
+                    <div class="form-grid form-grid-2">
+                        <div class="form-group">
+                            <label>
+                                💳 Forma de Pago <span class="required">*</span>
+                            </label>
+                            <div style="display: flex; gap: 20px; align-items: center; padding: 10px 0;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="radio" name="forma_pago" value="Estandar" checked disabled>
+                                    <span>Estándar</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                                    <input type="radio" name="forma_pago" value="Tarjeta de Credito" disabled>
+                                    <span>Tarjeta de Crédito</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN 5: ARCHIVOS ADJUNTOS -->
+                    <div class="section-title">
+                        📎 Paso 5: Archivos Adjuntos
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            📄 Archivo PDF Principal <span class="required">*</span>
+                        </label>
+                        <div class="file-upload-area" id="pdfUploadArea">
+                            <input type="file" id="archivo_pdf" accept=".pdf" style="display: none;" disabled required>
+                            <div style="font-size: 3em; margin-bottom: 10px;">📄</div>
+                            <p style="font-weight: 600; color: var(--primary-color);">
+                                Click para seleccionar archivo PDF
+                            </p>
+                            <p style="font-size: 0.85em; color: var(--text-secondary);">
+                                o arrastre el archivo aquí
+                            </p>
+                            <p id="pdfFileName" style="margin-top: 10px; font-weight: 600; color: var(--success-color);"></p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            📎 Archivos Anexos (XML, JPG, XLSX, ZIP)
+                        </label>
+                        <div class="file-upload-area" id="anexosUploadArea">
+                            <input type="file" id="archivos_anexos" accept=".xml,.jpg,.jpeg,.png,.xlsx,.xls,.zip" multiple style="display: none;" disabled>
+                            <div style="font-size: 3em; margin-bottom: 10px;">📎</div>
+                            <p style="font-weight: 600; color: var(--primary-color);">
+                                Click para seleccionar archivos anexos
+                            </p>
+                            <p style="font-size: 0.85em; color: var(--text-secondary);">
+                                o arrastre los archivos aquí (múltiples archivos permitidos)
+                            </p>
+                            <p id="anexosFileNames" style="margin-top: 10px; font-weight: 600; color: var(--success-color);"></p>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN 6: OBSERVACIONES -->
+                    <div class="section-title">
+                        📝 Paso 6: Observaciones (Opcional)
+                    </div>
+
+                    <div class="form-group">
+                        <textarea id="observaciones" placeholder="Escriba observaciones adicionales aquí..." disabled></textarea>
+                    </div>
+
+                    <!-- BOTÓN ADICIONAR -->
+                    <button type="submit" class="btn btn-primary" id="btnAdicionar" disabled>
+                        ➕ Adicionar a la Lista
+                    </button>
+                </form>
+
+                <!-- LISTA DE FACTURAS ADICIONADAS -->
+                <div class="facturas-list" id="facturasListContainer" style="display: none;">
+                    <h3>
+                        📋 Facturas Adicionadas (<span id="contadorFacturas">0</span>)
+                    </h3>
+
+                    <div style="overflow-x: auto;">
+                        <table class="facturas-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 40px;">
+                                        <input type="checkbox" id="selectAll" title="Seleccionar todas">
+                                    </th>
+                                    <th>NIT</th>
+                                    <th>Razón Social</th>
+                                    <th>Prefijo</th>
+                                    <th>Folio</th>
+                                    <th>Fecha Exp.</th>
+                                    <th>Valor Total</th>
+                                    <th>Empresa</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="facturasListBody">
+                                <!-- Facturas se agregan aquí dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 20px; display: flex; gap: 15px; justify-content: flex-end;">
+                        <button type="button" class="btn btn-secondary" onclick="limpiarLista()">
+                            🗑️ Limpiar Todo
+                        </button>
+                        <button type="button" class="btn btn-success btn-primary" onclick="radicarFacturas()">
+                            ✅ Radicar Facturas Seleccionadas
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let facturasAdicionadas = [];
+        let facturaValidada = false;
+
+        // Autocompletar fecha de radicación
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('fecha_radicacion').value = `${year}-${month}-${day}T${hours}:${minutes}`;
+        });
+
+        // PASO 1: VALIDAR DOCUMENTO (NIT-PREFIJO-FOLIO)
+        document.getElementById('btnValidar').addEventListener('click', async function() {
+            const nit = document.getElementById('nit_proveedor').value.trim();
+            const prefijo = document.getElementById('prefijo').value.trim().toUpperCase();
+            const folio = document.getElementById('folio').value.trim();
+
+            if (!nit || !prefijo || !folio) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '⚠️ Campos Incompletos',
+                    text: 'Por favor complete NIT, Prefijo y Folio antes de validar',
+                    confirmButtonColor: '#667eea'
+                });
+                return;
+            }
+
+            // Mostrar loading
+            Swal.fire({
+                title: '🔍 Validando...',
+                text: 'Buscando factura en el sistema',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                // 1. Buscar NIT para obtener razón social
+                const respuestaNit = await fetch(`/facturas-digitales/api/buscar-tercero?nit=${nit}`);
+                const dataNit = await respuestaNit.json();
+
+                if (!dataNit.existe) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '❌ NIT no encontrado',
+                        text: 'El NIT no está registrado en la base de datos de terceros',
+                        confirmButtonColor: '#667eea'
+                    });
+                    return;
+                }
+
+                document.getElementById('razon_social').value = dataNit.razon_social;
+
+                // 2. Validar si la factura ya existe
+                const respuestaDuplicado = await fetch(
+                    `/facturas-digitales/api/validar-duplicada?nit=${nit}&prefijo=${prefijo}&folio=${folio}`
+                );
+                const dataDuplicado = await respuestaDuplicado.json();
+
+                if (dataDuplicado.existe) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: '⚠️ Factura Duplicada',
+                        html: dataDuplicado.mensaje,
+                        footer: `<strong>Tabla:</strong> ${dataDuplicado.tabla_origen} | <strong>Fecha:</strong> ${dataDuplicado.fecha_registro}`,
+                        confirmButtonColor: '#667eea'
+                    });
+                    return;
+                }
+
+                // 3. Validación exitosa
+                Swal.fire({
+                    icon: 'success',
+                    title: '✅ Validación Exitosa',
+                    text: dataDuplicado.mensaje,
+                    confirmButtonColor: '#48bb78'
+                });
+
+                facturaValidada = true;
+                habilitarFormulario();
+
+            } catch (error) {
+                console.error('Error en validación:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: '❌ Error',
+                    text: 'Error al validar la factura. Intente nuevamente.',
+                    confirmButtonColor: '#667eea'
+                });
+            }
+        });
+
+        // Habilitar formulario después de validación
+        function habilitarFormulario() {
+            // Habilitar todos los campos del formulario
+            document.getElementById('fecha_emision').disabled = false;
+            document.getElementById('tipo_documento').disabled = false;
+            document.getElementById('tipo_servicio').disabled = false;
+            document.getElementById('valor_total').disabled = false;
+            document.getElementById('valor_iva').disabled = false;
+            document.querySelectorAll('input[name="forma_pago"]').forEach(radio => radio.disabled = false);
+            document.getElementById('archivo_pdf').disabled = false;
+            document.getElementById('archivos_anexos').disabled = false;
+            document.getElementById('observaciones').disabled = false;
+            document.getElementById('btnAdicionar').disabled = false;
+
+            // Scroll suave al siguiente paso
+            document.querySelector('.section-title:nth-of-type(2)').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Upload de archivos con drag & drop
+        ['pdfUploadArea', 'anexosUploadArea'].forEach(areaId => {
+            const area = document.getElementById(areaId);
+            const inputId = areaId === 'pdfUploadArea' ? 'archivo_pdf' : 'archivos_anexos';
+            const input = document.getElementById(inputId);
+
+            area.addEventListener('click', () => input.click());
+            area.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                area.classList.add('drag-over');
+            });
+            area.addEventListener('dragleave', () => area.classList.remove('drag-over'));
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.classList.remove('drag-over');
+                input.files = e.dataTransfer.files;
+                mostrarNombresArchivos(inputId);
+            });
+
+            input.addEventListener('change', () => mostrarNombresArchivos(inputId));
+        });
+
+        function mostrarNombresArchivos(inputId) {
+            const input = document.getElementById(inputId);
+            const displayId = inputId === 'archivo_pdf' ? 'pdfFileName' : 'anexosFileNames';
+            const display = document.getElementById(displayId);
+
+            if (input.files.length > 0) {
+                const nombres = Array.from(input.files).map(f => f.name).join(', ');
+                display.textContent = `📁 ${nombres}`;
+            } else {
+                display.textContent = '';
+            }
+        }
+
+        // ADICIONAR FACTURA A LA LISTA
+        document.getElementById('formFactura').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if (!facturaValidada) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '⚠️ Validación Requerida',
+                    text: 'Debe validar el documento antes de adicionar',
+                    confirmButtonColor: '#667eea'
+                });
+                return;
+            }
+
+            // Recopilar datos
+            const factura = {
+                id: Date.now(),
+                fecha_radicacion: document.getElementById('fecha_radicacion').value,
+                empresa: document.getElementById('empresa').value,
+                departamento: document.getElementById('departamento').value,
+                prefijo: document.getElementById('prefijo').value.toUpperCase(),
+                folio: document.getElementById('folio').value,
+                nit_proveedor: document.getElementById('nit_proveedor').value,
+                razon_social: document.getElementById('razon_social').value,
+                fecha_emision: document.getElementById('fecha_emision').value,
+                tipo_documento: document.getElementById('tipo_documento').value,
+                tipo_servicio: document.getElementById('tipo_servicio').value,
+                valor_total: parseFloat(document.getElementById('valor_total').value),
+                valor_iva: parseFloat(document.getElementById('valor_iva').value || 0),
+                forma_pago: document.querySelector('input[name="forma_pago"]:checked').value,
+                observaciones: document.getElementById('observaciones').value,
+                archivo_pdf: document.getElementById('archivo_pdf').files[0],
+                archivos_anexos: Array.from(document.getElementById('archivos_anexos').files)
+            };
+
+            facturasAdicionadas.push(factura);
+            actualizarTablaFacturas();
+
+            Swal.fire({
+                icon: 'success',
+                title: '✅ Factura Adicionada',
+                text: 'La factura se agregó a la lista correctamente',
+                timer: 2000,
+                showConfirmButton: false
+            });
+
+            // Limpiar formulario para nueva factura
+            limpiarFormularioNuevaFactura();
+        });
+
+        function actualizarTablaFacturas() {
+            const tbody = document.getElementById('facturasListBody');
+            const container = document.getElementById('facturasListContainer');
+            const contador = document.getElementById('contadorFacturas');
+
+            if (facturasAdicionadas.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'block';
+            contador.textContent = facturasAdicionadas.length;
+
+            tbody.innerHTML = facturasAdicionadas.map(f => `
+                <tr class="fade-in">
+                    <td>
+                        <input type="checkbox" class="factura-checkbox" data-id="${f.id}" checked>
+                    </td>
+                    <td>${f.nit_proveedor}</td>
+                    <td>${f.razon_social}</td>
+                    <td>${f.prefijo}</td>
+                    <td>${f.folio}</td>
+                    <td>${new Date(f.fecha_emision).toLocaleDateString('es-CO')}</td>
+                    <td>$ ${f.valor_total.toLocaleString('es-CO')}</td>
+                    <td>${f.empresa}</td>
+                    <td><span class="badge badge-success">Pendiente</span></td>
+                    <td>
+                        <button class="btn-icon btn-delete" onclick="eliminarFactura(${f.id})">
+                            🗑️
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Scroll a la tabla
+            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function limpiarFormularioNuevaFactura() {
+            // Limpiar solo campos editables, mantener empresa y departamento
+            document.getElementById('prefijo').value = '';
+            document.getElementById('folio').value = '';
+            document.getElementById('nit_proveedor').value = '';
+            document.getElementById('razon_social').value = '';
+            document.getElementById('fecha_emision').value = '';
+            document.getElementById('tipo_documento').value = '';
+            document.getElementById('tipo_servicio').value = '';
+            document.getElementById('valor_total').value = '';
+            document.getElementById('valor_iva').value = '';
+            document.getElementById('observaciones').value = '';
+            document.getElementById('archivo_pdf').value = '';
+            document.getElementById('archivos_anexos').value = '';
+            document.getElementById('pdfFileName').textContent = '';
+            document.getElementById('anexosFileNames').textContent = '';
+
+            // Deshabilitar formulario hasta nueva validación
+            facturaValidada = false;
+            document.getElementById('fecha_emision').disabled = true;
+            document.getElementById('tipo_documento').disabled = true;
+            document.getElementById('tipo_servicio').disabled = true;
+            document.getElementById('valor_total').disabled = true;
+            document.getElementById('valor_iva').disabled = true;
+            document.querySelectorAll('input[name="forma_pago"]').forEach(radio => radio.disabled = true);
+            document.getElementById('archivo_pdf').disabled = true;
+            document.getElementById('archivos_anexos').disabled = true;
+            document.getElementById('observaciones').disabled = true;
+            document.getElementById('btnAdicionar').disabled = true;
+
+            // Focus en prefijo para nueva factura
+            document.getElementById('prefijo').focus();
+        }
+
+        function eliminarFactura(id) {
+            Swal.fire({
+                title: '¿Eliminar factura?',
+                text: 'Esta acción no se puede deshacer',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#f56565',
+                cancelButtonColor: '#cbd5e0',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    facturasAdicionadas = facturasAdicionadas.filter(f => f.id !== id);
+                    actualizarTablaFacturas();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Eliminada',
+                        text: 'Factura eliminada de la lista',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        }
+
+        function limpiarLista() {
+            Swal.fire({
+                title: '¿Limpiar toda la lista?',
+                text: 'Se eliminarán todas las facturas adicionadas',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#f56565',
+                cancelButtonColor: '#cbd5e0',
+                confirmButtonText: 'Sí, limpiar todo',
+                cancelButtonText: 'Cancelar'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    facturasAdicionadas = [];
+                    actualizarTablaFacturas();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Lista limpiada',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        }
+
+        // Select All checkbox
+        document.getElementById('selectAll').addEventListener('change', function() {
+            document.querySelectorAll('.factura-checkbox').forEach(cb => {
+                cb.checked = this.checked;
+            });
+        });
+
+        // RADICAR FACTURAS SELECCIONADAS
+        async function radicarFacturas() {
+            const checkboxes = document.querySelectorAll('.factura-checkbox:checked');
+            if (checkboxes.length === 0) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: '⚠️ Sin selección',
+                    text: 'Seleccione al menos una factura para radicar',
+                    confirmButtonColor: '#667eea'
+                });
+                return;
+            }
+
+            const idsSeleccionados = Array.from(checkboxes).map(cb => parseInt(cb.dataset.id));
+            const facturasRadicar = facturasAdicionadas.filter(f => idsSeleccionados.includes(f.id));
+
+            Swal.fire({
+                title: '📤 Radicando facturas...',
+                html: `Procesando ${facturasRadicar.length} factura(s)`,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            try {
+                let exitosas = 0;
+                let errores = 0;
+
+                for (const factura of facturasRadicar) {
+                    const formData = new FormData();
+                    
+                    // Agregar todos los campos
+                    Object.keys(factura).forEach(key => {
+                        if (key === 'archivo_pdf') {
+                            formData.append('archivo_pdf', factura.archivo_pdf);
+                        } else if (key === 'archivos_anexos') {
+                            factura.archivos_anexos.forEach(file => {
+                                formData.append('archivos_anexos', file);
+                            });
+                        } else if (key !== 'id') {
+                            formData.append(key, factura[key]);
+                        }
+                    });
+
+                    const response = await fetch('/facturas-digitales/api/cargar-factura', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        exitosas++;
+                        facturasAdicionadas = facturasAdicionadas.filter(f => f.id !== factura.id);
+                    } else {
+                        errores++;
+                    }
+                }
+
+                actualizarTablaFacturas();
+
+                if (errores === 0) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '✅ Radicación Exitosa',
+                        text: `${exitosas} factura(s) radicada(s) correctamente`,
+                        confirmButtonColor: '#48bb78'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: '⚠️ Radicación Parcial',
+                        html: `
+                            <strong>Exitosas:</strong> ${exitosas}<br>
+                            <strong>Con errores:</strong> ${errores}
+                        `,
+                        confirmButtonColor: '#ed8936'
+                    });
+                }
+
+            } catch (error) {
+                console.error('Error radicando facturas:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: '❌ Error',
+                    text: 'Error al radicar las facturas',
+                    confirmButtonColor: '#667eea'
+                });
+            }
+        }
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+</body>
+</html>

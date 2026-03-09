@@ -1,0 +1,35 @@
+════════════════════════════════════════════════════════════════
+  ✅ CAMBIO DE PUERTO COMPLETADO - 30 NOV 2025
+════════════════════════════════════════════════════════════════
+
+📋 CAMBIO REALIZADO:
+   Puerto DIAN vs ERP: 5000 → 8097
+
+🔧 CONFIGURACIÓN FINAL:
+   • Gestor Documental: http://localhost:8099
+   • DIAN vs ERP:       http://localhost:8097
+
+📁 ARCHIVOS ACTUALIZADOS (9):
+   ✓ Proyecto Dian Vs ERP v5.20251130\app.py
+   ✓ templates\dashboard.html
+   ✓ 2_iniciar_dian.bat
+   ✓ iniciar_ambos_sistemas.bat
+   ✓ LEER_PRIMERO.md
+   ✓ ESTADO_SISTEMA.txt
+   ✓ GUIA_INICIO_SISTEMAS.md
+   ✓ Proyecto Dian Vs ERP v5.20251130\README_INSTALACION.md
+   ✓ Dashboard JavaScript (función abrirDianVsERP)
+
+🚀 CÓMO INICIAR:
+   1. Doble clic: 1_iniciar_gestor.bat
+   2. Doble clic: 2_iniciar_dian.bat
+   3. Navega a: http://localhost:8099
+
+✅ VERIFICACIÓN:
+   - Gestor Documental escuchando en 8099
+   - DIAN vs ERP escuchando en 8097
+   - Enlace en dashboard apunta a 8097
+   - Scripts de inicio actualizados
+   - Documentación actualizada
+
+════════════════════════════════════════════════════════════════

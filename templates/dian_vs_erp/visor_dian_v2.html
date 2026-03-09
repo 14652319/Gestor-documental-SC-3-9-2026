@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>DIAN vs ERP — FACTURACIÓN ELECTRÓNICA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/tabulator-tables@5.5.2/dist/css/tabulator_midnight.min.css" rel="stylesheet">
+  <style>
+    /* ===== COLORES INSTITUCIONALES SUPERTIENDAS CAÑAVERAL ===== */
+    :root{
+      /* Fondos oscuros (modo dark por defecto) */
+      --bg:#1a1f2e; --panel:#252b3b; --hdr:#151924; --bd:#3a4254;
+      /* Verde corporativo SC (consistente en ambos modos) */
+      --green-bright:#00d084; --green-primary:#00c875; --green-header:#2d5016;
+      /* Textos modo oscuro */
+      --txt:#e8eaed; --muted:#9fb0c7;
+      /* Colores de acción */
+      --danger:#e94444; --info:#2563eb; --gold:#fdd835;
+    }
+    
+    /* ===== MODO CLARO (LIGHT MODE) ===== */
+    body.light-mode{
+      /* Fondos claros con toque verde suave */
+      --bg:#f0f9f4; --panel:#f8fdfb; --hdr:#e8f5f0; --bd:#d4e8dd;
+      /* Verde corporativo (consistente) */
+      --green-bright:#00d084; --green-primary:#00c875; --green-header:#2d5016;
+      /* Textos modo claro */
+      --txt:#2c3e50; --muted:#6c757d;
+      /* Colores de acción (ajustados) */
+      --danger:#e94444; --info:#2563eb; --gold:#f9a825;
+    }
+    
+    /* Toggle Switch para cambio de modo */
+    .theme-toggle{
+      position:relative;display:inline-flex;align-items:center;gap:8px;
+      background:var(--panel);border:1px solid var(--bd);
+      border-radius:20px;padding:4px 12px 4px 8px;cursor:pointer;
+      transition:all 0.3s ease;color:var(--txt);
+    }
+    .theme-toggle:hover{
+      border-color:var(--green-primary);
+      background:rgba(0,200,117,0.1);
+      transform:translateY(-1px);
+    }
+    .theme-toggle input{display:none}
+    .theme-icon{font-size:18px;transition:transform 0.3s ease}
+    .theme-toggle:hover .theme-icon{transform:scale(1.15) rotate(20deg)}
+    
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
+    
+    /* Banner superior verde corporativo */
+    .banner-green{
+      background:linear-gradient(135deg, var(--green-bright) 0%, #00a86b 100%);
+      padding:6px 14px;text-align:center;font-weight:600;font-size:13px;
+      box-shadow:0 2px 8px rgba(0,208,132,0.3);
+      color:#fff;
+    }
+    body.light-mode .banner-green{
+      box-shadow:0 2px 8px rgba(0,208,132,0.4);
+    }
+    
+    .page{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+    .top{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,var(--hdr),#101420);border-bottom:1px solid #1f2737}
+    .top .row{display:flex;gap:10px;align-items:center;padding:10px 14px}
+    .spacer{flex:1}
+    
+    /* Botones con colores corporativos */
+    .btn{
+      border:1px solid var(--bd);background:var(--panel);color:#fff;
+      padding:7px 12px;border-radius:8px;cursor:pointer;text-decoration:none;
+      display:inline-block;transition:all 0.2s ease;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+    .btn.primary{
+      background:var(--green-primary);border:1px solid #00a86b;
+    }
+    .btn.primary:hover{
+      background:#00a86b;box-shadow:0 4px 12px rgba(0,200,117,0.3);
+    }
+    .btn.danger{background:var(--danger);border:1px solid #c93434}
+    .btn.danger:hover{background:#c93434}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    
+    /* Botón dorado/oro para exportar */
+    .btn.gold{
+      background:#2a2411;border-color:#4d3b06;color:#fdd835;
+    }
+    body.light-mode .btn.gold{
+      background:#f9f7f0;border:1px solid #e8d68f;color:#9a7b0d;
+      font-weight:600;
+    }
+    body.light-mode .btn.gold:hover{
+      background:#f9a825;border-color:#e09400;color:#fff;
+    }
+    
+    /* Inputs con estilo corporativo adaptable */
+    input[type="date"],input[type="text"]{
+      background:var(--panel);color:var(--txt);border:1px solid var(--bd);
+      border-radius:8px;padding:7px 10px;min-width:170px;
+    }
+    input[type="date"]:focus,input[type="text"]:focus{
+      outline:none;border-color:var(--green-primary);
+      box-shadow:0 0 0 2px rgba(0,200,117,0.2);
+    }
+    
+    /* Ajustes modo claro para tabla - ESTILO VERDE SUAVE */
+    body.light-mode .tabulator-row.tabulator-selectable:hover{
+      background:#e0f5ec !important; /* Verde muy claro al pasar mouse */
+    }
+    body.light-mode .tabulator-row.tabulator-selected{
+      background:rgba(0,200,117,0.15) !important; /* Verde claro cuando seleccionada */
+    }
+    body.light-mode .tabulator{
+      background:var(--bg) !important;
+      color:var(--txt) !important;
+    }
+    body.light-mode .tabulator-header{
+      background:var(--green-header) !important;
+      color:#fff !important;
+    }
+    body.light-mode .tabulator-cell{
+      border-color:#d4e8dd !important; /* Borde verde muy suave */
+      color:#2c3e50 !important;
+    }
+    /* Filas alternadas estilo modo oscuro - una más clara, otra más oscura */
+    body.light-mode .tabulator-row{
+      background:#ffffff !important; /* Fila clara (blanco con toque verde) */
+    }
+    
+    body.light-mode .tabulator-row:nth-child(even){
+      background:#f0f9f4 !important; /* Fila más oscura (verde muy suave) */
+    }
+    body.light-mode .tabulator-row .tabulator-cell{
+      color:#2c3e50 !important;
+      border-right:1px solid #e5f3ec !important; /* Líneas verticales suaves */
+    }
+    body.light-mode .btn{color:var(--txt)}
+    body.light-mode .btn.primary,body.light-mode .btn.danger{color:#fff}
+    body.light-mode .link{color:#00a86b !important} /* Verde corporativo para links */
+    body.light-mode .link:hover{color:#00875a !important}
+    
+    .chip{color:var(--muted);font-size:13px;opacity:.9}
+    body.light-mode .chip{color:#6c757d;opacity:1}
+    .content{flex:1;display:flex;flex-direction:column;overflow:hidden}
+    .table-wrap{flex:1;overflow:auto;padding:10px 14px}
+    #tabla{height:100%}
+    
+    /* Footer con gradiente */
+    .bottom{
+      position:sticky;bottom:0;
+      background:linear-gradient(0deg,var(--hdr),#0f131c);
+      border-top:1px solid #1f2737;padding:6px 12px;
+      display:flex;align-items:center;gap:12px;
+    }
+    .counter{margin-left:auto;color:var(--muted)}
+    
+    /* Filas de tabla con colores corporativos */
+    .tabulator-row.tabulator-selectable:hover{background:#2a3650 !important}
+    .tabulator-row.tabulator-selected{
+      background:rgba(0,200,117,0.15) !important;
+      border-left:3px solid var(--green-primary) !important;
+    }
+    
+    /* Headers de tabla verde oscuro SC */
+    .tabulator .tabulator-header{
+      background:var(--green-header) !important;
+      color:#fff !important;
+      font-weight:600;
+      box-shadow:inset 0 -2px 4px rgba(0,0,0,0.2);
+    }
+    .tabulator .tabulator-header .tabulator-col{
+      border-right:1px solid rgba(255,255,255,0.1);
+    }
+    
+    /* Header filter inputs */
+    .tabulator-header .tabulator-col .tabulator-header-filter input{
+      background:#1e2433;border:1px solid var(--bd);color:var(--txt);
+      border-radius:6px;height:26px;
+    }
+    body.light-mode .tabulator-header .tabulator-col .tabulator-header-filter input{
+      background:#f8fdfb;border:1px solid #c8e6d7;color:#2c3e50;
+    }
+    body.light-mode .tabulator-header .tabulator-col .tabulator-header-filter input:focus{
+      background:#fff;border-color:var(--green-primary);
+    }
+    
+    /* Links dorados */
+    .link{color:var(--gold);text-decoration:none;font-weight:500}
+    .link:hover{text-decoration:underline;color:#ffeb3b}
+    
+    .kpi{font-size:12px;color:var(--muted)}
+    
+    /* Paginación con botón activo verde */
+    .tabulator .tabulator-footer .tabulator-page.active{
+      background:var(--green-primary) !important;
+      color:#fff !important;
+      border-color:var(--green-primary) !important;
+    }
+    
+    /* Footer en modo claro - verde suave */
+    body.light-mode .tabulator .tabulator-footer{
+      background:#f0f9f4 !important;
+      color:var(--txt) !important;
+      border-top:1px solid #d4e8dd !important;
+    }
+    body.light-mode .tabulator .tabulator-footer .tabulator-page{
+      background:#fff !important;
+      color:var(--txt) !important;
+      border:1px solid #d4e8dd !important;
+    }
+    body.light-mode .tabulator .tabulator-footer .tabulator-page:hover{
+      background:#e0f5ec !important;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <!-- Banner verde corporativo -->
+  <div class="banner-green">
+    SUPERTIENDAS CAÑAVERAL SAS - GESTOR DOCUMENTAL
+  </div>
+  
+  <!-- barra superior -->
+  <div class="top">
+    <div class="row">
+      <div style="font-weight:800">📊 DIAN vs ERP — FACTURACION ELECTRONICA</div>
+      <div class="spacer"></div>
+      
+      <!-- Toggle de tema claro/oscuro -->
+      <label class="theme-toggle" title="Cambiar tema claro/oscuro">
+        <input type="checkbox" id="themeToggle">
+        <span class="theme-icon">🌙</span>
+        <span style="font-size:13px;font-weight:500">Tema</span>
+      </label>
+      
+      <!-- Botón de Sincronización y Fecha de Última Actualización -->
+      <button class="btn primary" onclick="sincronizarDatos()" id="btnSincronizar" title="Recalcular días y sincronizar archivos">
+        <span id="iconoSincronizar">🔄</span> Sincronizar
+      </button>
+      <div style="font-size:11px;color:var(--muted);line-height:1.2">
+        <div>Última actualización:</div>
+        <div id="ultimaSincronizacion" style="font-weight:600;color:#ffa500">Pendiente</div>
+      </div>
+      
+      <div class="kpi">👤 {{ usuario }}</div>
+      <a class="btn" href="http://127.0.0.1:8099/dashboard">🏠 Volver a Menú</a>
+      <a class="btn" href="/dian_vs_erp/reportes_dinamicos" title="Reportes Dinámicos con Filtros Avanzados" style="background:#9b59b6;color:#fff">📊 Reportes</a>
+      <button class="btn" onclick="abrirModalConfiguracion()" title="Configuración del Sistema">⚙️ Configuración</button>
+      <button class="btn danger" onclick="cerrarSesionManual()">🚪 Salir</button>
+    </div>
+    <!-- 🟢 BANNER VERDE PARA CONFIRMAR VERSIÓN -->
+    {% if version == 'v2' %}
+    <div style="background:#0066cc;color:white;padding:15px;margin:15px 0;border-radius:8px;text-align:center;font-size:18px;font-weight:bold">
+      🔄 VISOR DE FACTURAS V2 - CARGA DESDE TABLAS OPTIMIZADAS (DIAN, ERP COMERCIAL, ERP FINANCIERO, ACUSES) 🔄
+    </div>
+    {% else %}
+    <div style="background:#00d084;color:white;padding:15px;margin:15px 0;border-radius:8px;text-align:center;font-size:18px;font-weight:bold">
+      ✅ VERSIÓN FINAL - 20-DIC-2025 09:52 - VALIDACIÓN COMPLETA DE FECHAS ✅
+    </div>
+    {% endif %}
+    <div class="row">
+      <span class="chip">📅 Fecha Inicial</span>
+      <input type="date" id="f_ini">
+      <span class="chip">📅 Fecha Final</span>
+      <input type="date" id="f_fin">
+
+      <span class="chip">🔎 Buscar</span>
+      <input type="text" id="q" placeholder="Escribe para filtrar…" autocomplete="off">
+
+      <button class="btn primary" id="btnBuscar">Buscar</button>
+      <button class="btn" onclick="location.href='/dian_vs_erp/cargar_archivos'">📂 Cargar/Procesar</button>
+      <button class="btn" onclick="abrirModalCargaAutomatica()" style="background:#9b59b6;color:#fff">🚀 Carga Automática</button>
+
+      <div class="spacer"></div>
+
+      <a class="btn" href="/dian_vs_erp/descargar_plantilla/dian">Plantilla DIAN</a>
+      <a class="btn" href="/dian_vs_erp/descargar_plantilla/erp">Plantilla ERP</a>
+      <a class="btn" href="/dian_vs_erp/descargar_plantilla/acuses">Plantilla Acuses</a>
+
+      <button class="btn gold" id="btnExport" disabled>📥 Exportar seleccionadas</button>
+      <button class="btn" id="btnEmailMasivo" disabled style="background:#00c875;color:#fff">✈️ Enviar Emails Masivo</button>
+      <a class="btn" href="/dian_vs_erp/reportes_dinamicos" title="Generar Reportes con Tabla Dinámica" style="background:#9b59b6;color:#fff;font-weight:bold">📊 Reportes Dinámicos</a>
+    </div>
+  </div>
+
+  <!-- tabla -->
+  <div class="content">
+    <div class="table-wrap"><div id="tabla"></div></div>
+    <div class="bottom">
+      <div>Mostrando datos filtrados</div>
+      <div class="counter" id="selCounter">0 seleccionadas</div>
+    </div>
+  </div>
+</div>
+
+<!-- 📊 Librería XLSX para exportar Excel -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- 📋 Librería Tabulator -->
+<script src="https://cdn.jsdelivr.net/npm/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+<script>
+  let table;
+  let filtrosBusqueda = []; // Array para rastrear filtros personalizados
+
+  // helpers
+  function firstDayOfMonth(d){ return new Date(d.getFullYear(), d.getMonth(), 1); }
+  function firstDayOfYear(d){ return new Date(d.getFullYear(), 0, 1); } // 🔥 ENERO = mes 0
+  function toYMD(d){ const p=n=>String(n).padStart(2,'0'); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
+  function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
+
+  // 🔥 FECHAS POR DEFECTO: TODO EL AÑO (01-ene-2025 hasta hoy)
+  const hoy = new Date();
+  document.getElementById("f_ini").value = toYMD(firstDayOfYear(hoy)); // ✅ 2025-01-01
+  document.getElementById("f_fin").value = toYMD(hoy); // ✅ HOY
+  console.log("🔥 FECHAS ESTABLECIDAS - Desde:", document.getElementById("f_ini").value, "Hasta:", document.getElementById("f_fin").value);
+
+  // 🔥 Formatter para fecha sin hora
+  function formatFechaSinHora(cell){
+    const val = cell.getValue();
+    if(!val) return "";
+    // Extraer solo YYYY-MM-DD (sin hora)
+    return val.split(" ")[0];
+  }
+
+  // construir tabla con TODAS las columnas del dashboard original
+  table = new Tabulator("#tabla", {
+    layout:"fitDataStretch",
+    height:"100%",
+    selectable:true,
+    pagination:"local",
+    paginationSize:500,
+    paginationSizeSelector:[500, 1000, 2000, 5000],
+    movableColumns:true,
+    headerFilterLiveFilter:true, // ✅ HABILITAR FILTROS EN VIVO
+    columns:[
+      {formatter:"rowSelection", titleFormatter:"rowSelection", hozAlign:"center", width:44, headerSort:false},
+      {title:"NIT Emisor", field:"nit_emisor", headerFilter:"input", width:120},
+      {title:"Razón Social", field:"nombre_emisor", headerFilter:"input", width:250},
+      {
+        title:"🏷️ Tipo Tercero", 
+        field:"tipo_tercero", 
+        headerFilter:"input", 
+        width:180,
+        cssClass:"columna-tipo-tercero",
+        formatter: function(cell) {
+          const val = cell.getValue();
+          if (!val) return '<span style="color:#999;">Sin datos</span>';
+          return `<strong style="color:#00d084;">${val}</strong>`;
+        }
+      },
+      {title:"Fecha Emisión", field:"fecha_emision", formatter:formatFechaSinHora, headerFilter:"input", width:120},
+      {title:"Tipo Documento", field:"tipo_documento", headerFilter:"input", width:100},
+      {title:"Prefijo", field:"prefijo", headerFilter:"input", width:80},
+      {title:"Folio", field:"folio", headerFilter:"input", width:100},
+      {
+        title:"Valor", 
+        field:"valor", 
+        formatter: function(cell) {
+          const valor = cell.getValue();
+          if (valor === null || valor === undefined) return '$0.00';
+          
+          // Formatear como moneda
+          const formatoMoneda = new Intl.NumberFormat('es-CO', {
+            style: 'currency',
+            currency: 'COP',
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+          }).format(valor);
+          
+          // 🔴 VALORES NEGATIVOS EN ROJO (notas crédito)
+          if (valor < 0) {
+            return `<span style="color: #dc3545; font-weight: bold;">${formatoMoneda}</span>`;
+          }
+          
+          return formatoMoneda;
+        },
+        hozAlign:"right", 
+        headerFilter:"input", 
+        width:130
+      },
+      {title:"Ver PDF", field:"cufe", hozAlign:"center", headerSort:false, width:80,
+        formatter:(cell)=>{ const c=cell.getValue(); return c?`<a class="link" target="_blank" href="https://catalogo-vpfe.dian.gov.co/document/searchqr?documentkey=${c}">👁️ Ver</a>`:""; }},
+      {title:"Estado Aprobación", field:"estado_aprobacion", headerFilter:"input", width:150},
+      {title:"Forma de Pago", field:"forma_pago_texto", headerFilter:"input", width:100},
+      {title:"Estado Contable", field:"estado_contable", headerFilter:"input", width:130},
+      {title:"N° Días", field:"dias_desde_emision", hozAlign:"center", headerFilter:"input", width:80},
+      {title:"Solicitante", field:"usuario_solicitante", headerFilter:"input", width:150, editor:"input", cellEdited:onCellEdited},
+      {title:"Aprobador", field:"usuario_aprobador", headerFilter:"input", width:150, editor:"input", cellEdited:onCellEdited},
+      {title:"✉️", field:"enviar_email", hozAlign:"center", headerSort:false, width:60, formatter:emailIconFormatter},
+      {title:"Observaciones", field:"observaciones", headerFilter:"input", width:200, editor:"input"},
+      {title:"Módulo", field:"modulo", headerFilter:"input", width:120},
+      {title:"Causador", field:"doc_causado_por", headerFilter:"input", width:200, editor:"input", cellEdited:onCellEdited},
+    ],
+  });
+
+  // contador seleccionadas + habilitar export y email masivo
+  function updateSelected(){
+    const n = table.getSelectedRows().length;
+    document.getElementById("selCounter").textContent = `${n} seleccionadas`;
+    document.getElementById("btnExport").disabled = n===0;
+    
+    // ✅ NUEVA LÓGICA:
+    // - Avioncito: Solo con EXACTAMENTE 1 archivo seleccionado
+    // - Envío Masivo: Solo con 2 o más archivos seleccionados
+    document.getElementById("btnEmailMasivo").disabled = n < 2; // Habilitar solo con 2+
+    
+    // ✅ REFRESCAR columna de avioncito para mostrar/ocultar según selección
+    table.redraw(true); // Forzar redibujado completo de la tabla
+  }
+  table.on("rowSelectionChanged", updateSelected);
+
+  // 📊 VARIABLE GLOBAL PARA GUARDAR ESTADÍSTICAS DEL BACKEND
+  let estadisticasBackend = null;
+  
+  // 📊 FUNCIÓN PARA CALCULAR ESTADÍSTICAS DE DATOS FILTRADOS
+  function calcularEstadisticas() {
+    if (!table) return null;
+    
+    // Obtener SOLO los datos visibles después de aplicar filtros
+    const datosVisibles = table.getData("active"); // "active" = solo filas visibles
+    
+    console.log(`📊 Calculando estadísticas de ${datosVisibles.length} registros visibles`);
+    
+    // Si no hay datos visibles, retornar ceros
+    if (datosVisibles.length === 0) {
+      return {
+        stats: {'Causada': 0, 'No Registrada': 0, 'Recibido': 0, 'Rechazado': 0},
+        total: 0
+      };
+    }
+    
+    // Inicializar contadores con todos los estados posibles
+    const stats = {};
+    
+    // Contar cada registro según su estado_contable (campo correcto)
+    datosVisibles.forEach((row, index) => {
+      // 🔥 USAR EL CAMPO CORRECTO: estado_contable
+      // Este campo ya viene calculado del backend con los valores correctos:
+      // "Causada", "No Registrada", "Recibido", "Rechazado"
+      let estado = row.estado_contable || row['estado_contable'] || 'No Registrada';
+      
+      // 🔍 DEBUG: Mostrar los primeros 3 registros
+      if (index < 3) {
+        console.log(`🔍 Registro ${index + 1} - Estado detectado: "${estado}"`, {
+          estado_contable: row.estado_contable,
+          estado_aprobacion: row.estado_aprobacion,
+          modulo: row.modulo
+        });
+      }
+      
+      // Incrementar contador
+      if (!stats[estado]) {
+        stats[estado] = 0;
+      }
+      stats[estado]++;
+    });
+    
+    console.log("📊 Estadísticas calculadas:", stats);
+    return { stats, total: datosVisibles.length };
+  }
+  
+  // 📊 FUNCIÓN PARA ACTUALIZAR EL BANNER DE ESTADÍSTICAS
+  function actualizarBannerEstadisticas() {
+    const resultado = calcularEstadisticas();
+    if (!resultado) return;
+    
+    const { stats, total } = resultado;
+    
+    const causadas = stats['Causada'] || 0;
+    const noRegistradas = stats['No Registrada'] || 0;
+    const recibidas = stats['Recibido'] || 0;
+    const rechazadas = stats['Rechazado'] || 0;
+    
+    const banner = document.querySelector('div[style*="background:#00d084"]');
+    if (banner) {
+      banner.innerHTML = `
+        📊 <strong>ESTADÍSTICAS:</strong> 
+        Causadas: <span style="background:white;color:#00d084;padding:3px 8px;border-radius:5px;font-weight:bold">${causadas.toLocaleString()}</span> | 
+        No Registradas: <span style="background:white;color:#ff9800;padding:3px 8px;border-radius:5px;font-weight:bold">${noRegistradas.toLocaleString()}</span> | 
+        Recibidas: <span style="background:white;color:#2196f3;padding:3px 8px;border-radius:5px;font-weight:bold">${recibidas.toLocaleString()}</span> | 
+        Rechazadas: <span style="background:white;color:#f44336;padding:3px 8px;border-radius:5px;font-weight:bold">${rechazadas.toLocaleString()}</span>
+        <span style="font-size:14px;opacity:0.8"> (Mostrando: ${total.toLocaleString()})</span>
+      `;
+      console.log(`✅ Banner actualizado con estadísticas de ${total} registros filtrados`);
+    }
+  }
+  
+  // 🔥 EVENTO: Recalcular estadísticas cada vez que se apliquen filtros en la tabla
+  table.on("dataFiltered", function(filters, rows){
+    console.log(`🔍 Filtros aplicados - ${rows.length} filas visibles`);
+    actualizarBannerEstadisticas();
+  });
+  
+  // 🔥 EVENTO: Recalcular estadísticas después de renderizar la tabla
+  table.on("renderComplete", function(){
+    console.log("✅ Tabla renderizada - recalculando estadísticas");
+    actualizarBannerEstadisticas();
+  });
+
+  // 🔥 CARGA INICIAL - DESPUÉS de establecer las fechas y crear la tabla
+  console.log("🚀 INICIANDO CARGA INICIAL CON FECHAS:", document.getElementById("f_ini").value, "→", document.getElementById("f_fin").value);
+  cargar();
+
+  // cargar datos desde API y aplicar filtros
+  async function cargar(){
+    try {
+      // 🔥 LEER Y VALIDAR LOS VALORES DE LOS FILTROS DE FECHA
+      let f_ini = document.getElementById("f_ini").value.trim();
+      let f_fin = document.getElementById("f_fin").value.trim();
+      
+      // 🔥 VALIDACIÓN ROBUSTA: Solo permitir formato YYYY-MM-DD válido
+      const fechaRegex = /^\d{4}-\d{2}-\d{2}$/;
+      
+      if (f_ini && !fechaRegex.test(f_ini)) {
+        console.error("❌ Fecha inicial inválida:", f_ini);
+        alert("❌ Fecha inicial inválida. Debe ser formato YYYY-MM-DD");
+        return;
+      }
+      
+      if (f_fin && !fechaRegex.test(f_fin)) {
+        console.error("❌ Fecha final inválida:", f_fin);
+        alert("❌ Fecha final inválida. Debe ser formato YYYY-MM-DD");
+        return;
+      }
+      
+      // 🔥 Si no hay fechas, usar defaults (el backend también lo hace)
+      if (!f_ini) {
+        const hoy = new Date();
+        f_ini = `${hoy.getFullYear()}-01-01`;
+        console.warn("⚠️ Fecha inicial vacía, usando:", f_ini);
+      }
+      
+      if (!f_fin) {
+        const hoy = new Date();
+        f_fin = toYMD(hoy);
+        console.warn("⚠️ Fecha final vacía, usando:", f_fin);
+      }
+      
+      // 🔥 OBTENER TÉRMINO DE BÚSQUEDA desde variable global (capturado en el click)
+      const q = window._searchTerm || "";
+      console.log("🔍 Usando término de búsqueda guardado:", `"${q}"`);
+      console.log("🔍 Longitud del término:", q.length);
+      
+      // 🔥 DETERMINAR URL SEGÚN VERSIÓN (V2 usa tablas optimizadas)
+      {% if version == 'v2' %}
+      let url = "/dian_vs_erp/api/dian_v2";  // 🔄 API V2 - Tablas optimizadas
+      console.log("🔄 MODO V2: Usando API con tablas optimizadas (DIAN, ERP Comercial, ERP Financiero, Acuses)");
+      {% else %}
+      let url = "/dian_vs_erp/api/dian";  // API estándar - Tabla maestro_dian_vs_erp
+      console.log("📊 MODO ESTÁNDAR: Usando API con tabla maestro_dian_vs_erp");
+      {% endif %}
+      
+      // 🔥 CONSTRUIR URL CON PARÁMETROS VALIDADOS
+      const params = [];
+      if(f_ini) params.push(`fecha_inicial=${f_ini}`);
+      if(f_fin) params.push(`fecha_final=${f_fin}`);
+      if(q) {
+        const buscarParam = `buscar=${encodeURIComponent(q)}`;
+        console.log("✅ AGREGANDO parámetro de búsqueda:", buscarParam);
+        params.push(buscarParam);
+      } else {
+        console.warn("⚠️ NO se agregará parámetro de búsqueda porque q está vacío");
+      }
+      if(params.length > 0) url += "?" + params.join("&");
+      
+      console.log("🔘 BOTÓN BUSCAR PRESIONADO - Llamando a cargar()...");
+      console.log(`📅 Filtrando DESDE: ${f_ini} HASTA: ${f_fin}`);
+      console.log(`🔍 Búsqueda: ${q ? `"${q}"` : '(sin filtro)'}`);
+      console.log(`🔗 URL completa: ${url}`);
+
+      
+      const res = await fetch(url, {headers:{'Cache-Control':'no-cache'}});
+      
+      if(!res.ok){
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      
+      const data = await res.json();
+      console.log(`✅ Datos cargados desde API: ${data.registros ? data.registros.length : data.length} registros`);
+      
+      // 🔥 GUARDAR ESTADÍSTICAS DEL BACKEND (para referencia)
+      if (data.estadisticas) {
+        estadisticasBackend = data.estadisticas;
+        console.log("📊 Estadísticas desde backend:", data.estadisticas);
+        console.log("📊 Total mostrado:", data.total_mostrado);
+      }
+      
+      // ✅ NO actualizamos el banner aquí - lo hará el evento "renderComplete" 
+      //    después de cargar los datos en la tabla, para mantener consistencia
+      //    con el recálculo dinámico cuando se apliquen filtros
+      
+      // Usar data.registros si está disponible, sino usar data directamente
+      const registros = data.registros || data.data || data;
+      
+      // 🔍 VERIFICAR TIPO_TERCERO EN DATOS
+      if (registros.length > 0) {
+        console.log("%c═══════════════════════════════════════════════════════", "color: #00d084; font-weight: bold; font-size: 16px");
+        console.log("%c✅ ARCHIVO CORRECTO: templates/visor_dian_v2.html", "color: #00d084; font-weight: bold; font-size: 18px");
+        console.log("%c🏷️  VERSIÓN: 23-DIC-2025 - PAGINACIÓN LOCAL", "color: yellow; font-weight: bold; font-size: 16px");
+        console.log("%c═══════════════════════════════════════════════════════", "color: #00d084; font-weight: bold; font-size: 16px");
+        console.log("🏷️  Primer registro completo:", registros[0]);
+        console.log("🏷️  tipo_tercero del primer registro:", registros[0].tipo_tercero);
+        const conTipoTercero = registros.filter(r => r.tipo_tercero && r.tipo_tercero.trim() !== '').length;
+        console.log(`🏷️  Registros con tipo_tercero: ${conTipoTercero} de ${registros.length} (${(conTipoTercero/registros.length*100).toFixed(2)}%)`);
+      }
+      
+      table.setData(registros);
+      // Limpiar filtros locales después de cargar datos del backend
+      filtrosBusqueda.forEach(fn => table.removeFilter(fn));
+      filtrosBusqueda = [];
+      updateSelected();
+      
+    } catch(err) {
+      console.error("❌ Error cargando datos:", err);
+      alert(`Error al cargar los datos:\n${err.message}\n\nVer consola (F12) para más detalles.`);
+    }
+  }
+  
+  // 🔥 BOTÓN BUSCAR - Capturar valor INMEDIATAMENTE al hacer click
+  const btnBuscar = document.getElementById("btnBuscar");
+  const inputQ = document.getElementById("q");
+  
+  console.log("🔧 Verificando elementos:");
+  console.log("   Botón Buscar:", btnBuscar);
+  console.log("   Input búsqueda:", inputQ);
+  
+  btnBuscar.addEventListener("click", function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    console.log("🔘 CLICK EN BOTÓN BUSCAR DETECTADO");
+    
+    // 🔥 CAPTURAR VALOR del campo global Y de los filtros de header de Tabulator
+    let valorBusqueda = inputQ ? inputQ.value.trim() : "";
+    
+    // Si el campo global está vacío, intentar leer los filtros de header de Tabulator
+    if (!valorBusqueda && table) {
+      const filtros = table.getHeaderFilters();
+      console.log("📊 Filtros de header activos:", filtros);
+      
+      // Buscar el filtro de NIT Emisor
+      const filtroNIT = filtros.find(f => f.field === 'nit_emisor');
+      if (filtroNIT && filtroNIT.value) {
+        valorBusqueda = filtroNIT.value;
+        console.log("✅ Usando filtro de NIT Emisor del header:", valorBusqueda);
+      }
+      
+      // Si no hay filtro de NIT, buscar en nombre emisor
+      if (!valorBusqueda) {
+        const filtroNombre = filtros.find(f => f.field === 'nombre_emisor');
+        if (filtroNombre && filtroNombre.value) {
+          valorBusqueda = filtroNombre.value;
+          console.log("✅ Usando filtro de Nombre Emisor del header:", valorBusqueda);
+        }
+      }
+    }
+    
+    console.log("📝 Valor final para buscar:", `"${valorBusqueda}"`);
+    console.log("📝 Longitud:", valorBusqueda.length);
+    
+    // Guardar en variable global temporal
+    window._searchTerm = valorBusqueda;
+    
+    cargar();
+  });
+  
+  // 🔥 EVENTOS: Cambios en fechas recargan datos
+  document.getElementById("f_ini").addEventListener("change", cargar);
+  document.getElementById("f_fin").addEventListener("change", cargar);
+  
+  // 🔥 EVENTO: Enter en campo de búsqueda
+  if (inputQ) {
+    inputQ.addEventListener("keydown", (e)=> {
+      if(e.key === "Enter") {
+        cargar();
+      } else if(e.key === "Escape") { 
+        e.target.value = ""; 
+        cargar();
+      }
+    });
+  }
+
+  // exportar seleccionadas
+  document.getElementById("btnExport").addEventListener("click", async ()=>{
+    const sel = table.getSelectedData();
+    if(sel.length===0) {
+      alert("⚠️ No has seleccionado ninguna factura.\n\nPor favor, marca las casillas de las facturas que deseas exportar.");
+      return;
+    }
+    
+    console.log(`📥 Exportando ${sel.length} facturas seleccionadas...`);
+    
+    try {
+      // Mostrar indicador de carga
+      const btnExport = document.getElementById("btnExport");
+      const textoOriginal = btnExport.textContent;
+      btnExport.disabled = true;
+      btnExport.textContent = "⏳ Generando Excel...";
+      
+      // Enviar datos al backend para generar Excel con valores negativos
+      const response = await fetch('/dian_vs_erp/api/exportar_seleccionadas', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          datos: sel
+        })
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error del servidor: ${response.status}`);
+      }
+      
+      // Descargar el archivo
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `DIAN_vs_ERP_Seleccionadas_${new Date().getTime()}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      console.log(`✅ Excel descargado con ${sel.length} facturas`);
+      
+      // Restaurar botón
+      btnExport.disabled = false;
+      btnExport.textContent = textoOriginal;
+      
+    } catch (error) {
+      console.error('❌ Error exportando:', error);
+      alert(`Error al exportar:\n${error.message}`);
+      
+      // Restaurar botón en caso de error
+      const btnExport = document.getElementById("btnExport");
+      btnExport.disabled = false;
+      btnExport.textContent = "📥 Exportar seleccionadas";
+    }
+  });
+
+  // ===== TOGGLE TEMA CLARO/OSCURO =====
+  const themeToggle = document.getElementById("themeToggle");
+  const themeIcon = document.querySelector(".theme-icon");
+  
+  // Cargar preferencia guardada
+  const savedTheme = localStorage.getItem("theme") || "dark";
+  if(savedTheme === "light"){
+    document.body.classList.add("light-mode");
+    themeToggle.checked = true;
+    themeIcon.textContent = "☀️";
+  }
+  
+  // Cambiar tema
+  themeToggle.addEventListener("change", function(){
+    if(this.checked){
+      document.body.classList.add("light-mode");
+      themeIcon.textContent = "☀️";
+      localStorage.setItem("theme", "light");
+    } else {
+      document.body.classList.remove("light-mode");
+      themeIcon.textContent = "🌙";
+      localStorage.setItem("theme", "dark");
+    }
+  });
+
+  // ============================================
+  // FUNCIONES PARA COLUMNAS EDITABLES
+  // ============================================
+  
+  function onCellEdited(cell){
+    const field = cell.getField();
+    const value = cell.getValue();
+    const row = cell.getRow().getData();
+    const cufe = row.cufe;
+    const nit = row.nit_emisor;
+    
+    console.log(`Campo editado: ${field} = "${value}" para CUFE ${cufe}`);
+    
+    // Si es Solicitante o Aprobador, preguntar si aplicar a todo el NIT
+    if(field === "usuario_solicitante" || field === "usuario_aprobador"){
+      if(confirm(`¿Aplicar "${value}" a TODOS los documentos del NIT ${nit}?`)){
+        aplicarCambioATodoElNIT(nit, field, value);
+      } else {
+        guardarCampoIndividual(cufe, field, value);
+      }
+    } else {
+      // Para otros campos (Causador, Observaciones), guardar individual
+      guardarCampoIndividual(cufe, field, value);
+    }
+  }
+  
+  function aplicarCambioATodoElNIT(nit, campo, valor){
+    fetch('/dian_vs_erp/api/actualizar_nit', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({nit, campo, valor})
+    })
+    .then(r => r.json())
+    .then(data => {
+      if(data.exito){
+        alert(`✅ ${data.mensaje}`);
+        cargar(); // Recargar tabla
+      } else {
+        alert(`❌ ${data.mensaje}`);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('❌ Error al guardar cambios');
+    });
+  }
+  
+  function guardarCampoIndividual(cufe, campo, valor){
+    fetch('/dian_vs_erp/api/actualizar_campo', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({cufe, campo, valor})
+    })
+    .then(r => r.json())
+    .then(data => {
+      if(data.exito){
+        console.log(`✅ Campo ${campo} actualizado`);
+      } else {
+        alert(`❌ ${data.mensaje}`);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('❌ Error al guardar campo');
+    });
+  }
+
+  // ============================================
+  // ICONO DE ENVÍO DE EMAIL
+  // ============================================
+  
+  function emailIconFormatter(cell){
+    const data = cell.getRow().getData();
+    const row = cell.getRow();
+    
+    // ✅ NUEVA LÓGICA: Mostrar avioncito SOLO si esta fila está seleccionada Y es la ÚNICA seleccionada
+    const totalSeleccionadas = table.getSelectedRows().length;
+    
+    if(row.isSelected() && totalSeleccionadas === 1){
+      // ✅ USAR ONCLICK INLINE para evitar conflicto con sistema de eventos de Tabulator
+      const cufe = data.cufe_cude || 'sin-cufe';
+      return `<a href="javascript:void(0)" onclick="event.stopPropagation(); enviarEmailIndividual('${cufe}'); return false;" style="cursor:pointer;font-size:18px;color:#00c875;text-decoration:none" title="Enviar Email Individual (1 factura)">✈️</a>`;
+    } else {
+      return ''; // No mostrar si no está seleccionado o hay múltiples selecciones
+    }
+  }
+  
+  // ✅ FUNCIÓN GLOBAL para envío individual (llamada desde onclick inline)
+  function enviarEmailIndividual(cufe){
+    console.log('✈️ ENVÍO INDIVIDUAL - CUFE:', cufe);
+    
+    // Obtener las facturas seleccionadas de la tabla (debe ser exactamente 1)
+    const facturas = table.getSelectedData();
+    
+    console.log('✅ Facturas seleccionadas:', facturas.length);
+    
+    if(facturas.length !== 1){
+      alert('⚠️ Error: Debe seleccionar exactamente 1 factura');
+      return;
+    }
+    
+    // ✅ USAR MISMA FUNCIÓN QUE EL BOTÓN MASIVO
+    console.log('📧 Llamando a abrirModalEnvioMasivo con 1 factura');
+    abrirModalEnvioMasivo(facturas);
+  }
+  
+  // ============================================
+  // MODAL DE CONFIGURACIÓN
+  // ============================================
+  
+  function abrirModalConfiguracion(){
+    window.location.href = '/dian_vs_erp/configuracion';
+  }
+
+// ============================================
+// ENVÍO MASIVO DE EMAILS
+// ============================================
+
+// 🔧 DEFINIR FUNCIONES PRIMERO (antes de usarlas en enviarEmailClick)
+function abrirModalEnvioMasivo(facturas){
+  // Agrupar facturas por NIT para obtener destinatarios únicos
+  const nitsUnicos = [...new Set(facturas.map(f => f.nit_emisor))];
+  
+  // Obtener todos los usuarios de todos los NITs
+  const promesas = nitsUnicos.map(nit => 
+    fetch(`/dian_vs_erp/api/usuarios/por_nit/${nit}`)
+      .then(r => r.json())
+      .then(response => ({nit, usuarios: response.usuarios || []}))
+      .catch(err => {
+        console.error(`Error obteniendo usuarios de NIT ${nit}:`, err);
+        return {nit, usuarios: []};
+      })
+  );
+  
+  Promise.all(promesas).then(resultados => {
+    // Crear mapa de usuarios por NIT
+    const usuariosPorNit = {};
+    resultados.forEach(r => {
+      usuariosPorNit[r.nit] = r.usuarios.filter(u => u.activo);
+    });
+    
+    mostrarModalEnvioMasivo(facturas, usuariosPorNit);
+  });
+}
+
+function mostrarModalEnvioMasivo(facturas, usuariosPorNit){
+  // Obtener todos los destinatarios únicos
+  const destinatariosUnicos = new Map();
+  
+  Object.values(usuariosPorNit).forEach(usuarios => {
+    usuarios.forEach(u => {
+      if(!destinatariosUnicos.has(u.correo)){
+        destinatariosUnicos.set(u.correo, {
+          correo: u.correo,
+          nombre: `${u.nombres} ${u.apellidos}`,
+          tipo: u.tipo_usuario,
+          nits: []
+        });
+      }
+      destinatariosUnicos.get(u.correo).nits.push(u.nit);
+    });
+  });
+  
+  const destinatarios = Array.from(destinatariosUnicos.values());
+  const solicitantes = destinatarios.filter(d => d.tipo === 'SOLICITANTE');
+  const aprobadores = destinatarios.filter(d => d.tipo === 'APROBADOR');
+  
+  let html = `
+    <div style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10000;display:flex;align-items:center;justify-content:center" id="modalEmailMasivo" onclick="if(event.target===this) this.remove()">
+      <div style="background:var(--panel);border-radius:12px;padding:30px;max-width:700px;width:90%;max-height:80vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,0.3)">
+        <h2 style="margin:0 0 20px 0;color:var(--txt)">✈️ Envío Masivo de Emails</h2>
+        
+        <div style="margin-bottom:20px;padding:15px;background:var(--bg);border-radius:8px">
+          <strong>📊 Facturas seleccionadas:</strong> ${facturas.length}<br>
+          <strong>🏢 NITs únicos:</strong> ${Object.keys(usuariosPorNit).length}<br>
+          <strong>👥 Destinatarios únicos:</strong> ${destinatarios.length}
+        </div>
+        
+        <div style="margin-bottom:20px;padding:15px;background:rgba(255,193,7,0.1);border-left:4px solid #ffc107;border-radius:8px">
+          <strong style="color:#ffc107">⚠️ Importante:</strong>
+          <p style="margin:5px 0 0 0;color:var(--txt-muted);font-size:14px">
+            Se enviará un email agrupado con todas las facturas a cada destinatario seleccionado.
+          </p>
+        </div>
+        
+        <h3 style="color:var(--txt);margin:20px 0 10px 0">Seleccione Destinatarios:</h3>
+        
+        <div style="margin-bottom:15px">
+          <label style="display:block;margin-bottom:5px;color:var(--txt);font-weight:600">
+            <input type="checkbox" id="selectAllSolicitantes" onchange="toggleAllCheckboxesMasivo('solicitante', this.checked)">
+            📋 Solicitantes (${solicitantes.length}):
+          </label>
+          ${solicitantes.length > 0 ? solicitantes.map(s => `
+            <label style="display:block;padding:8px;margin:5px 0;background:var(--bg);border-radius:6px;cursor:pointer">
+              <input type="checkbox" class="dest-solicitante" name="destinatario_masivo" value="${s.correo}" data-nombre="${s.nombre}">
+              ${s.nombre} - ${s.correo}
+            </label>
+          `).join('') : '<p style="color:var(--txt-muted);font-style:italic;margin-left:20px">No hay solicitantes configurados</p>'}
+        </div>
+        
+        <div style="margin-bottom:20px">
+          <label style="display:block;margin-bottom:5px;color:var(--txt);font-weight:600">
+            <input type="checkbox" id="selectAllAprobadores" onchange="toggleAllCheckboxesMasivo('aprobador', this.checked)">
+            ✅ Aprobadores (${aprobadores.length}):
+          </label>
+          ${aprobadores.length > 0 ? aprobadores.map(a => `
+            <label style="display:block;padding:8px;margin:5px 0;background:var(--bg);border-radius:6px;cursor:pointer">
+              <input type="checkbox" class="dest-aprobador" name="destinatario_masivo" value="${a.correo}" data-nombre="${a.nombre}">
+              ${a.nombre} - ${a.correo}
+            </label>
+          `).join('') : '<p style="color:var(--txt-muted);font-style:italic;margin-left:20px">No hay aprobadores configurados</p>'}
+        </div>
+        
+        <div style="display:flex;gap:10px;margin-top:20px">
+          <button onclick="enviarEmailsMasivos()" style="flex:1;padding:12px 20px;background:#00c875;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">✈️ Enviar Todos</button>
+          <button onclick="document.getElementById('modalEmailMasivo').remove()" style="flex:1;padding:12px 20px;background:#e94444;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">Cancelar</button>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function toggleAllCheckboxesMasivo(tipo, checked){
+  document.querySelectorAll(`.dest-${tipo}`).forEach(cb => cb.checked = checked);
+}
+
+function enviarEmailsMasivos(){
+  const checkboxes = document.querySelectorAll('input[name="destinatario_masivo"]:checked');
+  
+  if(checkboxes.length === 0){
+    alert('⚠️ Seleccione al menos un destinatario');
+    return;
+  }
+  
+  const destinatarios = Array.from(checkboxes).map(cb => ({
+    correo: cb.value,
+    nombre: cb.dataset.nombre
+  }));
+  
+  const facturas = table.getSelectedData();
+  const totalEmails = destinatarios.length;
+  
+  if(!confirm(`📧 Se enviará ${totalEmails} email(s) agrupado(s):\n\n${facturas.length} facturas en ${totalEmails} email(s) (uno por destinatario)\n\n¿Continuar?`)){
+    return;
+  }
+  
+  // Mostrar indicador de progreso
+  const modal = document.getElementById('modalEmailMasivo');
+  modal.innerHTML = `
+    <div style="background:var(--panel);border-radius:12px;padding:50px;text-align:center">
+      <div style="font-size:48px;margin-bottom:20px">✈️</div>
+      <h3 style="color:var(--txt);margin:0">Enviando emails agrupados...</h3>
+      <p style="color:var(--txt-muted)">📦 ${facturas.length} facturas en ${totalEmails} email(s)</p>
+      <div style="margin-top:20px;background:var(--bg);border-radius:10px;height:20px;overflow:hidden">
+        <div id="progressBar" style="height:100%;width:0%;background:#00c875;transition:width 0.3s"></div>
+      </div>
+      <p id="progressText" style="margin-top:10px;color:var(--txt-muted)">0 / ${totalEmails}</p>
+    </div>
+  `;
+  
+  // Enviar UN email agrupado por destinatario
+  let enviados = 0;
+  let fallidos = 0;
+  let erroresAcumulados = [];
+  
+  const enviarSiguiente = (index) => {
+    if(index >= destinatarios.length){
+      // Terminado
+      modal.remove();
+      let mensaje = `✅ Envío masivo completado\n\n📧 Enviados: ${enviados}\n❌ Fallidos: ${fallidos}\n📦 Total facturas: ${facturas.length}`;
+      
+      if(erroresAcumulados.length > 0){
+        mensaje += '\n\n⚠️ Errores:\n' + erroresAcumulados.slice(0, 3).join('\n');
+        if(erroresAcumulados.length > 3){
+          mensaje += `\n... y ${erroresAcumulados.length - 3} más (ver consola F12)`;
+        }
+      }
+      
+      alert(mensaje);
+      console.log('Todos los errores:', erroresAcumulados);
+      return;
+    }
+    
+    const destinatario = destinatarios[index];
+    
+    // Actualizar progreso ANTES de enviar
+    document.getElementById('progressText').textContent = `Enviando a ${destinatario.nombre}...`;
+    
+    // Extraer CUFEs de todas las facturas
+    const cufes = facturas.map(f => f.cufe);
+    
+    // Enviar TODAS las facturas agrupadas a este destinatario
+    fetch('/dian_vs_erp/api/enviar_email_agrupado', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        destinatarios: [destinatario],
+        cufes: cufes
+      })
+    })
+    .then(response => {
+      console.log('Response status:', response.status);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('Respuesta del servidor:', data);
+      if(data.exito){
+        enviados++;
+        console.log(`✅ Email enviado a ${destinatario.correo}`);
+      } else {
+        fallidos++;
+        erroresAcumulados.push(`${destinatario.nombre}: ${data.mensaje}`);
+        console.error('❌ Error enviando a', destinatario.correo, ':', data.mensaje);
+      }
+      
+      // Actualizar progreso
+      const progreso = ((index + 1) / destinatarios.length) * 100;
+      document.getElementById('progressBar').style.width = progreso + '%';
+      document.getElementById('progressText').textContent = `${index + 1} / ${totalEmails}`;
+      
+      // Enviar siguiente con delay
+      setTimeout(() => enviarSiguiente(index + 1), 2000);
+    })
+    .catch(err => {
+      console.error('❌ Error de conexión:', err);
+      fallidos++;
+      erroresAcumulados.push(`${destinatario.nombre}: ${err.message}`);
+      
+      // Actualizar progreso
+      const progreso = ((index + 1) / destinatarios.length) * 100;
+      document.getElementById('progressBar').style.width = progreso + '%';
+      document.getElementById('progressText').textContent = `${index + 1} / ${totalEmails}`;
+      
+      // Continuar con el siguiente
+      setTimeout(() => enviarSiguiente(index + 1), 2000);
+    });
+  };
+  
+  // Iniciar el envío secuencial
+  enviarSiguiente(0);
+}
+
+// ============================================
+// EVENT LISTENER PARA BOTÓN DE ENVÍO MASIVO
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+  const btnEmailMasivo = document.getElementById('btnEmailMasivo');
+  if (btnEmailMasivo) {
+    btnEmailMasivo.addEventListener('click', () => {
+      const facturas = table.getSelectedData();
+      if (facturas.length === 0) {
+        alert('⚠️ Seleccione al menos una factura');
+        return;
+      }
+      console.log('📧 Envío masivo - facturas:', facturas.length);
+      abrirModalEnvioMasivo(facturas);
+    });
+  }
+});
+
+</script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).\n\n' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+function cerrarSesionManual() {
+    // Confirmar antes de salir
+    if (!confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+        return;
+    }
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).then(() => {
+        console.log('✅ Sesión cerrada correctamente');
+        // Redirigir al login
+        window.location.href = '/';
+    }).catch(err => {
+        console.error('❌ Error al cerrar sesión:', err);
+        // Redirigir de todas formas
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+    
+    // Cargar última sincronización al iniciar
+    cargarUltimaSincronizacion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+
+// ===== FUNCIONES DE SINCRONIZACIÓN =====
+
+async function sincronizarDatos() {
+    const btnSincronizar = document.getElementById('btnSincronizar');
+    const iconoSincronizar = document.getElementById('iconoSincronizar');
+    const ultimaSincronizacion = document.getElementById('ultimaSincronizacion');
+    
+    console.log('🔄 Iniciando sincronización...');
+    
+    // Deshabilitar botón y mostrar animación
+    btnSincronizar.disabled = true;
+    iconoSincronizar.style.animation = 'spin 1s linear infinite';
+    iconoSincronizar.innerHTML = '🔄';
+    ultimaSincronizacion.textContent = 'Sincronizando...';
+    ultimaSincronizacion.style.color = '#ffa500';
+    
+    try {
+        // 🆕 PASO 1: EJECUTAR SINCRONIZACIÓN EN BACKEND (guarda en BD)
+        console.log('📡 Llamando /api/sincronizar...');
+        const response = await fetch('/dian_vs_erp/api/sincronizar', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'}
+        });
+        
+        const data = await response.json();
+        
+        if (data.exito) {
+            console.log('✅ Backend sincronizado:', data.mensaje);
+            
+            // 🆕 PASO 2: RECARGAR DATOS DEL API (LEFT JOINs en tiempo real)
+            console.log('🔄 Recargando datos del visor...');
+            await cargar();
+            
+            // 🆕 PASO 3: OBTENER FECHA DE ÚLTIMA SINCRONIZACIÓN DESDE BD
+            console.log('📅 Consultando última sincronización desde BD...');
+            const responseUltima = await fetch('/dian_vs_erp/api/ultima_sincronizacion');
+            const dataUltima = await responseUltima.json();
+            
+            if (dataUltima.exito && dataUltima.fecha_sincronizacion) {
+                ultimaSincronizacion.textContent = dataUltima.fecha_sincronizacion;
+                ultimaSincronizacion.style.color = '#00d084';
+                ultimaSincronizacion.style.fontWeight = '700';
+                console.log('✅ Fecha mostrada:', dataUltima.fecha_sincronizacion);
+            } else {
+                ultimaSincronizacion.textContent = 'Pendiente';
+                ultimaSincronizacion.style.color = '#ffa500';
+            }
+            
+            // Animación de éxito
+            iconoSincronizar.innerHTML = '✅';
+            
+            // 🆕 MOSTRAR NOTIFICACIÓN
+            mostrarNotificacion('✅ Sincronización completada', 'success');
+            
+            // 🆕 PASO 4: REFRESCAR NAVEGADOR AUTOMÁTICAMENTE (como F5)
+            console.log('🔄 Refrescando navegador en 2 segundos...');
+            setTimeout(() => {
+                location.reload();  // ⭐ ESTO ES COMO PRESIONAR F5
+            }, 2000);
+            
+        } else {
+            throw new Error(data.mensaje || 'Error desconocido');
+        }
+    } catch (error) {
+        console.error('❌ Error en sincronización:', error);
+        ultimaSincronizacion.textContent = 'Error';
+        ultimaSincronizacion.style.color = '#e94444';
+        iconoSincronizar.innerHTML = '❌';
+        btnSincronizar.disabled = false;
+        iconoSincronizar.style.animation = '';
+        
+        mostrarNotificacion('❌ Error al sincronizar: ' + error.message, 'error');
+    } finally {
+        // Rehabilitar botón y detener animación
+        btnSincronizar.disabled = false;
+        iconoSincronizar.style.animation = '';
+    }
+}
+
+// 🆕 FUNCIÓN AUXILIAR PARA NOTIFICACIONES VISUALES
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    // Crear elemento de notificación si no existe
+    let notificacion = document.getElementById('notificacion-sync');
+    if (!notificacion) {
+        notificacion = document.createElement('div');
+        notificacion.id = 'notificacion-sync';
+        notificacion.style.cssText = `
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-weight: 500;
+            z-index: 10000;
+            animation: slideIn 0.3s ease-out;
+        `;
+        document.body.appendChild(notificacion);
+    }
+    
+    // Estilos según tipo
+    const colores = {
+        success: { bg: '#00d084', text: '#fff' },
+        error: { bg: '#e94444', text: '#fff' },
+        info: { bg: '#4a9eff', text: '#fff' }
+    };
+    
+    const color = colores[tipo] || colores.info;
+    notificacion.style.backgroundColor = color.bg;
+    notificacion.style.color = color.text;
+    notificacion.textContent = mensaje;
+    notificacion.style.display = 'block';
+    
+    // Ocultar después de 3 segundos
+    setTimeout(() => {
+        notificacion.style.animation = 'slideOut 0.3s ease-out';
+        setTimeout(() => {
+            notificacion.style.display = 'none';
+        }, 300);
+    }, 3000);
+}
+
+async function cargarUltimaSincronizacion() {
+    console.log('📅 Cargando última sincronización desde BD...');
+    const ultimaSincronizacion = document.getElementById('ultimaSincronizacion');
+    
+    if (!ultimaSincronizacion) {
+        console.error('❌ ERROR: Elemento ultimaSincronizacion no encontrado');
+        return;
+    }
+    
+    try {
+        // 🆕 CONSULTAR ÚLTIMA SINCRONIZACIÓN DESDE BD
+        const response = await fetch('/dian_vs_erp/api/ultima_sincronizacion');
+        const data = await response.json();
+        
+        if (data.exito && data.fecha_sincronizacion) {
+            console.log('✅ Última sincronización desde BD:', data.fecha_sincronizacion);
+            ultimaSincronizacion.textContent = data.fecha_sincronizacion;
+            ultimaSincronizacion.style.color = '#00d084';
+            ultimaSincronizacion.style.fontWeight = '700';
+        } else {
+            console.log('⚠️ No hay sincronizaciones previas en BD');
+            ultimaSincronizacion.textContent = 'Pendiente';
+            ultimaSincronizacion.style.color = '#ffa500';
+            ultimaSincronizacion.style.fontWeight = '600';
+        }
+    } catch (error) {
+        console.error('❌ Error al cargar última sincronización:', error);
+        ultimaSincronizacion.textContent = 'Pendiente';
+        ultimaSincronizacion.style.color = '#ffa500';
+        ultimaSincronizacion.style.fontWeight = '600';
+    }
+}
+
+// Agregar estilos de animación al documento
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    @keyframes slideIn {
+        from { 
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to { 
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOut {
+        from { 
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to { 
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(styleSheet);
+
+// ========================================
+// 🚀 CARGA AUTOMÁTICA DE ARCHIVOS
+// Sistema de carga masiva desde carpetas
+// ========================================
+
+function abrirModalCargaAutomatica() {
+    // Crear modal dinámicamente
+    const modal = document.createElement('div');
+    modal.id = 'modalCargaAuto';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+    `;
+    
+    modal.innerHTML = `
+        <div style="background: white; border-radius: 12px; padding: 30px; max-width: 900px; width: 90%; max-height: 85vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0; color: #9b59b6;">🚀 Carga Automática de Archivos</h2>
+                <button onclick="cerrarModalCargaAuto()" style="background: #e74c3c; color: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; font-size: 18px;">✕</button>
+            </div>
+            
+            <div id="contenidoModalAuto">
+                <p style="color: #7f8c8d; margin-bottom: 20px;">
+                    Este sistema escanea carpetas configuradas y carga archivos automáticamente.
+                    Los archivos ya procesados se omiten automáticamente.
+                </p>
+                
+                <div style="text-align: center; margin: 40px 0;">
+                    <button onclick="escanearArchivos()" style="background: #3498db; color: white; border: none; border-radius: 8px; padding: 15px 30px; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        🔍 Escanear Archivos Pendientes
+                    </button>
+                </div>
+                
+                <div id="resultadoEscaneo" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+function cerrarModalCargaAuto() {
+    const modal = document.getElementById('modalCargaAuto');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+async function escanearArchivos() {
+    const resultado = document.getElementById('resultadoEscaneo');
+    resultado.innerHTML = '<div style="text-align: center; padding: 20px;"><div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite;"></div><p>Escaneando carpetas...</p></div>';
+    
+    try {
+        const response = await fetch('/dian_vs_erp/cargar_automatico_escanear', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await response.json();
+        
+        if (data.exito) {
+            mostrarResultadoEscaneo(data);
+        } else {
+            resultado.innerHTML = `<div style="background: #fee; border-left: 4px solid #e74c3c; padding: 15px; border-radius: 4px; color: #c0392b;"><strong>❌ Error:</strong> ${data.mensaje}</div>`;
+        }
+    } catch (error) {
+        resultado.innerHTML = `<div style="background: #fee; border-left: 4px solid #e74c3c; padding: 15px; border-radius: 4px; color: #c0392b;"><strong>❌ Error de conexión:</strong> ${error.message}</div>`;
+    }
+}
+
+function mostrarResultadoEscaneo(data) {
+    const resultado = document.getElementById('resultadoEscaneo');
+    
+    let html = `
+        <div style="background: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 10px 0; color: #2c3e50;">📊 Resumen del Escaneo</h3>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center;">
+                <div style="background: white; padding: 10px; border-radius: 4px;">
+                    <div style="font-size: 24px; font-weight: bold; color: #3498db;">${data.total_encontrados}</div>
+                    <div style="font-size: 12px; color: #7f8c8d;">Total Encontrados</div>
+                </div>
+                <div style="background: white; padding: 10px; border-radius: 4px;">
+                    <div style="font-size: 24px; font-weight: bold; color: #27ae60;">${data.pendientes}</div>
+                    <div style="font-size: 12px; color: #7f8c8d;">Pendientes</div>
+                </div>
+                <div style="background: white; padding: 10px; border-radius: 4px;">
+                    <div style="font-size: 24px; font-weight: bold; color: #95a5a6;">${data.ya_procesados}</div>
+                    <div style="font-size: 12px; color: #7f8c8d;">Ya Procesados</div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    if (data.pendientes > 0) {
+        html += `
+            <div style="background: #e8f5e9; border-left: 4px solid #27ae60; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                <h4 style="margin: 0 0 10px 0; color: #27ae60;">✅ Archivos Pendientes (${data.pendientes})</h4>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: #27ae60; color: white;">
+                                <th style="padding: 8px; text-align: left;">Archivo</th>
+                                <th style="padding: 8px; text-align: center;">Carpeta</th>
+                                <th style="padding: 8px; text-align: right;">Tamaño</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+        `;
+        
+        data.archivos_pendientes.forEach(archivo => {
+            const tamanioMB = (archivo.tamanio / 1024 / 1024).toFixed(2);
+            html += `
+                <tr style="border-bottom: 1px solid #ddd;">
+                    <td style="padding: 8px;">${archivo.nombre}</td>
+                    <td style="padding: 8px; text-align: center;"><span style="background: #3498db; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">${archivo.carpeta}</span></td>
+                    <td style="padding: 8px; text-align: right;">${tamanioMB} MB</td>
+                </tr>
+            `;
+        });
+        
+        html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button onclick="ejecutarCargaAutomatica(${JSON.stringify(data.archivos_pendientes)})" 
+                        style="background: #27ae60; color: white; border: none; border-radius: 8px; padding: 15px 40px; font-size: 16px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    ⚡ Procesar ${data.pendientes} Archivo(s)
+                </button>
+            </div>
+        `;
+    } else {
+        html += `
+            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; border-radius: 4px;">
+                <strong>ℹ️ No hay archivos pendientes</strong><br>
+                Todos los archivos encontrados ya fueron procesados anteriormente.
+            </div>
+        `;
+    }
+    
+    resultado.innerHTML = html;
+}
+
+async function ejecutarCargaAutomatica(archivos) {
+    console.log('🚀 INICIANDO ejecutarCargaAutomatica con', archivos.length, 'archivos');
+    console.log('📦 Archivos a procesar:', archivos);
+    
+    const resultado = document.getElementById('resultadoEscaneo');
+    resultado.innerHTML = '<div style="text-align: center; padding: 40px;"><div style="display: inline-block; width: 50px; height: 50px; border: 5px solid #f3f3f3; border-top: 5px solid #27ae60; border-radius: 50%; animation: spin 1s linear infinite;"></div><h3>⚡ Procesando archivos...</h3><p id="progresoTexto">Iniciando...</p></div>';
+    
+    try {
+        console.log('📡 Enviando petición a /dian_vs_erp/cargar_automatico_ejecutar');
+        const response = await fetch('/dian_vs_erp/cargar_automatico_ejecutar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ archivos: archivos })
+        });
+        
+        console.log('📨 Respuesta recibida, status:', response.status);
+        console.log('📨 Response OK?', response.ok);
+        
+        const data = await response.json();
+        console.log('📊 Datos recibidos:', data);
+        
+        if (data.exito) {
+            console.log('✅ Procesamiento exitoso, mostrando resultados');
+            mostrarResultadoProcesamiento(data);
+        } else {
+            console.error('❌ Error en procesamiento:', data.mensaje);
+            resultado.innerHTML = `<div style="background: #fee; border-left: 4px solid #e74c3c; padding: 15px; border-radius: 4px; color: #c0392b;"><strong>❌ Error:</strong> ${data.mensaje}</div>`;
+        }
+    } catch (error) {
+        console.error('💥 EXCEPCIÓN CAPTURADA:', error);
+        resultado.innerHTML = `<div style="background: #fee; border-left: 4px solid #e74c3c; padding: 15px; border-radius: 4px; color: #c0392b;"><strong>❌ Error:</strong> ${error.message}</div>`;
+    }
+}
+
+function mostrarResultadoProcesamiento(data) {
+    const resultado = document.getElementById('resultadoEscaneo');
+    
+    let html = `
+        <div style="background: #d4edda; border-left: 4px solid #28a745; padding: 20px; border-radius: 4px; margin-bottom: 20px;">
+            <h3 style="margin: 0 0 10px 0; color: #155724;">✅ ${data.mensaje}</h3>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px;">
+                <div style="background: white; padding: 10px; border-radius: 4px; text-align: center;">
+                    <div style="font-size: 22px; font-weight: bold; color: #3498db;">${data.resumen.archivos_procesados}</div>
+                    <div style="font-size: 11px; color: #7f8c8d;">Archivos</div>
+                </div>
+                <div style="background: white; padding: 10px; border-radius: 4px; text-align: center;">
+                    <div style="font-size: 22px; font-weight: bold; color: #27ae60;">${data.resumen.exitosos}</div>
+                    <div style="font-size: 11px; color: #7f8c8d;">Exitosos</div>
+                </div>
+                <div style="background: white; padding: 10px; border-radius: 4px; text-align: center;">
+                    <div style="font-size: 22px; font-weight: bold; color: #e74c3c;">${data.resumen.fallidos}</div>
+                    <div style="font-size: 11px; color: #7f8c8d;">Fallidos</div>
+                </div>
+                <div style="background: white; padding: 10px; border-radius: 4px; text-align: center;">
+                    <div style="font-size: 22px; font-weight: bold; color: #9b59b6;">${data.resumen.total_registros_insertados.toLocaleString()}</div>
+                    <div style="font-size: 11px; color: #7f8c8d;">Registros</div>
+                </div>
+            </div>
+        </div>
+        
+        <h4 style="color: #2c3e50; margin-bottom: 10px;">📋 Detalle del Procesamiento</h4>
+        <div style="max-height: 300px; overflow-y: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #34495e; color: white;">
+                        <th style="padding: 8px; text-align: left;">Archivo</th>
+                        <th style="padding: 8px; text-align: center;">Estado</th>
+                        <th style="padding: 8px; text-align: right;">Registros</th>
+                        <th style="padding: 8px; text-align: right;">Tiempo</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    data.detalles.forEach(detalle => {
+        const estadoColor = detalle.estado === 'COMPLETADO' ? '#27ae60' : '#e74c3c';
+        const estadoIcon = detalle.estado === 'COMPLETADO' ? '✅' : '❌';
+        
+        html += `
+            <tr style="border-bottom: 1px solid #ddd;">
+                <td style="padding: 8px;">${detalle.archivo}</td>
+                <td style="padding: 8px; text-align: center;">
+                    <span style="background: ${estadoColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px;">
+                        ${estadoIcon} ${detalle.estado}
+                    </span>
+                </td>
+                <td style="padding: 8px; text-align: right;">${detalle.registros_insertados.toLocaleString()}</td>
+                <td style="padding: 8px; text-align: right;">${detalle.tiempo_segundos}s</td>
+            </tr>
+        `;
+        
+        if (detalle.error) {
+            html += `
+                <tr>
+                    <td colspan="4" style="padding: 5px 8px; background: #fee; color: #c0392b; font-size: 12px;">
+                        ⚠️ Error: ${detalle.error}
+                    </td>
+                </tr>
+            `;
+        }
+    });
+    
+    html += `
+                </tbody>
+            </table>
+        </div>
+        
+        <div style="text-align: center; margin-top: 20px;">
+            <button onclick="location.reload()" style="background: #3498db; color: white; border: none; border-radius: 8px; padding: 12px 30px; font-size: 14px; cursor: pointer;">
+                🔄 Recargar Tabla
+            </button>
+            <button onclick="cerrarModalCargaAuto()" style="background: #95a5a6; color: white; border: none; border-radius: 8px; padding: 12px 30px; font-size: 14px; cursor: pointer; margin-left: 10px;">
+                Cerrar
+            </button>
+        </div>
+    `;
+    
+    resultado.innerHTML = html;
+}
+
+</script>
+
+</body>
+</html>

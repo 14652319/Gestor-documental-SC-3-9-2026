@@ -1,0 +1,85 @@
+{
+  "info": {
+    "name": "Gestor Documental - Básico",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colección mínima para validar APIs principales: login, check_nit, finalizar, admin listar_usuarios, DIAN list."
+  },
+  "item": [
+    {
+      "name": "Auth - Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {"key": "Content-Type", "value": "application/json"}
+        ],
+        "url": {
+          "raw": "http://localhost:8099/api/auth/login",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8099",
+          "path": ["api","auth","login"]
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nit\": \"805028041\",\n  \"usuario\": \"admin\",\n  \"password\": \"admin123\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Registro - Check NIT",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": {
+          "raw": "http://localhost:8099/api/registro/check_nit",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8099",
+          "path": ["api","registro","check_nit"]
+        },
+        "body": {"mode": "raw", "raw": "{\n  \"nit\": \"14652319\"\n}"}
+      }
+    },
+    {
+      "name": "Registro - Finalizar",
+      "request": {
+        "method": "POST",
+        "header": [{"key": "Content-Type", "value": "application/json"}],
+        "url": {
+          "raw": "http://localhost:8099/api/registro/finalizar",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8099",
+          "path": ["api","registro","finalizar"]
+        },
+        "body": {"mode": "raw", "raw": "{\n  \"nit\": \"14652319\",\n  \"usuarios\": [{\n    \"usuario\": \"prueba\",\n    \"correo\": \"proveedor@example.com\"\n  }],\n  \"documentos\": [\n    \"RUT.pdf\",\n    \"CAMARA_COMERCIO.pdf\",\n    \"CEDULA_REPRESENTANTE.pdf\",\n    \"CERTIFICACION_BANCARIA.pdf\",\n    \"FORMULARIO_CONOCIMIENTO_PROVEEDORES.pdf\",\n    \"DECLARACION_FONDOS_JURIDICA.pdf\",\n    \"DECLARACION_FONDOS_NATURAL.pdf\"\n  ]\n}"}
+      }
+    },
+    {
+      "name": "Admin - Listar Usuarios",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8099/api/admin/listar_usuarios",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8099",
+          "path": ["api","admin","listar_usuarios"]
+        }
+      }
+    },
+    {
+      "name": "DIAN - Listado",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "http://localhost:8099/api/dian",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8099",
+          "path": ["api","dian"]
+        }
+      }
+    }
+  ]
+}

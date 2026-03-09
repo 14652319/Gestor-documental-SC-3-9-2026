@@ -1,0 +1,1407 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Supertiendas Cañaveral</title>
+    <style>
+        /* ========================================
+           VARIABLES CSS Y RESET
+        ======================================== */
+        :root {
+            /* Colores corporativos (del login) */
+            --primary-green: #166534;
+            --primary-green-dark: #14532d;
+            --primary-yellow: #fbbf24;
+            --primary-yellow-light: #fcd34d;
+            
+            /* Gradiente corporativo */
+            --gradient-main: linear-gradient(135deg, #166534 0%, #15803d 25%, #84cc16 50%, #fbbf24 75%, #f59e0b 100%);
+            
+            /* Colores de soporte */
+            --white: #ffffff;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            
+            /* Colores de estado */
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            
+            /* Sombras */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            
+            /* Dimensiones */
+            --sidebar-width: 280px;
+            --header-height: 70px;
+            --border-radius: 12px;
+            
+            /* Transiciones */
+            --transition-fast: 0.2s ease;
+            --transition-normal: 0.3s ease;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+        
+        /* ========================================
+           HEADER CON GRADIENTE
+        ======================================== */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: var(--gradient-main);
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--white);
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .logo-icon {
+            font-size: 32px;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--white);
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            cursor: pointer;
+            transition: var(--transition-normal);
+        }
+        
+        .user-info:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary-green);
+        }
+        
+        .user-details {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .user-role {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .btn-logout {
+            background: rgba(239, 68, 68, 0.9);
+            color: var(--white);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition-normal);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-logout:hover {
+            background: rgba(239, 68, 68, 1);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* ========================================
+           SIDEBAR CON GRADIENTE SUTIL
+        ======================================== */
+        .sidebar {
+            position: fixed;
+            top: var(--header-height);
+            left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--header-height));
+            background: linear-gradient(180deg, #166534 0%, #14532d 100%);
+            overflow-y: auto;
+            box-shadow: var(--shadow-xl);
+            z-index: 900;
+            padding: 20px 0;
+        }
+        
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        
+        .sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* ========================================
+           MENÚ DE MÓDULOS
+        ======================================== */
+        .menu-section {
+            margin-bottom: 10px;
+        }
+        
+        .menu-title {
+            color: var(--primary-yellow-light);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 15px 25px 10px;
+            opacity: 0.8;
+        }
+        
+        .menu-item {
+            position: relative;
+        }
+        
+        .menu-item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 25px;
+            color: var(--white);
+            cursor: pointer;
+            transition: var(--transition-fast);
+            border-left: 4px solid transparent;
+        }
+        
+        .menu-item-header:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-left-color: var(--primary-yellow);
+        }
+        
+        .menu-item-header.active {
+            background: rgba(251, 191, 36, 0.2);
+            border-left-color: var(--primary-yellow);
+        }
+        
+        .menu-item-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .menu-icon {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+        }
+        
+        .menu-text {
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        .menu-arrow {
+            font-size: 12px;
+            transition: transform var(--transition-normal);
+        }
+        
+        .menu-arrow.rotated {
+            transform: rotate(180deg);
+        }
+        
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height var(--transition-normal);
+            background: rgba(0, 0, 0, 0.2);
+        }
+        
+        .submenu.open {
+            max-height: 500px;
+        }
+        
+        .submenu-item {
+            padding: 10px 25px 10px 65px;
+            color: rgba(255, 255, 255, 0.9);
+            cursor: pointer;
+            transition: var(--transition-fast);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .submenu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+            padding-left: 70px;
+        }
+        
+        .submenu-item.active {
+            background: rgba(251, 191, 36, 0.15);
+            color: var(--primary-yellow-light);
+            font-weight: 600;
+        }
+        
+        .submenu-icon {
+            font-size: 16px;
+        }
+        
+        /* ========================================
+           CONTENIDO PRINCIPAL
+        ======================================== */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--header-height);
+            padding: 30px;
+            min-height: calc(100vh - var(--header-height));
+        }
+        
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            color: var(--gray-600);
+            font-size: 14px;
+        }
+        
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .breadcrumb-separator {
+            color: var(--gray-400);
+        }
+        
+        .page-header {
+            margin-bottom: 30px;
+        }
+        
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-green-dark);
+            margin-bottom: 10px;
+            background: var(--gradient-main);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .page-subtitle {
+            color: var(--gray-600);
+            font-size: 16px;
+        }
+        
+        /* ========================================
+           TARJETAS DE MÓDULOS
+        ======================================== */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .module-card {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            box-shadow: var(--shadow-md);
+            transition: var(--transition-normal);
+            cursor: pointer;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: var(--gradient-main);
+        }
+        
+        .module-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary-green);
+        }
+        
+        .card-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-green-dark);
+            margin-bottom: 10px;
+        }
+        
+        .card-description {
+            color: var(--gray-600);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .card-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .card-btn {
+            flex: 1;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-normal);
+            font-size: 13px;
+        }
+        
+        .card-btn-primary {
+            background: var(--gradient-main);
+            color: var(--white);
+        }
+        
+        .card-btn-primary:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .card-btn-secondary {
+            background: var(--gray-100);
+            color: var(--gray-700);
+        }
+        
+        .card-btn-secondary:hover {
+            background: var(--gray-200);
+        }
+        
+        /* ========================================
+           VISTA DE CONTENIDO VACÍO
+        ======================================== */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .empty-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        .empty-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--gray-700);
+            margin-bottom: 10px;
+        }
+        
+        .empty-description {
+            color: var(--gray-500);
+            font-size: 16px;
+        }
+        
+        /* ========================================
+           BADGES Y NOTIFICACIONES
+        ======================================== */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .badge-success {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+        }
+        
+        .badge-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+        
+        .badge-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+        }
+        
+        .badge-info {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--info);
+        }
+        
+        /* ========================================
+           RESPONSIVE
+        ======================================== */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform var(--transition-normal);
+            }
+            
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .header {
+                padding: 0 15px;
+            }
+            
+            .user-details {
+                display: none;
+            }
+            
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* ========================================
+           ANIMACIONES
+        ======================================== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+        
+        /* ========================================
+           UTILIDADES
+        ======================================== */
+        .hidden {
+            display: none !important;
+        }
+        
+        .text-center {
+            text-align: center;
+        }
+        
+        .mt-20 {
+            margin-top: 20px;
+        }
+        
+        .mt-30 {
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <!-- ========================================
+         HEADER CON GRADIENTE
+    ======================================== -->
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <span class="logo-icon">🏪</span>
+                <span>Supertiendas Cañaveral</span>
+            </div>
+        </div>
+        
+        <div class="header-right">
+            <div class="user-info" id="userInfo">
+                <div class="user-avatar" id="userAvatar">RC</div>
+                <div class="user-details">
+                    <div class="user-name" id="userName">Ricardo Riascos</div>
+                    <div class="user-role" id="userRole">Usuario Interno</div>
+                </div>
+            </div>
+            
+            <button class="btn-logout" onclick="cerrarSesion()">
+                <span>🚪</span>
+                <span>Cerrar Sesión</span>
+            </button>
+        </div>
+    </header>
+    
+    <!-- ========================================
+         SIDEBAR CON MENÚ MODULAR
+    ======================================== -->
+    <aside class="sidebar" id="sidebar">
+        <!-- Menú para USUARIOS INTERNOS -->
+        <div id="menuInterno" class="hidden">
+            <div class="menu-section">
+                <div class="menu-title">📊 Gestión Principal</div>
+                
+                <!-- TERCEROS -->
+                <div class="menu-item">
+                    <div class="menu-item-header" onclick="toggleSubmenu('terceros')">
+                        <div class="menu-item-content">
+                            <span class="menu-icon">👥</span>
+                            <span class="menu-text">Terceros</span>
+                        </div>
+                        <span class="menu-arrow" id="arrow-terceros">▼</span>
+                    </div>
+                    <div class="submenu" id="submenu-terceros">
+                        <div class="submenu-item" onclick="navegarA('terceros', 'dashboard')">
+                            <span class="submenu-icon">📊</span>
+                            <span>Dashboard Terceros</span>
+                        </div>
+                        <div class="submenu-item" onclick="navegarA('terceros', 'consultar')">
+                            <span class="submenu-icon">📋</span>
+                            <span>Consultar Terceros</span>
+                        </div>
+                        <div class="submenu-item" onclick="navegarA('terceros', 'crear')">
+                            <span class="submenu-icon">➕</span>
+                            <span>Crear Terceros</span>
+                        </div>
+                        <div class="submenu-item" onclick="window.location.href='/sagrilaft/radicados'">
+                            <span class="submenu-icon">✏️</span>
+                            <span>Gestionar Terceros (SAGRILAFT)</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- FACTURAS -->
+                <div class="menu-item">
+                    <div class="menu-item-header" onclick="toggleSubmenu('facturas')">
+                        <div class="menu-item-content">
+                            <span class="menu-icon">🧾</span>
+                            <span class="menu-text">Facturas</span>
+                        </div>
+                        <span class="menu-arrow" id="arrow-facturas">▼</span>
+                    </div>
+                    <div class="submenu" id="submenu-facturas">
+                        <div class="submenu-item" onclick="window.location.href='/recibir_facturas/nueva_factura'">
+                            <span class="submenu-icon">📄</span>
+                            <span>Recepción de Facturas</span>
+                        </div>
+                        <div class="submenu-item" onclick="window.location.href='/relaciones/generar_relacion'">
+                            <span class="submenu-icon">�</span>
+                            <span>Generar Relaciones (NUEVO)</span>
+                        </div>
+                        <div class="submenu-item" onclick="window.location.href='/facturas-digitales/'">
+                            <span class="submenu-icon">📄</span>
+                            <span>Recepción de Facturas Digitales</span>
+                        </div>
+                        <div class="submenu-item" onclick="navegarA('facturas', 'consultas')">
+                            <span class="submenu-icon">�</span>
+                            <span>Consultas</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ✅ ARCHIVO DIGITAL (NUEVO - Oct 21, 2025) -->
+                <div class="menu-item">
+                    <div class="menu-item-header" onclick="toggleSubmenu('archivo-digital')">
+                        <div class="menu-item-content">
+                            <span class="menu-icon">📁</span>
+                            <span class="menu-text">Archivo Digital</span>
+                        </div>
+                        <span class="menu-arrow" id="arrow-archivo-digital">▼</span>
+                    </div>
+                    <div class="submenu" id="submenu-archivo-digital">
+                        <div class="submenu-item" onclick="window.location.href='/archivo_digital/cargar'">
+                            <span class="submenu-icon">📤</span>
+                            <span>Cargar Documento</span>
+                        </div>
+                        <div class="submenu-item" onclick="window.location.href='/archivo_digital/visor'">
+                            <span class="submenu-icon">📂</span>
+                            <span>Visor de Documentos</span>
+                        </div>
+                        <div class="submenu-item" onclick="navegarA('archivo-digital', 'estadisticas')">
+                            <span class="submenu-icon">📈</span>
+                            <span>Estadísticas</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SEGURIDAD SOCIAL -->
+                <div class="menu-item">
+                    <div class="menu-item-header" onclick="navegarA('seguridad-social', 'planillas')">
+                        <div class="menu-item-content">
+                            <span class="menu-icon">🏥</span>
+                            <span class="menu-text">Seguridad Social</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ✅ CAUSACIONES (NUEVO - Oct 23, 2025) -->
+                <div class="menu-item">
+                    <div class="menu-item-header" onclick="window.location.href='/causaciones/'">
+                        <div class="menu-item-content">
+                            <span class="menu-icon">💰</span>
+                            <span class="menu-text">Causaciones</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ✅ VALIDACIÓN DIAN vs ERP (SISTEMA INDEPENDIENTE) -->
+                <div class="menu-item">
+                    <div class="menu-item-header" onclick="toggleSubmenu('dian-vs-erp')">
+                        <div class="menu-item-content">
+                            <span class="menu-icon">⚖️</span>
+                            <span class="menu-text">Validación DIAN vs ERP</span>
+                        </div>
+                        <span class="menu-arrow" id="arrow-dian-vs-erp">▼</span>
+                    </div>
+                    <div class="submenu" id="submenu-dian-vs-erp">
+                        <div class="submenu-item" onclick="abrirDianVsERP()">
+                            <span class="submenu-icon">📊</span>
+                            <span>Visor de Facturas</span>
+                        </div>
+                        <div class="submenu-item" onclick="window.location.href='/dian_vs_erp/visor_v2'">
+                            <span class="submenu-icon">🔄</span>
+                            <span>Visor de Facturas v2</span>
+                        </div>
+                        <div class="submenu-item" onclick="window.location.href='/dian_vs_erp/reportes'">
+                            <span class="submenu-icon">📈</span>
+                            <span>Reportes</span>
+                        </div>
+                        <div class="submenu-item" onclick="window.location.href='/dian_vs_erp/configuracion'">
+                            <span class="submenu-icon">⚙️</span>
+                            <span>Configuración</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="menu-section">
+                <div class="menu-title">🛠️ Herramientas</div>
+                
+                <!-- UTILIDADES -->
+                <div class="menu-item">
+                    <div class="menu-item-header" onclick="toggleSubmenu('utilidades')">
+                        <div class="menu-item-content">
+                            <span class="menu-icon">🔧</span>
+                            <span class="menu-text">Utilidades</span>
+                        </div>
+                        <span class="menu-arrow" id="arrow-utilidades">▼</span>
+                    </div>
+                    <div class="submenu" id="submenu-utilidades">
+                        <div class="submenu-item" onclick="navegarA('utilidades', 'rut-dian')">
+                            <span class="submenu-icon">🔍</span>
+                            <span>Consulta RUT DIAN</span>
+                        </div>
+                        <div class="submenu-item" onclick="navegarA('utilidades', 'procuraduria')">
+                            <span class="submenu-icon">⚖️</span>
+                            <span>Consulta Procuraduría</span>
+                        </div>
+                        <div class="submenu-item" onclick="navegarA('utilidades', 'antecedentes')">
+                            <span class="submenu-icon">📋</span>
+                            <span>Consulta Antecedentes</span>
+                        </div>
+                        <div class="submenu-item" onclick="navegarA('utilidades', 'sisben')">
+                            <span class="submenu-icon">🏠</span>
+                            <span>Consulta Sisben</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="menu-section">
+                <div class="menu-title">⚙️ Configuración</div>
+                
+                <!-- ADMINISTRACIÓN -->
+                <div class="menu-item">
+                    <div class="menu-item-header" onclick="toggleSubmenu('administracion')">
+                        <div class="menu-item-content">
+                            <span class="menu-icon">👨‍💼</span>
+                            <span class="menu-text">Administración</span>
+                        </div>
+                        <span class="menu-arrow" id="arrow-administracion">▼</span>
+                    </div>
+                    <div class="submenu" id="submenu-administracion">
+                        <div class="submenu-item" onclick="window.location.href='/api/configuracion/centros_operacion_view'">
+                            <span class="submenu-icon">🏢</span>
+                            <span>Centros de Operación (CO)</span>
+                        </div>
+                        <div class="submenu-item" onclick="window.location.href='/api/configuracion/tipos_documento_view'">
+                            <span class="submenu-icon">📄</span>
+                            <span>Tipos de Documentos</span>
+                        </div>
+                        <div class="submenu-item" onclick="window.location.href='/api/configuracion/empresas_view'">
+                            <span class="submenu-icon">🏭</span>
+                            <span>Empresas</span>
+                        </div>
+                        <div class="submenu-item" onclick="window.location.href='/api/configuracion/formas_pago_view'">
+                            <span class="submenu-icon">💳</span>
+                            <span>Formas de Pago</span>
+                        </div>
+                        <div class="submenu-item" onclick="window.location.href='/api/configuracion/tipos_servicio_view'">
+                            <span class="submenu-icon">🛠️</span>
+                            <span>Tipos de Servicio</span>
+                        </div>
+                        <div class="submenu-item" onclick="window.location.href='/api/configuracion/departamentos_view'">
+                            <span class="submenu-icon">🏢</span>
+                            <span>Departamentos</span>
+                        </div>
+                        <div class="submenu-item" onclick="navegarA('admin', 'seguridad')">
+                            <span class="submenu-icon">🔒</span>
+                            <span>Seguridad</span>
+                        </div>
+                        <div class="submenu-item" onclick="navegarA('admin', 'log')">
+                            <span class="submenu-icon">📜</span>
+                            <span>Logs del Sistema</span>
+                        </div>
+                        <div class="submenu-item" onclick="window.location.href='/admin/monitoreo/dashboard'">
+                            <span class="submenu-icon">🖥️</span>
+                            <span>Monitoreo</span>
+                        </div>
+                        <div class="submenu-item" onclick="window.location.href='/admin/usuarios-permisos/'">
+                            <span class="submenu-icon">�</span>
+                            <span>Usuarios y Permisos</span>
+                        </div>
+                        <div class="submenu-item" onclick="navegarA('admin', 'consecutivos')">
+                            <span class="submenu-icon">🔢</span>
+                            <span>Consecutivos</span>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Menú para PROVEEDORES EXTERNOS -->
+        <div id="menuExterno" class="hidden">
+            <div class="menu-section">
+                <div class="menu-title">📦 Mis Servicios</div>
+                
+                <!-- FACTURAS -->
+                <div class="menu-item">
+                    <div class="menu-item-header" onclick="toggleSubmenu('facturas-ext')">
+                        <div class="menu-item-content">
+                            <span class="menu-icon">🧾</span>
+                            <span class="menu-text">Facturas</span>
+                        </div>
+                        <span class="menu-arrow" id="arrow-facturas-ext">▼</span>
+                    </div>
+                    <div class="submenu" id="submenu-facturas-ext">
+                        <div class="submenu-item" onclick="navegarA('facturas-ext', 'radicar')">
+                            <span class="submenu-icon">📤</span>
+                            <span>Radicar Facturas</span>
+                        </div>
+                        <div class="submenu-item" onclick="navegarA('facturas-ext', 'seguimiento')">
+                            <span class="submenu-icon">📊</span>
+                            <span>Seguimiento a Facturas</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SOLICITUDES -->
+                <div class="menu-item">
+                    <div class="menu-item-header" onclick="navegarA('solicitudes', 'radicados')">
+                        <div class="menu-item-content">
+                            <span class="menu-icon">📋</span>
+                            <span class="menu-text">Mis Radicados</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="menu-section">
+                <div class="menu-title">👤 Mi Cuenta</div>
+                
+                <!-- USUARIO -->
+                <div class="menu-item">
+                    <div class="menu-item-header" onclick="toggleSubmenu('usuario-ext')">
+                        <div class="menu-item-content">
+                            <span class="menu-icon">👤</span>
+                            <span class="menu-text">Usuario</span>
+                        </div>
+                        <span class="menu-arrow" id="arrow-usuario-ext">▼</span>
+                    </div>
+                    <div class="submenu" id="submenu-usuario-ext">
+                        <div class="submenu-item" onclick="navegarA('usuario', 'actualizar')">
+                            <span class="submenu-icon">✏️</span>
+                            <span>Actualizar Información</span>
+                        </div>
+                        <div class="submenu-item" onclick="navegarA('usuario', 'usuarios')">
+                            <span class="submenu-icon">👥</span>
+                            <span>Usuarios</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- ========================================
+         CONTENIDO PRINCIPAL
+    ======================================== -->
+    <main class="main-content">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb" id="breadcrumb">
+            <div class="breadcrumb-item">
+                <span>🏠</span>
+                <span>Inicio</span>
+            </div>
+        </div>
+        
+        <!-- Vista de Bienvenida -->
+        <div id="vistaInicio">
+            <div class="page-header">
+                <h1 class="page-title" id="tituloInicio">Bienvenido al Dashboard</h1>
+                <p class="page-subtitle" id="subtituloInicio">Selecciona un módulo del menú lateral para comenzar</p>
+            </div>
+            
+            <div class="cards-grid" id="cardsGrid">
+                <!-- Las tarjetas se generarán dinámicamente con JavaScript -->
+            </div>
+        </div>
+        
+        <!-- Vista de Módulo (se muestra al hacer clic en un menú) -->
+        <div id="vistaModulo" class="hidden">
+            <div class="page-header">
+                <h1 class="page-title" id="tituloModulo">Módulo</h1>
+                <p class="page-subtitle" id="subtituloModulo">Descripción del módulo</p>
+            </div>
+            
+            <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <h2 class="empty-title">Funcionalidad en Desarrollo</h2>
+                <p class="empty-description">Este módulo estará disponible próximamente.</p>
+                <button class="card-btn card-btn-primary mt-20" onclick="volverInicio()">
+                    ← Volver al Inicio
+                </button>
+            </div>
+        </div>
+    </main>
+    
+    <!-- ========================================
+         JAVASCRIPT
+    ======================================== -->
+    <script>
+        // ========================================
+        // DATOS DEL USUARIO (desde el backend)
+        // ========================================
+        let usuarioActual = {
+            nombre: "{{ user_data.get('usuario', 'Usuario') }}",
+            rol: "{{ user_data.get('rol', 'externo') }}", // "interno", "admin" o "externo"
+            nit: "{{ user_data.get('nit', '') }}",
+            email: "{{ user_data.get('correo', '') }}",
+            permisos: ["todos"] // En producción, estos vendrían del backend
+        };
+        
+        // ========================================
+        // CONFIGURACIÓN DE MÓDULOS
+        // ========================================
+        const modulosInternos = [
+            { id: 'terceros', nombre: 'Terceros', icono: '👥', descripcion: 'Gestión de terceros (clientes, proveedores)' },
+            { id: 'facturas', nombre: 'Facturas', icono: '🧾', descripcion: 'Recepción y gestión de facturas' },
+            { id: 'causaciones', nombre: 'Causaciones', icono: '💰', descripcion: 'Causar facturas y operaciones' },
+            { id: 'dian_vs_erp', nombre: 'Validación DIAN vs ERP', icono: '⚖️', descripcion: 'Validación de facturas DIAN contra ERP' },
+            { id: 'seguridad-social', nombre: 'Seguridad Social', icono: '🏥', descripcion: 'Visualizar y guardar planillas' },
+            { id: 'archivo', nombre: 'Archivo Digital', icono: '📁', descripcion: 'Gestión de archivo digital' },
+            { id: 'utilidades', nombre: 'Utilidades', icono: '🔧', descripcion: 'Validaciones y consultas' },
+            { id: 'admin', nombre: 'Administración', icono: '👨‍💼', descripcion: 'Configuración del sistema' }
+        ];
+        
+        const modulosExternos = [
+            { id: 'facturas-ext', nombre: 'Mis Facturas', icono: '🧾', descripcion: 'Radicar y consultar facturas' },
+            { id: 'solicitudes', nombre: 'Mis Radicados', icono: '📋', descripcion: 'Seguimiento de radicados' },
+            { id: 'usuario', nombre: 'Mi Cuenta', icono: '👤', descripcion: 'Gestión de mi información' }
+        ];
+        
+        // ========================================
+        // INICIALIZACIÓN
+        // ========================================
+        window.addEventListener('DOMContentLoaded', function() {
+            // Verificar si hay sesión (en producción esto vendría del backend)
+            const sesion = localStorage.getItem('sesion');
+            if (!sesion) {
+                window.location.href = '/';
+                return;
+            }
+            
+            // Parsear datos de sesión
+            const datosSesion = JSON.parse(sesion);
+            usuarioActual = datosSesion;
+            
+            // Configurar UI según tipo de usuario
+            configurarDashboard();
+            
+            // Generar tarjetas de inicio
+            generarTarjetasInicio();
+        });
+        
+        // ========================================
+        // CONFIGURAR DASHBOARD SEGÚN ROL
+        // ========================================
+        function configurarDashboard() {
+            // Actualizar info de usuario en header
+            document.getElementById('userName').textContent = usuarioActual.nombre;
+            document.getElementById('userRole').textContent = usuarioActual.rol === 'interno' 
+                ? 'Usuario Interno' 
+                : 'Proveedor Externo';
+            
+            // Iniciales del avatar
+            const iniciales = usuarioActual.nombre.split(' ')
+                .map(n => n[0])
+                .join('')
+                .substring(0, 2)
+                .toUpperCase();
+            document.getElementById('userAvatar').textContent = iniciales;
+            
+            // Mostrar menú correspondiente (admin e interno ven el dashboard completo)
+            if (usuarioActual.rol === 'interno' || usuarioActual.rol === 'admin') {
+                document.getElementById('menuInterno').classList.remove('hidden');
+                document.getElementById('tituloInicio').textContent = 'Dashboard de Gestión';
+                document.getElementById('subtituloInicio').textContent = 'Sistema de gestión documental y contable';
+            } else {
+                document.getElementById('menuExterno').classList.remove('hidden');
+                document.getElementById('tituloInicio').textContent = 'Portal de Proveedor';
+                document.getElementById('subtituloInicio').textContent = 'Gestiona tus facturas y documentos';
+            }
+        }
+        
+        // ========================================
+        // GENERAR TARJETAS DE INICIO
+        // ========================================
+        function generarTarjetasInicio() {
+            const cardsGrid = document.getElementById('cardsGrid');
+            const modulos = usuarioActual.rol === 'interno' ? modulosInternos : modulosExternos;
+            
+            cardsGrid.innerHTML = modulos.map(modulo => `
+                <div class="module-card fade-in" onclick="navegarA('${modulo.id}', 'inicio')">
+                    <div class="card-icon">${modulo.icono}</div>
+                    <h3 class="card-title">${modulo.nombre}</h3>
+                    <p class="card-description">${modulo.descripcion}</p>
+                    <div class="card-actions">
+                        <button class="card-btn card-btn-primary">
+                            Acceder →
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // ========================================
+        // TOGGLE SUBMENU
+        // ========================================
+        function toggleSubmenu(menuId) {
+            const submenu = document.getElementById('submenu-' + menuId);
+            const arrow = document.getElementById('arrow-' + menuId);
+            
+            if (submenu.classList.contains('open')) {
+                submenu.classList.remove('open');
+                arrow.classList.remove('rotated');
+            } else {
+                // Cerrar otros submenús
+                document.querySelectorAll('.submenu').forEach(s => s.classList.remove('open'));
+                document.querySelectorAll('.menu-arrow').forEach(a => a.classList.remove('rotated'));
+                
+                // Abrir este
+                submenu.classList.add('open');
+                arrow.classList.add('rotated');
+            }
+        }
+        
+        // ========================================
+        // NAVEGACIÓN
+        // ========================================
+        function navegarA(modulo, submodulo) {
+            console.log(`Navegando a: ${modulo} > ${submodulo}`);
+            
+            // ✅ TERCEROS MODULE - Redirect to actual module pages
+            if (modulo === 'terceros') {
+                let targetUrl = '/terceros/';
+                
+                // Map submenu actions to actual module URLs
+                switch (submodulo) {
+                    case 'crear':
+                        targetUrl = '/terceros/crear';
+                        break;
+                    case 'actualizar':
+                    case 'consultar':
+                    case 'listar':
+                        targetUrl = '/terceros/consulta';
+                        break;
+                    case 'dashboard':
+                    default:
+                        targetUrl = '/terceros/';
+                        break;
+                }
+                
+                console.log(`🚀 Redirecting to terceros module: ${targetUrl}`);
+                window.location.href = targetUrl;
+                return; // Exit early for terceros module
+            }
+            
+            // ✅ DIAN vs ERP MODULE - Redirect to actual module pages
+            if (modulo === 'dian_vs_erp') {
+                let targetUrl = '/dian_vs_erp/';
+                
+                // Map submenu actions to actual module URLs
+                switch (submodulo) {
+                    case 'cargar':
+                        targetUrl = '/dian_vs_erp/cargar_archivos';
+                        break;
+                    case 'validaciones':
+                        targetUrl = '/dian_vs_erp/validaciones';
+                        break;
+                    case 'reportes':
+                        targetUrl = '/dian_vs_erp/reportes';
+                        break;
+                    case 'dashboard':
+                    case 'inicio':
+                    default:
+                        targetUrl = '/dian_vs_erp/';
+                        break;
+                }
+                
+                console.log(`🚀 Redirecting to DIAN vs ERP module: ${targetUrl}`);
+                window.location.href = targetUrl;
+                return; // Exit early for dian_vs_erp module
+            }
+            
+            // ⚠️ OTHER MODULES - Show placeholder view (legacy behavior)
+            // Ocultar vista de inicio
+            document.getElementById('vistaInicio').classList.add('hidden');
+            
+            // Mostrar vista de módulo
+            document.getElementById('vistaModulo').classList.remove('hidden');
+            
+            // Actualizar título
+            const moduloObj = [...modulosInternos, ...modulosExternos].find(m => m.id === modulo);
+            if (moduloObj) {
+                document.getElementById('tituloModulo').textContent = moduloObj.nombre;
+                document.getElementById('subtituloModulo').textContent = `${moduloObj.descripcion} > ${submodulo}`;
+            }
+            
+            // Actualizar breadcrumb
+            document.getElementById('breadcrumb').innerHTML = `
+                <div class="breadcrumb-item">
+                    <span>🏠</span>
+                    <span style="cursor: pointer;" onclick="volverInicio()">Inicio</span>
+                </div>
+                <span class="breadcrumb-separator">›</span>
+                <div class="breadcrumb-item">
+                    <span>${moduloObj ? moduloObj.nombre : modulo}</span>
+                </div>
+                <span class="breadcrumb-separator">›</span>
+                <div class="breadcrumb-item">
+                    <span>${submodulo}</span>
+                </div>
+            `;
+            
+            // Marcar item activo en menú
+            document.querySelectorAll('.submenu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // TODO: Aquí cargarías el contenido real del módulo
+            // Por ahora mostramos el estado vacío
+        }
+        
+        // ========================================
+        // VOLVER A INICIO
+        // ========================================
+        function volverInicio() {
+            document.getElementById('vistaModulo').classList.add('hidden');
+            document.getElementById('vistaInicio').classList.remove('hidden');
+            
+            // Resetear breadcrumb
+            document.getElementById('breadcrumb').innerHTML = `
+                <div class="breadcrumb-item">
+                    <span>🏠</span>
+                    <span>Inicio</span>
+                </div>
+            `;
+        }
+        
+        // ========================================
+        // CERRAR SESIÓN
+        // ========================================
+        function cerrarSesion() {
+            if (confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+                localStorage.removeItem('sesion');
+                window.location.href = '/';
+            }
+        }
+        
+        // ========================================
+        // FUNCIONES DE UTILIDAD
+        // ========================================
+        
+        // Simular inicio de sesión (para pruebas)
+        function simularSesion(tipo) {
+            const sesion = tipo === 'interno' ? {
+                nombre: "Ricardo Riascos",
+                rol: "interno",
+                nit: "805028041",
+                email: "rriascos@supertiendascanaveral.com",
+                permisos: ["todos"]
+            } : {
+                nombre: "Juan Pérez",
+                rol: "externo",
+                nit: "900123456",
+                email: "juan@proveedor.com",
+                permisos: ["facturas", "radicados", "usuario"]
+            };
+            
+            localStorage.setItem('sesion', JSON.stringify(sesion));
+            window.location.reload();
+        }
+        
+        // Exponer para consola de desarrollo
+        window.simularSesion = simularSesion;
+        
+        // ============================================
+        // FUNCIÓN PARA ABRIR DIAN VS ERP (MÓDULO INTEGRADO)
+        // ============================================
+        async function abrirDianVsERP() {
+            // Mostrar mensaje
+            mostrarNotificacion('info', '🔍 Abriendo módulo DIAN vs ERP...');
+            
+            try {
+                // Abrir módulo integrado en la misma ventana
+                window.location.href = '/dian_vs_erp/';
+                
+                // O si prefieres en nueva ventana:
+                // window.open('/dian_vs_erp/', '_blank', 'width=1400,height=900');
+                // mostrarNotificacion('success', '✅ Abriendo DIAN vs ERP en nueva ventana');
+                
+            } catch (error) {
+                console.error('Error abriendo DIAN vs ERP:', error);
+                mostrarNotificacion('danger', '❌ Error al abrir el módulo DIAN vs ERP');
+            }
+        }
+        
+        // Función para mostrar notificaciones
+        function mostrarNotificacion(tipo, mensaje) {
+            const colores = {
+                success: '#22c55e',
+                info: '#3b82f6',
+                warning: '#f59e0b',
+                danger: '#ef4444'
+            };
+            
+            const notif = document.createElement('div');
+            notif.style.cssText = `
+                position: fixed;
+                top: 90px;
+                right: 20px;
+                background: ${colores[tipo] || colores.info};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-weight: 500;
+                max-width: 400px;
+                animation: slideIn 0.3s ease;
+            `;
+            notif.textContent = mensaje;
+            document.body.appendChild(notif);
+            
+            setTimeout(() => {
+                notif.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notif.remove(), 300);
+            }, 4000);
+        }
+    </script>
+    
+    <style>
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+    </style>
+
+    <!-- ✅ INACTIVITY WARNING MODAL (25 MIN CON ADVERTENCIA 1 MIN ANTES) -->
+    {% include '_inactivity_warning.html' %}
+
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+<script>
+// Heartbeat: mantiene la sesión marcada como "Conectado" en el panel de monitoreo
+(function() {
+    function enviarHeartbeat() {
+        fetch('/api/monitoreo/heartbeat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'same-origin'
+        }).catch(function() {}); // silenciar errores de red
+    }
+    // Enviar inmediatamente al cargar, y luego cada 2 minutos
+    enviarHeartbeat();
+    setInterval(enviarHeartbeat, 120000);
+})();
+</script>
+    </body>
+</html>

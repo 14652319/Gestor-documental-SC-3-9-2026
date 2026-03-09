@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>DIAN vs ERP — FACTURACIÓN ELECTRÓNICA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/tabulator-tables@5.5.2/dist/css/tabulator_midnight.min.css" rel="stylesheet">
+  <style>
+    /* ===== COLORES INSTITUCIONALES SUPERTIENDAS CAÑAVERAL ===== */
+    :root{
+      /* Fondos oscuros (modo dark por defecto) */
+      --bg:#1a1f2e; --panel:#252b3b; --hdr:#151924; --bd:#3a4254;
+      /* Verde corporativo SC (consistente en ambos modos) */
+      --green-bright:#00d084; --green-primary:#00c875; --green-header:#2d5016;
+      /* Textos modo oscuro */
+      --txt:#e8eaed; --muted:#9fb0c7;
+      /* Colores de acción */
+      --danger:#e94444; --info:#2563eb; --gold:#fdd835;
+    }
+    
+    /* ===== MODO CLARO (LIGHT MODE) ===== */
+    body.light-mode{
+      /* Fondos claros con toque verde suave */
+      --bg:#f0f9f4; --panel:#f8fdfb; --hdr:#e8f5f0; --bd:#d4e8dd;
+      /* Verde corporativo (consistente) */
+      --green-bright:#00d084; --green-primary:#00c875; --green-header:#2d5016;
+      /* Textos modo claro */
+      --txt:#2c3e50; --muted:#6c757d;
+      /* Colores de acción (ajustados) */
+      --danger:#e94444; --info:#2563eb; --gold:#f9a825;
+    }
+    
+    /* Toggle Switch para cambio de modo */
+    .theme-toggle{
+      position:relative;display:inline-flex;align-items:center;gap:8px;
+      background:var(--panel);border:1px solid var(--bd);
+      border-radius:20px;padding:4px 12px 4px 8px;cursor:pointer;
+      transition:all 0.3s ease;color:var(--txt);
+    }
+    .theme-toggle:hover{
+      border-color:var(--green-primary);
+      background:rgba(0,200,117,0.1);
+      transform:translateY(-1px);
+    }
+    .theme-toggle input{display:none}
+    .theme-icon{font-size:18px;transition:transform 0.3s ease}
+    .theme-toggle:hover .theme-icon{transform:scale(1.15) rotate(20deg)}
+    
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
+    
+    /* Banner superior verde corporativo */
+    .banner-green{
+      background:linear-gradient(135deg, var(--green-bright) 0%, #00a86b 100%);
+      padding:6px 14px;text-align:center;font-weight:600;font-size:13px;
+      box-shadow:0 2px 8px rgba(0,208,132,0.3);
+      color:#fff;
+    }
+    body.light-mode .banner-green{
+      box-shadow:0 2px 8px rgba(0,208,132,0.4);
+    }
+    
+    .page{display:flex;flex-direction:column;height:100vh;overflow:hidden}
+    .top{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,var(--hdr),#101420);border-bottom:1px solid #1f2737}
+    .top .row{display:flex;gap:10px;align-items:center;padding:10px 14px}
+    .spacer{flex:1}
+    
+    /* Botones con colores corporativos */
+    .btn{
+      border:1px solid var(--bd);background:var(--panel);color:#fff;
+      padding:7px 12px;border-radius:8px;cursor:pointer;text-decoration:none;
+      display:inline-block;transition:all 0.2s ease;
+    }
+    .btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,0.3)}
+    .btn.primary{
+      background:var(--green-primary);border:1px solid #00a86b;
+    }
+    .btn.primary:hover{
+      background:#00a86b;box-shadow:0 4px 12px rgba(0,200,117,0.3);
+    }
+    .btn.danger{background:var(--danger);border:1px solid #c93434}
+    .btn.danger:hover{background:#c93434}
+    .btn:disabled{opacity:.55;cursor:not-allowed}
+    
+    /* Botón dorado/oro para exportar */
+    .btn.gold{
+      background:#2a2411;border-color:#4d3b06;color:#fdd835;
+    }
+    body.light-mode .btn.gold{
+      background:#f9f7f0;border:1px solid #e8d68f;color:#9a7b0d;
+      font-weight:600;
+    }
+    body.light-mode .btn.gold:hover{
+      background:#f9a825;border-color:#e09400;color:#fff;
+    }
+    
+    /* Inputs con estilo corporativo adaptable */
+    input[type="date"],input[type="text"]{
+      background:var(--panel);color:var(--txt);border:1px solid var(--bd);
+      border-radius:8px;padding:7px 10px;min-width:170px;
+    }
+    input[type="date"]:focus,input[type="text"]:focus{
+      outline:none;border-color:var(--green-primary);
+      box-shadow:0 0 0 2px rgba(0,200,117,0.2);
+    }
+    
+    /* Ajustes modo claro para tabla - ESTILO VERDE SUAVE */
+    body.light-mode .tabulator-row.tabulator-selectable:hover{
+      background:#e0f5ec !important; /* Verde muy claro al pasar mouse */
+    }
+    body.light-mode .tabulator-row.tabulator-selected{
+      background:rgba(0,200,117,0.15) !important; /* Verde claro cuando seleccionada */
+    }
+    body.light-mode .tabulator{
+      background:var(--bg) !important;
+      color:var(--txt) !important;
+    }
+    body.light-mode .tabulator-header{
+      background:var(--green-header) !important;
+      color:#fff !important;
+    }
+    body.light-mode .tabulator-cell{
+      border-color:#d4e8dd !important; /* Borde verde muy suave */
+      color:#2c3e50 !important;
+    }
+    /* Filas alternadas estilo modo oscuro - una más clara, otra más oscura */
+    body.light-mode .tabulator-row{
+      background:#ffffff !important; /* Fila clara (blanco con toque verde) */
+    }
+    
+    /* ⭐ ESTILOS PARA COLUMNA TIPO TERCERO - FONDO AMARILLO */
+    .columna-tipo-tercero {
+      background-color: #fff9c4 !important;
+      font-weight: 600 !important;
+    }
+    body.light-mode .columna-tipo-tercero {
+      background-color: #fff59d !important;
+    }
+    
+    body.light-mode .tabulator-row:nth-child(even){
+      background:#f0f9f4 !important; /* Fila más oscura (verde muy suave) */
+    }
+    body.light-mode .tabulator-row .tabulator-cell{
+      color:#2c3e50 !important;
+      border-right:1px solid #e5f3ec !important; /* Líneas verticales suaves */
+    }
+    body.light-mode .btn{color:var(--txt)}
+    body.light-mode .btn.primary,body.light-mode .btn.danger{color:#fff}
+    body.light-mode .link{color:#00a86b !important} /* Verde corporativo para links */
+    body.light-mode .link:hover{color:#00875a !important}
+    
+    .chip{color:var(--muted);font-size:13px;opacity:.9}
+    body.light-mode .chip{color:#6c757d;opacity:1}
+    .content{flex:1;display:flex;flex-direction:column;overflow:hidden}
+    .table-wrap{flex:1;overflow:auto;padding:10px 14px}
+    #tabla{height:100%}
+    
+    /* Footer con gradiente */
+    .bottom{
+      position:sticky;bottom:0;
+      background:linear-gradient(0deg,var(--hdr),#0f131c);
+      border-top:1px solid #1f2737;padding:6px 12px;
+      display:flex;align-items:center;gap:12px;
+    }
+    .counter{margin-left:auto;color:var(--muted)}
+    
+    /* Filas de tabla con colores corporativos */
+    .tabulator-row.tabulator-selectable:hover{background:#2a3650 !important}
+    .tabulator-row.tabulator-selected{
+      background:rgba(0,200,117,0.15) !important;
+      border-left:3px solid var(--green-primary) !important;
+    }
+    
+    /* Headers de tabla verde oscuro SC */
+    .tabulator .tabulator-header{
+      background:var(--green-header) !important;
+      color:#fff !important;
+      font-weight:600;
+      box-shadow:inset 0 -2px 4px rgba(0,0,0,0.2);
+    }
+    .tabulator .tabulator-header .tabulator-col{
+      border-right:1px solid rgba(255,255,255,0.1);
+    }
+    
+    /* Header filter inputs */
+    .tabulator-header .tabulator-col .tabulator-header-filter input{
+      background:#1e2433;border:1px solid var(--bd);color:var(--txt);
+      border-radius:6px;height:26px;
+    }
+    body.light-mode .tabulator-header .tabulator-col .tabulator-header-filter input{
+      background:#f8fdfb;border:1px solid #c8e6d7;color:#2c3e50;
+    }
+    body.light-mode .tabulator-header .tabulator-col .tabulator-header-filter input:focus{
+      background:#fff;border-color:var(--green-primary);
+    }
+    
+    /* Links dorados */
+    .link{color:var(--gold);text-decoration:none;font-weight:500}
+    .link:hover{text-decoration:underline;color:#ffeb3b}
+    
+    .kpi{font-size:12px;color:var(--muted)}
+    
+    /* Paginación con botón activo verde */
+    .tabulator .tabulator-footer .tabulator-page.active{
+      background:var(--green-primary) !important;
+      color:#fff !important;
+      border-color:var(--green-primary) !important;
+    }
+    
+    /* Footer en modo claro - verde suave */
+    body.light-mode .tabulator .tabulator-footer{
+      background:#f0f9f4 !important;
+      color:var(--txt) !important;
+      border-top:1px solid #d4e8dd !important;
+    }
+    body.light-mode .tabulator .tabulator-footer .tabulator-page{
+      background:#fff !important;
+      color:var(--txt) !important;
+      border:1px solid #d4e8dd !important;
+    }
+    body.light-mode .tabulator .tabulator-footer .tabulator-page:hover{
+      background:#e0f5ec !important;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+  <!-- Banner verde corporativo -->
+  <div class="banner-green">
+    SUPERTIENDAS CAÑAVERAL SAS - GESTOR DOCUMENTAL
+  </div>
+  
+  <!-- barra superior -->
+  <div class="top">
+    <div class="row">
+      <div style="font-weight:800">📊 DIAN vs ERP — FACTURACION ELECTRONICA</div>
+      <div class="spacer"></div>
+      
+      <!-- Toggle de tema claro/oscuro -->
+      <label class="theme-toggle" title="Cambiar tema claro/oscuro">
+        <input type="checkbox" id="themeToggle">
+        <span class="theme-icon">🌙</span>
+        <span style="font-size:13px;font-weight:500">Tema</span>
+      </label>
+      
+      <div class="kpi">👤 {{ usuario }}</div>
+      <a class="btn" href="/">Dashboard Principal</a>
+      <button class="btn" onclick="abrirModalConfiguracion()" title="Configuración del Sistema">⚙️ Configuración</button>
+      <button class="btn danger" onclick="cerrarSesionManual()">🚪 Salir</button>
+    </div>
+    <div class="row">
+      <span class="chip">📅 Fecha Inicial</span>
+      <input type="date" id="f_ini">
+      <span class="chip">📅 Fecha Final</span>
+      <input type="date" id="f_fin">
+
+      <span class="chip">🔎 Buscar</span>
+      <input type="text" id="q" placeholder="Escribe para filtrar…">
+
+      <button class="btn primary" id="btnBuscar">Buscar</button>
+      <button class="btn" onclick="location.href='/dian_vs_erp/cargar_archivos'">📂 Cargar/Procesar</button>
+
+      <div class="spacer"></div>
+
+      <a class="btn" href="/dian_vs_erp/descargar_plantilla/dian">Plantilla DIAN</a>
+      <a class="btn" href="/dian_vs_erp/descargar_plantilla/erp">Plantilla ERP</a>
+      <a class="btn" href="/dian_vs_erp/descargar_plantilla/acuses">Plantilla Acuses</a>
+
+      <button class="btn gold" id="btnExport" disabled>📥 Exportar seleccionadas</button>
+      <button class="btn" id="btnEmailMasivo" disabled style="background:#00c875;color:#fff">✈️ Enviar Emails Masivo</button>
+    </div>
+  </div>
+
+  <!-- tabla -->
+  <div class="content">
+    <div class="table-wrap"><div id="tabla"></div></div>
+    <div class="bottom">
+      <div>Mostrando datos filtrados</div>
+      <div class="counter" id="selCounter">0 seleccionadas</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+<script>
+  let table;
+  let filtrosBusqueda = []; // Array para rastrear filtros personalizados
+
+  // helpers
+  function firstDayOfMonth(d){ return new Date(d.getFullYear(), d.getMonth(), 1); }
+  function toYMD(d){ const p=n=>String(n).padStart(2,'0'); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
+  function debounce(fn,ms){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); }; }
+
+  // fechas por defecto: 1er día mes y hoy
+  const hoy = new Date();
+  document.getElementById("f_ini").value = toYMD(firstDayOfMonth(hoy));
+  document.getElementById("f_fin").value = toYMD(hoy);
+
+  // 🔥 Formatter para fecha sin hora
+  function formatFechaSinHora(cell){
+    const val = cell.getValue();
+    if(!val) return "";
+    // Extraer solo YYYY-MM-DD (sin hora)
+    return val.split(" ")[0];
+  }
+
+  // construir tabla con TODAS las columnas del dashboard original
+  table = new Tabulator("#tabla", {
+    layout:"fitDataStretch",
+    height:"100%",
+    selectable:true,
+    pagination:"local",
+    paginationSize:500,
+    paginationSizeSelector:[500,1000,2000],
+    movableColumns:true,
+    columns:[
+      {formatter:"rowSelection", titleFormatter:"rowSelection", hozAlign:"center", width:44, headerSort:false},
+      {title:"NIT Emisor", field:"nit_emisor", headerFilter:"input", width:120},
+      {title:"Razón Social", field:"nombre_emisor", headerFilter:"input", width:250},
+      {
+        title:"🏷️ Tipo Tercero", 
+        field:"tipo_tercero", 
+        headerFilter:"input", 
+        width:180,
+        cssClass:"columna-tipo-tercero",
+        formatter: function(cell) {
+          const val = cell.getValue();
+          if (!val) return '<span style="color:#999;">Sin datos</span>';
+          return `<strong style="color:#00d084;">${val}</strong>`;
+        }
+      },
+      {title:"Fecha Emisión", field:"fecha_emision", formatter:formatFechaSinHora, headerFilter:"input", width:120},
+      {title:"Tipo Documento", field:"tipo_documento", headerFilter:"input", width:100},
+      {title:"Prefijo", field:"prefijo", headerFilter:"input", width:80},
+      {title:"Folio", field:"folio", headerFilter:"input", width:100},
+      {title:"Valor", field:"valor", formatter:"money", formatterParams:{thousand:",",precision:2}, hozAlign:"right", headerFilter:"input", width:130},
+      {title:"Ver PDF", field:"cufe", hozAlign:"center", headerSort:false, width:80,
+        formatter:(cell)=>{ const c=cell.getValue(); return c?`<a class="link" target="_blank" href="https://catalogo-vpfe.dian.gov.co/document/searchqr?documentkey=${c}">👁️ Ver</a>`:""; }},
+      {title:"Estado Aprobación", field:"estado_aprobacion", headerFilter:"input", width:150},
+      {title:"Forma de Pago", field:"forma_pago_texto", headerFilter:"input", width:100},
+      {title:"Estado Contable", field:"estado_contable", headerFilter:"input", width:130},
+      {title:"N° Días", field:"dias_desde_emision", hozAlign:"center", headerFilter:"input", width:80},
+      {title:"Solicitante", field:"usuario_solicitante", headerFilter:"input", width:150, editor:"input", cellEdited:onCellEdited},
+      {title:"Aprobador", field:"usuario_aprobador", headerFilter:"input", width:150, editor:"input", cellEdited:onCellEdited},
+      {title:"✉️", field:"enviar_email", hozAlign:"center", headerSort:false, width:60, formatter:emailIconFormatter, cellClick:enviarEmailClick},
+      {title:"Observaciones", field:"observaciones", headerFilter:"input", width:200, editor:"input"},
+      {title:"Módulo", field:"modulo", headerFilter:"input", width:120},
+      {title:"Causador", field:"doc_causado_por", headerFilter:"input", width:200, editor:"input", cellEdited:onCellEdited},
+    ],
+  });
+
+  // contador seleccionadas + habilitar export y email masivo
+  function updateSelected(){
+    const n = table.getSelectedRows().length;
+    document.getElementById("selCounter").textContent = `${n} seleccionadas`;
+    document.getElementById("btnExport").disabled = n===0;
+    document.getElementById("btnEmailMasivo").disabled = n===0;
+  }
+  table.on("rowSelectionChanged", updateSelected);
+
+  // 🔥 FILTRO GLOBAL: Búsqueda + Fechas (NO reemplaza headerFilters)
+  function aplicarFiltros(){
+    if(!table) return;
+    
+    const q = document.getElementById("q").value.trim().toLowerCase();
+    const f_ini = document.getElementById("f_ini").value;
+    const f_fin = document.getElementById("f_fin").value;
+    
+    console.log("🔍 Aplicando filtros:", {busqueda: q, fecha_inicial: f_ini, fecha_final: f_fin});
+    
+    // 🔥 Eliminar filtros personalizados previos
+    filtrosBusqueda.forEach(fn => table.removeFilter(fn));
+    filtrosBusqueda = [];
+    
+    // 🔍 Filtro de búsqueda global
+    if(q){
+      const filtroBusqueda = (data) => {
+        return Object.values(data).some(v => 
+          String(v || "").toLowerCase().includes(q)
+        );
+      };
+      table.addFilter(filtroBusqueda);
+      filtrosBusqueda.push(filtroBusqueda);
+      console.log("✅ Filtro de búsqueda:", q);
+    }
+    
+    // 📅 Filtro de fechas
+    if(f_ini || f_fin){
+      const filtroFechas = (data) => {
+        const fechaStr = data.fecha_emision || "";
+        const fecha = fechaStr.split(" ")[0]; // Solo YYYY-MM-DD
+        
+        if(f_ini && fecha < f_ini) return false;
+        if(f_fin && fecha > f_fin) return false;
+        return true;
+      };
+      table.addFilter(filtroFechas);
+      filtrosBusqueda.push(filtroFechas);
+      console.log("✅ Filtro de fechas:", f_ini, "→", f_fin);
+    }
+    
+    console.log("✅ Registros visibles:", table.getDataCount("active"));
+  }
+  
+  // Búsqueda en tiempo real con debounce (180ms)
+  const runQuickSearch = debounce(aplicarFiltros, 180);
+  
+  // Listeners
+  document.getElementById("q").addEventListener("input", runQuickSearch);
+  document.getElementById("q").addEventListener("keydown", (e)=>{ 
+    if(e.key==="Escape"){ 
+      e.target.value=""; 
+      aplicarFiltros(); 
+    } 
+  });
+  
+  // Cambios en fechas aplican filtro inmediatamente
+  document.getElementById("f_ini").addEventListener("change", aplicarFiltros);
+  document.getElementById("f_fin").addEventListener("change", aplicarFiltros);
+
+  // cargar datos desde API y aplicar filtros
+  async function cargar(){
+    try {
+      console.log("📡 Cargando datos desde API...");
+      const res = await fetch("/dian_vs_erp/api/dian", {headers:{'Cache-Control':'no-cache'}});
+      
+      if(!res.ok){
+        throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+      }
+      
+      const data = await res.json();
+      console.log(`✅ Datos cargados: ${data.length} registros`);
+      
+      // 🔍 VERIFICAR TIPO_TERCERO EN DATOS
+      if (data.length > 0) {
+        console.log("%c═══════════════════════════════════════════════════════", "color: #00d084; font-weight: bold; font-size: 16px");
+        console.log("%c✅ ARCHIVO CORRECTO: templates/dian_vs_erp/visor_moderno.html", "color: #00d084; font-weight: bold; font-size: 18px");
+        console.log("%c🏷️  VERSIÓN: 20-DIC-2025 00:50 - CON COLUMNA TIPO_TERCERO", "color: yellow; font-weight: bold; font-size: 16px");
+        console.log("%c═══════════════════════════════════════════════════════", "color: #00d084; font-weight: bold; font-size: 16px");
+        console.log("🏷️  Primer registro completo:", data[0]);
+        console.log("🏷️  tipo_tercero del primer registro:", data[0].tipo_tercero);
+        const conTipoTercero = data.filter(r => r.tipo_tercero && r.tipo_tercero.trim() !== '').length;
+        console.log(`🏷️  Registros con tipo_tercero: ${conTipoTercero} de ${data.length} (${(conTipoTercero/data.length*100).toFixed(2)}%)`);
+      }
+      
+      table.setData(data);
+      aplicarFiltros(); // Aplicar filtros después de cargar
+      updateSelected();
+      
+    } catch(err) {
+      console.error("❌ Error cargando datos:", err);
+      alert(`Error al cargar los datos:\n${err.message}\n\nVer consola (F12) para más detalles.`);
+    }
+  }
+  document.getElementById("btnBuscar").addEventListener("click", cargar);
+
+  // exportar seleccionadas
+  document.getElementById("btnExport").addEventListener("click", ()=>{
+    const sel = table.getSelectedData();
+    if(sel.length===0) return;
+    table.download("xlsx", "DIAN_vs_ERP_Seleccionadas.xlsx", {sheetName:"Seleccionadas"});
+  });
+
+  // carga inicial
+  cargar();
+  
+  // ===== TOGGLE TEMA CLARO/OSCURO =====
+  const themeToggle = document.getElementById("themeToggle");
+  const themeIcon = document.querySelector(".theme-icon");
+  
+  // Cargar preferencia guardada
+  const savedTheme = localStorage.getItem("theme") || "dark";
+  if(savedTheme === "light"){
+    document.body.classList.add("light-mode");
+    themeToggle.checked = true;
+    themeIcon.textContent = "☀️";
+  }
+  
+  // Cambiar tema
+  themeToggle.addEventListener("change", function(){
+    if(this.checked){
+      document.body.classList.add("light-mode");
+      themeIcon.textContent = "☀️";
+      localStorage.setItem("theme", "light");
+    } else {
+      document.body.classList.remove("light-mode");
+      themeIcon.textContent = "🌙";
+      localStorage.setItem("theme", "dark");
+    }
+  });
+
+  // ============================================
+  // FUNCIONES PARA COLUMNAS EDITABLES
+  // ============================================
+  
+  function onCellEdited(cell){
+    const field = cell.getField();
+    const value = cell.getValue();
+    const row = cell.getRow().getData();
+    const cufe = row.cufe;
+    const nit = row.nit_emisor;
+    
+    console.log(`Campo editado: ${field} = "${value}" para CUFE ${cufe}`);
+    
+    // Si es Solicitante o Aprobador, preguntar si aplicar a todo el NIT
+    if(field === "usuario_solicitante" || field === "usuario_aprobador"){
+      if(confirm(`¿Aplicar "${value}" a TODOS los documentos del NIT ${nit}?`)){
+        aplicarCambioATodoElNIT(nit, field, value);
+      } else {
+        guardarCampoIndividual(cufe, field, value);
+      }
+    } else {
+      // Para otros campos (Causador, Observaciones), guardar individual
+      guardarCampoIndividual(cufe, field, value);
+    }
+  }
+  
+  function aplicarCambioATodoElNIT(nit, campo, valor){
+    fetch('/dian_vs_erp/api/actualizar_nit', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({nit, campo, valor})
+    })
+    .then(r => r.json())
+    .then(data => {
+      if(data.exito){
+        alert(`✅ ${data.mensaje}`);
+        cargar(); // Recargar tabla
+      } else {
+        alert(`❌ ${data.mensaje}`);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('❌ Error al guardar cambios');
+    });
+  }
+  
+  function guardarCampoIndividual(cufe, campo, valor){
+    fetch('/dian_vs_erp/api/actualizar_campo', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({cufe, campo, valor})
+    })
+    .then(r => r.json())
+    .then(data => {
+      if(data.exito){
+        console.log(`✅ Campo ${campo} actualizado`);
+      } else {
+        alert(`❌ ${data.mensaje}`);
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert('❌ Error al guardar campo');
+    });
+  }
+
+  // ============================================
+  // ICONO DE ENVÍO DE EMAIL
+  // ============================================
+  
+  function emailIconFormatter(cell){
+    const data = cell.getRow().getData();
+    
+    // ✨ NUEVO: Usa el flag de usuarios desde DB
+    const tieneUsuarios = data.tiene_usuarios_email === true || data.tiene_usuarios_email === "true";
+    
+    if(tieneUsuarios){
+      return '<span style="cursor:pointer;font-size:18px;color:#00c875" title="Enviar Email">✈️</span>';
+    } else {
+      return '<span style="opacity:0.3;font-size:18px" title="Sin destinatarios configurados">✈️</span>';
+    }
+  }
+  
+  function enviarEmailClick(e, cell){
+    const data = cell.getRow().getData();
+    
+    // ✨ NUEVO: Verifica flag de usuarios desde DB
+    const tieneUsuarios = data.tiene_usuarios_email === true || data.tiene_usuarios_email === "true";
+    
+    if(!tieneUsuarios){
+      alert('⚠️ No hay destinatarios configurados para este NIT en la base de datos.\n\n' +
+            'Por favor, vaya a Configuración → Usuarios por NIT y agregue un Solicitante o Aprobador para el NIT: ' + data.nit_emisor);
+      return;
+    }
+    
+    abrirModalEnvioEmail(data);
+  }
+  
+  // ============================================
+  // MODAL DE CONFIGURACIÓN
+  // ============================================
+  
+  function abrirModalConfiguracion(){
+    window.location.href = '/dian_vs_erp/config';
+  }
+
+</script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).\n\n' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+function cerrarSesionManual() {
+    // Confirmar antes de salir
+    if (!confirm('¿Estás seguro de que deseas cerrar sesión?')) {
+        return;
+    }
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).then(() => {
+        console.log('✅ Sesión cerrada correctamente');
+        // Redirigir al login
+        window.location.href = '/';
+    }).catch(err => {
+        console.error('❌ Error al cerrar sesión:', err);
+        // Redirigir de todas formas
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+</body>
+</html>

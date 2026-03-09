@@ -1,0 +1,20 @@
+DECLARACIÓN DE ORIGINALIDAD Y LICENCIAS
+
+Este proyecto "Gestor Documental" ha sido desarrollado para Supertiendas Cañaveral.
+
+1) Originalidad del código:
+- El código entregado es original del proyecto y fue creado específicamente para este sistema.
+- No se incluyen fragmentos con restricciones de terceros fuera de las dependencias estándar.
+
+2) Dependencias externas:
+- Las librerías usadas están listadas en `requirements.txt` y se distribuyen bajo sus propias licencias (Flask, SQLAlchemy, etc.).
+- El uso cumple las licencias públicas de cada paquete.
+
+3) Material sensible:
+- No se entregan secretos ni credenciales en el repositorio; el archivo `.env.example` provee la estructura para configurarlos en producción.
+
+4) Derechos de uso:
+- El entregable puede ser ejecutado, mantenido y extendido por el área de TIC de Supertiendas Cañaveral.
+
+Fecha de entrega: 2025-12-04
+Autor: Ricardo Riascos (desarrollo)

@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Documentos - Tercero</title>
+    <style>
+        /* ========================================================================= */
+        /*                     COLORES INSTITUCIONALES                              */
+        /* ========================================================================= */
+        :root {
+            --primary-green: #166534;
+            --primary-green-dark: #14532d;
+            --primary-green-light: #22c55e;
+            --secondary-orange: #f97316;
+            --secondary-orange-dark: #ea580c;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-yellow: #eab308;
+            --success-green: #10b981;
+            --warning-orange: #f59e0b;
+            --danger-red: #ef4444;
+            --info-blue: #06b6d4;
+            --dark-gray: #374151;
+            --light-gray: #f3f4f6;
+            --white: #ffffff;
+            --border-color: #d1d5db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--light-gray) 0%, #e5e7eb 100%);
+            min-height: 100vh;
+            color: var(--dark-gray);
+        }
+
+        /* ========================================================================= */
+        /*                              HEADER FIJO                                 */
+        /* ========================================================================= */
+        .header-fijo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #7c3aed 100%);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-titulo h1 {
+            color: var(--white);
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-header {
+            background: var(--secondary-orange);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-header:hover {
+            background: var(--secondary-orange-dark);
+            transform: translateY(-1px);
+        }
+
+        /* ========================================================================= */
+        /*                         CONTENEDOR PRINCIPAL                             */
+        /* ========================================================================= */
+        .contenedor-principal {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ========================================================================= */
+        /*                           INFORMACIÓN TERCERO                            */
+        /* ========================================================================= */
+        .info-tercero {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .info-header {
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #7c3aed 100%);
+            color: var(--white);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-body {
+            padding: 1.5rem 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-campo {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+        }
+
+        .info-valor {
+            font-size: 1rem;
+            color: var(--dark-gray);
+            font-weight: 500;
+        }
+
+        /* ========================================================================= */
+        /*                         ESTADÍSTICAS DOCUMENTOS                          */
+        /* ========================================================================= */
+        .estadisticas {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .stat-numero {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        /* ========================================================================= */
+        /*                             ACCIONES MASIVAS                             */
+        /* ========================================================================= */
+        .acciones-masivas {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .acciones-titulo {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark-gray);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .acciones-botones {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-green);
+            color: var(--white);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--primary-green-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--dark-gray);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        .btn-warning {
+            background: var(--warning-orange);
+            color: var(--white);
+        }
+
+        .btn-warning:hover:not(:disabled) {
+            background: #d97706;
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background: var(--success-green);
+            color: var(--white);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: var(--danger-red);
+            color: var(--white);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* ========================================================================= */
+        /*                             TABLA DOCUMENTOS                             */
+        /* ========================================================================= */
+        .documentos-container {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .documentos-header {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+            color: var(--white);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .documentos-titulo {
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .tabla-wrapper {
+            overflow-x: auto;
+        }
+
+        .tabla-documentos {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .tabla-documentos th {
+            background: var(--light-gray);
+            color: var(--dark-gray);
+            font-weight: 600;
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 2px solid var(--border-color);
+            white-space: nowrap;
+        }
+
+        .tabla-documentos td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+
+        .tabla-documentos tbody tr:hover {
+            background: rgba(22, 101, 52, 0.05);
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .checkbox-custom {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-green);
+        }
+
+        .estado-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .estado-pendiente {
+            background: rgba(251, 191, 36, 0.1);
+            color: #d97706;
+        }
+
+        .estado-aprobado {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+        }
+
+        .estado-rechazado {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-red);
+        }
+
+        .tipo-documento {
+            font-weight: 600;
+            color: var(--primary-green);
+        }
+
+        .acciones-documento {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+            border-radius: 4px;
+            min-width: auto;
+        }
+
+        /* ========================================================================= */
+        /*                              MODALES                                     */
+        /* ========================================================================= */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .modal.activo {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--accent-purple) 0%, #7c3aed 100%);
+            color: var(--white);
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-titulo {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .btn-cerrar {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            background: var(--light-gray);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        /* ========================================================================= */
+        /*                              LOADING                                     */
+        /* ========================================================================= */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(22, 101, 52, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-green);
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .loading-overlay.activo {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .loading-content {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========================================================================= */
+        /*                              RESPONSIVE                                  */
+        /* ========================================================================= */
+        @media (max-width: 768px) {
+            .contenedor-principal {
+                padding: 1rem;
+                margin-top: 100px;
+            }
+
+            .header-fijo {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .info-body {
+                grid-template-columns: 1fr;
+            }
+
+            .estadisticas {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .acciones-masivas {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .acciones-botones {
+                justify-content: center;
+            }
+
+            .tabla-documentos th,
+            .tabla-documentos td {
+                padding: 0.75rem 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-content">
+            <div class="loading" style="width: 40px; height: 40px; margin: 0 auto 1rem;"></div>
+            <h3>Cargando documentos...</h3>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!--                              HEADER FIJO                                 -->
+    <!-- ========================================================================= -->
+    <header class="header-fijo">
+        <div class="header-titulo">
+            <h1>
+                <span>📄</span>
+                Documentos - <span id="header-tercero">Cargando...</span>
+            </h1>
+        </div>
+        <div class="header-acciones">
+            <a href="/terceros/consulta" class="btn-header">
+                <span>📋</span>
+                Lista de Terceros
+            </a>
+            <a href="/terceros/" class="btn-header">
+                <span>🏠</span>
+                Dashboard
+            </a>
+        </div>
+    </header>
+
+    <!-- ========================================================================= -->
+    <!--                         CONTENEDOR PRINCIPAL                             -->
+    <!-- ========================================================================= -->
+    <div class="contenedor-principal">
+        <!-- ===== INFORMACIÓN DEL TERCERO ===== -->
+        <div class="info-tercero" id="info-tercero" style="display: none;">
+            <div class="info-header">
+                <div class="formulario-titulo">
+                    <span>👤</span>
+                    Información del Tercero
+                </div>
+                <div>
+                    <span id="estado-tercero"></span>
+                </div>
+            </div>
+            <div class="info-body" id="info-body">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+
+        <!-- ===== ESTADÍSTICAS ===== -->
+        <div class="estadisticas">
+            <div class="stat-card">
+                <div class="stat-icon">📄</div>
+                <div class="stat-numero" id="stat-total">-</div>
+                <div class="stat-label">Total Documentos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-numero" id="stat-pendientes">-</div>
+                <div class="stat-label">Pendientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-numero" id="stat-aprobados">-</div>
+                <div class="stat-label">Aprobados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">❌</div>
+                <div class="stat-numero" id="stat-rechazados">-</div>
+                <div class="stat-label">Rechazados</div>
+            </div>
+        </div>
+
+        <!-- ===== ACCIONES MASIVAS ===== -->
+        <div class="acciones-masivas">
+            <div class="acciones-titulo">
+                <span>⚙️</span>
+                Acciones Masivas
+                <span id="contador-seleccionados">(0 seleccionados)</span>
+            </div>
+            <div class="acciones-botones">
+                <button class="btn btn-primary" onclick="subirDocumento()" title="Subir nuevo documento">
+                    <span>⬆️</span>
+                    Subir Documento
+                </button>
+                <button class="btn btn-success" onclick="aprobarSeleccionados()" id="btn-aprobar" disabled>
+                    <span>✅</span>
+                    Aprobar Seleccionados
+                </button>
+                <button class="btn btn-warning" onclick="rechazarSeleccionados()" id="btn-rechazar" disabled>
+                    <span>❌</span>
+                    Rechazar Seleccionados
+                </button>
+                <button class="btn btn-danger" onclick="eliminarSeleccionados()" id="btn-eliminar" disabled>
+                    <span>🗑️</span>
+                    Eliminar Seleccionados
+                </button>
+                <button class="btn btn-secondary" onclick="descargarSeleccionados()" id="btn-descargar" disabled>
+                    <span>💾</span>
+                    Descargar ZIP
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== TABLA DE DOCUMENTOS ===== -->
+        <div class="documentos-container">
+            <div class="documentos-header">
+                <div class="documentos-titulo">
+                    <span>📋</span>
+                    Lista de Documentos
+                </div>
+                <div>
+                    <button class="btn btn-secondary btn-small" onclick="recargarDocumentos()">
+                        <span>🔄</span>
+                        Actualizar
+                    </button>
+                </div>
+            </div>
+            
+            <div class="tabla-wrapper">
+                <table class="tabla-documentos">
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class="checkbox-container">
+                                    <input type="checkbox" id="select-all" class="checkbox-custom" onchange="toggleSelectAll()">
+                                </div>
+                            </th>
+                            <th>Tipo</th>
+                            <th>Archivo</th>
+                            <th>Tamaño</th>
+                            <th>Estado</th>
+                            <th>Fecha Subida</th>
+                            <th>Revisor</th>
+                            <th>Observaciones</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-documentos">
+                        <tr>
+                            <td colspan="9" style="text-align: center; padding: 3rem; color: #6b7280;">
+                                <div class="loading" style="margin: 0 auto 1rem;"></div>
+                                Cargando documentos...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!--                               MODALES                                    -->
+    <!-- ========================================================================= -->
+    
+    <!-- MODAL REVISAR DOCUMENTO -->
+    <div class="modal" id="modal-revisar">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-titulo">📝 Revisar Documento</h3>
+                <button class="btn-cerrar" onclick="cerrarModal('modal-revisar')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="detalle-documento">
+                    <!-- Se llena dinámicamente -->
+                </div>
+                
+                <div style="margin-top: 1.5rem;">
+                    <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Nuevo Estado:</label>
+                    <select id="nuevo-estado" style="width: 100%; padding: 0.75rem; border: 2px solid #d1d5db; border-radius: 8px; margin-bottom: 1rem;">
+                        <option value="pendiente">⏳ Pendiente</option>
+                        <option value="aprobado">✅ Aprobado</option>
+                        <option value="rechazado">❌ Rechazado</option>
+                    </select>
+                    
+                    <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Observaciones:</label>
+                    <textarea id="observaciones-revision" placeholder="Ingrese observaciones sobre la revisión..." style="width: 100%; min-height: 100px; padding: 0.75rem; border: 2px solid #d1d5db; border-radius: 8px; resize: vertical;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cerrarModal('modal-revisar')">Cancelar</button>
+                <button class="btn btn-success" onclick="guardarRevision()">
+                    <span>💾</span>
+                    Guardar Revisión
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SUBIR DOCUMENTO -->
+    <div class="modal" id="modal-subir">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-titulo">⬆️ Subir Nuevo Documento</h3>
+                <button class="btn-cerrar" onclick="cerrarModal('modal-subir')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 1rem;">
+                    <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Tipo de Documento:</label>
+                    <select id="tipo-documento" style="width: 100%; padding: 0.75rem; border: 2px solid #d1d5db; border-radius: 8px;">
+                        <option value="">Seleccionar tipo...</option>
+                        <option value="RUT">RUT</option>
+                        <option value="CAMARA_COMERCIO">Cámara de Comercio</option>
+                        <option value="CEDULA_REPRESENTANTE">Cédula Representante</option>
+                        <option value="CERTIFICACION_BANCARIA">Certificación Bancaria</option>
+                        <option value="FORMULARIO_CONOCIMIENTO_PROVEEDORES">Formulario Conocimiento Proveedores</option>
+                        <option value="DECLARACION_FONDOS_JURIDICA">Declaración Fondos Jurídica</option>
+                        <option value="DECLARACION_FONDOS_NATURAL">Declaración Fondos Natural</option>
+                        <option value="OTRO">Otro</option>
+                    </select>
+                </div>
+                
+                <div style="margin-bottom: 1rem;">
+                    <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Archivo PDF:</label>
+                    <input type="file" id="archivo-pdf" accept=".pdf" style="width: 100%; padding: 0.75rem; border: 2px solid #d1d5db; border-radius: 8px;">
+                    <div style="font-size: 0.8rem; color: #6b7280; margin-top: 0.5rem;">
+                        Solo archivos PDF. Tamaño máximo: 10 MB
+                    </div>
+                </div>
+
+                <div>
+                    <label style="font-weight: 600; margin-bottom: 0.5rem; display: block;">Descripción (opcional):</label>
+                    <textarea id="descripcion-documento" placeholder="Descripción adicional del documento..." style="width: 100%; min-height: 80px; padding: 0.75rem; border: 2px solid #d1d5db; border-radius: 8px; resize: vertical;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="cerrarModal('modal-subir')">Cancelar</button>
+                <button class="btn btn-primary" onclick="subirArchivoDocumento()">
+                    <span>⬆️</span>
+                    Subir Documento
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================================
+        //                           VARIABLES GLOBALES
+        // =====================================================================
+        
+        let terceroId = null;
+        let documentos = [];
+        let documentosSeleccionados = new Set();
+        let documentoEnRevision = null;
+
+        // =====================================================================
+        //                           INICIALIZACIÓN
+        // =====================================================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Obtener ID del tercero desde la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            terceroId = urlParams.get('id');
+            
+            if (!terceroId) {
+                alert('❌ ID del tercero no especificado');
+                window.location.href = '/terceros/consulta';
+                return;
+            }
+
+            // Cargar datos
+            cargarDatosTercero();
+            cargarDocumentos();
+        });
+
+        // =====================================================================
+        //                           CARGA DE DATOS
+        // =====================================================================
+        
+        async function cargarDatosTercero() {
+            try {
+                const response = await fetch(`/terceros/api/obtener/${terceroId}`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Error obteniendo datos del tercero');
+                }
+
+                const tercero = data.data;
+                mostrarInformacionTercero(tercero);
+
+            } catch (error) {
+                console.error('Error cargando tercero:', error);
+                alert(`❌ Error cargando tercero: ${error.message}`);
+                window.location.href = '/terceros/consulta';
+            }
+        }
+
+        async function cargarDocumentos() {
+            mostrarLoading(true);
+            
+            try {
+                const response = await fetch(`/terceros/api/documentos/${terceroId}`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Error obteniendo documentos');
+                }
+
+                documentos = data.data;
+                mostrarDocumentos();
+                actualizarEstadisticas();
+
+            } catch (error) {
+                console.error('Error cargando documentos:', error);
+                const tbody = document.getElementById('tbody-documentos');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 3rem; color: #ef4444;">
+                            ❌ Error cargando documentos: ${error.message}
+                        </td>
+                    </tr>
+                `;
+            } finally {
+                mostrarLoading(false);
+            }
+        }
+
+        function mostrarInformacionTercero(tercero) {
+            const infoBody = document.getElementById('info-body');
+            infoBody.innerHTML = `
+                <div class="info-campo">
+                    <div class="info-label">NIT</div>
+                    <div class="info-valor">${tercero.nit}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-label">Razón Social</div>
+                    <div class="info-valor">${tercero.razon_social}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-label">Email</div>
+                    <div class="info-valor">${tercero.email || 'No especificado'}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-label">Teléfono</div>
+                    <div class="info-valor">${tercero.telefono || 'No especificado'}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-label">Categoría</div>
+                    <div class="info-valor">${tercero.categoria_tercero || 'No especificado'}</div>
+                </div>
+            `;
+
+            // Estado del tercero en el header
+            const estadoBadge = tercero.activo 
+                ? '<span class="estado-badge estado-aprobado">✅ Activo</span>'
+                : '<span class="estado-badge estado-rechazado">❌ Inactivo</span>';
+            
+            document.getElementById('estado-tercero').innerHTML = estadoBadge;
+            document.getElementById('header-tercero').textContent = `${tercero.nit} - ${tercero.razon_social}`;
+            document.getElementById('info-tercero').style.display = 'block';
+        }
+
+        function mostrarDocumentos() {
+            const tbody = document.getElementById('tbody-documentos');
+            
+            if (documentos.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 3rem; color: #6b7280;">
+                            📄 No hay documentos registrados para este tercero
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = documentos.map(doc => `
+                <tr data-documento-id="${doc.id}">
+                    <td>
+                        <div class="checkbox-container">
+                            <input type="checkbox" class="checkbox-custom checkbox-documento" 
+                                   value="${doc.id}" onchange="actualizarSeleccion()">
+                        </div>
+                    </td>
+                    <td>
+                        <span class="tipo-documento">${doc.tipo_documento}</span>
+                    </td>
+                    <td>
+                        <div>
+                            <strong>${doc.nombre_archivo}</strong>
+                            ${doc.descripcion ? `<br><small style="color: #6b7280;">${doc.descripcion}</small>` : ''}
+                        </div>
+                    </td>
+                    <td>${formatearTamaño(doc.tamaño_bytes)}</td>
+                    <td>
+                        <span class="estado-badge estado-${doc.estado_aprobacion}">
+                            ${getEstadoIcon(doc.estado_aprobacion)} ${doc.estado_aprobacion}
+                        </span>
+                    </td>
+                    <td>${formatearFecha(doc.fecha_subida)}</td>
+                    <td>${doc.usuario_revisor || '-'}</td>
+                    <td>
+                        ${doc.observaciones_revision 
+                            ? `<small title="${doc.observaciones_revision}">${doc.observaciones_revision.substring(0, 50)}${doc.observaciones_revision.length > 50 ? '...' : ''}</small>`
+                            : '-'
+                        }
+                    </td>
+                    <td>
+                        <div class="acciones-documento">
+                            <button class="btn btn-primary btn-small" onclick="descargarDocumento(${doc.id})" title="Descargar">
+                                📥
+                            </button>
+                            <button class="btn btn-warning btn-small" onclick="revisarDocumento(${doc.id})" title="Revisar">
+                                📝
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="eliminarDocumento(${doc.id})" title="Eliminar">
+                                🗑️
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Limpiar selección
+            documentosSeleccionados.clear();
+            actualizarContadorSeleccionados();
+        }
+
+        function actualizarEstadisticas() {
+            const total = documentos.length;
+            const pendientes = documentos.filter(d => d.estado_aprobacion === 'pendiente').length;
+            const aprobados = documentos.filter(d => d.estado_aprobacion === 'aprobado').length;
+            const rechazados = documentos.filter(d => d.estado_aprobacion === 'rechazado').length;
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-pendientes').textContent = pendientes;
+            document.getElementById('stat-aprobados').textContent = aprobados;
+            document.getElementById('stat-rechazados').textContent = rechazados;
+        }
+
+        // =====================================================================
+        //                           UTILIDADES
+        // =====================================================================
+        
+        function formatearTamaño(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function formatearFecha(fecha) {
+            if (!fecha) return '-';
+            const date = new Date(fecha);
+            return date.toLocaleDateString('es-CO', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        function getEstadoIcon(estado) {
+            switch (estado) {
+                case 'pendiente': return '⏳';
+                case 'aprobado': return '✅';
+                case 'rechazado': return '❌';
+                default: return '❓';
+            }
+        }
+
+        function mostrarLoading(mostrar) {
+            const overlay = document.getElementById('loading-overlay');
+            if (mostrar) {
+                overlay.classList.add('activo');
+            } else {
+                overlay.classList.remove('activo');
+            }
+        }
+
+        // =====================================================================
+        //                           SELECCIÓN DOCUMENTOS
+        // =====================================================================
+        
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('select-all');
+            const checkboxes = document.querySelectorAll('.checkbox-documento');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+                if (selectAll.checked) {
+                    documentosSeleccionados.add(parseInt(checkbox.value));
+                } else {
+                    documentosSeleccionados.delete(parseInt(checkbox.value));
+                }
+            });
+            
+            actualizarContadorSeleccionados();
+            actualizarBotonesAcciones();
+        }
+
+        function actualizarSeleccion() {
+            const checkboxes = document.querySelectorAll('.checkbox-documento');
+            const selectAll = document.getElementById('select-all');
+            
+            // Actualizar conjunto de seleccionados
+            documentosSeleccionados.clear();
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    documentosSeleccionados.add(parseInt(checkbox.value));
+                }
+            });
+
+            // Actualizar estado del "select all"
+            const totalChecked = documentosSeleccionados.size;
+            const totalCheckboxes = checkboxes.length;
+            
+            if (totalChecked === 0) {
+                selectAll.indeterminate = false;
+                selectAll.checked = false;
+            } else if (totalChecked === totalCheckboxes) {
+                selectAll.indeterminate = false;
+                selectAll.checked = true;
+            } else {
+                selectAll.indeterminate = true;
+                selectAll.checked = false;
+            }
+
+            actualizarContadorSeleccionados();
+            actualizarBotonesAcciones();
+        }
+
+        function actualizarContadorSeleccionados() {
+            const contador = document.getElementById('contador-seleccionados');
+            contador.textContent = `(${documentosSeleccionados.size} seleccionados)`;
+        }
+
+        function actualizarBotonesAcciones() {
+            const haySeleccionados = documentosSeleccionados.size > 0;
+            
+            document.getElementById('btn-aprobar').disabled = !haySeleccionados;
+            document.getElementById('btn-rechazar').disabled = !haySeleccionados;
+            document.getElementById('btn-eliminar').disabled = !haySeleccionados;
+            document.getElementById('btn-descargar').disabled = !haySeleccionados;
+        }
+
+        // =====================================================================
+        //                           ACCIONES DOCUMENTOS
+        // =====================================================================
+        
+        function recargarDocumentos() {
+            cargarDocumentos();
+        }
+
+        async function descargarDocumento(documentoId) {
+            try {
+                const response = await fetch(`/terceros/api/documento/descargar/${documentoId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Error descargando documento');
+                }
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                
+                // Obtener nombre del archivo desde headers o usar uno por defecto
+                const contentDisposition = response.headers.get('Content-Disposition');
+                let filename = 'documento.pdf';
+                if (contentDisposition) {
+                    const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                    if (filenameMatch) {
+                        filename = filenameMatch[1];
+                    }
+                }
+                a.download = filename;
+                
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+            } catch (error) {
+                console.error('Error descargando documento:', error);
+                alert(`❌ Error descargando documento: ${error.message}`);
+            }
+        }
+
+        function revisarDocumento(documentoId) {
+            const documento = documentos.find(d => d.id === documentoId);
+            if (!documento) return;
+
+            documentoEnRevision = documento;
+
+            // Llenar modal con información del documento
+            document.getElementById('detalle-documento').innerHTML = `
+                <div style="background: #f3f4f6; padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <h4 style="margin: 0 0 0.5rem; color: #374151;">${documento.tipo_documento}</h4>
+                    <p style="margin: 0; color: #6b7280;"><strong>Archivo:</strong> ${documento.nombre_archivo}</p>
+                    <p style="margin: 0; color: #6b7280;"><strong>Tamaño:</strong> ${formatearTamaño(documento.tamaño_bytes)}</p>
+                    <p style="margin: 0; color: #6b7280;"><strong>Subido:</strong> ${formatearFecha(documento.fecha_subida)}</p>
+                    ${documento.descripcion ? `<p style="margin: 0.5rem 0 0; color: #374151;"><strong>Descripción:</strong> ${documento.descripcion}</p>` : ''}
+                </div>
+            `;
+
+            // Establecer valores actuales
+            document.getElementById('nuevo-estado').value = documento.estado_aprobacion || 'pendiente';
+            document.getElementById('observaciones-revision').value = documento.observaciones_revision || '';
+
+            // Mostrar modal
+            document.getElementById('modal-revisar').classList.add('activo');
+        }
+
+        async function guardarRevision() {
+            if (!documentoEnRevision) return;
+
+            const nuevoEstado = document.getElementById('nuevo-estado').value;
+            const observaciones = document.getElementById('observaciones-revision').value.trim();
+
+            try {
+                const response = await fetch(`/terceros/api/documento/revisar/${documentoEnRevision.id}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        estado_aprobacion: nuevoEstado,
+                        observaciones_revision: observaciones
+                    })
+                });
+
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.message);
+                }
+
+                alert('✅ Revisión guardada exitosamente');
+                cerrarModal('modal-revisar');
+                cargarDocumentos(); // Recargar para mostrar cambios
+
+            } catch (error) {
+                console.error('Error guardando revisión:', error);
+                alert(`❌ Error guardando revisión: ${error.message}`);
+            }
+        }
+
+        async function eliminarDocumento(documentoId) {
+            const documento = documentos.find(d => d.id === documentoId);
+            if (!documento) return;
+
+            if (!confirm(`¿Está seguro que desea eliminar el documento "${documento.nombre_archivo}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/terceros/api/documento/eliminar/${documentoId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.message);
+                }
+
+                alert('✅ Documento eliminado exitosamente');
+                cargarDocumentos(); // Recargar lista
+
+            } catch (error) {
+                console.error('Error eliminando documento:', error);
+                alert(`❌ Error eliminando documento: ${error.message}`);
+            }
+        }
+
+        // =====================================================================
+        //                           ACCIONES MASIVAS
+        // =====================================================================
+        
+        async function aprobarSeleccionados() {
+            if (documentosSeleccionados.size === 0) return;
+
+            if (!confirm(`¿Aprobar ${documentosSeleccionados.size} documentos seleccionados?`)) {
+                return;
+            }
+
+            await accionMasiva('aprobar', 'aprobado');
+        }
+
+        async function rechazarSeleccionados() {
+            if (documentosSeleccionados.size === 0) return;
+
+            const observaciones = prompt('Ingrese observaciones para el rechazo (opcional):');
+            if (observaciones === null) return; // Usuario canceló
+
+            await accionMasiva('rechazar', 'rechazado', observaciones);
+        }
+
+        async function eliminarSeleccionados() {
+            if (documentosSeleccionados.size === 0) return;
+
+            if (!confirm(`¿Eliminar ${documentosSeleccionados.size} documentos seleccionados? Esta acción no se puede deshacer.`)) {
+                return;
+            }
+
+            await accionMasiva('eliminar');
+        }
+
+        async function accionMasiva(accion, estado = null, observaciones = '') {
+            const documentosIds = Array.from(documentosSeleccionados);
+            
+            try {
+                const response = await fetch('/terceros/api/documentos/accion_masiva', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        documentos_ids: documentosIds,
+                        accion: accion,
+                        estado_aprobacion: estado,
+                        observaciones_revision: observaciones
+                    })
+                });
+
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.message);
+                }
+
+                alert(`✅ ${data.message}`);
+                cargarDocumentos(); // Recargar lista
+
+            } catch (error) {
+                console.error(`Error en acción masiva ${accion}:`, error);
+                alert(`❌ Error en acción masiva: ${error.message}`);
+            }
+        }
+
+        async function descargarSeleccionados() {
+            if (documentosSeleccionados.size === 0) return;
+
+            const documentosIds = Array.from(documentosSeleccionados);
+            
+            try {
+                const response = await fetch('/terceros/api/documentos/descargar_zip', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({documentos_ids: documentosIds})
+                });
+
+                if (!response.ok) {
+                    throw new Error('Error generando archivo ZIP');
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `documentos_tercero_${terceroId}.zip`;
+                
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+            } catch (error) {
+                console.error('Error descargando ZIP:', error);
+                alert(`❌ Error descargando archivo ZIP: ${error.message}`);
+            }
+        }
+
+        // =====================================================================
+        //                           SUBIR DOCUMENTO
+        // =====================================================================
+        
+        function subirDocumento() {
+            // Limpiar formulario
+            document.getElementById('tipo-documento').value = '';
+            document.getElementById('archivo-pdf').value = '';
+            document.getElementById('descripcion-documento').value = '';
+            
+            // Mostrar modal
+            document.getElementById('modal-subir').classList.add('activo');
+        }
+
+        async function subirArchivoDocumento() {
+            const tipoDocumento = document.getElementById('tipo-documento').value;
+            const archivoPdf = document.getElementById('archivo-pdf').files[0];
+            const descripcion = document.getElementById('descripcion-documento').value.trim();
+
+            // Validaciones
+            if (!tipoDocumento) {
+                alert('❌ Seleccione el tipo de documento');
+                return;
+            }
+
+            if (!archivoPdf) {
+                alert('❌ Seleccione un archivo PDF');
+                return;
+            }
+
+            if (archivoPdf.type !== 'application/pdf') {
+                alert('❌ Solo se permiten archivos PDF');
+                return;
+            }
+
+            if (archivoPdf.size > 10 * 1024 * 1024) { // 10 MB
+                alert('❌ El archivo excede el tamaño máximo de 10 MB');
+                return;
+            }
+
+            // Preparar FormData
+            const formData = new FormData();
+            formData.append('tercero_id', terceroId);
+            formData.append('tipo_documento', tipoDocumento);
+            formData.append('archivo', archivoPdf);
+            formData.append('descripcion', descripcion);
+
+            try {
+                const response = await fetch('/terceros/api/documento/subir', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.message);
+                }
+
+                alert('✅ Documento subido exitosamente');
+                cerrarModal('modal-subir');
+                cargarDocumentos(); // Recargar lista
+
+            } catch (error) {
+                console.error('Error subiendo documento:', error);
+                alert(`❌ Error subiendo documento: ${error.message}`);
+            }
+        }
+
+        // =====================================================================
+        //                           GESTIÓN DE MODALES
+        // =====================================================================
+        
+        function cerrarModal(modalId) {
+            document.getElementById(modalId).classList.remove('activo');
+        }
+
+        // Cerrar modales al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('activo');
+            }
+        });
+
+        // Cerrar modales con ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.activo').forEach(modal => {
+                    modal.classList.remove('activo');
+                });
+            }
+        });
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+            {% include '_session_expired_interceptor.html' %}
+        </body>
+</html>

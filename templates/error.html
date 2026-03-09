@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Dashboard Facturas</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .error-container {
+            max-width: 600px;
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .error-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+        .error-title {
+            color: #e74c3c;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        .error-message {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        .error-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+        .btn:hover { transform: translateY(-2px); }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .error-details {
+            background: #f8f9fa;
+            border-left: 4px solid #e74c3c;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+            border-radius: 0 5px 5px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: #666;
+            display: none;
+        }
+        .suggestions {
+            background: #e8f5e8;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .suggestions h4 {
+            color: #155724;
+            margin-top: 0;
+        }
+        .suggestions ul {
+            margin-bottom: 0;
+            padding-left: 20px;
+        }
+        .suggestions li {
+            margin-bottom: 8px;
+        }
+        @media (max-width: 768px) {
+            .error-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+            .error-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">⚠️</div>
+        <h1 class="error-title">¡Oops! Algo salió mal</h1>
+        
+        <div class="error-message">
+            {{ mensaje or "Ha ocurrido un error inesperado en el sistema." }}
+        </div>
+
+        {% if codigo_error %}
+        <div class="error-details" id="error-details">
+            <strong>Código de Error:</strong> {{ codigo_error }}<br>
+            <strong>Timestamp:</strong> {{ timestamp or "No disponible" }}<br>
+            {% if detalles_tecnicos %}
+            <strong>Detalles Técnicos:</strong><br>
+            {{ detalles_tecnicos }}
+            {% endif %}
+        </div>
+        
+        <button class="btn btn-warning" onclick="toggleDetails()" style="margin-bottom: 20px;">
+            📋 Mostrar/Ocultar Detalles Técnicos
+        </button>
+        {% endif %}
+
+        <div class="suggestions">
+            <h4>💡 ¿Qué puedes hacer?</h4>
+            <ul>
+                <li><strong>Volver al Dashboard:</strong> Regresa a la página principal para continuar trabajando</li>
+                <li><strong>Recargar la página:</strong> A veces un simple refresh soluciona el problema</li>
+                <li><strong>Verificar la URL:</strong> Asegúrate de que la dirección sea correcta</li>
+                <li><strong>Intentar más tarde:</strong> El problema podría ser temporal</li>
+                <li><strong>Reportar el error:</strong> Si persiste, contacta al administrador del sistema</li>
+            </ul>
+        </div>
+
+        <div class="error-actions">
+            <a href="/" class="btn btn-primary">🏠 Ir al Dashboard</a>
+            <button class="btn btn-secondary" onclick="window.history.back()">← Volver Atrás</button>
+            <button class="btn btn-success" onclick="window.location.reload()">🔄 Recargar Página</button>
+        </div>
+
+        {% if not is_production %}
+        <div style="margin-top: 30px; padding: 15px; background: #fff3cd; border-radius: 5px; font-size: 12px; color: #856404;">
+            <strong>🔧 Modo Desarrollo Activo</strong><br>
+            Este mensaje aparece porque el sistema está en modo de desarrollo. 
+            En producción, los errores se manejan de forma más elegante.
+        </div>
+        {% endif %}
+
+        <div style="margin-top: 20px; font-size: 12px; color: #999;">
+            Dashboard de Gestión de Facturas | 
+            <span id="timestamp-actual"></span>
+        </div>
+    </div>
+
+    <script>
+        function toggleDetails() {
+            const details = document.getElementById('error-details');
+            if (details) {
+                details.style.display = details.style.display === 'none' || details.style.display === '' ? 'block' : 'none';
+            }
+        }
+
+        // Mostrar timestamp actual
+        document.getElementById('timestamp-actual').textContent = new Date().toLocaleString('es-ES');
+
+        // Auto-reportar error (simulado)
+        function reportarError() {
+            // En un sistema real, esto enviaría el error al servidor para logging
+            console.log('Error reportado:', {
+                mensaje: '{{ mensaje }}',
+                url: window.location.href,
+                userAgent: navigator.userAgent,
+                timestamp: new Date().toISOString()
+            });
+            
+            alert('Error reportado al administrador del sistema. Gracias por tu colaboración.');
+        }
+
+        // Detectar si el error es de conexión
+        if (navigator.onLine === false) {
+            document.querySelector('.error-message').innerHTML += 
+                '<br><br><strong style="color: #e74c3c;">⚠️ Sin conexión a Internet</strong><br>' +
+                'Verifica tu conexión de red e intenta nuevamente.';
+        }
+
+        // Agregar funcionalidad de teclas
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case 'Home':
+                    window.location.href = '/';
+                    break;
+                case 'Escape':
+                    window.history.back();
+                    break;
+                case 'F5':
+                    e.preventDefault();
+                    window.location.reload();
+                    break;
+            }
+        });
+
+        // Mostrar tips de navegación
+        setTimeout(function() {
+            const tips = document.createElement('div');
+            tips.style.cssText = 'position: fixed; bottom: 20px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-size: 12px; max-width: 250px;';
+            tips.innerHTML = '💡 <strong>Tips:</strong><br>Home = Dashboard | Esc = Atrás | F5 = Recargar';
+            document.body.appendChild(tips);
+            
+            setTimeout(() => tips.style.opacity = '0.7', 3000);
+            setTimeout(() => tips.remove(), 8000);
+        }, 2000);
+    </script>
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

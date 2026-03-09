@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 Orden de Compra - OCR</title>
+<style>
+    :root {
+        --canaveral-green: #0A6E3F;
+        --canaveral-green-dark: #085330;
+        --canaveral-yellow: #FFB900;
+        --canaveral-yellow-light: #FFD966;
+    }
+
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        background: #f5f7fa;
+        color: #2d3748;
+    }
+
+    .container-principal {
+        max-width: 1400px;
+        margin: 20px auto;
+        padding: 0 20px;
+    }
+
+    .header-principal {
+        background: linear-gradient(135deg, var(--canaveral-green), var(--canaveral-green-dark));
+        color: white;
+        padding: 20px 30px;
+        border-radius: 12px 12px 0 0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .card-orden {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        margin-bottom: 20px;
+        overflow: hidden;
+        border-top: 4px solid var(--canaveral-yellow);
+    }
+
+    .seccion-encabezado {
+        background: linear-gradient(to right, #f8f9fa, #ffffff);
+        padding: 25px 30px;
+        border-bottom: 3px solid var(--canaveral-yellow);
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 30px;
+        align-items: center;
+    }
+
+    .logo-container {
+        text-align: center;
+        padding: 15px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .logo-container img {
+        max-width: 180px;
+        height: auto;
+    }
+
+    .info-encabezado {
+        display: grid;
+        gap: 10px;
+    }
+
+    .empresa-nombre {
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: var(--canaveral-green);
+        margin: 0;
+    }
+
+    .documento-titulo {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #555;
+        margin: 5px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .fecha-consecutivo {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-top: 15px;
+    }
+
+    .campo-fecha {
+        background: white;
+        padding: 10px;
+        border-radius: 6px;
+        border: 2px solid #e2e8f0;
+        text-align: center;
+    }
+
+    .campo-fecha label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #666;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+    }
+
+    .campo-fecha input {
+        width: 100%;
+        border: none;
+        text-align: center;
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--canaveral-green);
+        background: transparent;
+    }
+
+    .consecutivo-display {
+        grid-column: span 2;
+        background: var(--canaveral-green);
+        color: white;
+        padding: 15px;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 1.8rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 8px rgba(10, 110, 63, 0.3);
+    }
+
+    .seccion-info-proveedor {
+        padding: 25px 30px;
+        background: #f9fafb;
+        border-bottom: 2px solid #e5e7eb;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #4a5568;
+        margin-bottom: 5px;
+        font-size: 0.8rem;
+    }
+
+    .form-group label span {
+        color: #e53e3e;
+    }
+
+    .form-group {
+        margin-bottom: 12px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #cbd5e0;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: all 0.3s;
+        background: white;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--canaveral-green);
+        box-shadow: 0 0 0 2px rgba(10, 110, 63, 0.1);
+    }
+
+    .form-control:disabled {
+        background: #f7fafc;
+        cursor: not-allowed;
+    }
+
+    .grid-2-cols {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .grid-3-cols {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+
+    .btn {
+        padding: 10px 24px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+        font-size: 0.95rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-primary {
+        background: var(--canaveral-green);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: var(--canaveral-green-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(10, 110, 63, 0.3);
+    }
+
+    .btn-secondary {
+        background: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background: #5a6268;
+    }
+
+    .btn-warning {
+        background: var(--canaveral-yellow);
+        color: #333;
+    }
+
+    .btn-warning:hover {
+        background: #e6a500;
+    }
+
+    .seccion-items {
+        padding: 25px 30px;
+    }
+
+    .tabla-items {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .tabla-items thead {
+        background: var(--canaveral-green);
+        color: white;
+    }
+
+    .tabla-items th {
+        padding: 12px;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .tabla-items td {
+        padding: 10px;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .tabla-items tbody tr:hover {
+        background: #f7fafc;
+    }
+
+    .tabla-items input,
+    .tabla-items select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #cbd5e0;
+        border-radius: 6px;
+        font-size: 0.9rem;
+    }
+
+    .tabla-items input:focus,
+    .tabla-items select:focus {
+        outline: none;
+        border-color: var(--canaveral-green);
+    }
+
+    .btn-eliminar-fila {
+        background: #e53e3e;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.85rem;
+    }
+
+    .btn-eliminar-fila:hover {
+        background: #c53030;
+    }
+
+    .seccion-totales {
+        background: linear-gradient(to right, #f7fafc, #edf2f7);
+        padding: 25px 30px;
+        border-top: 3px solid var(--canaveral-yellow);
+    }
+
+    .grid-totales {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 30px;
+    }
+
+    .observaciones-finales textarea {
+        width: 100%;
+        min-height: 150px;
+        padding: 12px;
+        border: 2px solid #cbd5e0;
+        border-radius: 8px;
+        font-family: inherit;
+        font-size: 0.95rem;
+        resize: vertical;
+    }
+
+    .totales-cuadro {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        border: 2px solid var(--canaveral-green);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .fila-total {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 1rem;
+    }
+
+    .fila-total:last-child {
+        border-bottom: none;
+        border-top: 3px solid var(--canaveral-green);
+        margin-top: 10px;
+        padding-top: 15px;
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--canaveral-green);
+    }
+
+    .fila-total label {
+        font-weight: 600;
+        color: #4a5568;
+    }
+
+    .fila-total span {
+        font-weight: 700;
+        color: var(--canaveral-green);
+    }
+
+    .acciones-finales {
+        padding: 25px 30px;
+        background: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-top: 2px solid #e5e7eb;
+    }
+
+    .alert {
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-weight: 500;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border-left: 4px solid #28a745;
+    }
+
+    .alert-error {
+        background: #f8d7da;
+        color: #721c24;
+        border-left: 4px solid #dc3545;
+    }
+
+    .alert-warning {
+        background: #fff3cd;
+        color: #856404;
+        border-left: 4px solid var(--canaveral-yellow);
+    }
+
+    @media print {
+        .btn,
+        .acciones-finales,
+        .header-principal {
+            display: none;
+        }
+    }
+</style>
+</head>
+<body>
+<div class="container-principal">
+    <div class="header-principal">
+        <div>
+            <h1 style="margin: 0; font-size: 1.8rem; font-weight: 700;">📝 Orden de Compra (OCR)</h1>
+            <p style="margin: 5px 0 0; opacity: 0.9;">Generar nueva orden de compra para proveedor</p>
+        </div>
+        <div>
+            <button onclick="window.location.href='/facturas-digitales/'" class="btn btn-secondary">
+                ← Volver al Dashboard
+            </button>
+        </div>
+    </div>
+
+    <!-- Mensajes de Alerta -->
+    <div id="alertContainer"></div>
+
+    <form id="formOrdenCompra" onsubmit="return false;">
+        <!-- SECCIÓN 1: ENCABEZADO CON LOGO Y DATOS -->
+        <div class="card-orden">
+            <div class="seccion-encabezado" style="padding: 15px 30px;">
+                <!-- DISEÑO: Logo+Fecha+OCR Izquierda COMPACTO | Texto Empresa ANCHO -->
+                <div style="display: grid; grid-template-columns: 200px 1fr; gap: 40px; align-items: center;">
+                    
+                    <!-- COLUMNA IZQUIERDA: Logo, Fecha y OCR apilados verticalmente (MÁS COMPACTO) -->
+                    <div style="display: flex; flex-direction: column; gap: 8px; align-items: center;">
+                        <!-- Logo -->
+                        <img src="/static/images/logo_canaveral.png" 
+                             alt="Logo Supertiendas Cañaveral" 
+                             style="width: 100%; height: auto; max-height: 85px; object-fit: contain;">
+                        
+                        <!-- Fecha Horizontal (Día, Mes, Año) -->
+                        <div style="display: flex; gap: 4px; width: 100%; justify-content: center;">
+                            <div style="text-align: center;">
+                                <label style="display: block; font-size: 0.6rem; font-weight: 600; color: #555; margin-bottom: 2px;">DÍA</label>
+                                <input type="text" id="dia" readonly style="width: 32px; padding: 5px 3px; text-align: center; border: 1px solid #ddd; border-radius: 4px; font-size: 0.75rem;">
+                            </div>
+                            <div style="text-align: center;">
+                                <label style="display: block; font-size: 0.6rem; font-weight: 600; color: #555; margin-bottom: 2px;">MES</label>
+                                <input type="text" id="mes" readonly style="width: 85px; padding: 5px 3px; text-align: center; border: 1px solid #ddd; border-radius: 4px; font-size: 0.75rem;">
+                            </div>
+                            <div style="text-align: center;">
+                                <label style="display: block; font-size: 0.6rem; font-weight: 600; color: #555; margin-bottom: 2px;">AÑO</label>
+                                <input type="text" id="anio" readonly style="width: 50px; padding: 5px 3px; text-align: center; border: 1px solid #ddd; border-radius: 4px; font-size: 0.75rem;">
+                            </div>
+                        </div>
+                        
+                        <!-- OCR -->
+                        <div style="background: var(--canaveral-green); color: white; padding: 10px 16px; border-radius: 6px; font-weight: 700; font-size: 0.9rem; text-align: center; width: 100%;" id="consecutivoDisplay">
+                            OCR-000000000
+                        </div>
+                    </div>
+
+                    <!-- COLUMNA DERECHA: Información de la Empresa (ALINEADO A LA IZQUIERDA) -->
+                    <div style="text-align: left; display: flex; flex-direction: column; justify-content: center; padding-left: 20px;">
+                        <h2 style="color: var(--canaveral-green); margin: 0 0 8px 0; font-size: 1.35rem; font-weight: 700; line-height: 1.2; white-space: nowrap;">
+                            SUPERTIENDAS CAÑAVERAL S.A.S.
+                        </h2>
+                        <p style="margin: 0 0 8px 0; font-size: 0.85rem; color: #555; font-weight: 600; line-height: 1.2;">
+                            SC-ERP-CSU-FOR-004 | Versión 02
+                        </p>
+                        <p style="margin: 0; font-size: 0.9rem; color: #333; font-weight: 600; line-height: 1.3;">
+                            FORMATO DISTRIBUCIÓN DE FACTURA ELECTRÓNICA<br>DE VENTA ACREEDORES
+                        </p>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- SECCIÓN 2: INFORMACIÓN DEL PROVEEDOR -->
+            <div class="seccion-info-proveedor" style="padding: 15px 25px;">
+                <h3 style="color: var(--canaveral-green); margin-bottom: 12px; font-size: 1rem; font-weight: 700; border-bottom: 2px solid var(--canaveral-yellow); padding-bottom: 6px;">
+                    📋 Información del Proveedor
+                </h3>
+
+                <div class="grid-2-cols">
+                    <div class="form-group">
+                        <label>NIT <span>*</span></label>
+                        <input type="text" id="nit" class="form-control" placeholder="Ingrese NIT del proveedor" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre / Razón Social <span>*</span></label>
+                        <input type="text" id="razonSocial" class="form-control" placeholder="Se cargará automáticamente" disabled>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 12px;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 0.85rem;">Dirección</label>
+                        <input type="text" id="direccion" class="form-control" placeholder="Se cargará automáticamente" disabled style="padding: 6px 10px; font-size: 0.85rem;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label style="font-size: 0.85rem;">Teléfono</label>
+                        <input type="text" id="telefono" class="form-control" placeholder="Se cargará automáticamente" disabled style="padding: 6px 10px; font-size: 0.85rem;">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0; grid-column: span 2;">
+                        <label style="font-size: 0.85rem;">E-mail <span>*</span></label>
+                        <input type="email" id="email" class="form-control" placeholder="Se cargará automáticamente" style="padding: 6px 10px; font-size: 0.85rem;">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Motivo <span>*</span></label>
+                    <input type="text" id="motivo" class="form-control" placeholder="Ej: ESCRIBA EL MOTIVO DE LA COMPRA DEL BIEN O SERVICIO" required>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 3: DETALLE DE ITEMS -->
+            <div class="seccion-items" style="padding: 15px 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <h3 style="color: var(--canaveral-green); margin: 0; font-size: 1rem; font-weight: 700;">
+                        📦 Detalle de Ítems
+                    </h3>
+                    <button type="button" onclick="agregarFila()" class="btn btn-primary" style="padding: 6px 15px; font-size: 0.85rem;">
+                        ➕ Agregar Fila Manual
+                    </button>
+                </div>
+
+                <!-- 🎯 SELECTOR INTELIGENTE DE C.O POR TIPO -->
+                <div style="background: linear-gradient(135deg, #f0f9ff, #e0f2fe); border: 2px solid var(--canaveral-yellow); border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                    <strong style="color: var(--canaveral-green); font-size: 0.95rem; display: block; margin-bottom: 10px;">🏪 Agregar C.O por tipo:</strong>
+                    
+                    <!-- Fila 1: Los 8 tipos de C.O -->
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;">
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; background: white; padding: 6px 12px; border-radius: 5px; border: 1px solid #cbd5e1;">
+                            <input type="checkbox" id="check-almacen" class="check-tipo" style="width: 16px; height: 16px; cursor: pointer;">
+                            <span style="font-size: 0.85rem;">🏬 Almacén</span>
+                        </label>
+                        
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; background: white; padding: 6px 12px; border-radius: 5px; border: 1px solid #cbd5e1;">
+                            <input type="checkbox" id="check-bodega" class="check-tipo" style="width: 16px; height: 16px; cursor: pointer;">
+                            <span style="font-size: 0.85rem;">📦 Bodega</span>
+                        </label>
+                        
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; background: white; padding: 6px 12px; border-radius: 5px; border: 1px solid #cbd5e1;">
+                            <input type="checkbox" id="check-c_comercial" class="check-tipo" style="width: 16px; height: 16px; cursor: pointer;">
+                            <span style="font-size: 0.85rem;">🏢 C.Comercial</span>
+                        </label>
+                        
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; background: white; padding: 6px 12px; border-radius: 5px; border: 1px solid #cbd5e1;">
+                            <input type="checkbox" id="check-mayorista" class="check-tipo" style="width: 16px; height: 16px; cursor: pointer;">
+                            <span style="font-size: 0.85rem;">🏪 Mayorista</span>
+                        </label>
+                        
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; background: white; padding: 6px 12px; border-radius: 5px; border: 1px solid #cbd5e1;">
+                            <input type="checkbox" id="check-asaderos" class="check-tipo" style="width: 16px; height: 16px; cursor: pointer;">
+                            <span style="font-size: 0.85rem;">🍗 Asaderos</span>
+                        </label>
+                        
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; background: white; padding: 6px 12px; border-radius: 5px; border: 1px solid #cbd5e1;">
+                            <input type="checkbox" id="check-panaderias" class="check-tipo" style="width: 16px; height: 16px; cursor: pointer;">
+                            <span style="font-size: 0.85rem;">🍞 Panaderías</span>
+                        </label>
+                        
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; background: white; padding: 6px 12px; border-radius: 5px; border: 1px solid #cbd5e1;">
+                            <input type="checkbox" id="check-domicilios" class="check-tipo" style="width: 16px; height: 16px; cursor: pointer;">
+                            <span style="font-size: 0.85rem;">🛵 Domicilios</span>
+                        </label>
+                        
+                        <label style="display: flex; align-items: center; gap: 5px; cursor: pointer; background: white; padding: 6px 12px; border-radius: 5px; border: 1px solid #cbd5e1;">
+                            <input type="checkbox" id="check-otros" class="check-tipo" style="width: 16px; height: 16px; cursor: pointer;">
+                            <span style="font-size: 0.85rem;">📋 Otros</span>
+                        </label>
+                    </div>
+                    
+                    <!-- Fila 2: Todos + Botones -->
+                    <div style="display: flex; gap: 10px; align-items: center; padding-top: 10px; border-top: 1px solid #cbd5e1;">
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; background: #fef3c7; padding: 6px 12px; border-radius: 5px; border: 2px solid var(--canaveral-yellow); font-weight: 600;">
+                            <input type="checkbox" id="check-todos" style="width: 18px; height: 18px; cursor: pointer;">
+                            <span style="font-size: 0.9rem;">✅ TODOS</span>
+                        </label>
+                        
+                        <button type="button" onclick="agregarFilasPorTipo()" class="btn btn-primary" style="padding: 8px 16px; font-size: 0.85rem; margin-left: auto;">
+                            ➕ Agregar Seleccionados
+                        </button>
+                        
+                        <button type="button" onclick="eliminarNoSeleccionados()" class="btn btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; background: #dc3545;">
+                            🗑️ Eliminar No Marcados
+                        </button>
+                    </div>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="tabla-items" id="tablaItems">
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;">☑</th>
+                                <th style="width: 200px;">Centro de Operación (C.O)</th>
+                                <th style="width: 150px;">Unidad de Negocio (UN)</th>
+                                <th style="width: 150px;">Centro de Costos (C.C)</th>
+                                <th style="width: 100px;">Cantidad</th>
+                                <th style="width: 150px;">Precio Unitario</th>
+                                <th style="width: 150px;">Valor Total</th>
+                                <th style="width: 60px;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bodyTablaItems">
+                            <!-- Las filas se agregarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 4: TOTALES Y OBSERVACIONES -->
+            <div class="seccion-totales">
+                <div class="grid-totales">
+                    <div class="observaciones-finales">
+                        <h4 style="color: var(--canaveral-green); margin-bottom: 12px; font-weight: 600;">
+                            📝 Observaciones Finales
+                        </h4>
+                        <textarea id="observaciones" placeholder="Ingrese observaciones adicionales sobre la orden de compra..."></textarea>
+                    </div>
+
+                    <div class="totales-cuadro">
+                        <h4 style="color: var(--canaveral-green); margin-bottom: 15px; font-weight: 600; text-align: center;">
+                            💰 Resumen de Totales
+                        </h4>
+                        <div class="fila-total">
+                            <label>Sub-Total:</label>
+                            <span id="subtotalDisplay">$0.00</span>
+                        </div>
+                        <div class="fila-total">
+                            <label>IVA 19%:</label>
+                            <span id="ivaDisplay">$0.00</span>
+                        </div>
+                        <div class="fila-total">
+                            <label>Retefuente:</label>
+                            <span id="retefuenteDisplay">$0.00</span>
+                        </div>
+                        <div class="fila-total">
+                            <label>TOTAL:</label>
+                            <span id="totalDisplay">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN 5: ACCIONES FINALES -->
+            <div class="acciones-finales">
+                <div>
+                    <button type="button" onclick="limpiarFormulario()" class="btn btn-secondary">
+                        🔄 Limpiar Todo
+                    </button>
+                </div>
+                <div style="display: flex; gap: 15px;">
+                    <button type="button" onclick="guardarOrden()" class="btn btn-primary" id="btnGuardar">
+                        💾 Guardar Orden
+                    </button>
+                    <button type="button" onclick="mostrarModalEnvio()" class="btn btn-warning" id="btnEnviar" style="display: none;">
+                        ✉️ Enviar por Correo
+                    </button>
+                    <button type="button" onclick="descargarPDF()" class="btn btn-primary" id="btnPDF" style="display: none;">
+                        📥 Descargar PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- Modal de Envío por Correo -->
+<div id="modalEnvioCorreo" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: white; border-radius: 12px; padding: 30px; max-width: 500px; width: 90%; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
+        <h3 style="color: var(--canaveral-green); margin-bottom: 20px; font-size: 1.3rem;">✉️ Enviar Orden por Correo</h3>
+        
+        <div class="form-group">
+            <label>El correo del proveedor es:</label>
+            <input type="email" id="emailEnvio" class="form-control" style="font-weight: 600; color: var(--canaveral-green);">
+        </div>
+
+        <div class="form-group">
+            <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                <input type="checkbox" id="checkOtroCorreo" onchange="toggleOtroCorreo()">
+                <span>Enviar a otro correo electrónico</span>
+            </label>
+        </div>
+
+        <div class="form-group" id="grupoOtroCorreo" style="display: none;">
+            <label>Correo alternativo:</label>
+            <input type="email" id="otroCorreo" class="form-control" placeholder="correo@ejemplo.com">
+        </div>
+
+        <div style="display: flex; gap: 15px; margin-top: 25px;">
+            <button onclick="cerrarModalEnvio()" class="btn btn-secondary" style="flex: 1;">Cancelar</button>
+            <button onclick="enviarPorCorreo()" class="btn btn-primary" style="flex: 1;">📧 Enviar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let ordenGuardadaId = null;
+let contadorFilas = 0;
+let centrosOperacion = [];
+let unidadesNegocio = [];
+let centrosCosto = [];
+
+// Inicializar al cargar la página
+document.addEventListener('DOMContentLoaded', function() {
+    cargarFechaActual();
+    cargarConsecutivo();
+    cargarCatalogos();
+    agregarFila(); // Agregar primera fila por defecto
+
+    // Event listener para buscar proveedor al cambiar NIT
+    document.getElementById('nit').addEventListener('blur', function() {
+        const nit = this.value.trim();
+        if (nit) {
+            buscarProveedor(nit);
+        }
+    });
+    
+    // Event listener para checkbox "Todos" - Marcar/Desmarcar todos
+    document.getElementById('check-todos').addEventListener('change', function() {
+        const estadoTodos = this.checked;
+        document.querySelectorAll('.check-tipo').forEach(checkbox => {
+            checkbox.checked = estadoTodos;
+        });
+    });
+    
+    // Desmarcar "Todos" si algún tipo se desmarca manualmente
+    document.querySelectorAll('.check-tipo').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            if (!this.checked) {
+                document.getElementById('check-todos').checked = false;
+            } else {
+                // Si todos están marcados, marcar "Todos"
+                const todosChecked = Array.from(document.querySelectorAll('.check-tipo')).every(cb => cb.checked);
+                if (todosChecked) {
+                    document.getElementById('check-todos').checked = true;
+                }
+            }
+        });
+    });
+});
+
+function cargarFechaActual() {
+    const hoy = new Date();
+    document.getElementById('dia').value = hoy.getDate();
+    document.getElementById('mes').value = hoy.toLocaleString('es-CO', { month: 'long' }).toUpperCase();
+    document.getElementById('anio').value = hoy.getFullYear();
+}
+
+async function cargarConsecutivo() {
+    try {
+        const response = await fetch('/facturas-digitales/api/ordenes-compra/consecutivo');
+        const data = await response.json();
+        if (data.success) {
+            document.getElementById('consecutivoDisplay').textContent = data.consecutivo;
+        }
+    } catch (error) {
+        console.error('Error cargando consecutivo:', error);
+    }
+}
+
+async function cargarCatalogos() {
+    try {
+        // Cargar centros de operación con clasificación por tipo
+        const respCO = await fetch('/facturas-digitales/api/ordenes-compra/centros-operacion');
+        if (respCO.ok) {
+            const dataCO = await respCO.json();
+            centrosOperacion = dataCO.data || [];
+            console.log('C.O cargados:', centrosOperacion.length, 'registros');
+        }
+
+        // Cargar unidades de negocio
+        const respUN = await fetch('/facturas-digitales/api/ordenes-compra/unidades-negocio');
+        if (respUN.ok) {
+            const dataUN = await respUN.json();
+            unidadesNegocio = dataUN.data || [];
+        }
+
+        // Cargar centros de costo
+        const respCC = await fetch('/facturas-digitales/api/ordenes-compra/centros-costo');
+        if (respCC.ok) {
+            const dataCC = await respCC.json();
+            centrosCosto = dataCC.data || [];
+        }
+    } catch (error) {
+        console.error('Error cargando catálogos:', error);
+    }
+}
+
+async function buscarProveedor(nit) {
+    try {
+        // Mostrar indicador de carga
+        const nitInput = document.getElementById('nit');
+        nitInput.style.borderColor = '#FFB900';
+        nitInput.disabled = true;
+        
+        const response = await fetch(`/facturas-digitales/api/ordenes-compra/buscar-tercero/${nit}`);
+        const data = await response.json();
+        
+        nitInput.disabled = false;
+        
+        if (data.success) {
+            // ✅ Tercero encontrado
+            nitInput.style.borderColor = '#28a745';
+            document.getElementById('razonSocial').value = data.data.razon_social || '';
+            document.getElementById('direccion').value = data.data.direccion || '';
+            document.getElementById('telefono').value = data.data.telefono || '';
+            document.getElementById('email').value = data.data.email || '';
+            document.getElementById('razonSocial').disabled = false;
+            document.getElementById('email').disabled = false;
+            
+            mostrarAlerta(`✅ Proveedor encontrado: ${data.data.razon_social}`, 'success');
+        } else {
+            // ❌ No encontrado
+            nitInput.style.borderColor = '#dc3545';
+            mostrarAlerta(data.message || 'No se encontró el tercero con ese NIT', 'error');
+            limpiarDatosProveedor();
+        }
+    } catch (error) {
+        console.error('Error buscando proveedor:', error);
+        document.getElementById('nit').style.borderColor = '#dc3545';
+        document.getElementById('nit').disabled = false;
+        mostrarAlerta('Error al buscar el proveedor. Verifique la conexión.', 'error');
+        limpiarDatosProveedor();
+    }
+}
+
+function limpiarDatosProveedor() {
+    document.getElementById('razonSocial').value = '';
+    document.getElementById('direccion').value = '';
+    document.getElementById('telefono').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('razonSocial').disabled = true;
+    document.getElementById('email').disabled = true;
+}
+
+function agregarFila(codigoPreseleccionado = null, nombrePreseleccionado = null) {
+    contadorFilas++;
+    const tbody = document.getElementById('bodyTablaItems');
+    const tr = document.createElement('tr');
+    tr.id = `fila-${contadorFilas}`;
+    tr.dataset.codigoCo = codigoPreseleccionado || '';
+    
+    tr.innerHTML = `
+        <td style="text-align: center;">
+            <input type="checkbox" class="checkbox-fila" checked style="width: 18px; height: 18px; cursor: pointer;">
+        </td>
+        <td>
+            <select class="select-co" onchange="calcularTotales()" ${codigoPreseleccionado ? '' : ''}>
+                <option value="">Seleccione...</option>
+                ${centrosOperacion.map(co => `<option value="${co.codigo}" ${co.codigo === codigoPreseleccionado ? 'selected' : ''}>${co.codigo} - ${co.nombre}</option>`).join('')}
+            </select>
+        </td>
+        <td>
+            <select class="select-un" onchange="calcularTotales()">
+                <option value="">Seleccione...</option>
+                ${unidadesNegocio.map(un => `<option value="${un.codigo}">${un.codigo} ${un.nombre}</option>`).join('')}
+            </select>
+        </td>
+        <td>
+            <select class="select-cc" onchange="calcularTotales()">
+                <option value="">Seleccione...</option>
+                ${centrosCosto.map(cc => `<option value="${cc.codigo}">${cc.codigo} ${cc.nombre}</option>`).join('')}
+            </select>
+        </td>
+        <td>
+            <input type="number" class="input-cantidad" value="1" min="1" onchange="calcularFilaTotales(this)">
+        </td>
+        <td>
+            <input type="text" class="input-precio" placeholder="$0.00" onkeyup="formatearMoneda(this); calcularFilaTotales(this);">
+        </td>
+        <td>
+            <input type="text" class="input-total" placeholder="$0.00" disabled style="background: #f0f0f0; font-weight: 600; color: var(--canaveral-green);">
+        </td>
+        <td>
+            <button type="button" class="btn-eliminar-fila" onclick="eliminarFila(${contadorFilas})">🗑️</button>
+        </td>
+    `;
+    
+    tbody.appendChild(tr);
+}
+
+// 🎯 NUEVA FUNCIÓN: Agregar filas masivamente por tipo de C.O
+function agregarFilasPorTipo() {
+    // Leer checkboxes individuales
+    const checkAlmacen = document.getElementById('check-almacen').checked;
+    const checkBodega = document.getElementById('check-bodega').checked;
+    const checkCComercial = document.getElementById('check-c_comercial').checked;
+    const checkMayorista = document.getElementById('check-mayorista').checked;
+    const checkAsaderos = document.getElementById('check-asaderos').checked;
+    const checkPanaderias = document.getElementById('check-panaderias').checked;
+    const checkDomicilios = document.getElementById('check-domicilios').checked;
+    const checkOtros = document.getElementById('check-otros').checked;
+    const checkTodos = document.getElementById('check-todos').checked;
+    
+    if (!checkAlmacen && !checkBodega && !checkCComercial && !checkMayorista && 
+        !checkAsaderos && !checkPanaderias && !checkDomicilios && !checkOtros && !checkTodos) {
+        mostrarAlerta('⚠️ Seleccione al menos un tipo de C.O', 'warning');
+        return;
+    }
+    
+    let cantidadAgregada = 0;
+    
+    centrosOperacion.forEach(co => {
+        let agregar = false;
+        
+        if (checkTodos) {
+            agregar = true;
+        } else {
+            // El C.O puede tener múltiples tipos (array 'tipos')
+            const tiposArray = co.tipos || [co.tipo]; // Compatibilidad con formato antiguo
+            
+            if (checkAlmacen && tiposArray.includes('almacen')) {
+                agregar = true;
+            }
+            if (checkBodega && tiposArray.includes('bodega')) {
+                agregar = true;
+            }
+            if (checkCComercial && tiposArray.includes('c_comercial')) {
+                agregar = true;
+            }
+            if (checkMayorista && tiposArray.includes('mayorista')) {
+                agregar = true;
+            }
+            if (checkAsaderos && tiposArray.includes('asaderos')) {
+                agregar = true;
+            }
+            if (checkPanaderias && tiposArray.includes('panaderias')) {
+                agregar = true;
+            }
+            if (checkDomicilios && tiposArray.includes('domicilios')) {
+                agregar = true;
+            }
+            if (checkOtros && tiposArray.includes('otros')) {
+                agregar = true;
+            }
+        }
+        
+        if (agregar) {
+            // Verificar si ya existe una fila con este C.O
+            const filaExistente = Array.from(document.querySelectorAll('#bodyTablaItems tr')).find(tr => {
+                const select = tr.querySelector('.select-co');
+                return select && select.value === co.codigo;
+            });
+            
+            if (!filaExistente) {
+                agregarFila(co.codigo, co.nombre);
+                cantidadAgregada++;
+            }
+        }
+    });
+    
+    if (cantidadAgregada > 0) {
+        mostrarAlerta(`✅ Se agregaron ${cantidadAgregada} C.O a la tabla`, 'success');
+    } else {
+        mostrarAlerta('ℹ️ No se encontraron nuevos C.O para agregar', 'warning');
+    }
+}
+
+// 🎯 NUEVA FUNCIÓN: Eliminar filas NO marcadas
+function eliminarNoSeleccionados() {
+    const filas = document.querySelectorAll('#bodyTablaItems tr');
+    let eliminadas = 0;
+    
+    filas.forEach(fila => {
+        const checkbox = fila.querySelector('.checkbox-fila');
+        if (checkbox && !checkbox.checked) {
+            fila.remove();
+            eliminadas++;
+        }
+    });
+    
+    calcularTotales();
+    
+    if (eliminadas > 0) {
+        mostrarAlerta(`🗑️ Se eliminaron ${eliminadas} filas no marcadas`, 'success');
+    } else {
+        mostrarAlerta('ℹ️ Todas las filas están marcadas', 'warning');
+    }
+}
+
+function eliminarFila(id) {
+    const fila = document.getElementById(`fila-${id}`);
+    if (fila) {
+        fila.remove();
+        calcularTotales();
+    }
+}
+
+function formatearMoneda(input) {
+    let valor = input.value.replace(/[^0-9]/g, '');
+    if (valor) {
+        const numero = parseInt(valor);
+        input.value = '$' + numero.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    }
+}
+
+function parsearMoneda(texto) {
+    return parseFloat(texto.replace(/[^0-9.-]+/g, '')) || 0;
+}
+
+function calcularFilaTotales(input) {
+    const fila = input.closest('tr');
+    const cantidad = parseFloat(fila.querySelector('.input-cantidad').value) || 0;
+    const precioTexto = fila.querySelector('.input-precio').value;
+    const precioUnitario = parsearMoneda(precioTexto);
+    const total = cantidad * precioUnitario;
+    
+    fila.querySelector('.input-total').value = '$' + total.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    
+    calcularTotales();
+}
+
+function calcularTotales() {
+    let subtotal = 0;
+    
+    const filas = document.querySelectorAll('#bodyTablaItems tr');
+    filas.forEach(fila => {
+        const totalTexto = fila.querySelector('.input-total').value;
+        subtotal += parsearMoneda(totalTexto);
+    });
+    
+    const iva = subtotal * 0.19;
+    const retefuente = subtotal * 0.025; // 2.5% ejemplo
+    const total = subtotal + iva - retefuente;
+    
+    document.getElementById('subtotalDisplay').textContent = '$' + subtotal.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('ivaDisplay').textContent = '$' + iva.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('retefuenteDisplay').textContent = '$' + retefuente.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+    document.getElementById('totalDisplay').textContent = '$' + total.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+async function guardarOrden() {
+    // Validar campos obligatorios
+    const nit = document.getElementById('nit').value.trim();
+    const razonSocial = document.getElementById('razonSocial').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const motivo = document.getElementById('motivo').value.trim();
+    
+    if (!nit || !razonSocial || !email || !motivo) {
+        mostrarAlerta('Por favor complete todos los campos obligatorios (*)', 'error');
+        return;
+    }
+    
+    // Validar que haya al menos una fila con datos
+    const filas = document.querySelectorAll('#bodyTablaItems tr');
+    if (filas.length === 0) {
+        mostrarAlerta('Debe agregar al menos un ítem a la orden de compra', 'error');
+        return;
+    }
+    
+    // Construir array de items
+    const items = [];
+    filas.forEach(fila => {
+        const selectCO = fila.querySelector('.select-co');
+        const selectUN = fila.querySelector('.select-un');
+        const selectCC = fila.querySelector('.select-cc');
+        const cantidad = fila.querySelector('.input-cantidad').value;
+        const precioUnitario = parsearMoneda(fila.querySelector('.input-precio').value);
+        const valorTotal = parsearMoneda(fila.querySelector('.input-total').value);
+        
+        if (selectCO.value && selectUN.value && selectCC.value && cantidad && precioUnitario > 0) {
+            items.push({
+                centro_operacion_codigo: selectCO.value,
+                centro_operacion_nombre: selectCO.options[selectCO.selectedIndex].text,
+                unidad_negocio_codigo: selectUN.value,
+                unidad_negocio_nombre: selectUN.options[selectUN.selectedIndex].text,
+                centro_costo_codigo: selectCC.value,
+                centro_costo_nombre: selectCC.options[selectCC.selectedIndex].text,
+                cantidad: parseInt(cantidad),
+                precio_unitario: precioUnitario,
+                valor_total: valorTotal
+            });
+        }
+    });
+    
+    if (items.length === 0) {
+        mostrarAlerta('Debe completar los datos de al menos un ítem', 'error');
+        return;
+    }
+    
+    const datosOrden = {
+        tercero_nit: nit,
+        tercero_nombre: razonSocial,
+        tercero_direccion: document.getElementById('direccion').value.trim(),
+        tercero_telefono: document.getElementById('telefono').value.trim(),
+        tercero_email: email,
+        motivo: motivo,
+        observaciones: document.getElementById('observaciones').value.trim(),
+        subtotal: parsearMoneda(document.getElementById('subtotalDisplay').textContent),
+        iva: parsearMoneda(document.getElementById('ivaDisplay').textContent),
+        retefuente: parsearMoneda(document.getElementById('retefuenteDisplay').textContent),
+        total: parsearMoneda(document.getElementById('totalDisplay').textContent),
+        items: items
+    };
+    
+    try {
+        document.getElementById('btnGuardar').disabled = true;
+        document.getElementById('btnGuardar').textContent = '⏳ Guardando...';
+        
+        const response = await fetch('/facturas-digitales/api/ordenes-compra/crear', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(datosOrden)
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            ordenGuardadaId = data.data.id;
+            mostrarAlerta(`✅ Orden de compra ${data.data.numero_orden} guardada exitosamente`, 'success');
+            document.getElementById('btnGuardar').style.display = 'none';
+            document.getElementById('btnEnviar').style.display = 'inline-flex';
+            document.getElementById('btnPDF').style.display = 'inline-flex';
+            document.getElementById('consecutivoDisplay').textContent = data.data.numero_orden;
+            
+            // Deshabilitar campos
+            document.getElementById('nit').disabled = true;
+            document.querySelectorAll('input, select, textarea, button.btn-eliminar-fila').forEach(el => {
+                if (el.id !== 'btnEnviar' && el.id !== 'btnPDF') {
+                    el.disabled = true;
+                }
+            });
+        } else {
+            mostrarAlerta(data.message || 'Error al guardar la orden', 'error');
+            document.getElementById('btnGuardar').disabled = false;
+            document.getElementById('btnGuardar').textContent = '💾 Guardar Orden';
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarAlerta('Error al guardar la orden de compra', 'error');
+        document.getElementById('btnGuardar').disabled = false;
+        document.getElementById('btnGuardar').textContent = '💾 Guardar Orden';
+    }
+}
+
+function mostrarModalEnvio() {
+    const email = document.getElementById('email').value;
+    document.getElementById('emailEnvio').value = email;
+    document.getElementById('modalEnvioCorreo').style.display = 'flex';
+}
+
+function cerrarModalEnvio() {
+    document.getElementById('modalEnvioCorreo').style.display = 'none';
+    document.getElementById('checkOtroCorreo').checked = false;
+    document.getElementById('grupoOtroCorreo').style.display = 'none';
+    document.getElementById('otroCorreo').value = '';
+}
+
+function toggleOtroCorreo() {
+    const checkbox = document.getElementById('checkOtroCorreo');
+    const grupo = document.getElementById('grupoOtroCorreo');
+    grupo.style.display = checkbox.checked ? 'block' : 'none';
+}
+
+async function enviarPorCorreo() {
+    if (!ordenGuardadaId) {
+        mostrarAlerta('Debe guardar la orden primero', 'error');
+        return;
+    }
+    
+    const emailDestino = document.getElementById('checkOtroCorreo').checked 
+        ? document.getElementById('otroCorreo').value.trim()
+        : document.getElementById('emailEnvio').value.trim();
+    
+    if (!emailDestino) {
+        mostrarAlerta('Por favor ingrese un correo electrónico', 'error');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/facturas-digitales/api/ordenes-compra/enviar-correo', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                orden_id: ordenGuardadaId,
+                email_destino: emailDestino
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            mostrarAlerta('✅ Orden de compra enviada por correo exitosamente', 'success');
+            cerrarModalEnvio();
+        } else {
+            mostrarAlerta(data.message || 'Error al enviar el correo', 'error');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        mostrarAlerta('Error al enviar el correo', 'error');
+    }
+}
+
+function descargarPDF() {
+    if (!ordenGuardadaId) {
+        mostrarAlerta('Debe guardar la orden primero', 'error');
+        return;
+    }
+    
+    window.open(`/facturas-digitales/api/ordenes-compra/pdf/${ordenGuardadaId}`, '_blank');
+}
+
+function limpiarFormulario() {
+    if (ordenGuardadaId) {
+        if (!confirm('¿Está seguro? Esto creará una nueva orden de compra.')) {
+            return;
+        }
+    }
+    
+    document.getElementById('formOrdenCompra').reset();
+    document.getElementById('bodyTablaItems').innerHTML = '';
+    limpiarDatosProveedor();
+    ordenGuardadaId = null;
+    contadorFilas = 0;
+    
+    document.getElementById('btnGuardar').style.display = 'inline-flex';
+    document.getElementById('btnEnviar').style.display = 'none';
+    document.getElementById('btnPDF').style.display = 'none';
+    document.getElementById('btnGuardar').disabled = false;
+    document.getElementById('btnGuardar').textContent = '💾 Guardar Orden';
+    
+    document.querySelectorAll('input, select, textarea').forEach(el => {
+        el.disabled = false;
+    });
+    
+    cargarFechaActual();
+    cargarConsecutivo();
+    agregarFila();
+    calcularTotales();
+}
+
+function mostrarAlerta(mensaje, tipo) {
+    const container = document.getElementById('alertContainer');
+    const alert = document.createElement('div');
+    alert.className = `alert alert-${tipo === 'success' ? 'success' : tipo === 'warning' ? 'warning' : 'error'}`;
+    alert.textContent = mensaje;
+    
+    container.innerHTML = '';
+    container.appendChild(alert);
+    
+    setTimeout(() => {
+        alert.style.transition = 'opacity 0.5s';
+        alert.style.opacity = '0';
+        setTimeout(() => alert.remove(), 500);
+    }, 5000);
+}
+</script>
+</body>
+</html>

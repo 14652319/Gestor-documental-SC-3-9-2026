@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archivo Digital - Editar Documento</title>
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>✏️</text></svg>">
+    <style>
+        /* =============================================
+           🎨 VARIABLES CSS (COLORES INSTITUCIONALES)
+           ============================================= */
+        :root {
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #e1e8ed;
+            --input-bg: #ffffff;
+            --input-border: #cbd5e0;
+            --brand-green: #166534;
+            --brand-green-dark: #14532d;
+            --brand-green-light: #dcfce7;
+            --red-error: #dc2626;
+            --blue-info: #2563eb;
+            --yellow-warning: #eab308;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --border-color: #404040;
+            --input-bg: #3a3a3a;
+            --input-border: #505050;
+            --brand-green: #22c55e;
+            --brand-green-dark: #16a34a;
+            --brand-green-light: #14532d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* =============================================
+           🎯 HEADER FIJO CON USUARIO
+           ============================================= */
+        .header {
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+            color: white;
+            padding: 15px 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dark-mode-toggle {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: background 0.3s;
+        }
+
+        .dark-mode-toggle:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .btn-salir, .btn-volver {
+            background: var(--red-error);
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-volver {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .btn-salir:hover, .btn-volver:hover {
+            transform: scale(1.05);
+        }
+
+        /* =============================================
+           📋 CONTENEDOR PRINCIPAL - LAYOUT DIVIDIDO
+           ============================================= */
+        .container {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            padding: 20px;
+            gap: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Columna izquierda: Formulario + Anexos */
+        .left-panel {
+            flex: 0 0 45%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        /* Columna derecha: Visor PDF */
+        .right-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow: hidden;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            color: var(--brand-green);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* =============================================
+           📄 VISOR DE PDF MEJORADO
+           ============================================= */
+        .pdf-viewer-container {
+            flex: 1;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .pdf-viewer-header {
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 12px 12px 0 0;
+        }
+
+        .pdf-viewer-header h3 {
+            margin: 0;
+            padding: 0;
+            border: none;
+            color: white;
+            font-size: 1.1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pdf-current-file {
+            font-size: 0.9em;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 15px;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .pdf-viewer-body {
+            flex: 1;
+            position: relative;
+            background: #525659;
+            overflow: hidden;
+        }
+
+        .pdf-embed {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .pdf-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+        }
+
+        .pdf-loading .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* =============================================
+           📎 LISTA DE ANEXOS
+           ============================================= */
+        .anexos-container {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .anexos-container h4 {
+            color: var(--brand-green);
+            margin-bottom: 15px;
+            font-size: 1em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .anexos-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .anexo-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-color);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .anexo-item:hover {
+            border-color: var(--brand-green);
+            background: var(--brand-green-light);
+            transform: translateX(5px);
+        }
+
+        .anexo-item.active {
+            border-color: var(--brand-green);
+            background: var(--brand-green-light);
+            box-shadow: 0 2px 8px rgba(22, 101, 52, 0.2);
+        }
+
+        .anexo-icon {
+            font-size: 2em;
+            flex-shrink: 0;
+        }
+
+        .anexo-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .anexo-nombre {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 3px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .anexo-meta {
+            font-size: 0.85em;
+            color: #6b7280;
+        }
+
+        /* Scrollbar personalizado para lista de anexos */
+        .anexos-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .anexos-list::-webkit-scrollbar-track {
+            background: var(--bg-color);
+            border-radius: 10px;
+        }
+
+        .anexos-list::-webkit-scrollbar-thumb {
+            background: var(--brand-green);
+            border-radius: 10px;
+        }
+
+        .anexos-list::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-green-dark);
+        }
+
+        /* =============================================
+           📱 RESPONSIVE
+           ============================================= */
+        @media (max-width: 1024px) {
+            .container {
+                flex-direction: column;
+                overflow-y: auto;
+            }
+
+            .left-panel {
+                flex: none;
+                width: 100%;
+                max-height: none;
+            }
+
+            .right-panel {
+                flex: none;
+                width: 100%;
+                height: 600px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.2em;
+            }
+
+            .header-actions {
+                flex-wrap: wrap;
+                gap: 5px;
+            }
+
+            .user-info {
+                font-size: 0.8em;
+                padding: 6px 12px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .right-panel {
+                height: 500px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Eliminar estilos duplicados del viejo diseño */
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .card h3 {
+            color: var(--brand-green);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* =============================================
+           📝 FORMULARIO
+           ============================================= */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        input, select, textarea {
+            padding: 10px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 0.95em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--brand-green);
+        }
+
+        input:disabled, select:disabled, textarea:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* =============================================
+           📄 VISOR DE PDF
+           ============================================= */
+        .pdf-viewer {
+            width: 100%;
+            height: 600px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: #f9fafb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pdf-loading {
+            text-align: center;
+            color: #6b7280;
+            font-size: 1.1em;
+        }
+
+        .pdf-error {
+            text-align: center;
+            color: var(--red-error);
+            padding: 20px;
+        }
+
+        .pdf-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .pdf-controls button {
+            padding: 8px 15px;
+            background: var(--brand-green);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .pdf-controls button:hover {
+            background: var(--brand-green-dark);
+        }
+
+        /* =============================================
+           📎 ADJUNTOS
+           ============================================= */
+        .adjuntos-list {
+            margin-top: 15px;
+        }
+
+        .adjunto-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: var(--brand-green-light);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+
+        .adjunto-item a {
+            color: var(--brand-green-dark);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .adjunto-item a:hover {
+            text-decoration: underline;
+        }
+
+        /* =============================================
+           📊 HISTORIAL
+           ============================================= */
+        .historial-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .historial-item {
+            padding: 12px;
+            border-left: 3px solid var(--brand-green);
+            margin-bottom: 10px;
+            background: var(--brand-green-light);
+            border-radius: 6px;
+        }
+
+        .historial-item .fecha {
+            font-size: 0.85em;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+
+        .historial-item .accion {
+            font-weight: 600;
+            color: var(--brand-green-dark);
+        }
+
+        .historial-item .usuario {
+            font-size: 0.9em;
+            color: var(--text-color);
+            margin-top: 5px;
+        }
+
+        /* =============================================
+           🔘 BOTONES
+           ============================================= -->
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--brand-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--brand-green-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--red-error);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #b91c1c;
+        }
+
+        .btn-warning {
+            background: var(--yellow-warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background: #ca8a04;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* =============================================
+           📱 RESPONSIVE
+           ============================================= */
+        @media (max-width: 1024px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card.full-width {
+                grid-column: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.2em;
+            }
+
+            .header-actions {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pdf-viewer {
+                height: 400px;
+            }
+        }
+
+        /* =============================================
+           ✅ BADGES DE ESTADO
+           ============================================= */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-cargado {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-revision {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-aprobado {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge-rechazado {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* =============================================
+           💬 LOADING
+           ============================================= */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--brand-green);
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <!-- =============================================
+         🎯 HEADER FIJO
+         ============================================= -->
+    <div class="header">
+        <h1>✏️ Archivo Digital - Editar Documento</h1>
+        <div class="header-actions">
+            <span class="user-info">
+                👤 <span id="nombreUsuario">{{ session.get('usuario', 'Usuario') }}</span>
+            </span>
+            <button class="dark-mode-toggle" id="toggleModeBtn" onclick="toggleTheme()">🌙</button>
+            <a href="/archivo_digital/visor" class="btn-volver">🔙 Volver al Visor</a>
+            <button class="btn-salir" onclick="cerrarSesion()">🚪 Salir</button>
+        </div>
+    </div>
+
+    <!-- =============================================
+         📋 CONTENIDO PRINCIPAL - LAYOUT DIVIDIDO
+         ============================================= -->
+    <div class="container">
+        <!-- PANEL IZQUIERDO: Formulario + Anexos -->
+        <div class="left-panel">
+            <!-- FORMULARIO -->
+            <div class="card">
+                <h3>📝 Información del Documento</h3>
+                <form id="formEditarDocumento">
+                    <div class="form-grid">
+                        <!-- ID (No editable) -->
+                        <div class="form-group">
+                            <label>ID</label>
+                            <input type="text" id="documentoId" disabled>
+                        </div>
+
+                        <!-- Tipo (No editable) -->
+                        <div class="form-group">
+                            <label>Tipo</label>
+                            <input type="text" id="tipoDocumento" disabled>
+                        </div>
+
+                        <!-- Centro (No editable) -->
+                        <div class="form-group">
+                            <label>Centro</label>
+                            <input type="text" id="centroOperacion" disabled>
+                        </div>
+
+                        <!-- Consecutivo (No editable) -->
+                        <div class="form-group">
+                            <label>Consecutivo</label>
+                            <input type="text" id="consecutivo" disabled>
+                        </div>
+
+                        <!-- Fecha -->
+                        <div class="form-group">
+                            <label>Fecha</label>
+                            <input type="date" id="fechaDocumento" name="fecha_documento">
+                        </div>
+
+                        <!-- Empresa -->
+                        <div class="form-group">
+                            <label>Empresa</label>
+                            <select id="empresa" name="empresa">
+                                <option value="SC">SC - Supertiendas</option>
+                                <option value="LG">LG - Legran</option>
+                            </select>
+                        </div>
+
+                        <!-- Nombre Archivo (sin .pdf) -->
+                        <div class="form-group full-width">
+                            <label>Nombre para Mostrar</label>
+                            <input type="text" id="nombreArchivo" name="nombre_archivo" 
+                                   placeholder="Nombre sin extensión .pdf">
+                        </div>
+
+                        <!-- Observaciones -->
+                        <div class="form-group full-width">
+                            <label>Observaciones</label>
+                            <textarea id="observaciones" name="observaciones" rows="3"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary" id="btnGuardar">
+                            � Guardar Cambios
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='/archivo_digital/visor'">
+                            ❌ Cancelar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- ANEXOS -->
+            <div class="anexos-container" id="anexosContainer" style="display: none;">
+                <h4>📎 Anexos del Documento (<span id="cantidadAnexos">0</span>)</h4>
+                <div class="anexos-list" id="anexosList">
+                    <!-- Se llena dinámicamente con JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL DERECHO: Visor PDF -->
+        <div class="right-panel">
+            <div class="pdf-viewer-container">
+                <div class="pdf-viewer-header">
+                    <h3>
+                        <span>📄 Visualizador de Documentos</span>
+                    </h3>
+                    <div class="pdf-current-file" id="currentFileName">
+                        Documento Principal
+                    </div>
+                </div>
+                <div class="pdf-viewer-body">
+                    <div id="pdfLoading" class="pdf-loading">
+                        <div class="spinner"></div>
+                        <div>Cargando documento...</div>
+                    </div>
+                    <iframe id="pdfViewer" class="pdf-embed" style="display: none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+                <!-- FILA COMPLETA: ADJUNTOS -->
+                <div class="card full-width">
+                    <h3>📎 Adjuntos</h3>
+                    <div id="adjuntosList" class="adjuntos-list">
+                        <p style="color: #6b7280; font-style: italic;">No hay adjuntos para este documento</p>
+                    </div>
+                </div>
+
+                <!-- FILA COMPLETA: HISTORIAL -->
+                <div class="card full-width">
+                    <h3>📜 Historial de Cambios</h3>
+                    <div id="historialList" class="historial-list">
+                        <p style="color: #6b7280; font-style: italic;">No hay historial registrado</p>
+                    </div>
+                </div>
+
+                <!-- FILA COMPLETA: ACCIONES AVANZADAS -->
+                <div class="card full-width">
+                    <h3>⚙️ Acciones Avanzadas</h3>
+                    <div class="btn-group">
+                        <button class="btn btn-danger" onclick="eliminarDocumento()">
+                            🗑️ Eliminar Documento
+                        </button>
+                        <button class="btn btn-warning" onclick="rechazarDocumento()">
+                            ❌ Rechazar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================================
+         💻 JAVASCRIPT
+         ============================================= -->
+    <script>
+        let documentoActual = null;
+        const documentoId = window.location.pathname.split('/').pop();
+
+        // ===== INICIALIZACIÓN =====
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarTemaGuardado();
+            cargarDocumento();
+        });
+
+        // ===== CARGAR DOCUMENTO =====
+        async function cargarDocumento() {
+            try {
+                const response = await fetch(`/api/notas/detalle/${documentoId}`);
+                const data = await response.json();
+
+                if (data.success) {
+                    documentoActual = data.data;
+                    renderizarDocumento();
+                } else {
+                    alert('❌ Error al cargar documento: ' + (data.message || 'Error desconocido'));
+                    window.location.href = '/archivo_digital/visor';
+                }
+            } catch (error) {
+                console.error('Error completo:', error);
+                alert('❌ Error al cargar documento: ' + error.message);
+                window.location.href = '/archivo_digital/visor';
+            }
+        }
+
+        // ===== RENDERIZAR DOCUMENTO =====
+        function renderizarDocumento() {
+            const doc = documentoActual;
+
+            // Llenar formulario
+            document.getElementById('documentoId').value = doc.id;
+            
+            // ✅ Acceder a campos anidados correctamente
+            const tipoDoc = doc.tipo_documento || {};
+            const centroOp = doc.centro_operacion || {};
+            
+            document.getElementById('tipoDocumento').value = `${tipoDoc.siglas || ''} - ${tipoDoc.nombre || ''}`;
+            document.getElementById('centroOperacion').value = `${centroOp.codigo || ''} - ${centroOp.nombre || ''}`;
+            document.getElementById('consecutivo').value = doc.consecutivo;
+            document.getElementById('fechaDocumento').value = doc.fecha_documento;
+            document.getElementById('empresa').value = doc.empresa;
+            document.getElementById('nombreArchivo').value = doc.nombre_archivo || '';
+            document.getElementById('observaciones').value = doc.observaciones || '';
+
+            // Cargar PDF principal en visor (✅ VISUALIZAR, NO descargar)
+            const pdfUrl = `/api/notas/visualizar/${doc.id}`;
+            cargarPDF(pdfUrl, 'Documento Principal');
+
+            // Cargar anexos si existen
+            if (doc.adjuntos && doc.adjuntos.length > 0) {
+                const anexosContainer = document.getElementById('anexosContainer');
+                const anexosList = document.getElementById('anexosList');
+                const cantidadAnexos = document.getElementById('cantidadAnexos');
+
+                anexosContainer.style.display = 'block';
+                cantidadAnexos.textContent = doc.adjuntos.length;
+
+                const anexosHTML = doc.adjuntos.map((adj, index) => `
+                    <div class="anexo-item" onclick="cambiarPDF('/api/notas/visualizar_adjunto/${adj.id}', '${adj.nombre_archivo}', ${index})" id="anexo-${index}">
+                        <div class="anexo-icon">📎</div>
+                        <div class="anexo-info">
+                            <div class="anexo-nombre">${adj.nombre_archivo}</div>
+                            <div class="anexo-meta">${formatearTamano(adj.tamano_bytes)} • ${adj.tipo_archivo.toUpperCase()}</div>
+                        </div>
+                    </div>
+                `).join('');
+
+                anexosList.innerHTML = `
+                    <div class="anexo-item active" onclick="cargarPDF('/api/notas/visualizar/${doc.id}', 'Documento Principal')" id="anexo-principal">
+                        <div class="anexo-icon">📄</div>
+                        <div class="anexo-info">
+                            <div class="anexo-nombre">Documento Principal</div>
+                            <div class="anexo-meta">PDF Principal</div>
+                        </div>
+                    </div>
+                    ${anexosHTML}
+                `;
+            }
+        }
+
+        // ===== CARGAR PDF EN VISOR =====
+        function cargarPDF(url, nombre) {
+            console.log('🔵 Cargando PDF:', url, 'Nombre:', nombre);
+            
+            const pdfViewer = document.getElementById('pdfViewer');
+            const pdfLoading = document.getElementById('pdfLoading');
+            const currentFileName = document.getElementById('currentFileName');
+
+            if (!pdfViewer || !pdfLoading || !currentFileName) {
+                console.error('❌ Elementos del visor no encontrados');
+                return;
+            }
+
+            // Mostrar loading
+            pdfLoading.style.display = 'flex';
+            pdfViewer.style.display = 'none';
+
+            // Actualizar nombre del archivo
+            currentFileName.textContent = nombre;
+
+            // Cargar PDF
+            pdfViewer.src = url;
+
+            // Cuando cargue, ocultar loading
+            pdfViewer.onload = () => {
+                console.log('✅ PDF cargado correctamente');
+                pdfLoading.style.display = 'none';
+                pdfViewer.style.display = 'block';
+            };
+
+            // Manejar error de carga
+            pdfViewer.onerror = () => {
+                console.error('❌ Error al cargar PDF:', url);
+                pdfLoading.innerHTML = '<div style="color: white;">❌ Error al cargar el PDF</div>';
+            };
+        }
+
+        // ===== CAMBIAR PDF (desde anexo) =====
+        function cambiarPDF(url, nombre, index) {
+            // Remover active de todos
+            document.querySelectorAll('.anexo-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Agregar active al seleccionado
+            document.getElementById(`anexo-${index}`).classList.add('active');
+
+            // Cargar PDF
+            cargarPDF(url, nombre);
+        }
+
+        // ===== CARGAR HISTORIAL =====
+        async function cargarHistorial() {
+            try {
+                const response = await fetch(`/api/notas/historial/${documentoId}`);
+                const data = await response.json();
+
+                if (data.success && data.data.length > 0) {
+                    const historialHTML = data.data.map(h => `
+                        <div class="historial-item">
+                            <div class="fecha">${formatearFechaHora(h.fecha_cambio)}</div>
+                            <div class="accion">${h.accion}</div>
+                            <div class="usuario">👤 ${h.usuario_cambio}</div>
+                        </div>
+                    `).join('');
+                    document.getElementById('historialList').innerHTML = historialHTML;
+                }
+            } catch (error) {
+                console.error('Error cargando historial:', error);
+            }
+        }
+
+        // ===== GUARDAR CAMBIOS =====
+        document.getElementById('formEditarDocumento').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const cambios = {
+                estado: document.getElementById('estado').value,
+                fecha_documento: document.getElementById('fechaDocumento').value,
+                empresa: document.getElementById('empresa').value,
+                nombre_archivo: document.getElementById('nombreArchivo').value,
+                observaciones: document.getElementById('observaciones').value,
+                modified_by: '{{ session.get("usuario", "sistema") }}'
+            };
+
+            try {
+                const btnGuardar = document.getElementById('btnGuardar');
+                btnGuardar.disabled = true;
+                btnGuardar.textContent = '⏳ Guardando...';
+
+                const response = await fetch(`/api/notas/editar/${documentoId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(cambios)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ Cambios guardados exitosamente');
+                    cargarDocumento();
+                } else {
+                    alert(`❌ ${data.message}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al guardar cambios');
+            } finally {
+                const btnGuardar = document.getElementById('btnGuardar');
+                btnGuardar.disabled = false;
+                btnGuardar.textContent = '💾 Guardar Cambios';
+            }
+        });
+
+        // ===== CAMBIAR ESTADO RÁPIDO =====
+        function cambiarEstado(nuevoEstado) {
+            document.getElementById('estado').value = nuevoEstado;
+            document.getElementById('formEditarDocumento').requestSubmit();
+        }
+
+        // ===== ACCIONES DE PDF =====
+        function mostrarPDF() {
+            // Ocultar mensaje de carga y mostrar PDF
+            document.getElementById('pdfLoading').style.display = 'none';
+            document.getElementById('pdfViewer').style.display = 'block';
+            document.getElementById('btnDescargar').disabled = false;
+            document.getElementById('btnAbrir').disabled = false;
+        }
+
+        function errorPDF() {
+            document.getElementById('pdfLoading').innerHTML = `
+                <div class="pdf-error">
+                    <div style="font-size: 3em;">⚠️</div>
+                    <div>No se pudo cargar el PDF</div>
+                    <div style="font-size: 0.9em; margin-top: 10px;">
+                        El archivo puede no existir o no estar disponible
+                    </div>
+                </div>
+            `;
+        }
+
+        function descargarPDF() {
+            if (!documentoActual) return;
+            window.open(`/api/notas/descargar/${documentoId}`, '_blank');
+        }
+
+        function abrirNuevaVentana() {
+            if (!documentoActual) return;
+            window.open(`/api/notas/descargar/${documentoId}`, '_blank', 'width=900,height=700');
+        }
+
+        // ===== ELIMINAR DOCUMENTO =====
+        async function eliminarDocumento() {
+            if (!confirm('⚠️ ¿Está seguro de eliminar este documento? Esta acción NO se puede deshacer.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/notas/eliminar/${documentoId}`, {
+                    method: 'DELETE'
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('✅ Documento eliminado exitosamente');
+                    window.location.href = '/archivo_digital/visor';
+                } else {
+                    alert(`❌ ${data.message}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al eliminar documento');
+            }
+        }
+
+        // ===== RECHAZAR DOCUMENTO =====
+        function rechazarDocumento() {
+            const motivo = prompt('Ingrese el motivo del rechazo:');
+            if (motivo) {
+                document.getElementById('estado').value = 'rechazado';
+                document.getElementById('observaciones').value += `\n\n❌ RECHAZADO: ${motivo}`;
+                document.getElementById('formEditarDocumento').requestSubmit();
+            }
+        }
+
+        // ===== UTILIDADES =====
+        function formatearFechaHora(fecha) {
+            if (!fecha) return '-';
+            const date = new Date(fecha);
+            return date.toLocaleString('es-CO');
+        }
+
+        function formatearTamano(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1048576) return (bytes / 1024).toFixed(2) + ' KB';
+            return (bytes / 1048576).toFixed(2) + ' MB';
+        }
+
+        // ===== MODO OSCURO =====
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme-archivo-digital', newTheme);
+            document.getElementById('toggleModeBtn').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        function cargarTemaGuardado() {
+            const savedTheme = localStorage.getItem('theme-archivo-digital') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('toggleModeBtn').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // ===== CERRAR SESIÓN =====
+        async function cerrarSesion() {
+            if (confirm('¿Está seguro de que desea cerrar sesión?')) {
+                try {
+                    await fetch('/api/auth/logout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                } catch (e) {
+                    console.warn('Logout error:', e);
+                } finally {
+                    window.location.href = '/';
+                }
+            }
+        }
+    </script>
+
+    <!-- ✅ MODAL DE INACTIVIDAD (25 MIN) -->
+    {% include '_inactivity_warning.html' %}
+
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

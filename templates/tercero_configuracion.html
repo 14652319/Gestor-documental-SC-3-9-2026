@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuración Avanzada - Gestión de Terceros</title>
+    <style>
+        /* ========================================================================= */
+        /*                     COLORES INSTITUCIONALES                              */
+        /* ========================================================================= */
+        :root {
+            --primary-green: #166534;
+            --primary-green-dark: #14532d;
+            --primary-green-light: #22c55e;
+            --secondary-orange: #f97316;
+            --secondary-orange-dark: #ea580c;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-yellow: #eab308;
+            --success-green: #10b981;
+            --warning-orange: #f59e0b;
+            --danger-red: #ef4444;
+            --info-blue: #06b6d4;
+            --dark-gray: #374151;
+            --light-gray: #f3f4f6;
+            --white: #ffffff;
+            --border-color: #d1d5db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--light-gray) 0%, #e5e7eb 100%);
+            min-height: 100vh;
+            color: var(--dark-gray);
+        }
+
+        /* ========================================================================= */
+        /*                              HEADER FIJO                                 */
+        /* ========================================================================= */
+        .header-fijo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #2563eb 100%);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-titulo h1 {
+            color: var(--white);
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-header {
+            background: var(--secondary-orange);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-header:hover {
+            background: var(--secondary-orange-dark);
+            transform: translateY(-1px);
+        }
+
+        /* ========================================================================= */
+        /*                         CONTENEDOR PRINCIPAL                             */
+        /* ========================================================================= */
+        .contenedor-principal {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ========================================================================= */
+        /*                              PESTAÑAS                                    */
+        /* ========================================================================= */
+        .pestanas-container {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .pestanas-header {
+            display: flex;
+            background: var(--light-gray);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .pestana {
+            padding: 1rem 2rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--dark-gray);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 3px solid transparent;
+        }
+
+        .pestana:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .pestana.activa {
+            background: var(--white);
+            color: var(--accent-blue);
+            border-bottom-color: var(--accent-blue);
+        }
+
+        .pestana-contenido {
+            padding: 2rem;
+            display: none;
+        }
+
+        .pestana-contenido.activo {
+            display: block;
+        }
+
+        /* ========================================================================= */
+        /*                              SECCIONES                                   */
+        /* ========================================================================= */
+        .seccion-titulo {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .grid-configuracion {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+        }
+
+        .config-card {
+            background: var(--light-gray);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .config-card-titulo {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .campo-grupo {
+            margin-bottom: 1.5rem;
+        }
+
+        .campo-label {
+            font-weight: 600;
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .campo-input, .campo-select, .campo-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .campo-input:focus, .campo-select:focus, .campo-textarea:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .campo-ayuda {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        /* ========================================================================= */
+        /*                              BOTONES                                     */
+        /* ========================================================================= */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--accent-blue);
+            color: var(--white);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--dark-gray);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        .btn-success {
+            background: var(--success-green);
+            color: var(--white);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        .btn-warning {
+            background: var(--warning-orange);
+            color: var(--white);
+        }
+
+        .btn-warning:hover:not(:disabled) {
+            background: #d97706;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: var(--danger-red);
+            color: var(--white);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .acciones-footer {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        /* ========================================================================= */
+        /*                              ESTADÍSTICAS                                */
+        /* ========================================================================= */
+        .estadisticas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+
+        .stat-numero {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        /* ========================================================================= */
+        /*                              ALERTAS                                     */
+        /* ========================================================================= */
+        .alerta {
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 500;
+        }
+
+        .alerta-info {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .alerta-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .alerta-warning {
+            background: rgba(251, 191, 36, 0.1);
+            color: #d97706;
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .alerta-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-red);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        /* ========================================================================= */
+        /*                              RESPONSIVE                                  */
+        /* ========================================================================= */
+        @media (max-width: 768px) {
+            .contenedor-principal {
+                padding: 1rem;
+                margin-top: 100px;
+            }
+
+            .header-fijo {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .pestanas-header {
+                flex-wrap: wrap;
+            }
+
+            .pestana {
+                flex: 1;
+                min-width: 120px;
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .grid-configuracion {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .acciones-footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ========================================================================= -->
+    <!--                              HEADER FIJO                                 -->
+    <!-- ========================================================================= -->
+    <header class="header-fijo">
+        <div class="header-titulo">
+            <h1>
+                <span>⚙️</span>
+                Configuración Avanzada - Gestión de Terceros
+            </h1>
+        </div>
+        <div class="header-acciones">
+            <a href="/terceros/consulta" class="btn-header">
+                <span>📋</span>
+                Lista de Terceros
+            </a>
+            <a href="/terceros/" class="btn-header">
+                <span>🏠</span>
+                Dashboard
+            </a>
+        </div>
+    </header>
+
+    <!-- ========================================================================= -->
+    <!--                         CONTENEDOR PRINCIPAL                             -->
+    <!-- ========================================================================= -->
+    <div class="contenedor-principal">
+        <!-- ===== ESTADÍSTICAS GENERALES ===== -->
+        <div class="estadisticas-grid">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-numero" id="stat-total-terceros">-</div>
+                <div class="stat-label">Total Terceros</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📧</div>
+                <div class="stat-numero" id="stat-correos-enviados">-</div>
+                <div class="stat-label">Correos Enviados (Hoy)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📄</div>
+                <div class="stat-numero" id="stat-documentos-pendientes">-</div>
+                <div class="stat-label">Documentos Pendientes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⚠️</div>
+                <div class="stat-numero" id="stat-terceros-vencidos">-</div>
+                <div class="stat-label">Terceros por Notificar</div>
+            </div>
+        </div>
+
+        <!-- ===== PESTAÑAS DE CONFIGURACIÓN ===== -->
+        <div class="pestanas-container">
+            <div class="pestanas-header">
+                <button class="pestana activa" onclick="cambiarPestana('notificaciones')">
+                    <span>📧</span>
+                    Notificaciones
+                </button>
+                <button class="pestana" onclick="cambiarPestana('documentos')">
+                    <span>📄</span>
+                    Documentos
+                </button>
+                <button class="pestana" onclick="cambiarPestana('sistema')">
+                    <span>⚙️</span>
+                    Sistema
+                </button>
+                <button class="pestana" onclick="cambiarPestana('mantenimiento')">
+                    <span>🔧</span>
+                    Mantenimiento
+                </button>
+            </div>
+
+            <!-- ===== CONFIGURACIÓN DE NOTIFICACIONES ===== -->
+            <div class="pestana-contenido activo" id="pestana-notificaciones">
+                <div class="seccion-titulo">
+                    <span>📧</span>
+                    Configuración de Notificaciones por Email
+                </div>
+
+                <div class="alerta alerta-info">
+                    <span>ℹ️</span>
+                    Configure los parámetros para el envío masivo de notificaciones a terceros.
+                </div>
+
+                <div class="grid-configuracion">
+                    <div class="config-card">
+                        <div class="config-card-titulo">
+                            <span>⚡</span>
+                            Límites de Envío
+                        </div>
+                        
+                        <div class="campo-grupo">
+                            <label class="campo-label">Correos por bloque</label>
+                            <input type="number" id="correos_por_bloque" class="campo-input" min="1" max="100" value="5">
+                            <div class="campo-ayuda">Número de correos a enviar simultáneamente</div>
+                        </div>
+
+                        <div class="campo-grupo">
+                            <label class="campo-label">Intervalo entre bloques (segundos)</label>
+                            <input type="number" id="intervalo_bloques" class="campo-input" min="1" max="60" value="5">
+                            <div class="campo-ayuda">Pausa entre cada bloque de envíos</div>
+                        </div>
+
+                        <div class="campo-grupo">
+                            <label class="campo-label">Máximo por día</label>
+                            <input type="number" id="limite_diario" class="campo-input" min="10" max="10000" value="1000">
+                            <div class="campo-ayuda">Límite total de correos por día</div>
+                        </div>
+                    </div>
+
+                    <div class="config-card">
+                        <div class="config-card-titulo">
+                            <span>📝</span>
+                            Plantillas de Email
+                        </div>
+                        
+                        <div class="campo-grupo">
+                            <label class="campo-label">Asunto por defecto</label>
+                            <input type="text" id="asunto_email" class="campo-input" value="Recordatorio de actualización de documentos">
+                            <div class="campo-ayuda">Asunto que aparecerá en los correos</div>
+                        </div>
+
+                        <div class="campo-grupo">
+                            <label class="campo-label">Correo remitente</label>
+                            <input type="email" id="email_remitente" class="campo-input" value="noreply@supertiendascanaveral.com">
+                            <div class="campo-ayuda">Dirección de correo que aparece como remitente</div>
+                        </div>
+
+                        <div class="campo-grupo">
+                            <label class="campo-label">Plantilla HTML</label>
+                            <textarea id="plantilla_html" class="campo-textarea" rows="8" placeholder="Contenido HTML del email...">&lt;h2&gt;Recordatorio de Actualización&lt;/h2&gt;
+&lt;p&gt;Estimado {razon_social},&lt;/p&gt;
+&lt;p&gt;Le recordamos que han transcurrido {dias_transcurridos} días desde su último registro.&lt;/p&gt;
+&lt;p&gt;Por favor, actualice sus documentos a la brevedad.&lt;/p&gt;</textarea>
+                            <div class="campo-ayuda">Plantilla HTML. Variables disponibles: {razon_social}, {nit}, {dias_transcurridos}, {email}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== CONFIGURACIÓN DE DOCUMENTOS ===== -->
+            <div class="pestana-contenido" id="pestana-documentos">
+                <div class="seccion-titulo">
+                    <span>📄</span>
+                    Configuración de Gestión de Documentos
+                </div>
+
+                <div class="alerta alerta-warning">
+                    <span>⚠️</span>
+                    Cambie estos parámetros solo si está seguro del impacto en el sistema.
+                </div>
+
+                <div class="grid-configuracion">
+                    <div class="config-card">
+                        <div class="config-card-titulo">
+                            <span>📁</span>
+                            Almacenamiento
+                        </div>
+                        
+                        <div class="campo-grupo">
+                            <label class="campo-label">Tamaño máximo por archivo (MB)</label>
+                            <input type="number" id="tamano_max_archivo" class="campo-input" min="1" max="100" value="10">
+                            <div class="campo-ayuda">Tamaño máximo permitido para cada documento PDF</div>
+                        </div>
+
+                        <div class="campo-grupo">
+                            <label class="campo-label">Carpeta de almacenamiento</label>
+                            <input type="text" id="carpeta_documentos" class="campo-input" value="documentos_terceros">
+                            <div class="campo-ayuda">Ruta relativa donde se almacenan los documentos</div>
+                        </div>
+
+                        <div class="campo-grupo">
+                            <label class="campo-label">Días para limpieza automática</label>
+                            <input type="number" id="dias_limpieza" class="campo-input" min="30" max="3650" value="2555">
+                            <div class="campo-ayuda">Días después de los cuales se pueden eliminar documentos antiguos (7 años por defecto)</div>
+                        </div>
+                    </div>
+
+                    <div class="config-card">
+                        <div class="config-card-titulo">
+                            <span>✅</span>
+                            Aprobaciones
+                        </div>
+                        
+                        <div class="campo-grupo">
+                            <label class="campo-label">Aprobación automática</label>
+                            <select id="aprobacion_automatica" class="campo-select">
+                                <option value="false">Deshabilitada</option>
+                                <option value="true">Habilitada</option>
+                            </select>
+                            <div class="campo-ayuda">Aprobar documentos automáticamente al subirlos</div>
+                        </div>
+
+                        <div class="campo-grupo">
+                            <label class="campo-label">Usuario revisor por defecto</label>
+                            <input type="text" id="revisor_defecto" class="campo-input" placeholder="admin">
+                            <div class="campo-ayuda">Usuario que aparece como revisor en aprobaciones automáticas</div>
+                        </div>
+
+                        <div class="campo-grupo">
+                            <label class="campo-label">Días para recordatorio de revisión</label>
+                            <input type="number" id="dias_recordatorio_revision" class="campo-input" min="1" max="30" value="7">
+                            <div class="campo-ayuda">Días después de los cuales recordar revisar documentos pendientes</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== CONFIGURACIÓN DEL SISTEMA ===== -->
+            <div class="pestana-contenido" id="pestana-sistema">
+                <div class="seccion-titulo">
+                    <span>⚙️</span>
+                    Configuración General del Sistema
+                </div>
+
+                <div class="grid-configuracion">
+                    <div class="config-card">
+                        <div class="config-card-titulo">
+                            <span>🔄</span>
+                            Automatización
+                        </div>
+                        
+                        <div class="campo-grupo">
+                            <label class="campo-label">Frecuencia de notificación por defecto (días)</label>
+                            <input type="number" id="frecuencia_defecto" class="campo-input" min="1" max="9999" value="365">
+                            <div class="campo-ayuda">Días por defecto para nuevos terceros</div>
+                        </div>
+
+                        <div class="campo-grupo">
+                            <label class="campo-label">Hora de envío diario (24h)</label>
+                            <input type="time" id="hora_envio" class="campo-input" value="08:00">
+                            <div class="campo-ayuda">Hora en que se ejecuta el proceso automático diario</div>
+                        </div>
+
+                        <div class="campo-grupo">
+                            <label class="campo-label">Zona horaria</label>
+                            <select id="zona_horaria" class="campo-select">
+                                <option value="America/Bogota">América/Bogotá (UTC-5)</option>
+                                <option value="UTC">UTC</option>
+                            </select>
+                            <div class="campo-ayuda">Zona horaria para cálculos de fechas</div>
+                        </div>
+                    </div>
+
+                    <div class="config-card">
+                        <div class="config-card-titulo">
+                            <span>📊</span>
+                            Paginación y Interfaz
+                        </div>
+                        
+                        <div class="campo-grupo">
+                            <label class="campo-label">Registros por página por defecto</label>
+                            <select id="registros_por_pagina" class="campo-select">
+                                <option value="200">200</option>
+                                <option value="500">500</option>
+                                <option value="1000">1000</option>
+                                <option value="5000">5000</option>
+                            </select>
+                            <div class="campo-ayuda">Cantidad inicial de registros a mostrar</div>
+                        </div>
+
+                        <div class="campo-grupo">
+                            <label class="campo-label">Tiempo de session (minutos)</label>
+                            <input type="number" id="tiempo_session" class="campo-input" min="5" max="480" value="60">
+                            <div class="campo-ayuda">Tiempo antes de cerrar sesión automáticamente</div>
+                        </div>
+
+                        <div class="campo-grupo">
+                            <label class="campo-label">Tema por defecto</label>
+                            <select id="tema_defecto" class="campo-select">
+                                <option value="light">Claro</option>
+                                <option value="dark">Oscuro</option>
+                                <option value="auto">Automático</option>
+                            </select>
+                            <div class="campo-ayuda">Tema visual por defecto para nuevos usuarios</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== MANTENIMIENTO ===== -->
+            <div class="pestana-contenido" id="pestana-mantenimiento">
+                <div class="seccion-titulo">
+                    <span>🔧</span>
+                    Herramientas de Mantenimiento
+                </div>
+
+                <div class="alerta alerta-danger">
+                    <span>⚠️</span>
+                    <strong>PELIGRO:</strong> Estas acciones pueden afectar datos del sistema. Use con precaución.
+                </div>
+
+                <div class="grid-configuracion">
+                    <div class="config-card">
+                        <div class="config-card-titulo">
+                            <span>🧹</span>
+                            Limpieza de Datos
+                        </div>
+                        
+                        <div class="campo-grupo">
+                            <button class="btn btn-warning" onclick="limpiarLogsAntiguos()">
+                                <span>🗂️</span>
+                                Limpiar Logs Antiguos
+                            </button>
+                            <div class="campo-ayuda">Elimina logs de notificaciones mayores a 90 días</div>
+                        </div>
+
+                        <div class="campo-grupo">
+                            <button class="btn btn-warning" onclick="limpiarDocumentosHuerfanos()">
+                                <span>📄</span>
+                                Limpiar Documentos Huérfanos
+                            </button>
+                            <div class="campo-ayuda">Elimina archivos sin referencia en base de datos</div>
+                        </div>
+
+                        <div class="campo-grupo">
+                            <button class="btn btn-danger" onclick="resetearEstadisticas()">
+                                <span>📊</span>
+                                Resetear Estadísticas
+                            </button>
+                            <div class="campo-ayuda">⚠️ Reinicia contadores de notificaciones</div>
+                        </div>
+                    </div>
+
+                    <div class="config-card">
+                        <div class="config-card-titulo">
+                            <span>💾</span>
+                            Respaldos y Exportación
+                        </div>
+                        
+                        <div class="campo-grupo">
+                            <button class="btn btn-primary" onclick="exportarConfiguracion()">
+                                <span>📤</span>
+                                Exportar Configuración
+                            </button>
+                            <div class="campo-ayuda">Descarga archivo JSON con configuración actual</div>
+                        </div>
+
+                        <div class="campo-grupo">
+                            <button class="btn btn-secondary" onclick="importarConfiguracion()">
+                                <span>📥</span>
+                                Importar Configuración
+                            </button>
+                            <div class="campo-ayuda">Carga configuración desde archivo JSON</div>
+                        </div>
+
+                        <div class="campo-grupo">
+                            <button class="btn btn-success" onclick="respaldoCompleto()">
+                                <span>💽</span>
+                                Respaldo Completo
+                            </button>
+                            <div class="campo-ayuda">Crea respaldo de todos los datos del módulo</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="config-card" style="margin-top: 2rem;">
+                    <div class="config-card-titulo">
+                        <span>📈</span>
+                        Estado del Sistema
+                    </div>
+                    
+                    <div id="estado-sistema" class="campo-grupo">
+                        <div class="loading" style="margin: 0 auto;">Cargando estado...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ACCIONES GLOBALES -->
+            <div class="acciones-footer">
+                <div>
+                    <button class="btn btn-secondary" onclick="resetearFormulario()">
+                        <span>↩️</span>
+                        Resetear Cambios
+                    </button>
+                    <button class="btn btn-warning" onclick="validarConfiguracion()">
+                        <span>✅</span>
+                        Validar Configuración
+                    </button>
+                </div>
+                <div>
+                    <button class="btn btn-success" onclick="guardarConfiguracion()">
+                        <span>💾</span>
+                        Guardar Configuración
+                    </button>
+                    <button class="btn btn-primary" onclick="aplicarYReiniciar()">
+                        <span>🔄</span>
+                        Aplicar y Reiniciar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================================
+        //                           VARIABLES GLOBALES
+        // =====================================================================
+        
+        let configuracionOriginal = {};
+        let pestanaActual = 'notificaciones';
+
+        // =====================================================================
+        //                           INICIALIZACIÓN
+        // =====================================================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            cargarEstadisticas();
+            cargarConfiguracion();
+            cargarEstadoSistema();
+        });
+
+        // =====================================================================
+        //                           GESTIÓN DE PESTAÑAS
+        // =====================================================================
+        
+        function cambiarPestana(nombrePestana) {
+            // Remover clase activa de todas las pestañas
+            document.querySelectorAll('.pestana').forEach(p => p.classList.remove('activa'));
+            document.querySelectorAll('.pestana-contenido').forEach(c => c.classList.remove('activo'));
+
+            // Activar pestaña seleccionada
+            event.target.classList.add('activa');
+            document.getElementById(`pestana-${nombrePestana}`).classList.add('activo');
+
+            pestanaActual = nombrePestana;
+
+            // Cargar datos específicos si es necesario
+            if (nombrePestana === 'mantenimiento') {
+                cargarEstadoSistema();
+            }
+        }
+
+        // =====================================================================
+        //                           CARGA DE DATOS
+        // =====================================================================
+        
+        async function cargarEstadisticas() {
+            try {
+                const response = await fetch('/terceros/api/estadisticas_sistema');
+                const data = await response.json();
+
+                if (data.success) {
+                    const stats = data.data;
+                    document.getElementById('stat-total-terceros').textContent = stats.total_terceros;
+                    document.getElementById('stat-correos-enviados').textContent = stats.correos_enviados_hoy;
+                    document.getElementById('stat-documentos-pendientes').textContent = stats.documentos_pendientes;
+                    document.getElementById('stat-terceros-vencidos').textContent = stats.terceros_por_notificar;
+                }
+            } catch (error) {
+                console.error('Error cargando estadísticas:', error);
+            }
+        }
+
+        async function cargarConfiguracion() {
+            try {
+                const response = await fetch('/terceros/api/configuracion');
+                const data = await response.json();
+
+                if (data.success) {
+                    configuracionOriginal = { ...data.data };
+                    llenarFormularioConfiguracion(data.data);
+                }
+            } catch (error) {
+                console.error('Error cargando configuración:', error);
+                alert('❌ Error cargando configuración del sistema');
+            }
+        }
+
+        function llenarFormularioConfiguracion(config) {
+            // Notificaciones
+            document.getElementById('correos_por_bloque').value = config.correos_por_bloque || 5;
+            document.getElementById('intervalo_bloques').value = config.intervalo_bloques || 5;
+            document.getElementById('limite_diario').value = config.limite_diario || 1000;
+            document.getElementById('asunto_email').value = config.asunto_email || 'Recordatorio de actualización de documentos';
+            document.getElementById('email_remitente').value = config.email_remitente || 'noreply@supertiendascanaveral.com';
+            document.getElementById('plantilla_html').value = config.plantilla_html || '';
+
+            // Documentos
+            document.getElementById('tamano_max_archivo').value = config.tamano_max_archivo || 10;
+            document.getElementById('carpeta_documentos').value = config.carpeta_documentos || 'documentos_terceros';
+            document.getElementById('dias_limpieza').value = config.dias_limpieza || 2555;
+            document.getElementById('aprobacion_automatica').value = config.aprobacion_automatica || 'false';
+            document.getElementById('revisor_defecto').value = config.revisor_defecto || '';
+            document.getElementById('dias_recordatorio_revision').value = config.dias_recordatorio_revision || 7;
+
+            // Sistema
+            document.getElementById('frecuencia_defecto').value = config.frecuencia_defecto || 365;
+            document.getElementById('hora_envio').value = config.hora_envio || '08:00';
+            document.getElementById('zona_horaria').value = config.zona_horaria || 'America/Bogota';
+            document.getElementById('registros_por_pagina').value = config.registros_por_pagina || '200';
+            document.getElementById('tiempo_session').value = config.tiempo_session || 60;
+            document.getElementById('tema_defecto').value = config.tema_defecto || 'light';
+        }
+
+        async function cargarEstadoSistema() {
+            try {
+                const response = await fetch('/terceros/api/estado_sistema');
+                const data = await response.json();
+
+                if (data.success) {
+                    mostrarEstadoSistema(data.data);
+                }
+            } catch (error) {
+                console.error('Error cargando estado del sistema:', error);
+                document.getElementById('estado-sistema').innerHTML = `
+                    <div class="alerta alerta-danger">
+                        <span>❌</span>
+                        Error cargando estado del sistema: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function mostrarEstadoSistema(estado) {
+            const estadoHtml = `
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                    <div style="text-align: center;">
+                        <h4>Base de Datos</h4>
+                        <span class="estado-badge ${estado.base_datos ? 'estado-aprobado' : 'estado-rechazado'}">
+                            ${estado.base_datos ? '✅ Conectado' : '❌ Desconectado'}
+                        </span>
+                    </div>
+                    <div style="text-align: center;">
+                        <h4>Correo Electrónico</h4>
+                        <span class="estado-badge ${estado.correo ? 'estado-aprobado' : 'estado-rechazado'}">
+                            ${estado.correo ? '✅ Configurado' : '❌ Sin configurar'}
+                        </span>
+                    </div>
+                    <div style="text-align: center;">
+                        <h4>Espacio en Disco</h4>
+                        <span class="estado-badge ${estado.espacio_disco > 1000 ? 'estado-aprobado' : 'estado-warning'}">
+                            ${estado.espacio_disco} MB disponibles
+                        </span>
+                    </div>
+                    <div style="text-align: center;">
+                        <h4>Último Respaldo</h4>
+                        <span class="estado-badge ${estado.dias_ultimo_respaldo < 7 ? 'estado-aprobado' : 'estado-warning'}">
+                            ${estado.dias_ultimo_respaldo} días
+                        </span>
+                    </div>
+                </div>
+                <div style="margin-top: 1rem;">
+                    <strong>Versión del Sistema:</strong> ${estado.version} | 
+                    <strong>Uptime:</strong> ${estado.uptime} | 
+                    <strong>Memoria:</strong> ${estado.memoria_uso}%
+                </div>
+            `;
+
+            document.getElementById('estado-sistema').innerHTML = estadoHtml;
+        }
+
+        // =====================================================================
+        //                           ACCIONES PRINCIPALES
+        // =====================================================================
+        
+        async function guardarConfiguracion() {
+            const configuracion = recopilarConfiguracion();
+
+            try {
+                const response = await fetch('/terceros/api/configuracion', {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(configuracion)
+                });
+
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.message);
+                }
+
+                alert('✅ Configuración guardada exitosamente');
+                configuracionOriginal = { ...configuracion };
+
+            } catch (error) {
+                console.error('Error guardando configuración:', error);
+                alert(`❌ Error guardando configuración: ${error.message}`);
+            }
+        }
+
+        function recopilarConfiguracion() {
+            return {
+                // Notificaciones
+                correos_por_bloque: parseInt(document.getElementById('correos_por_bloque').value),
+                intervalo_bloques: parseInt(document.getElementById('intervalo_bloques').value),
+                limite_diario: parseInt(document.getElementById('limite_diario').value),
+                asunto_email: document.getElementById('asunto_email').value,
+                email_remitente: document.getElementById('email_remitente').value,
+                plantilla_html: document.getElementById('plantilla_html').value,
+
+                // Documentos
+                tamano_max_archivo: parseInt(document.getElementById('tamano_max_archivo').value),
+                carpeta_documentos: document.getElementById('carpeta_documentos').value,
+                dias_limpieza: parseInt(document.getElementById('dias_limpieza').value),
+                aprobacion_automatica: document.getElementById('aprobacion_automatica').value === 'true',
+                revisor_defecto: document.getElementById('revisor_defecto').value,
+                dias_recordatorio_revision: parseInt(document.getElementById('dias_recordatorio_revision').value),
+
+                // Sistema
+                frecuencia_defecto: parseInt(document.getElementById('frecuencia_defecto').value),
+                hora_envio: document.getElementById('hora_envio').value,
+                zona_horaria: document.getElementById('zona_horaria').value,
+                registros_por_pagina: parseInt(document.getElementById('registros_por_pagina').value),
+                tiempo_session: parseInt(document.getElementById('tiempo_session').value),
+                tema_defecto: document.getElementById('tema_defecto').value
+            };
+        }
+
+        function resetearFormulario() {
+            if (confirm('¿Desea deshacer todos los cambios y volver a la configuración guardada?')) {
+                llenarFormularioConfiguracion(configuracionOriginal);
+            }
+        }
+
+        function validarConfiguracion() {
+            const config = recopilarConfiguracion();
+            let errores = [];
+
+            // Validaciones básicas
+            if (config.correos_por_bloque < 1 || config.correos_por_bloque > 100) {
+                errores.push('Correos por bloque debe estar entre 1 y 100');
+            }
+
+            if (config.intervalo_bloques < 1 || config.intervalo_bloques > 60) {
+                errores.push('Intervalo entre bloques debe estar entre 1 y 60 segundos');
+            }
+
+            if (config.tamano_max_archivo < 1 || config.tamano_max_archivo > 100) {
+                errores.push('Tamaño máximo de archivo debe estar entre 1 y 100 MB');
+            }
+
+            if (!config.email_remitente || !config.email_remitente.includes('@')) {
+                errores.push('Correo remitente debe ser un email válido');
+            }
+
+            if (errores.length > 0) {
+                alert(`❌ Errores de validación:\n\n${errores.join('\n')}`);
+                return false;
+            } else {
+                alert('✅ Configuración válida');
+                return true;
+            }
+        }
+
+        async function aplicarYReiniciar() {
+            if (!validarConfiguracion()) return;
+
+            if (!confirm('⚠️ Esta acción guardará la configuración y reiniciará los servicios del módulo. ¿Continuar?')) {
+                return;
+            }
+
+            await guardarConfiguracion();
+            
+            try {
+                const response = await fetch('/terceros/api/reiniciar_modulo', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    alert('✅ Configuración aplicada y servicios reiniciados exitosamente');
+                    setTimeout(() => location.reload(), 2000);
+                }
+            } catch (error) {
+                console.error('Error reiniciando módulo:', error);
+                alert(`❌ Error reiniciando módulo: ${error.message}`);
+            }
+        }
+
+        // =====================================================================
+        //                           HERRAMIENTAS DE MANTENIMIENTO
+        // =====================================================================
+        
+        async function limpiarLogsAntiguos() {
+            if (!confirm('¿Eliminar logs de notificaciones mayores a 90 días?')) return;
+
+            try {
+                const response = await fetch('/terceros/api/mantenimiento/limpiar_logs', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+                alert(data.success ? `✅ ${data.message}` : `❌ ${data.message}`);
+
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        async function limpiarDocumentosHuerfanos() {
+            if (!confirm('¿Eliminar archivos sin referencia en base de datos?')) return;
+
+            try {
+                const response = await fetch('/terceros/api/mantenimiento/limpiar_huerfanos', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+                alert(data.success ? `✅ ${data.message}` : `❌ ${data.message}`);
+
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        async function resetearEstadisticas() {
+            if (!confirm('⚠️ ¿Resetear TODOS los contadores de estadísticas? Esta acción no se puede deshacer.')) return;
+
+            try {
+                const response = await fetch('/terceros/api/mantenimiento/resetear_estadisticas', {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+                alert(data.success ? `✅ ${data.message}` : `❌ ${data.message}`);
+                
+                if (data.success) {
+                    cargarEstadisticas();
+                }
+
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        async function exportarConfiguracion() {
+            try {
+                const response = await fetch('/terceros/api/configuracion/exportar');
+                const blob = await response.blob();
+                
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `configuracion_terceros_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+
+                alert('✅ Configuración exportada exitosamente');
+
+            } catch (error) {
+                alert(`❌ Error exportando: ${error.message}`);
+            }
+        }
+
+        function importarConfiguracion() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = async function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+
+                try {
+                    const text = await file.text();
+                    const config = JSON.parse(text);
+                    
+                    if (confirm('¿Importar esta configuración? Se sobrescribirá la configuración actual.')) {
+                        llenarFormularioConfiguracion(config);
+                        alert('✅ Configuración importada. Recuerde guardar los cambios.');
+                    }
+                } catch (error) {
+                    alert(`❌ Error importando configuración: ${error.message}`);
+                }
+            };
+
+            input.click();
+        }
+
+        async function respaldoCompleto() {
+            if (!confirm('¿Crear respaldo completo del módulo de terceros?')) return;
+
+            try {
+                const response = await fetch('/terceros/api/mantenimiento/respaldo_completo', {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `respaldo_terceros_${new Date().toISOString().split('T')[0]}.zip`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+
+                    alert('✅ Respaldo creado y descargado exitosamente');
+                } else {
+                    const data = await response.json();
+                    throw new Error(data.message);
+                }
+
+            } catch (error) {
+                alert(`❌ Error creando respaldo: ${error.message}`);
+            }
+        }
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

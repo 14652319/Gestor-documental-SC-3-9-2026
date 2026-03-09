@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📄 Detalle Factura - {{ factura.numero_factura }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-primary: #16A085;
+            --brand-secondary: #128C7E;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .light-mode {
+            background-color: #F8F9FA;
+            color: #212529;
+        }
+
+        .dark-mode {
+            background-color: #1A1A1A;
+            color: #E9ECEF;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 24px;
+        }
+
+        .dark-mode .card {
+            background: #2D2D2D;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 16px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #E0E0E0;
+        }
+
+        .dark-mode .timeline::before {
+            background: #444;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -33px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 3px solid var(--brand-primary);
+            background: white;
+        }
+
+        .dark-mode .timeline-dot {
+            background: #2D2D2D;
+        }
+
+        .badge {
+            padding: 6px 16px;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-pendiente {
+            background: #FFF3CD;
+            color: #856404;
+        }
+
+        .badge-en_revision {
+            background: #D1ECF1;
+            color: #0C5460;
+        }
+
+        .badge-aprobado {
+            background: #D4EDDA;
+            color: #155724;
+        }
+
+        .badge-rechazado {
+            background: #F8D7DA;
+            color: #721C24;
+        }
+
+        .dark-mode .badge-pendiente {
+            background: #664D03;
+            color: #FFF3CD;
+        }
+
+        .dark-mode .badge-en_revision {
+            background: #0A4A54;
+            color: #D1ECF1;
+        }
+
+        .dark-mode .badge-aprobado {
+            background: #0F5132;
+            color: #D1E7DD;
+        }
+
+        .dark-mode .badge-rechazado {
+            background: #58151C;
+            color: #F8D7DA;
+        }
+
+        .action-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 600px;
+            border: 2px solid #E0E0E0;
+            border-radius: 12px;
+        }
+
+        .dark-mode .pdf-viewer {
+            border-color: #444;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+        }
+
+        .info-item {
+            padding: 16px;
+            background: #F8F9FA;
+            border-radius: 8px;
+        }
+
+        .dark-mode .info-item {
+            background: #1A1A1A;
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <a href="{{ url_for('facturas_digitales.listado_facturas') }}" class="text-2xl">←</a>
+                <h1 class="text-2xl font-bold" style="color: var(--brand-primary);">
+                    📄 {{ factura.numero_factura }}
+                </h1>
+                <span class="badge badge-{{ factura.estado }}">
+                    {{ factura.estado.upper().replace('_', ' ') }}
+                </span>
+            </div>
+            <button id="toggleDarkMode" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                <span id="darkModeIcon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Información Principal -->
+            <div class="lg:col-span-2">
+                <!-- Datos de la Factura -->
+                <div class="card mb-6">
+                    <h2 class="text-xl font-bold mb-4">📋 Información General</h2>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Número de Factura</p>
+                            <p class="font-bold text-lg">{{ factura.numero_factura }}</p>
+                        </div>
+                        <div class="info-item">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">NIT Proveedor</p>
+                            <p class="font-bold">{{ factura.nit_proveedor }}</p>
+                        </div>
+                        <div class="info-item">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Razón Social</p>
+                            <p class="font-bold">{{ factura.razon_social_proveedor }}</p>
+                        </div>
+                        <div class="info-item">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Fecha Emisión</p>
+                            <p class="font-bold">{{ factura.fecha_emision.strftime('%d/%m/%Y') }}</p>
+                        </div>
+                        <div class="info-item">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Fecha Vencimiento</p>
+                            <p class="font-bold">{{ factura.fecha_vencimiento.strftime('%d/%m/%Y') if factura.fecha_vencimiento else 'N/A' }}</p>
+                        </div>
+                        <div class="info-item">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Valor Total</p>
+                            <p class="font-bold text-xl" style="color: var(--brand-primary);">
+                                ${{ "{:,.2f}".format(factura.valor_total) }}
+                            </p>
+                        </div>
+                        <div class="info-item">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Valor IVA</p>
+                            <p class="font-bold">${{ "{:,.2f}".format(factura.valor_iva or 0) }}</p>
+                        </div>
+                        <div class="info-item">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 mb-1">Fecha de Carga</p>
+                            <p class="font-bold">{{ factura.fecha_carga.strftime('%d/%m/%Y %H:%M') }}</p>
+                        </div>
+                    </div>
+
+                    {% if factura.observaciones %}
+                    <div class="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                        <p class="text-sm font-semibold mb-2">📝 Observaciones:</p>
+                        <p class="text-sm">{{ factura.observaciones }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if factura.motivo_rechazo %}
+                    <div class="mt-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                        <p class="text-sm font-semibold mb-2">❌ Motivo de Rechazo:</p>
+                        <p class="text-sm">{{ factura.motivo_rechazo }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Visor PDF -->
+                <div class="card">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">📄 Documento</h2>
+                        <a href="{{ url_for('facturas_digitales.descargar_factura', factura_id=factura.id) }}" 
+                           class="action-btn" 
+                           style="background: var(--brand-primary); color: white;">
+                            ⬇️ Descargar
+                        </a>
+                    </div>
+                    
+                    {% if factura.ruta_archivo.lower().endswith('.pdf') %}
+                    <iframe src="{{ url_for('facturas_digitales.descargar_factura', factura_id=factura.id) }}" 
+                            class="pdf-viewer">
+                    </iframe>
+                    {% else %}
+                    <div class="text-center py-12">
+                        <div class="text-6xl mb-4">📎</div>
+                        <p class="text-gray-600 dark:text-gray-400 mb-4">
+                            Archivo: {{ factura.nombre_archivo_original }}
+                        </p>
+                        <a href="{{ url_for('facturas_digitales.descargar_factura', factura_id=factura.id) }}" 
+                           class="action-btn" 
+                           style="background: var(--brand-primary); color: white;">
+                            ⬇️ Descargar Archivo
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="lg:col-span-1">
+                <!-- Acciones (Solo para usuarios internos) -->
+                {% if tipo_usuario == 'interno' and factura.estado in ['pendiente', 'en_revision'] %}
+                <div class="card mb-6">
+                    <h2 class="text-xl font-bold mb-4">⚡ Acciones</h2>
+                    <div class="space-y-3">
+                        <button onclick="cambiarEstado('en_revision')" class="action-btn w-full" style="background: #17A2B8; color: white;">
+                            🔍 Marcar en Revisión
+                        </button>
+                        <button onclick="aprobarFactura()" class="action-btn w-full" style="background: #28A745; color: white;">
+                            ✅ Aprobar Factura
+                        </button>
+                        <button onclick="rechazarFactura()" class="action-btn w-full" style="background: #DC3545; color: white;">
+                            ❌ Rechazar Factura
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Historial -->
+                <div class="card">
+                    <h2 class="text-xl font-bold mb-4">📜 Historial</h2>
+                    <div class="timeline">
+                        {% for evento in factura.historial|reverse %}
+                        <div class="timeline-item">
+                            <div class="timeline-dot"></div>
+                            <div class="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg">
+                                <p class="font-semibold text-sm">{{ evento.estado_anterior or 'Inicial' }} → {{ evento.estado_nuevo }}</p>
+                                <p class="text-xs text-gray-600 dark:text-gray-400 mt-1">
+                                    {{ evento.fecha_cambio.strftime('%d/%m/%Y %H:%M') }}
+                                </p>
+                                {% if evento.usuario_cambio %}
+                                <p class="text-xs text-gray-600 dark:text-gray-400">
+                                    Por: {{ evento.usuario_cambio }}
+                                </p>
+                                {% endif %}
+                                {% if evento.observaciones %}
+                                <p class="text-xs mt-2 p-2 bg-white dark:bg-gray-900 rounded">
+                                    {{ evento.observaciones }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% else %}
+                        <p class="text-sm text-gray-600 dark:text-gray-400">Sin historial disponible</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dark Mode
+        const toggleBtn = document.getElementById('toggleDarkMode');
+        const darkModeIcon = document.getElementById('darkModeIcon');
+        const body = document.body;
+
+        const darkMode = localStorage.getItem('darkMode') === 'true';
+        if (darkMode) {
+            body.classList.remove('light-mode');
+            body.classList.add('dark-mode');
+            darkModeIcon.textContent = '☀️';
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            body.classList.toggle('light-mode');
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            darkModeIcon.textContent = isDark ? '☀️' : '🌙';
+            localStorage.setItem('darkMode', isDark);
+        });
+
+        // Funciones de acciones
+        async function cambiarEstado(nuevoEstado, observaciones = null) {
+            try {
+                const response = await fetch('{{ url_for("facturas_digitales.cambiar_estado_api", factura_id=factura.id) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nuevo_estado: nuevoEstado,
+                        observaciones: observaciones
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Estado actualizado',
+                        text: result.message,
+                        confirmButtonColor: '#16A085'
+                    });
+                    location.reload();
+                } else {
+                    throw new Error(result.error || 'Error al cambiar estado');
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                    confirmButtonColor: '#16A085'
+                });
+            }
+        }
+
+        async function aprobarFactura() {
+            const { value: observaciones } = await Swal.fire({
+                title: '✅ Aprobar Factura',
+                input: 'textarea',
+                inputLabel: 'Observaciones (opcional)',
+                inputPlaceholder: 'Escribe observaciones sobre la aprobación...',
+                showCancelButton: true,
+                confirmButtonText: 'Aprobar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#28A745',
+                inputValidator: (value) => {
+                    // No es requerido, así que siempre es válido
+                    return null;
+                }
+            });
+
+            if (observaciones !== undefined) {
+                await cambiarEstado('aprobado', observaciones);
+            }
+        }
+
+        async function rechazarFactura() {
+            const { value: motivo } = await Swal.fire({
+                title: '❌ Rechazar Factura',
+                input: 'textarea',
+                inputLabel: 'Motivo del rechazo *',
+                inputPlaceholder: 'Explica por qué se rechaza la factura...',
+                showCancelButton: true,
+                confirmButtonText: 'Rechazar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#DC3545',
+                inputValidator: (value) => {
+                    if (!value || value.trim() === '') {
+                        return 'Debes especificar un motivo de rechazo';
+                    }
+                }
+            });
+
+            if (motivo) {
+                await cambiarEstado('rechazado', motivo);
+            }
+        }
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+</body>
+</html>

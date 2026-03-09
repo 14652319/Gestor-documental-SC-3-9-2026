@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor Documentos Contables</title>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --brand-green: #16a34a;
+            --brand-green-dark: #166534;
+            --brand-yellow: #facc15;
+            --red-error: #dc2626;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #dcfce7, #fefce8, #dbeafe);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        /* 🎨 HEADER VERDE (Nuevo) */
+        .module-header {
+            background: linear-gradient(135deg, var(--brand-green), var(--brand-green-dark));
+            color: white;
+            padding: 20px 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .module-header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            color: white;
+        }
+        .module-content {
+            padding: 20px;
+        }
+        h1 {
+            color: var(--brand-green-dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn-primary { background: #facc15; color: #166534; }
+        .btn-secondary { background: #166534; color: white; }
+        .btn-warn { background: #dc2626; color: white; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        input[type="text"], input[type="date"] {
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        th {
+            background: #f3f4f6;
+            font-weight: 700;
+            color: #166534;
+        }
+        tr:hover {
+            background: #f9fafb;
+        }
+        .chip {
+            display: inline-block;
+            padding: 4px 8px;
+            background: #e0e7ff;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        
+        /* 📱 RESPONSIVE CSS (Nuevo) */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                border-radius: 8px;
+            }
+            .module-header {
+                padding: 15px;
+            }
+            .module-header h1 {
+                font-size: 1.2rem;
+            }
+            .module-content {
+                padding: 15px;
+            }
+            .toolbar {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .toolbar form {
+                flex-direction: column;
+                width: 100%;
+            }
+            .toolbar input[type="text"],
+            .toolbar input[type="date"],
+            .toolbar .btn {
+                width: 100%;
+            }
+            /* Tabla responsive: scroll horizontal */
+            .table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            table {
+                min-width: 800px; /* Forzar scroll en móviles */
+                font-size: 0.85rem;
+            }
+            th, td {
+                padding: 8px;
+            }
+            .chip {
+                font-size: 10px;
+                padding: 3px 6px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .module-header h1 {
+                font-size: 1rem;
+            }
+            .btn {
+                padding: 8px 12px;
+                font-size: 0.9rem;
+            }
+            table {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 🎨 HEADER VERDE (Nuevo) -->
+        <div class="module-header">
+            <span style="font-size: 1.8rem;">📂</span>
+            <h1>Visor de Documentos Contables</h1>
+        </div>
+        
+        <!-- CONTENIDO -->
+        <div class="module-content">
+                <div class="toolbar">
+            <span style="color: #166534; font-weight: 600;">👤 admin</span>
+            <input type="text" id="buscar" placeholder="🔍 Buscar...">
+            <input type="date" id="fechaDesde">
+            <input type="date" id="fechaHasta">
+            <button class="btn btn-primary" onclick="filtrarTabla()">Filtrar</button>
+            <button class="btn btn-secondary" onclick="verificarConsecutivos()">🔢 Verificar Consecutivos</button>
+            <button class="btn btn-primary" onclick="window.location.href='/archivo_digital/cargar'">⬆️ Cargar</button>
+            <button class="btn btn-warn" onclick="window.location.href='/dashboard'">🏠 Volver al Menú</button>
+        </div>
+
+        <form method="post">
+            <div style="margin-bottom: 10px;">
+                <label><input id="checkAll" type="checkbox"> Seleccionar todo</label>
+                <button id="btnEditar" class="btn btn-secondary" type="button" disabled>✏️ Editar</button>
+            </div>
+            
+            <!-- 📱 WRAPPER RESPONSIVE PARA TABLA (Nuevo) -->
+            <div class="table-wrapper">
+            <table id="docsTable">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Nombre</th>
+                        <th>Empresa</th>
+                        <th>C.O.</th>
+                        <th>Tipo</th>
+                        <th>Consecutivo</th>
+                        <th>Adjuntos</th>
+                        <th>Fecha Creación</th>
+                        <th>Fecha Documento</th>
+                        <th>Usuario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documentos %}
+                    <tr>
+                        <td><input class="row-check" type="checkbox" value="{{ doc.id }}"></td>
+                        <td><strong>{{ doc.nombre_archivo }}</strong></td>
+                        <td><span class="chip">{{ doc.empresa if doc.empresa else 'N/A' }}</span></td>
+                        <td>{{ doc.centro_operacion.codigo if doc.centro_operacion else 'N/A' }}</td>
+                        <td><span class="chip">{{ doc.tipo_documento.siglas if doc.tipo_documento else 'N/A' }}</span></td>
+                        <td>{{ doc.consecutivo }}</td>
+                        <td>{{ doc.adjuntos|length if doc.adjuntos else 0 }}</td>
+                        <td>{{ doc.created_at.strftime('%d/%m/%Y') if doc.created_at else 'N/A' }}</td>
+                        <td>{{ doc.fecha_documento.strftime('%d/%m/%Y') if doc.fecha_documento else 'N/A' }}</td>
+                        <td>{{ doc.created_by }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            </div><!-- Cierre table-wrapper -->
+            
+            <p style="margin-top: 20px; color: #6b7280;">
+                Mostrando {{ documentos|length }} de {{ total_documentos }} documentos
+            </p>
+        </form>
+        </div><!-- Cierre module-content -->
+    </div><!-- Cierre container -->
+
+    <script>
+        $(document).ready(function() {
+            // ✅ PASO 1: ESTABLECER FECHAS POR DEFECTO
+            const hoy = new Date();
+            const anio = hoy.getFullYear();
+            const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+            const dia = String(hoy.getDate()).padStart(2, '0');
+            
+            // Primer día del mes actual
+            document.getElementById('fechaDesde').value = `${anio}-${mes}-01`;
+            // Día actual
+            document.getElementById('fechaHasta').value = `${anio}-${mes}-${dia}`;
+            
+            // ✅ PASO 2: INICIALIZAR DATATABLE
+            $('#docsTable').DataTable({
+                paging: true,
+                pageLength: 50,
+                language: { url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" }
+            });
+
+            // ✅ PASO 3: CONTROLES DE SELECCIÓN
+            $('#checkAll').on('change', function() {
+                $('.row-check').prop('checked', this.checked);
+                updateButtons();
+            });
+
+            $('.row-check').on('change', updateButtons);
+
+            function updateButtons() {
+                const selected = $('.row-check:checked').length;
+                $('#btnEditar').prop('disabled', selected !== 1);
+            }
+
+            $('#btnEditar').on('click', function() {
+                const id = $('.row-check:checked').val();
+                if (id) window.location.href = '/archivo_digital/editar/' + id;
+            });
+        });
+
+        // ✅ FUNCIÓN DE FILTRADO (SI EXISTE EN EL BACKEND)
+        function filtrarTabla() {
+            const buscar = document.getElementById('buscar').value;
+            const desde = document.getElementById('fechaDesde').value;
+            const hasta = document.getElementById('fechaHasta').value;
+            
+            console.log('🔍 Filtrar:', { buscar, desde, hasta });
+            // TODO: Implementar lógica de filtrado con backend
+            alert('Filtrado: ' + buscar + '\nDesde: ' + desde + '\nHasta: ' + hasta);
+        }
+
+        // ✅ VERIFICACIÓN DE CONSECUTIVOS MEJORADA - SIEMPRE GENERA EXCEL COMPLETO
+        async function verificarConsecutivos() {
+            const desde = document.getElementById('fechaDesde').value;
+            const hasta = document.getElementById('fechaHasta').value;
+            
+            if (!desde || !hasta) {
+                alert('⚠️ Selecciona un rango de fechas');
+                return;
+            }
+            
+            // PASO 1: Preguntar qué tipos analizar
+            const opcion = prompt(
+                '🔢 VERIFICAR CONSECUTIVOS\n\n' +
+                'Selecciona una opción:\n\n' +
+                '1 - Todos los tipos de documento\n' +
+                '2 - Solo un tipo específico (ej: NCM, FPR, REC)\n\n' +
+                'Escribe 1 o 2:'
+            );
+            
+            if (!opcion || (opcion !== '1' && opcion !== '2')) {
+                return; // Cancelado
+            }
+            
+            let tiposFiltrar = [];
+            
+            if (opcion === '2') {
+                const tipoEspecifico = prompt('Escribe el tipo de documento (ej: NCM, FPR, REC):');
+                if (!tipoEspecifico) return;
+                tiposFiltrar = [tipoEspecifico.trim().toUpperCase()];
+            }
+            
+            // Obtener todos los documentos visibles en la tabla
+            const tabla = $('#docsTable').DataTable();
+            const datos = tabla.rows({ search: 'applied' }).data().toArray();
+            
+            // ✅ NUEVO: Recopilar TODOS los datos de todos los documentos para el Excel PRO
+            const todosLosDocumentos = [];
+            
+            // Agrupar por tipo de documento Y guardar todos los datos
+            const porTipo = {};
+            datos.forEach((fila, idx) => {
+                const tipoTexto = tabla.cell(idx, 4).data(); // Columna "Tipo"
+                const tipo = tipoTexto.replace(/<[^>]*>/g, '').trim(); // Quitar HTML si hay
+                const consecutivo = parseInt(tabla.cell(idx, 5).data()); // Columna "Consecutivo"
+                
+                // ✅ NUEVO: Recopilar todos los datos del documento (todas las columnas del frontend)
+                const nombreArchivo = tabla.cell(idx, 1).data().replace(/<[^>]*>/g, '').trim();
+                const empresa = tabla.cell(idx, 2).data().replace(/<[^>]*>/g, '').trim();
+                const centroOperacion = tabla.cell(idx, 3).data().replace(/<[^>]*>/g, '').trim();
+                const adjuntos = tabla.cell(idx, 6).data();
+                const fechaCreacion = tabla.cell(idx, 7).data();
+                const fechaDocumento = tabla.cell(idx, 8).data();
+                const usuario = tabla.cell(idx, 9).data();
+                
+                todosLosDocumentos.push({
+                    nombreArchivo,
+                    empresa,
+                    centroOperacion,
+                    tipo,
+                    consecutivo,
+                    adjuntos,
+                    fechaCreacion,
+                    fechaDocumento,
+                    usuario
+                });
+                
+                // Filtrar si es necesario (para reporte en pantalla)
+                if (opcion === '2' && !tiposFiltrar.includes(tipo)) {
+                    return; // Saltar este tipo
+                }
+                
+                if (!porTipo[tipo]) porTipo[tipo] = [];
+                porTipo[tipo].push(consecutivo);
+            });
+            
+            if (Object.keys(porTipo).length === 0) {
+                alert('⚠️ No se encontraron documentos del tipo especificado');
+                return;
+            }
+            
+            // Analizar consecutivos faltantes
+            let reporte = '📊 REPORTE DE CONSECUTIVOS\n';
+            reporte += `Periodo: ${desde} al ${hasta}\n`;
+            reporte += '━'.repeat(50) + '\n\n';
+            
+            let hayFaltantes = false;
+            const datosFaltantes = []; // Para exportar a Excel
+            
+            for (const [tipo, consecutivos] of Object.entries(porTipo)) {
+                const ordenados = consecutivos.sort((a, b) => a - b);
+                const min = ordenados[0];
+                const max = ordenados[ordenados.length - 1];
+                
+                const faltantes = [];
+                for (let i = min; i <= max; i++) {
+                    if (!ordenados.includes(i)) {
+                        faltantes.push(i);
+                    }
+                }
+                
+                reporte += `📄 Tipo: ${tipo}\n`;
+                reporte += `   Rango: ${min} - ${max}\n`;
+                reporte += `   Total: ${consecutivos.length} documentos\n`;
+                
+                if (faltantes.length > 0) {
+                    hayFaltantes = true;
+                    reporte += `   ❌ FALTAN ${faltantes.length}: ${faltantes.join(', ')}\n\n`;
+                    
+                    // Guardar para Excel
+                    datosFaltantes.push({
+                        tipo: tipo,
+                        min: min,
+                        max: max,
+                        total: consecutivos.length,
+                        esperados: max - min + 1,
+                        faltantes: faltantes.join(', ')
+                    });
+                } else {
+                    reporte += `   ✅ Secuencia completa\n\n`;
+                }
+            }
+            
+            if (!hayFaltantes) {
+                reporte += '\n✅ TODAS LAS SECUENCIAS ESTÁN COMPLETAS';
+            } else {
+                reporte += '\n⚠️ HAY CONSECUTIVOS FALTANTES';
+            }
+            
+            // ✅ CAMBIO: SIEMPRE preguntar si desea descargar el Excel PRO completo
+            alert(reporte);
+            
+            const descargarExcel = confirm(
+                '📊 EXCEL PROFESIONAL COMPLETO\n\n' +
+                '¿Deseas descargar un Excel con TODOS los documentos y su información completa?\n\n' +
+                'Incluirá:\n' +
+                '• Nombre del archivo\n' +
+                '• Empresa\n' +
+                '• Centro de Operación\n' +
+                '• Tipo de documento\n' +
+                '• Consecutivo\n' +
+                '• Cantidad de adjuntos\n' +
+                '• Fecha de creación\n' +
+                '• Fecha del documento\n' +
+                '• Usuario\n\n' +
+                (hayFaltantes ? '+ Hoja adicional con consecutivos faltantes' : '')
+            );
+            
+            if (descargarExcel) {
+                exportarExcelProfesionalCompleto(todosLosDocumentos, datosFaltantes, desde, hasta, hayFaltantes);
+            }
+        }
+        
+        // ✅ EXPORTAR EXCEL PROFESIONAL COMPLETO (TODOS LOS DOCUMENTOS)
+        function exportarExcelProfesionalCompleto(todosDocumentos, datosFaltantes, desde, hasta, hayFaltantes) {
+            // ========== HOJA 1: TODOS LOS DOCUMENTOS ==========
+            let csv = '========== LISTADO COMPLETO DE DOCUMENTOS CONTABLES ==========\n';
+            csv += `Periodo: ${desde} al ${hasta}\n`;
+            csv += `Total Documentos: ${todosDocumentos.length}\n`;
+            csv += `Fecha Generación: ${new Date().toLocaleString('es-CO')}\n\n`;
+            
+            // Headers de la tabla
+            csv += 'Nombre del Archivo,Empresa,Centro de Operación,Tipo Documento,Consecutivo,Adjuntos,Fecha Creación,Fecha Documento,Usuario\n';
+            
+            // Ordenar por tipo y consecutivo
+            todosDocumentos.sort((a, b) => {
+                if (a.tipo !== b.tipo) return a.tipo.localeCompare(b.tipo);
+                return a.consecutivo - b.consecutivo;
+            });
+            
+            // Agregar todas las filas
+            todosDocumentos.forEach(doc => {
+                csv += `"${doc.nombreArchivo}",`;
+                csv += `${doc.empresa},`;
+                csv += `${doc.centroOperacion},`;
+                csv += `${doc.tipo},`;
+                csv += `${doc.consecutivo},`;
+                csv += `${doc.adjuntos},`;
+                csv += `${doc.fechaCreacion},`;
+                csv += `${doc.fechaDocumento},`;
+                csv += `${doc.usuario}\n`;
+            });
+            
+            // ========== HOJA 2: RESUMEN POR TIPO ==========
+            csv += '\n\n========== RESUMEN POR TIPO DE DOCUMENTO ==========\n';
+            csv += 'Tipo,Cantidad,Consecutivo Min,Consecutivo Max\n';
+            
+            const resumenPorTipo = {};
+            todosDocumentos.forEach(doc => {
+                if (!resumenPorTipo[doc.tipo]) {
+                    resumenPorTipo[doc.tipo] = {
+                        cantidad: 0,
+                        consecutivos: []
+                    };
+                }
+                resumenPorTipo[doc.tipo].cantidad++;
+                resumenPorTipo[doc.tipo].consecutivos.push(doc.consecutivo);
+            });
+            
+            Object.keys(resumenPorTipo).sort().forEach(tipo => {
+                const datos = resumenPorTipo[tipo];
+                const consecutivos = datos.consecutivos.sort((a, b) => a - b);
+                csv += `${tipo},${datos.cantidad},${consecutivos[0]},${consecutivos[consecutivos.length - 1]}\n`;
+            });
+            
+            // ========== HOJA 3: CONSECUTIVOS FALTANTES (SI HAY) ==========
+            if (hayFaltantes && datosFaltantes.length > 0) {
+                csv += '\n\n========== CONSECUTIVOS FALTANTES ==========\n';
+                csv += 'Tipo de Documento,Rango Min,Rango Max,Total Existentes,Total Esperados,Consecutivos Faltantes\n';
+                
+                datosFaltantes.forEach(item => {
+                    csv += `${item.tipo},${item.min},${item.max},${item.total},${item.esperados},"${item.faltantes}"\n`;
+                });
+                
+                csv += '\nRESUMEN DE FALTANTES\n';
+                csv += `Tipos con faltantes,${datosFaltantes.length}\n`;
+                csv += `Total documentos faltantes,${datosFaltantes.reduce((sum, d) => sum + d.faltantes.split(',').length, 0)}\n`;
+            }
+            
+            // ========== HOJA 4: ESTADÍSTICAS GENERALES ==========
+            csv += '\n\n========== ESTADÍSTICAS GENERALES ==========\n';
+            
+            // Contar por empresa
+            const porEmpresa = {};
+            todosDocumentos.forEach(doc => {
+                porEmpresa[doc.empresa] = (porEmpresa[doc.empresa] || 0) + 1;
+            });
+            csv += '\nDocumentos por Empresa:\n';
+            csv += 'Empresa,Cantidad\n';
+            Object.entries(porEmpresa).forEach(([empresa, cant]) => {
+                csv += `${empresa},${cant}\n`;
+            });
+            
+            // Contar por usuario
+            const porUsuario = {};
+            todosDocumentos.forEach(doc => {
+                porUsuario[doc.usuario] = (porUsuario[doc.usuario] || 0) + 1;
+            });
+            csv += '\nDocumentos por Usuario:\n';
+            csv += 'Usuario,Cantidad\n';
+            Object.entries(porUsuario).forEach(([usuario, cant]) => {
+                csv += `${usuario},${cant}\n`;
+            });
+            
+            // Total de adjuntos
+            const totalAdjuntos = todosDocumentos.reduce((sum, doc) => sum + parseInt(doc.adjuntos || 0), 0);
+            csv += `\nTotal de Adjuntos,${totalAdjuntos}\n`;
+            csv += `Promedio de Adjuntos,${(totalAdjuntos / todosDocumentos.length).toFixed(2)}\n`;
+            
+            // ========== DESCARGAR ARCHIVO ==========
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const fecha = new Date().toISOString().split('T')[0];
+            link.setAttribute('href', url);
+            link.setAttribute('download', `Documentos_Contables_PRO_${fecha}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert(
+                '✅ EXCEL PROFESIONAL GENERADO EXITOSAMENTE\n\n' +
+                `📄 Archivo: Documentos_Contables_PRO_${fecha}.csv\n\n` +
+                '📊 Contenido:\n' +
+                `• Hoja 1: ${todosDocumentos.length} documentos completos\n` +
+                `• Hoja 2: Resumen por tipo (${Object.keys(resumenPorTipo).length} tipos)\n` +
+                (hayFaltantes ? `• Hoja 3: ${datosFaltantes.length} tipos con faltantes\n` : '') +
+                `• Hoja 4: Estadísticas generales\n\n` +
+                '🎯 Abre el archivo en Excel para ver todas las hojas'
+            );
+        }
+        
+        // ✅ EXPORTAR CONSECUTIVOS FALTANTES A EXCEL (FUNCIÓN LEGACY - MANTENER POR COMPATIBILIDAD)
+        function exportarConsecutivosFaltantes(datos, desde, hasta) {
+            // Crear CSV manualmente
+            let csv = 'Tipo de Documento,Rango Min,Rango Max,Total Existentes,Total Esperados,Consecutivos Faltantes\n';
+            
+            datos.forEach(item => {
+                csv += `${item.tipo},${item.min},${item.max},${item.total},${item.esperados},"${item.faltantes}"\n`;
+            });
+            
+            // Agregar resumen al final
+            csv += '\n\nRESUMEN\n';
+            csv += `Periodo,${desde} al ${hasta}\n`;
+            csv += `Tipos con faltantes,${datos.length}\n`;
+            csv += `Total documentos faltantes,${datos.reduce((sum, d) => sum + d.faltantes.split(',').length, 0)}\n`;
+            
+            // Crear blob y descargar
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            
+            const fecha = new Date().toISOString().split('T')[0];
+            link.setAttribute('href', url);
+            link.setAttribute('download', `Consecutivos_Faltantes_${fecha}.csv`);
+            link.style.visibility = 'hidden';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            alert('✅ Archivo descargado: Consecutivos_Faltantes_' + fecha + '.csv');
+        }
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

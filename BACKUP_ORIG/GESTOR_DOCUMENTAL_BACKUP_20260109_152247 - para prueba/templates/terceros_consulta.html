@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Terceros - Gestión Avanzada</title>
+    <style>
+        /* ========================================================================= */
+        /*                     COLORES INSTITUCIONALES                              */
+        /* ========================================================================= */
+        :root {
+            --primary-green: #166534;
+            --primary-green-dark: #14532d;
+            --primary-green-light: #22c55e;
+            --secondary-orange: #f97316;
+            --secondary-orange-dark: #ea580c;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-yellow: #eab308;
+            --success-green: #10b981;
+            --warning-orange: #f59e0b;
+            --danger-red: #ef4444;
+            --info-blue: #06b6d4;
+            --dark-gray: #374151;
+            --light-gray: #f3f4f6;
+            --white: #ffffff;
+            --border-color: #d1d5db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--light-gray) 0%, #e5e7eb 100%);
+            min-height: 100vh;
+            color: var(--dark-gray);
+        }
+
+        /* ========================================================================= */
+        /*                              HEADER FIJO                                 */
+        /* ========================================================================= */
+        .header-fijo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-titulo h1 {
+            color: var(--white);
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-header {
+            background: var(--secondary-orange);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-header:hover {
+            background: var(--secondary-orange-dark);
+            transform: translateY(-1px);
+        }
+
+        /* ========================================================================= */
+        /*                         CONTENEDOR PRINCIPAL                             */
+        /* ========================================================================= */
+        .contenedor-principal {
+            margin-top: 80px;
+            padding: 1rem;
+            max-width: 100%;
+        }
+
+        /* ========================================================================= */
+        /*                           PANEL DE FILTROS                               */
+        /* ========================================================================= */
+        .panel-filtros {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .filtros-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto auto;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .campo-grupo {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .campo-label {
+            font-weight: 600;
+            color: var(--primary-green);
+            font-size: 0.9rem;
+        }
+
+        .campo-input, .campo-select {
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .campo-input:focus, .campo-select:focus {
+            outline: none;
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-green);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-green-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--dark-gray);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        /* ========================================================================= */
+        /*                           PANEL DE ESTADÍSTICAS                         */
+        /* ========================================================================= */
+        .panel-estadisticas {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+            border-radius: 8px;
+            background: linear-gradient(135deg, var(--light-gray) 0%, #f9fafb 100%);
+        }
+
+        .stat-numero {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-green);
+        }
+
+        .stat-texto {
+            font-size: 0.8rem;
+            color: #6b7280;
+            font-weight: 500;
+        }
+
+        /* ========================================================================= */
+        /*                        TABLA CON ENCABEZADOS FIJOS                      */
+        /* ========================================================================= */
+        .contenedor-tabla {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .tabla-wrapper {
+            max-height: 600px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .tabla {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .tabla thead {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .tabla th {
+            color: var(--white);
+            font-weight: 600;
+            padding: 1rem 0.75rem;
+            text-align: left;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tabla th:last-child {
+            border-right: none;
+        }
+
+        .tabla td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.2s ease;
+        }
+
+        .tabla tbody tr:hover {
+            background-color: rgba(22, 101, 52, 0.02);
+        }
+
+        .tabla tbody tr:nth-child(even) {
+            background-color: rgba(248, 250, 252, 0.5);
+        }
+
+        /* ========================================================================= */
+        /*                              BADGES Y ESTADOS                           */
+        /* ========================================================================= */
+        .badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-success {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .badge-danger {
+            background-color: rgba(239, 68, 68, 0.1);
+            color: var(--danger-red);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .badge-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: var(--warning-orange);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        .badge-info {
+            background-color: rgba(6, 182, 212, 0.1);
+            color: var(--info-blue);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+        }
+
+        /* ========================================================================= */
+        /*                             BOTONES DE ACCIÓN                           */
+        /* ========================================================================= */
+        .acciones-fila {
+            display: flex;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .btn-info-sm {
+            background: var(--info-blue);
+            color: var(--white);
+        }
+
+        .btn-warning-sm {
+            background: var(--warning-orange);
+            color: var(--white);
+        }
+
+        .btn-success-sm {
+            background: var(--success-green);
+            color: var(--white);
+        }
+
+        .btn-danger-sm {
+            background: var(--danger-red);
+            color: var(--white);
+        }
+
+        .btn-sm:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        /* ========================================================================= */
+        /*                              PAGINACIÓN                                 */
+        /* ========================================================================= */
+        .panel-paginacion {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .paginacion-info {
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+        }
+
+        .paginacion-controles {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .paginacion-btn {
+            padding: 0.5rem 0.75rem;
+            border: 2px solid var(--border-color);
+            background: var(--white);
+            color: var(--dark-gray);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .paginacion-btn:hover:not(.disabled) {
+            border-color: var(--primary-green);
+            color: var(--primary-green);
+        }
+
+        .paginacion-btn.active {
+            background: var(--primary-green);
+            color: var(--white);
+            border-color: var(--primary-green);
+        }
+
+        .paginacion-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ========================================================================= */
+        /*                             LOADING STATES                              */
+        /* ========================================================================= */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(22, 101, 52, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-green);
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.1rem;
+            color: var(--primary-green);
+        }
+
+        /* ========================================================================= */
+        /*                             RESPONSIVE                                   */
+        /* ========================================================================= */
+        @media (max-width: 1200px) {
+            .filtros-row {
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+            }
+
+            .filtros-row .campo-grupo:nth-child(n+3) {
+                grid-column: 1 / -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-fijo {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .contenedor-principal {
+                margin-top: 120px;
+                padding: 0.5rem;
+            }
+
+            .filtros-row {
+                grid-template-columns: 1fr;
+            }
+
+            .panel-estadisticas {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tabla-wrapper {
+                max-height: 400px;
+            }
+
+            .tabla {
+                font-size: 0.8rem;
+            }
+
+            .tabla th,
+            .tabla td {
+                padding: 0.5rem 0.25rem;
+            }
+
+            .acciones-fila {
+                flex-direction: column;
+            }
+
+            .panel-paginacion {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- ========================================================================= -->
+    <!--                              HEADER FIJO                                 -->
+    <!-- ========================================================================= -->
+    <header class="header-fijo">
+        <div class="header-titulo">
+            <h1>
+                <span>📋</span>
+                Consulta de Terceros
+            </h1>
+        </div>
+        <div class="header-acciones">
+            <a href="/dashboard" class="btn-header">
+                <span>🏠</span>
+                Volver al Menú
+            </a>
+            <a href="/terceros/crear" class="btn-header">
+                <span>➕</span>
+                Crear Tercero
+            </a>
+        </div>
+    </header>
+
+    <!-- ========================================================================= -->
+    <!--                         CONTENEDOR PRINCIPAL                             -->
+    <!-- ========================================================================= -->
+    <div class="contenedor-principal">
+        <!-- PANEL DE FILTROS -->
+        <div class="panel-filtros">
+            <div class="filtros-row">
+                <div class="campo-grupo">
+                    <label class="campo-label">🔍 Buscar (NIT, Razón Social, Email)</label>
+                    <input type="text" class="campo-input" id="buscar" placeholder="Ingrese término de búsqueda...">
+                </div>
+                
+                <div class="campo-grupo">
+                    <label class="campo-label">📊 Registros por página</label>
+                    <select class="campo-select" id="registros-por-pagina">
+                        <option value="200">200</option>
+                        <option value="500">500</option>
+                        <option value="1000">1000</option>
+                        <option value="5000">5000</option>
+                    </select>
+                </div>
+
+                <div class="campo-grupo">
+                    <label class="campo-label">🔄 Estado</label>
+                    <select class="campo-select" id="filtro-estado">
+                        <option value="">Todos</option>
+                        <option value="activos">Activos</option>
+                        <option value="inactivos">Inactivos</option>
+                    </select>
+                </div>
+
+                <div class="campo-grupo">
+                    <label class="campo-label">📋 Ordenar por</label>
+                    <select class="campo-select" id="ordenar-por">
+                        <option value="fecha_desc">Fecha ↓</option>
+                        <option value="fecha_asc">Fecha ↑</option>
+                        <option value="nit_asc">NIT ↑</option>
+                        <option value="nit_desc">NIT ↓</option>
+                        <option value="razon_asc">Razón Social ↑</option>
+                        <option value="razon_desc">Razón Social ↓</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-primary" onclick="aplicarFiltros()">
+                    <span>🔍</span>
+                    Buscar
+                </button>
+
+                <button class="btn btn-secondary" onclick="limpiarFiltros()">
+                    <span>🔄</span>
+                    Limpiar
+                </button>
+            </div>
+        </div>
+
+        <!-- PANEL DE ESTADÍSTICAS -->
+        <div class="panel-estadisticas" id="estadisticas-panel">
+            <!-- Se cargan dinámicamente -->
+        </div>
+
+        <!-- TABLA DE TERCEROS -->
+        <div class="contenedor-tabla">
+            <div class="tabla-wrapper" id="tabla-wrapper">
+                <table class="tabla">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;">
+                                <input type="checkbox" id="seleccionar-todos" onchange="toggleSeleccionTodos()">
+                            </th>
+                            <th style="width: 120px;">NIT</th>
+                            <th>RAZÓN SOCIAL / NOMBRE</th>
+                            <th style="width: 150px;">FECHA CREACIÓN</th>
+                            <th style="width: 150px;">FECHA ACTUALIZACIÓN</th>
+                            <th style="width: 80px;">DÍAS</th>
+                            <th style="width: 80px;">DOCS</th>
+                            <th style="width: 100px;">ESTADO</th>
+                            <th style="width: 200px;">ACCIONES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-body">
+                        <!-- Se carga dinámicamente -->
+                    </tbody>
+                </table>
+                
+                <!-- Loading overlay -->
+                <div class="loading-overlay" id="loading-overlay" style="display: none;">
+                    <div>
+                        <div class="loading"></div>
+                        <div style="margin-top: 1rem;">Cargando terceros...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL DE PAGINACIÓN -->
+        <div class="panel-paginacion" id="panel-paginacion">
+            <!-- Se carga dinámicamente -->
+        </div>
+    </div>
+
+    <script>
+        // =====================================================================
+        //                           VARIABLES GLOBALES
+        // =====================================================================
+        
+        let datosActuales = {
+            terceros: [],
+            pagination: {},
+            stats: {},
+            terceros_seleccionados: []
+        };
+
+        let filtrosActuales = {
+            page: 1,
+            per_page: 200,
+            search: '',
+            estado: '',
+            orden: 'fecha_desc'
+        };
+
+        // =====================================================================
+        //                           CARGA DE DATOS
+        // =====================================================================
+        
+        async function cargarTerceros() {
+            mostrarLoading(true);
+            
+            try {
+                const params = new URLSearchParams(filtrosActuales);
+                const response = await fetch(`/terceros/api/listar?${params}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('🎯 API Success - data structure:', Object.keys(data));
+                    console.log('🎯 data.data structure:', Object.keys(data.data));
+                    console.log('🎯 terceros array length:', data.data.terceros ? data.data.terceros.length : 'undefined');
+                    
+                    // Preservar array de seleccionados al actualizar datos
+                    const tercerosSeleccionados = datosActuales.terceros_seleccionados || [];
+                    datosActuales = data.data;
+                    datosActuales.terceros_seleccionados = tercerosSeleccionados;
+                    console.log('🎯 datosActuales assigned:', Object.keys(datosActuales));
+                    
+                    mostrarTerceros();
+                    mostrarEstadisticas();
+                    mostrarPaginacion();
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                console.error('Error cargando terceros:', error);
+                mostrarError('Error cargando terceros: ' + error.message);
+            } finally {
+                mostrarLoading(false);
+            }
+        }
+
+        function mostrarTerceros() {
+            console.log('🚀 mostrarTerceros() called');
+            console.log('🚀 datosActuales:', datosActuales);
+            console.log('🚀 datosActuales.terceros:', datosActuales.terceros);
+            
+            const tbody = document.getElementById('tabla-body');
+            
+            if (!datosActuales.terceros || datosActuales.terceros.length === 0) {
+                console.log('❌ No hay terceros o array vacío');
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" style="text-align: center; padding: 2rem; color: #6b7280;">
+                            <div>📭</div>
+                            <div style="margin-top: 0.5rem;">No se encontraron terceros con los criterios especificados</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            console.log('✅ Procesando terceros:', datosActuales.terceros.length);
+            tbody.innerHTML = datosActuales.terceros.map(tercero => `
+                <tr>
+                    <td>
+                        <input type="checkbox" value="${tercero.id}" onchange="toggleSeleccionTercero(${tercero.id})">
+                    </td>
+                    <td>
+                        <strong>${tercero.nit}</strong>
+                    </td>
+                    <td>
+                        <div style="font-weight: 600; color: var(--primary-green);">${tercero.razon_social}</div>
+                        ${tercero.email !== 'No registrado' ? `<div style="font-size: 0.8rem; color: #6b7280;">${tercero.email}</div>` : ''}
+                    </td>
+                    <td>${tercero.fecha_registro}</td>
+                    <td>
+                        ${tercero.fecha_actualizacion}
+                        ${tercero.requiere_actualizacion ? '<div class="badge badge-warning" style="margin-top: 0.25rem;">⚠️ Desactualizado</div>' : ''}
+                    </td>
+                    <td>
+                        <span class="badge ${tercero.dias_actualizacion > 365 ? 'badge-danger' : tercero.dias_actualizacion > 180 ? 'badge-warning' : 'badge-info'}">
+                            ${tercero.dias_actualizacion}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge ${tercero.tiene_documentos ? 'badge-success' : 'badge-danger'}">
+                            ${tercero.total_documentos}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="badge badge-${tercero.estado_clase}">
+                            ${tercero.estado_texto}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="acciones-fila">
+                            <button class="btn-sm btn-info-sm" onclick="verTercero(${tercero.id})" title="Ver detalles">
+                                👁️ Ver
+                            </button>
+                            <button class="btn-sm btn-warning-sm" onclick="editarTercero(${tercero.id})" title="Editar tercero">
+                                ✏️ Editar
+                            </button>
+                            ${tercero.tiene_documentos ? `
+                                <button class="btn-sm btn-success-sm" onclick="revisarDocumentos(${tercero.id})" title="Revisar documentos">
+                                    📄 Docs
+                                </button>
+                            ` : ''}
+                            <button class="btn-sm ${tercero.activo ? 'btn-danger-sm' : 'btn-success-sm'}" 
+                                    onclick="cambiarEstado(${tercero.id}, ${!tercero.activo})" 
+                                    title="${tercero.activo ? 'Desactivar' : 'Activar'} tercero">
+                                ${tercero.activo ? '❌ Desactivar' : '✅ Activar'}
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function mostrarEstadisticas() {
+            const panel = document.getElementById('estadisticas-panel');
+            const stats = datosActuales.stats || {};
+            const tercerosSeleccionados = datosActuales.terceros_seleccionados || [];
+            
+            panel.innerHTML = `
+                <div class="stat-item">
+                    <div class="stat-numero">${(stats.total_terceros || 0).toLocaleString()}</div>
+                    <div class="stat-texto">Total Terceros</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-numero">${stats.mostrando_desde || 0} - ${stats.mostrando_hasta || 0}</div>
+                    <div class="stat-texto">Mostrando</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-numero">${(datosActuales.pagination?.page || 0)} / ${(datosActuales.pagination?.total_pages || 0)}</div>
+                    <div class="stat-texto">Página Actual</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-numero">${tercerosSeleccionados.length}</div>
+                    <div class="stat-texto">Seleccionados</div>
+                </div>
+            `;
+        }
+
+        function mostrarPaginacion() {
+            const panel = document.getElementById('panel-paginacion');
+            const pag = datosActuales.pagination;
+            
+            // Información de paginación
+            const info = `Mostrando ${datosActuales.stats.mostrando_desde} - ${datosActuales.stats.mostrando_hasta} de ${datosActuales.stats.total_terceros} terceros`;
+            
+            // Controles de paginación
+            let controles = `
+                <div class="paginacion-controles">
+                    <button class="paginacion-btn ${!pag.has_prev ? 'disabled' : ''}" 
+                            onclick="cambiarPagina(1)" ${!pag.has_prev ? 'disabled' : ''}>
+                        ⏮️ Primera
+                    </button>
+                    <button class="paginacion-btn ${!pag.has_prev ? 'disabled' : ''}" 
+                            onclick="cambiarPagina(${pag.prev_page || 1})" ${!pag.has_prev ? 'disabled' : ''}>
+                        ⬅️ Anterior
+                    </button>
+            `;
+            
+            // Páginas numeradas
+            const startPage = Math.max(1, pag.page - 2);
+            const endPage = Math.min(pag.total_pages, pag.page + 2);
+            
+            for (let i = startPage; i <= endPage; i++) {
+                controles += `
+                    <button class="paginacion-btn ${i === pag.page ? 'active' : ''}" 
+                            onclick="cambiarPagina(${i})">
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            controles += `
+                    <button class="paginacion-btn ${!pag.has_next ? 'disabled' : ''}" 
+                            onclick="cambiarPagina(${pag.next_page || pag.total_pages})" ${!pag.has_next ? 'disabled' : ''}>
+                        Siguiente ➡️
+                    </button>
+                    <button class="paginacion-btn ${!pag.has_next ? 'disabled' : ''}" 
+                            onclick="cambiarPagina(${pag.total_pages})" ${!pag.has_next ? 'disabled' : ''}>
+                        Última ⏭️
+                    </button>
+                </div>
+            `;
+            
+            panel.innerHTML = `
+                <div class="paginacion-info">${info}</div>
+                ${controles}
+            `;
+        }
+
+        function mostrarLoading(mostrar) {
+            const overlay = document.getElementById('loading-overlay');
+            overlay.style.display = mostrar ? 'flex' : 'none';
+        }
+
+        function mostrarError(mensaje) {
+            const tbody = document.getElementById('tabla-body');
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9" style="text-align: center; padding: 2rem; color: var(--danger-red);">
+                        <div>❌</div>
+                        <div style="margin-top: 0.5rem;">${mensaje}</div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // =====================================================================
+        //                           FUNCIONES DE FILTROS
+        // =====================================================================
+        
+        function aplicarFiltros() {
+            filtrosActuales.page = 1;
+            filtrosActuales.search = document.getElementById('buscar').value.trim();
+            filtrosActuales.per_page = parseInt(document.getElementById('registros-por-pagina').value);
+            filtrosActuales.estado = document.getElementById('filtro-estado').value;
+            filtrosActuales.orden = document.getElementById('ordenar-por').value;
+            
+            cargarTerceros();
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('buscar').value = '';
+            document.getElementById('registros-por-pagina').value = '200';
+            document.getElementById('filtro-estado').value = '';
+            document.getElementById('ordenar-por').value = 'fecha_desc';
+            
+            filtrosActuales = {
+                page: 1,
+                per_page: 200,
+                search: '',
+                estado: '',
+                orden: 'fecha_desc'
+            };
+            
+            cargarTerceros();
+        }
+
+        function cambiarPagina(nuevaPagina) {
+            filtrosActuales.page = nuevaPagina;
+            cargarTerceros();
+        }
+
+        // =====================================================================
+        //                           SELECCIÓN DE TERCEROS
+        // =====================================================================
+        
+        function toggleSeleccionTodos() {
+            const checkbox = document.getElementById('seleccionar-todos');
+            const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
+            
+            checkboxes.forEach(cb => {
+                cb.checked = checkbox.checked;
+                const terceroId = parseInt(cb.value);
+                if (checkbox.checked) {
+                    if (!datosActuales.terceros_seleccionados.includes(terceroId)) {
+                        datosActuales.terceros_seleccionados.push(terceroId);
+                    }
+                } else {
+                    const index = datosActuales.terceros_seleccionados.indexOf(terceroId);
+                    if (index > -1) {
+                        datosActuales.terceros_seleccionados.splice(index, 1);
+                    }
+                }
+            });
+            
+            mostrarEstadisticas();
+        }
+
+        function toggleSeleccionTercero(terceroId) {
+            const checkbox = document.querySelector(`input[value="${terceroId}"]`);
+            
+            if (checkbox.checked) {
+                if (!datosActuales.terceros_seleccionados.includes(terceroId)) {
+                    datosActuales.terceros_seleccionados.push(terceroId);
+                }
+            } else {
+                const index = datosActuales.terceros_seleccionados.indexOf(terceroId);
+                if (index > -1) {
+                    datosActuales.terceros_seleccionados.splice(index, 1);
+                }
+            }
+            
+            // Actualizar checkbox "seleccionar todos"
+            const totalCheckboxes = document.querySelectorAll('tbody input[type="checkbox"]').length;
+            const checkboxSeleccionados = document.querySelectorAll('tbody input[type="checkbox"]:checked').length;
+            const checkboxTodos = document.getElementById('seleccionar-todos');
+            
+            checkboxTodos.checked = totalCheckboxes > 0 && checkboxSeleccionados === totalCheckboxes;
+            checkboxTodos.indeterminate = checkboxSeleccionados > 0 && checkboxSeleccionados < totalCheckboxes;
+            
+            mostrarEstadisticas();
+        }
+
+        // =====================================================================
+        //                           ACCIONES DE TERCEROS
+        // =====================================================================
+        
+        function verTercero(terceroId) {
+            window.location.href = `/terceros/editar/${terceroId}`;
+        }
+
+        function editarTercero(terceroId) {
+            window.location.href = `/terceros/editar/${terceroId}`;
+        }
+
+        function revisarDocumentos(terceroId) {
+            window.location.href = `/terceros/documentos/${terceroId}`;
+        }
+
+        async function cambiarEstado(terceroId, nuevoEstado) {
+            const tercero = datosActuales.terceros.find(t => t.id === terceroId);
+            const accion = nuevoEstado ? 'activar' : 'desactivar';
+            
+            if (!confirm(`¿Está seguro que desea ${accion} el tercero "${tercero.razon_social}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/terceros/api/cambiar_estado/${terceroId}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({activo: nuevoEstado})
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert(`✅ Tercero ${accion} exitosamente`);
+                    cargarTerceros(); // Recargar para mostrar cambios
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (error) {
+                alert(`❌ Error: ${error.message}`);
+            }
+        }
+
+        // =====================================================================
+        //                           EVENT LISTENERS
+        // =====================================================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar terceros inicial
+            cargarTerceros();
+            
+            // Event listener para búsqueda en tiempo real
+            const inputBuscar = document.getElementById('buscar');
+            let timeoutBusqueda;
+            
+            inputBuscar.addEventListener('input', function() {
+                clearTimeout(timeoutBusqueda);
+                timeoutBusqueda = setTimeout(() => {
+                    if (inputBuscar.value.trim().length >= 3 || inputBuscar.value.trim().length === 0) {
+                        aplicarFiltros();
+                    }
+                }, 500);
+            });
+
+            // Event listeners para otros filtros
+            document.getElementById('registros-por-pagina').addEventListener('change', aplicarFiltros);
+            document.getElementById('filtro-estado').addEventListener('change', aplicarFiltros);
+            document.getElementById('ordenar-por').addEventListener('change', aplicarFiltros);
+
+            // Tecla Enter para buscar
+            inputBuscar.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    aplicarFiltros();
+                }
+            });
+        });
+
+        // =====================================================================
+        //                           FUNCIONES ADICIONALES
+        // =====================================================================
+        
+        function enviarNotificacionMasiva() {
+            const tercerosSeleccionados = datosActuales.terceros_seleccionados || [];
+            if (tercerosSeleccionados.length === 0) {
+                alert('❌ Debe seleccionar al menos un tercero para enviar notificaciones');
+                return;
+            }
+
+            const asunto = prompt('Ingrese el asunto del correo:');
+            if (!asunto) return;
+
+            const mensaje = prompt('Ingrese el mensaje del correo:');
+            if (!mensaje) return;
+
+            // TODO: Implementar envío masivo
+            alert(`🚧 Enviando notificación a ${tercerosSeleccionados.length} terceros...`);
+        }
+
+        function exportarSeleccion() {
+            const tercerosSeleccionados = datosActuales.terceros_seleccionados || [];
+            if (tercerosSeleccionados.length === 0) {
+                alert('❌ Debe seleccionar al menos un tercero para exportar');
+                return;
+            }
+
+            // TODO: Implementar exportación
+            alert(`🚧 Exportando ${tercerosSeleccionados.length} terceros...`);
+        }
+        
+        // =====================================================================
+        //                        FUNCIONES DE BOTONES
+        // =====================================================================
+        
+        function verTercero(id) {
+            console.log('Ver tercero:', id);
+            // Redirigir a página de visualización del tercero
+            window.location.href = `/terceros/ver/${id}`;
+        }
+        
+        function editarTercero(id) {
+            console.log('Editar tercero:', id);
+            // Redirigir a página de edición del tercero
+            window.location.href = `/terceros/editar/${id}`;
+        }
+        
+        function revisarDocumentos(id) {
+            console.log('Revisar documentos del tercero:', id);
+            alert(`📄 Revisar documentos del tercero ID: ${id}\n\n🚧 Función en desarrollo`);
+            // TODO: Implementar vista de documentos
+        }
+        
+        function cambiarEstado(id, nuevoEstado) {
+            console.log('Cambiar estado del tercero:', id, 'nuevo estado:', nuevoEstado);
+            const accion = nuevoEstado ? 'activar' : 'desactivar';
+            const confirmacion = confirm(`¿Está seguro que desea ${accion} este tercero?`);
+            
+            if (confirmacion) {
+                // Llamada real a la API
+                fetch(`/terceros/api/cambiar_estado/${id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ activo: nuevoEstado })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`✅ ${accion.toUpperCase()} exitoso: ${data.message}`);
+                        cargarTerceros(); // Recargar después del cambio
+                    } else {
+                        alert(`❌ Error: ${data.message}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert(`❌ Error de conexión: ${error.message}`);
+                });
+            }
+        }
+        
+        function toggleSeleccionTercero(id) {
+            console.log('Toggle selección tercero:', id);
+            const tercerosSeleccionados = datosActuales.terceros_seleccionados || [];
+            
+            if (tercerosSeleccionados.includes(id)) {
+                // Remover de seleccionados
+                const index = tercerosSeleccionados.indexOf(id);
+                tercerosSeleccionados.splice(index, 1);
+            } else {
+                // Agregar a seleccionados
+                tercerosSeleccionados.push(id);
+            }
+            
+            datosActuales.terceros_seleccionados = tercerosSeleccionados;
+            mostrarEstadisticas(); // Actualizar contador
+        }
+        
+        function cambiarPagina(numeroPagina) {
+            console.log('Cambiar a página:', numeroPagina);
+            filtrosActuales.page = numeroPagina;
+            cargarTerceros();
+        }
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

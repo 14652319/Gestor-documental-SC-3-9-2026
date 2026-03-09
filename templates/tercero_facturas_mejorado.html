@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facturas de {{ tercero.razon_social }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        .tercero-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .filters {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        .filter-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+        .facturas-list {
+            display: grid;
+            gap: 15px;
+        }
+        .factura-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        .factura-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .factura-header {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .factura-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn:hover { transform: translateY(-1px); }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Volver al Dashboard</a>
+        
+        <div class="header">
+            <h1>📄 Facturas de {{ tercero.razon_social }}</h1>
+            <p><strong>NIT:</strong> {{ tercero.nit }}</p>
+        </div>
+
+        <div class="tercero-info">
+            <h3>Información del Tercero</h3>
+            <div class="stats">
+                <div><strong>NIT:</strong> {{ tercero.nit }}</div>
+                <div><strong>Razón Social:</strong> {{ tercero.razon_social }}</div>
+                <div><strong>Total Facturas:</strong> {{ tercero.total_facturas }}</div>
+                <div><strong>Valor Total:</strong> ${{ "{:,.0f}".format(tercero.get('valor_total', 0)) }}</div>
+            </div>
+        </div>
+
+        <div class="filters">
+            <h3>Filtros</h3>
+            <form method="GET" class="filter-row">
+                <div>
+                    <label>Fecha Desde:</label>
+                    <input type="date" name="fecha_desde" value="{{ request.args.get('fecha_desde', '') }}">
+                </div>
+                <div>
+                    <label>Fecha Hasta:</label>
+                    <input type="date" name="fecha_hasta" value="{{ request.args.get('fecha_hasta', '') }}">
+                </div>
+                <div>
+                    <label>Buscar:</label>
+                    <input type="text" name="buscar" placeholder="Prefijo, folio..." value="{{ request.args.get('buscar', '') }}">
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-primary">Filtrar</button>
+                </div>
+            </form>
+        </div>
+
+        {% if facturas %}
+        <div class="facturas-list">
+            <h3>📋 Facturas Encontradas ({{ facturas|length }})</h3>
+            {% for factura in facturas %}
+            <div class="factura-card">
+                <div class="factura-header">
+                    <div>
+                        <strong>{{ factura.get('prefijo', 'N/A') }}-{{ factura.get('folio', 'N/A') }}</strong>
+                        <div style="color: #666; font-size: 14px;">{{ factura.get('clave_busqueda', 'N/A') }}</div>
+                    </div>
+                    <div style="color: #28a745; font-weight: bold;">
+                        ${{ "{:,.0f}".format(factura.get('valor', 0)) }}
+                    </div>
+                    <div>
+                        <a href="/factura/{{ factura.get('clave_busqueda', '') }}" class="btn btn-primary">Ver Detalle</a>
+                    </div>
+                </div>
+                <div class="factura-details">
+                    <div><strong>Fecha:</strong> {{ factura.get('fecha', 'N/A') }}</div>
+                    <div><strong>Estado:</strong> 
+                        {% if factura.get('archivos_fisicos', 0) > 0 %}
+                            <span style="color: #28a745;">✓ Con archivos</span>
+                        {% else %}
+                            <span style="color: #ffc107;">⚠ Solo metadatos</span>
+                        {% endif %}
+                    </div>
+                    <div><strong>Archivos:</strong> {{ factura.get('archivos_fisicos', 0) }}</div>
+                    <div><strong>Tipo:</strong> {{ factura.get('tipo_factura', 'N/A') }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 40px; color: #666;">
+            <h3>📭 Sin Facturas</h3>
+            <p>No se encontraron facturas registradas para {{ tercero.razon_social }}</p>        
+            <a href="/" class="btn btn-primary">Volver al Dashboard</a>
+        </div>
+        {% endif %}
+    </div>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

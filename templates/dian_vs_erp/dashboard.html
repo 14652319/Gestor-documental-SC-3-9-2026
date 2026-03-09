@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validación DIAN vs ERP - Gestor Documental</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --brand-primary: #16a085;
+            --brand-secondary: #1abc9c;
+            --brand-dark: #138d75;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --border-primary: #e9ecef;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --info: #3498db;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .dashboard-card {
+            background: var(--bg-primary);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: scale(1.02);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .action-button {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .action-button:hover {
+            background: linear-gradient(135deg, var(--brand-dark), var(--brand-primary));
+            transform: translateY(-1px);
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-completado {
+            background: var(--success);
+            color: white;
+        }
+
+        .status-validando {
+            background: var(--warning);
+            color: white;
+        }
+
+        .status-error {
+            background: var(--danger);
+            color: white;
+        }
+
+        .status-iniciado {
+            background: var(--info);
+            color: white;
+        }
+
+        .table-responsive {
+            background: var(--bg-primary);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .modern-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .modern-table th {
+            background: var(--brand-primary);
+            color: white;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .modern-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-primary);
+        }
+
+        .modern-table tr:hover {
+            background-color: var(--bg-secondary);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+        }
+
+        .alert-success {
+            background: rgba(39, 174, 96, 0.1);
+            border-color: var(--success);
+            color: var(--success);
+        }
+
+        .alert-warning {
+            background: rgba(243, 156, 18, 0.1);
+            border-color: var(--warning);
+            color: var(--warning);
+        }
+
+        .alert-danger {
+            background: rgba(231, 76, 60, 0.1);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        .alert-info {
+            background: rgba(52, 152, 219, 0.1);
+            border-color: var(--info);
+            color: var(--info);
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--brand-primary), var(--brand-secondary));
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center py-6">
+                <div class="flex items-center">
+                    <i class="fas fa-balance-scale text-3xl text-brand-primary mr-3"></i>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">Validación DIAN vs ERP</h1>
+                        <p class="text-sm text-gray-600">Sistema de Validación de Facturas</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm font-medium text-gray-900">{{ usuario }}</p>
+                        <p class="text-xs text-gray-500">Periodo: {{ periodo_actual }}</p>
+                    </div>
+                    <a href="{{ url_for('dashboard') }}" class="action-button">
+                        <i class="fas fa-home mr-2"></i>Dashboard Principal
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Mensajes Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }}">
+                        <i class="fas fa-{{ 'exclamation-triangle' if category == 'error' else 'info-circle' }} mr-2"></i>
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Estadísticas Principales -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_periodos }}</div>
+                <div class="stat-label">
+                    <i class="fas fa-calendar-alt mr-1"></i>
+                    Periodos Procesados
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number">{{ stats_actual.get('total_dian', 0) }}</div>
+                <div class="stat-label">
+                    <i class="fas fa-file-invoice mr-1"></i>
+                    Facturas DIAN ({{ periodo_actual }})
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number">{{ stats_actual.get('total_erp', 0) }}</div>
+                <div class="stat-label">
+                    <i class="fas fa-database mr-1"></i>
+                    Facturas ERP ({{ periodo_actual }})
+                </div>
+            </div>
+            
+            <div class="stat-card">
+                <div class="stat-number">{{ stats_actual.get('total_coincidentes', 0) }}</div>
+                <div class="stat-label">
+                    <i class="fas fa-check-circle mr-1"></i>
+                    Coincidentes ({{ periodo_actual }})
+                </div>
+            </div>
+        </div>
+
+        <!-- Estado del Periodo Actual -->
+        {% if procesamiento_actual %}
+        <div class="dashboard-card p-6 mb-8">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">
+                <i class="fas fa-chart-line mr-2 text-brand-primary"></i>
+                Estado del Periodo {{ periodo_actual }}
+            </h3>
+            
+            <div class="flex items-center justify-between mb-4">
+                <span class="status-badge status-{{ procesamiento_actual.estado_procesamiento }}">
+                    {{ procesamiento_actual.estado_procesamiento }}
+                </span>
+                
+                {% if procesamiento_actual.estado_procesamiento == 'completado' %}
+                    <div class="text-sm text-gray-600">
+                        Finalizado: {{ procesamiento_actual.fecha_finalizacion.strftime('%Y-%m-%d %H:%M:%S') if procesamiento_actual.fecha_finalizacion }}
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if stats_actual.get('total_coincidentes', 0) > 0 %}
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-600">{{ stats_actual.get('total_coincidentes', 0) }}</div>
+                    <div class="text-sm text-gray-600">Coincidentes</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-red-600">{{ stats_actual.get('total_discrepantes', 0) }}</div>
+                    <div class="text-sm text-gray-600">Discrepantes</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-yellow-600">
+                        {{ stats_actual.get('total_dian', 0) + stats_actual.get('total_erp', 0) - stats_actual.get('total_coincidentes', 0) - stats_actual.get('total_discrepantes', 0) }}
+                    </div>
+                    <div class="text-sm text-gray-600">Sin Cruzar</div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="dashboard-card p-6 mb-8">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle mr-2"></i>
+                No hay datos procesados para el periodo {{ periodo_actual }}. 
+                <a href="{{ url_for('dian_vs_erp.cargar_archivos') }}" class="underline">Cargar archivos</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Acciones Rápidas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <a href="{{ url_for('dian_vs_erp.cargar_archivos') }}" class="dashboard-card p-6 hover:bg-gray-50 transition-colors">
+                <div class="text-center">
+                    <i class="fas fa-upload text-4xl text-brand-primary mb-3"></i>
+                    <h4 class="font-semibold text-gray-900">Cargar Archivos</h4>
+                    <p class="text-sm text-gray-600 mt-1">Subir reportes DIAN y ERP</p>
+                </div>
+            </a>
+
+            <a href="{{ url_for('dian_vs_erp.validaciones') }}" class="dashboard-card p-6 hover:bg-gray-50 transition-colors">
+                <div class="text-center">
+                    <i class="fas fa-search text-4xl text-brand-primary mb-3"></i>
+                    <h4 class="font-semibold text-gray-900">Ver Validaciones</h4>
+                    <p class="text-sm text-gray-600 mt-1">Consultar resultados</p>
+                </div>
+            </a>
+
+            <a href="{{ url_for('dian_vs_erp.reportes') }}" class="dashboard-card p-6 hover:bg-gray-50 transition-colors">
+                <div class="text-center">
+                    <i class="fas fa-file-excel text-4xl text-brand-primary mb-3"></i>
+                    <h4 class="font-semibold text-gray-900">Generar Reportes</h4>
+                    <p class="text-sm text-gray-600 mt-1">Exportar a Excel</p>
+                </div>
+            </a>
+
+            <button onclick="ejecutarValidacion()" class="dashboard-card p-6 hover:bg-gray-50 transition-colors">
+                <div class="text-center">
+                    <i class="fas fa-play text-4xl text-brand-primary mb-3"></i>
+                    <h4 class="font-semibold text-gray-900">Ejecutar Validación</h4>
+                    <p class="text-sm text-gray-600 mt-1">Procesar periodo actual</p>
+                </div>
+            </button>
+        </div>
+
+        <!-- Historial de Procesamientos -->
+        {% if procesamientos %}
+        <div class="dashboard-card p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">
+                <i class="fas fa-history mr-2 text-brand-primary"></i>
+                Historial de Procesamientos
+            </h3>
+            
+            <div class="table-responsive">
+                <table class="modern-table">
+                    <thead>
+                        <tr>
+                            <th>Periodo</th>
+                            <th>Estado</th>
+                            <th>DIAN</th>
+                            <th>ERP</th>
+                            <th>Coincidentes</th>
+                            <th>Discrepantes</th>
+                            <th>Fecha Procesamiento</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for proc in procesamientos %}
+                        <tr>
+                            <td class="font-semibold">{{ proc.periodo }}</td>
+                            <td>
+                                <span class="status-badge status-{{ proc.estado_procesamiento }}">
+                                    {{ proc.estado_procesamiento }}
+                                </span>
+                            </td>
+                            <td>{{ proc.total_dian }}</td>
+                            <td>{{ proc.total_erp }}</td>
+                            <td class="text-green-600 font-semibold">{{ proc.total_coincidentes }}</td>
+                            <td class="text-red-600 font-semibold">{{ proc.total_discrepantes }}</td>
+                            <td class="text-sm text-gray-600">
+                                {{ proc.fecha_inicio.strftime('%Y-%m-%d %H:%M') if proc.fecha_inicio }}
+                            </td>
+                            <td>
+                                <div class="flex space-x-2">
+                                    <a href="{{ url_for('dian_vs_erp.validaciones', periodo=proc.periodo) }}" 
+                                       class="text-brand-primary hover:text-brand-dark" title="Ver validaciones">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('dian_vs_erp.api_exportar_validaciones', periodo=proc.periodo) }}" 
+                                       class="text-green-600 hover:text-green-800" title="Exportar Excel">
+                                        <i class="fas fa-file-excel"></i>
+                                    </a>
+                                    {% if session.rol in ['admin', 'interno'] %}
+                                    <button onclick="limpiarPeriodo('{{ proc.periodo }}')" 
+                                            class="text-red-600 hover:text-red-800" title="Limpiar datos">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="dashboard-card p-6 max-w-md w-full mx-4">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">Confirmar Acción</h3>
+                <p id="confirmMessage" class="text-gray-600 mb-6"></p>
+                <div class="flex justify-end space-x-4">
+                    <button onclick="cerrarModal()" class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                        Cancelar
+                    </button>
+                    <button id="confirmButton" class="action-button">
+                        Confirmar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notificación Toast -->
+    <div id="toast" class="fixed top-4 right-4 hidden z-50">
+        <div class="dashboard-card p-4 min-w-80">
+            <div class="flex items-center">
+                <i id="toastIcon" class="text-2xl mr-3"></i>
+                <div>
+                    <div id="toastTitle" class="font-semibold"></div>
+                    <div id="toastMessage" class="text-sm text-gray-600"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Función para ejecutar validación del periodo actual
+        function ejecutarValidacion() {
+            mostrarModal(
+                '¿Ejecutar validación del periodo {{ periodo_actual }}?',
+                () => {
+                    fetch(`/dian_vs_erp/api/ejecutar_validacion/{{ periodo_actual }}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            mostrarToast('Validación Ejecutada', data.message, 'success');
+                            setTimeout(() => location.reload(), 2000);
+                        } else {
+                            mostrarToast('Error', data.error, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        mostrarToast('Error', 'Error de conexión', 'error');
+                    });
+                }
+            );
+        }
+
+        // Función para limpiar periodo
+        function limpiarPeriodo(periodo) {
+            mostrarModal(
+                `¿Eliminar todos los datos del periodo ${periodo}? Esta acción no se puede deshacer.`,
+                () => {
+                    fetch(`/dian_vs_erp/api/limpiar_periodo/${periodo}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            mostrarToast('Periodo Limpiado', data.message, 'success');
+                            setTimeout(() => location.reload(), 2000);
+                        } else {
+                            mostrarToast('Error', data.error, 'error');
+                        }
+                    })
+                    .catch(error => {
+                        mostrarToast('Error', 'Error de conexión', 'error');
+                    });
+                }
+            );
+        }
+
+        // Funciones de modal y toast
+        function mostrarModal(mensaje, callback) {
+            document.getElementById('confirmMessage').textContent = mensaje;
+            document.getElementById('confirmButton').onclick = () => {
+                cerrarModal();
+                callback();
+            };
+            document.getElementById('confirmModal').classList.remove('hidden');
+        }
+
+        function cerrarModal() {
+            document.getElementById('confirmModal').classList.add('hidden');
+        }
+
+        function mostrarToast(titulo, mensaje, tipo) {
+            const iconos = {
+                success: 'fas fa-check-circle text-green-500',
+                error: 'fas fa-exclamation-circle text-red-500',
+                info: 'fas fa-info-circle text-blue-500'
+            };
+
+            document.getElementById('toastIcon').className = iconos[tipo];
+            document.getElementById('toastTitle').textContent = titulo;
+            document.getElementById('toastMessage').textContent = mensaje;
+            
+            const toast = document.getElementById('toast');
+            toast.classList.remove('hidden');
+            
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Actualización automática del dashboard cada 30 segundos
+        setInterval(() => {
+            if (document.hidden) return; // No actualizar si la pestaña no está visible
+            
+            fetch('/dian_vs_erp/api/estadisticas/{{ periodo_actual }}')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Actualizar estadísticas en tiempo real si es necesario
+                        console.log('Dashboard actualizado', data.estadisticas);
+                    }
+                })
+                .catch(error => {
+                    console.log('Error actualizando dashboard:', error);
+                });
+        }, 30000);
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+</body>
+</html>

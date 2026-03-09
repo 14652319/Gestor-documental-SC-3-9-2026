@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔄 Reimprimir Relación - Gestor Documental</title>
+    <style>
+        /* =============================================
+           🎨 VARIABLES CSS (LIGHT & DARK MODE)
+           ============================================= */
+        :root {
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #e1e8ed;
+            --input-bg: #ffffff;
+            --input-border: #cbd5e0;
+            --brand-green: #166534;
+            --brand-green-dark: #14532d;
+            --brand-green-light: #dcfce7;
+            --red-error: #dc2626;
+            --red-light: #fef2f2;
+            --orange-warning: #ea580c;
+            --blue-info: #2563eb;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --border-color: #404040;
+            --input-bg: #3a3a3a;
+            --input-border: #505050;
+            --brand-green: #22c55e;
+            --brand-green-dark: #16a34a;
+            --brand-green-light: #14532d;
+            --red-error: #ef5350;
+            --red-light: #4a1f1f;
+            --orange-warning: #ff9800;
+            --blue-info: #42a5f5;
+        }
+
+        /* =============================================
+           📐 BASE STYLES
+           ============================================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* =============================================
+           🎯 HEADER FIJO
+           ============================================= */
+        .header {
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+            color: white;
+            padding: 15px 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        /* 🎨 Logo en Header */
+        .header-logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-logo {
+            height: 40px;
+            width: auto;
+            object-fit: contain;
+            /* Protección contra copia */
+            user-select: none;
+            -webkit-user-drag: none;
+            pointer-events: none;
+            filter: brightness(0) invert(1); /* SVG blanco */
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+
+        .dark-mode-toggle {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: background 0.3s;
+        }
+
+        .dark-mode-toggle:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .btn-salir {
+            background: rgba(220,38,38,0.9);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+
+        .btn-salir:hover {
+            background: rgba(220,38,38,1);
+        }
+
+        /* =============================================
+           📋 CONTENEDOR PRINCIPAL (FIXED LAYOUT)
+           ============================================= */
+        .container {
+            flex: 1;
+            overflow: hidden; /* NO scroll en el contenedor principal */
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            max-height: 100%; /* Limitar altura para que quepa en el viewport */
+            overflow: hidden;
+        }
+
+        .card h3 {
+            color: var(--brand-green);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0; /* NO se encoge */
+        }
+
+        /* =============================================
+           📝 FORMULARIO (FIXED TOP)
+           ============================================= */
+        .form-section {
+            flex-shrink: 0; /* Mantener en la parte superior */
+            background: var(--card-bg);
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        /* =============================================
+           📝 FORMULARIO
+           ============================================= */
+        .alerta {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+        
+        .alerta.info {
+            background: #dbeafe;
+            border-left: 4px solid var(--blue-info);
+            color: #1e40af;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            background: var(--input-bg);
+            border: 2px solid var(--input-border);
+            border-radius: 8px;
+            font-size: 1em;
+            color: var(--text-color);
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: var(--brand-green);
+        }
+
+        option {
+            background: var(--input-bg);
+            color: var(--text-color);
+            padding: 10px;
+        }
+
+        /* =============================================
+           🎯 TABLA DE RELACIONES (SCROLLABLE)
+           ============================================= */
+        .tabla-wrapper {
+            flex: 1; /* Ocupa el espacio restante */
+            overflow-y: auto; /* SOLO la tabla tiene scroll */
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            max-height: 400px; /* Altura máxima para la tabla */
+        }
+
+        .tabla-container {
+            width: 100%;
+            position: relative;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+        }
+
+        thead {
+            background: var(--brand-green);
+            color: white;
+            position: sticky; /* HEADER FIJO */
+            top: 0;
+            z-index: 10;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9em;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: var(--brand-green-light);
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: var(--bg-color);
+        }
+
+        /* =============================================
+           🔘 BOTONES
+           ============================================= */
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-reimprimir {
+            background: var(--brand-green);
+            color: white;
+        }
+
+        .btn-reimprimir:hover {
+            background: var(--brand-green-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(22,101,52,0.3);
+        }
+
+        .btn-volver {
+            background: var(--input-bg);
+            color: var(--text-color);
+            border: 2px solid var(--input-border);
+        }
+
+        .btn-volver:hover {
+            background: var(--border-color);
+        }
+
+        .btn-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        /* =============================================
+           ⚠️ ALERTAS
+           ============================================= */
+        .alerta {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alerta.success {
+            background-color: var(--brand-green-light);
+            color: var(--brand-green-dark);
+        }
+
+        .alerta.warning {
+            background-color: var(--red-light);
+            color: var(--red-error);
+        }
+
+        .alerta.info {
+            background-color: #dbeafe;
+            color: var(--blue-info);
+        }
+
+        /* =============================================
+           📱 RESPONSIVE
+           ============================================= */
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .btn-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+            
+            td, th {
+                padding: 8px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- =============================================
+         🎯 HEADER
+         ============================================= -->
+    <header class="header">
+        <div class="header-logo-container">
+            <img src="{{ LOGO_PATH }}" alt="{{ LOGO_ALT_TEXT }}" class="header-logo">
+            <h1>🔄 Reimprimir Relación</h1>
+        </div>
+        <div class="header-actions">
+            <div class="user-info">
+                <span>{{ session['usuario']|upper }}</span>
+            </div>
+            <button type="button" class="dark-mode-toggle" id="toggleModeBtn" title="Cambiar modo" onclick="toggleDarkMode()">🌙</button>
+            <button type="button" class="btn-salir" onclick="confirmarSalida()">🏠 Volver al Menú</button>
+        </div>
+    </header>
+
+    <!-- =============================================
+         📋 CONTENEDOR PRINCIPAL
+         ============================================= -->
+    <div class="container">
+        <!-- Mensajes Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alerta {{ category }}">
+                {% if category == 'success' %}✅{% elif category == 'warning' %}⚠️{% else %}ℹ️{% endif %}
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <div class="card">
+            <h3>🔄 Seleccionar Relación a Reimprimir</h3>
+
+            {% if relaciones %}
+            <div class="alerta info">
+                ℹ️ Se encontraron <strong>{{ relaciones|length }}</strong> relaciones disponibles. Seleccione una para reimprimir.
+            </div>
+
+            <!-- =============================================
+                 📋 SECCIÓN DE CONTROLES (FIJA EN LA PARTE SUPERIOR)
+                 ============================================= -->
+            <div class="form-section">
+                <form method="post" action="{{ url_for('relaciones.reimprimir_relacion') }}" onsubmit="return validarReimpresion()">
+                    <div class="form-group">
+                        <label for="numero_relacion">📋 Número de Relación:</label>
+                        <select name="numero_relacion" id="numero_relacion" required>
+                            <option value="">-- Seleccionar Relación --</option>
+                            {% for r in relaciones %}
+                            <option value="{{ r.numero_relacion }}">
+                                {{ r.numero_relacion }} - {{ r.para }} ({{ r.total_facturas }} facturas - ${{ "{:,.0f}".format(r.valor_total|float) }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                                        <div class="form-group">
+                        <label for="formato">📄 Formato de Salida:</label>
+                        <select name="formato" id="formato" required>
+                            <option value="Excel" selected>📊 Excel (.xlsx)</option>
+                            <option value="pdf">📄 PDF (en desarrollo)</option>
+                            <option value="digital">📱 Digital (Sin Impresión)</option>
+                        </select>
+                    </div>
+
+                    <div class="button-group">
+                        <button type="submit" class="btn btn-primary">
+                            🔄 Reimprimir Relación
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="window.location.href='{{ url_for('relaciones.generar_relacion') }}'">
+                            ← Volver a Generar Relación
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- =============================================
+                 📊 TABLA DE RELACIONES (SCROLLABLE)
+                 ============================================= -->
+            <div class="tabla-wrapper">
+                <div class="tabla-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>No. Relación</th>
+                                <th>Fecha Generación</th>
+                                <th>Para</th>
+                                <th>Usuario</th>
+                                <th>Total Facturas</th>
+                                <th>Valor Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for r in relaciones %}
+                            <tr>
+                                <td><strong>{{ r.numero_relacion }}</strong></td>
+                                <td>{{ r.fecha_generacion }}</td>
+                                <td>{{ r.para }}</td>
+                                <td>{{ r.usuario }}</td>
+                                <td>{{ r.total_facturas }} facturas</td>
+                                <td>${{ "{:,.0f}".format(r.valor_total|float) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            {% else %}
+            <div class="alerta warning">
+                ⚠️ No hay relaciones disponibles para reimprimir.
+            </div>
+            <div class="btn-actions">
+                <button type="button" class="btn btn-volver" onclick="volverGenerar()">
+                    ← Volver a Generar Relación
+                </button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- =============================================
+         💻 JAVASCRIPT
+         ============================================= -->
+    <script>
+        // --- DARK MODE TOGGLE ---
+        function toggleDarkMode() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? '' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            document.getElementById('toggleModeBtn').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // Aplicar tema guardado
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || '';
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('toggleModeBtn').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        });
+
+        // --- VALIDAR REIMPRESIÓN ---
+        function validarReimpresion() {
+            const numeroRelacion = document.getElementById('numero_relacion').value;
+            if (!numeroRelacion) {
+                alert('⚠️ Debe seleccionar un número de relación');
+                return false;
+            }
+            
+            const confirmacion = confirm(`¿Está seguro de reimprimir la relación ${numeroRelacion}?`);
+            return confirmacion;
+        }
+
+        // --- NAVEGACIÓN ---
+        function volverGenerar() {
+            window.location.href = "{{ url_for('relaciones.mostrar_formulario') }}";
+        }
+
+        function confirmarSalida() {
+            window.location.href = "/dashboard";
+        }
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

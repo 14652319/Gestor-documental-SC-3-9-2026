@@ -1,0 +1,2990 @@
+<!-- VERSION: 2026-01-27 21:45 - SINTAXIS ARREGLADA -->
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Configuración - Gestor Documental</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* ===== COLORES INSTITUCIONALES SUPERTIENDAS CAÑAVERAL ===== */
+    :root{
+      /* Fondos oscuros */
+      --bg:#1a1f2e; --panel:#252b3b; --hdr:#151924; --bd:#3a4254;
+      /* Verde corporativo SC */
+      --green-bright:#00d084; --green-primary:#00c875; --green-header:#2d5016;
+      /* Textos */
+      --txt:#e8eaed; --txt-muted:#9fb0c7;
+      /* Acciones */
+      --danger:#e94444; --info:#2563eb;
+    }
+    
+    body.light-mode{
+      --bg:#f5f6f8; --panel:#ffffff; --hdr:#2d5016; --bd:#dde1e7;
+      --txt:#2c3e50; --txt-muted:#2c3e50;
+    }
+    
+    *{box-sizing:border-box; margin:0; padding:0}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+      background:var(--bg); color:var(--txt); line-height:1.6; padding:20px;
+      transition:background 0.3s, color 0.3s;
+    }
+    
+    .container{
+      max-width:1200px; margin:0 auto;
+    }
+    
+    .header{
+      background:linear-gradient(135deg, var(--green-bright) 0%, #00a86b 100%);
+      padding:20px 30px; border-radius:12px 12px 0 0; color:#fff;
+      display:flex; justify-content:space-between; align-items:center;
+      box-shadow:0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    .header h1{font-size:24px; font-weight:700}
+    
+    .btn{
+      padding:10px 20px; border-radius:8px; text-decoration:none;
+      font-weight:600; cursor:pointer; border:none; font-size:14px;
+      transition:all 0.2s;
+    }
+    
+    .btn-primary{
+      background:var(--green-primary); color:#fff;
+    }
+    .btn-primary:hover{
+      background:#00a86b; box-shadow:0 4px 12px rgba(0,200,117,0.3);
+    }
+    
+    .btn-danger{
+      background:var(--danger); color:#fff;
+    }
+    .btn-danger:hover{
+      background:#c93434; box-shadow:0 4px 12px rgba(233,68,68,0.3);
+    }
+    
+    .content{
+      background:var(--panel); padding:30px; border-radius:0 0 12px 12px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .tabs{
+      display:flex; gap:10px; margin-bottom:30px; border-bottom:2px solid var(--bd);
+      padding-bottom:10px;
+    }
+    
+    .tab{
+      padding:10px 20px; cursor:pointer; border-radius:8px 8px 0 0;
+      font-weight:600; transition:all 0.2s; border:none;
+      background:transparent; color:var(--txt-muted);
+    }
+    
+    .tab.active{
+      background:var(--green-primary); color:#fff;
+    }
+    
+    .tab-content{
+      display:none;
+    }
+    
+    .tab-content.active{
+      display:block;
+    }
+    
+    .section{
+      background:var(--bg); padding:20px; border-radius:8px; margin-bottom:20px;
+      border:1px solid var(--bd);
+    }
+    
+    .section h3{
+      color:var(--txt); margin-bottom:15px; font-size:18px;
+      border-bottom:2px solid var(--green-primary); padding-bottom:8px;
+    }
+    
+    .form-group{
+      margin-bottom:20px;
+    }
+    
+    .form-group label{
+      display:block; margin-bottom:5px; font-weight:600; color:var(--txt);
+    }
+    
+    .form-group input, .form-group select, .form-group textarea{
+      width:100%; padding:10px; border-radius:6px; border:1px solid var(--bd);
+      background:var(--panel); color:var(--txt); font-size:14px;
+    }
+    
+    .form-group textarea{
+      min-height:100px; resize:vertical;
+    }
+    
+    .grid{
+      display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr));
+      gap:20px;
+    }
+    
+    table{
+      width:100%; border-collapse:collapse; margin-top:15px;
+    }
+    
+    table th{
+      background:var(--green-header); color:#fff; padding:12px;
+      text-align:left; font-weight:600;
+    }
+    
+    table td{
+      padding:12px; border-bottom:1px solid var(--bd); color:var(--txt);
+    }
+    
+    table tr:hover{
+      background:var(--hdr);
+    }
+    
+    .badge{
+      display:inline-block; padding:4px 10px; border-radius:12px;
+      font-size:12px; font-weight:600;
+    }
+    
+    .badge-success{
+      background:#d1f4e0; color:#00a86b;
+    }
+    
+    .badge-danger{
+      background:#fee; color:#c93434;
+    }
+    
+    .badge-info{
+      background:#d6e4f0; color:#2c5f8d;
+    }
+    
+    .checkbox-group{
+      display:flex; gap:15px; flex-wrap:wrap;
+    }
+    
+    .checkbox-group label{
+      display:flex; align-items:center; gap:8px; cursor:pointer;
+    }
+    
+    /* Wrapper para tablas responsive */
+    .table-wrapper {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    /* 🆕 CLASE ESPECÍFICA PARA MODALES - Textos negros y visibles */
+    .modal-form-dark .form-group label{
+      color:#000 !important; font-weight:700 !important;
+    }
+    
+    .modal-form-dark .form-group input,
+    .modal-form-dark .form-group select,
+    .modal-form-dark .form-group textarea{
+      background:#fff !important; color:#000 !important; font-weight:600 !important;
+      border:2px solid #333 !important;
+    }
+    
+    .modal-form-dark .form-group select option{
+      color:#000 !important; background:#fff !important; font-weight:600 !important;
+    }
+    
+    .modal-form-dark .form-group input::placeholder{
+      color:#666 !important; font-weight:500 !important;
+    }
+    
+    .modal-form-dark small{
+      color:#000 !important; font-weight:600 !important;
+    }
+    
+    .modal-form-dark .checkbox-group label{
+      color:#000 !important; font-weight:600 !important;
+    }
+    
+    /* ===== RESPONSIVE DESIGN ===== */
+    @media screen and (max-width: 768px) {
+      body {
+        padding: 10px;
+      }
+      
+      .container {
+        max-width: 100%;
+      }
+      
+      .header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+        text-align: center;
+      }
+      
+      .header h1 {
+        font-size: 20px;
+      }
+      
+      .content {
+        padding: 15px;
+      }
+      
+      .tabs {
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+      
+      .tab {
+        padding: 8px 12px;
+        font-size: 13px;
+        flex: 1 1 auto;
+        min-width: 120px;
+        text-align: center;
+      }
+      
+      .grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+      }
+      
+      .section {
+        padding: 15px;
+        margin-bottom: 15px;
+      }
+      
+      .section h3 {
+        font-size: 16px;
+      }
+      
+      table {
+        font-size: 12px;
+      }
+      
+      table th,
+      table td {
+        padding: 8px 4px;
+      }
+      
+      /* Hacer tabla scrolleable horizontalmente en móvil */
+      .table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      table {
+        min-width: 600px;
+      }
+      
+      .btn {
+        width: 100%;
+        margin-bottom: 10px;
+      }
+      
+      .checkbox-group {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      /* Modal responsive */
+      .modal-content {
+        width: 95% !important;
+        max-width: 95% !important;
+        padding: 15px !important;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      
+      .modal-content h2 {
+        font-size: 18px;
+      }
+      
+      .modal-content .form-group input,
+      .modal-content .form-group select {
+        font-size: 16px; /* Evita zoom automático en iOS */
+      }
+    }
+    
+    @media screen and (max-width: 480px) {
+      .header h1 {
+        font-size: 18px;
+      }
+      
+      .tab {
+        font-size: 12px;
+        padding: 6px 8px;
+        min-width: 100px;
+      }
+      
+      .section h3 {
+        font-size: 14px;
+      }
+      
+      table {
+        font-size: 11px;
+      }
+      
+      table th,
+      table td {
+        padding: 6px 2px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>⚙️ Configuración del Sistema</h1>
+      <div style="display: flex; gap: 10px;">
+        <a href="/dian_vs_erp/reportes_dinamicos" class="btn btn-primary">📊 Reportes Dinámicos</a>
+        <a href="/dian_vs_erp/visor_v2" class="btn btn-danger">← Volver al Visor</a>
+      </div>
+    </div>
+    
+    <div class="content">
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab(0)">📧 Emails</button>
+        <button class="tab" onclick="switchTab(1)">👥 Usuarios por NIT</button>
+        <button class="tab" onclick="switchTab(2)">⏰ Envíos Programados</button>
+        <button class="tab" onclick="switchTab(3)">📊 Logs del Sistema</button>
+        <button class="tab" onclick="switchTab(4)">🗑️ Gestión de Datos</button>
+      </div>
+      
+      <!-- Script INMEDIATO para definir switchTab ANTES de usar onclick -->
+      <script>
+        window.switchTab = function(index){
+          console.log('switchTab llamado con index:', index);
+          
+          // Cambiar tabs activos visualmente
+          document.querySelectorAll('.tab').forEach((t,i) => {
+            t.classList.toggle('active', i === index);
+          });
+          document.querySelectorAll('.tab-content').forEach((c,i) => {
+            c.classList.toggle('active', i === index);
+          });
+          
+          // Marcar que se debe cargar datos cuando estén disponibles
+          window.pendingTabLoad = index;
+        };
+      </script>
+      
+      <!-- TAB 1: Configuración de Emails -->
+      <div class="tab-content active">
+        <div class="section">
+          <h3>📧 Configuración SMTP</h3>
+          
+          <div style="margin-bottom:20px;padding:15px;background:rgba(0,200,117,0.1);border-left:4px solid #00c875;border-radius:8px">
+            <strong style="color:#00c875">✅ Gmail Configurado:</strong> gestordocumentalsc01@gmail.com
+            <p style="margin:5px 0 0 0;color:var(--txt-muted);font-size:14px">
+              Usando configuración del Gestor Documental (Puerto 465 con SSL)
+            </p>
+          </div>
+          
+          <div class="grid">
+            <div class="form-group">
+              <label>Servidor SMTP</label>
+              <input type="text" id="smtp_host" value="smtp.gmail.com" placeholder="smtp.gmail.com" readonly style="background:var(--hdr);opacity:0.7">
+            </div>
+            <div class="form-group">
+              <label>Puerto</label>
+              <input type="number" id="smtp_port" value="465" readonly style="background:var(--hdr);opacity:0.7">
+            </div>
+            <div class="form-group">
+              <label>Usuario (Email)</label>
+              <input type="email" id="smtp_user" value="gestordocumentalsc01@gmail.com" placeholder="correo@empresa.com" readonly style="background:var(--hdr);opacity:0.7">
+            </div>
+            <div class="form-group">
+              <label>Contraseña</label>
+              <input type="password" id="smtp_pass" value="***********" placeholder="Contraseña o App Password de Gmail" readonly style="background:var(--hdr);opacity:0.7">
+            </div>
+            <div class="form-group">
+              <label>Nombre del Remitente</label>
+              <input type="text" id="from_name" value="Sistema Facturas DIAN - Supertiendas Cañaveral" placeholder="Sistema Facturas DIAN" readonly style="background:var(--hdr);opacity:0.7">
+            </div>
+            <div class="form-group">
+              <label>Email del Remitente</label>
+              <input type="email" id="from_email" value="gestordocumentalsc01@gmail.com" placeholder="correo@empresa.com" readonly style="background:var(--hdr);opacity:0.7">
+            </div>
+          </div>
+          
+          <div class="checkbox-group" style="margin-bottom:20px">
+            <label>
+              <input type="checkbox" id="use_ssl" checked disabled style="cursor:not-allowed">
+              Usar SSL (Puerto 465)
+            </label>
+            <label>
+              <input type="checkbox" id="use_tls" disabled style="cursor:not-allowed">
+              Usar TLS (Puerto 587)
+            </label>
+          </div>
+          
+          <div style="margin-bottom:15px;padding:12px;background:rgba(255,193,7,0.1);border-left:4px solid #ffc107;border-radius:8px">
+            <strong style="color:#ffc107">⚠️ Configuración Global del Sistema</strong>
+            <p style="margin:5px 0 0 0;color:var(--txt-muted);font-size:13px">
+              Esta configuración es compartida con todo el sistema. Para modificarla, edite el archivo <code style="background:var(--hdr);padding:2px 6px;border-radius:4px">.env</code> y reinicie el servidor.
+            </p>
+          </div>
+          
+          <button class="btn" onclick="probarConexionSMTP()" style="background:#2563eb;color:#fff">🔍 Probar Conexión SMTP</button>
+        </div>
+        
+        <div class="section">
+          <h3>📝 Plantillas de Email</h3>
+          <div class="form-group">
+            <label>Tipo de Plantilla</label>
+            <select id="tipo_plantilla" onchange="cargarPlantilla()">
+              <option value="no_registrada">Facturas No Registradas</option>
+              <option value="pendiente_credito">Facturas Pendientes a Crédito</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Asunto</label>
+            <input type="text" id="email_asunto" placeholder="Variables: {folio}, {nit}, {valor}, {fecha}">
+          </div>
+          <div class="form-group">
+            <label>Cuerpo del Email (HTML)</label>
+            <textarea id="email_cuerpo" placeholder="Puede usar variables: {nombre_emisor}, {prefijo}, {folio}, {valor}, {fecha_emision}"></textarea>
+          </div>
+          <button class="btn btn-primary" onclick="guardarPlantilla()">💾 Guardar Plantilla</button>
+        </div>
+        
+        <div class="section">
+          <h3>⚙️ Configuración de Envíos</h3>
+          <div class="grid">
+            <div class="form-group">
+              <label>Límite de emails por lote</label>
+              <input type="number" id="limite_lote" value="5" min="1" max="50">
+            </div>
+            <div class="form-group">
+              <label>Tiempo de espera entre lotes (segundos)</label>
+              <input type="number" id="tiempo_espera" value="10" min="5" max="60">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="guardarConfigEnvios()">💾 Guardar Configuración</button>
+        </div>
+      </div>
+      
+      <!-- TAB 2: Usuarios por NIT -->
+      <div class="tab-content">
+        <div class="section">
+          <h3>👥 Gestión de Usuarios Asociados a NITs</h3>
+          <button class="btn btn-primary" onclick="abrirModalAgregarUsuario()">➕ Agregar Usuario</button>
+          
+          <div style="margin-top:20px">
+            <input type="text" id="buscar_nit" placeholder="🔍 Buscar por NIT o Razón Social..." 
+                   style="padding:10px;border-radius:6px;border:1px solid var(--bd);width:100%;margin-bottom:15px"
+                   oninput="buscarUsuarios()">
+          </div>
+          
+          <div class="table-wrapper">
+            <table id="tablaUsuarios">
+              <thead>
+                <tr>
+                  <th>NIT</th>
+                  <th>Razón Social</th>
+                  <th>Tipo</th>
+                  <th>Nombre Completo</th>
+                  <th>Correo</th>
+                  <th>Teléfono</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="usuariosBody">
+                <tr><td colspan="8" style="text-align:center;padding:30px;color:var(--txt-muted)">Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <!-- TAB 3: Envíos Programados -->
+      <div class="tab-content">
+        <!-- Sección 1: Configuraciones de Envíos -->
+        <div class="section">
+          <h3>⏰ Configuración de Envíos Programados</h3>
+          <button class="btn btn-primary" onclick="modalNuevaConfiguracion()">➕ Nueva Configuración</button>
+          
+          <div class="table-wrapper">
+            <table style="margin-top:20px">
+              <thead>
+                <tr>
+                  <th style="width:250px">Nombre</th>
+                  <th>Tipo</th>
+                  <th>Criterios</th>
+                  <th>Frecuencia</th>
+                  <th>Horario</th>
+                  <th>Próximo Envío</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="configProgramadasBody">
+                <tr><td colspan="8" style="text-align:center;padding:30px;color:var(--txt-muted)">Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Sección 2: Usuarios de Causación -->
+        <div class="section">
+          <h3>👤 Usuarios de Causación</h3>
+          <p style="color:var(--txt-muted);margin-bottom:15px">Usuarios que causan documentos y recibirán alertas de acuses pendientes.</p>
+          <button class="btn btn-primary" onclick="modalNuevoUsuarioCausacion()">➕ Nuevo Usuario</button>
+          
+          <div class="table-wrapper">
+            <table style="margin-top:20px">
+              <thead>
+                <tr>
+                  <th>Nombre Causador</th>
+                  <th>Email</th>
+                  <th>Total Documentos</th>
+                  <th>Último Documento</th>
+                  <th>Estado</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="usuariosCausacionBody">
+                <tr><td colspan="6" style="text-align:center;padding:30px;color:var(--txt-muted)">Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <!-- Sección 3: Historial de Envíos -->
+        <div class="section">
+          <h3>📊 Historial de Envíos Automáticos</h3>
+          <div class="grid">
+            <div class="form-group">
+              <label>Configuración</label>
+              <select id="filtro_config_id" onchange="cargarHistorialEnvios()">
+                <option value="">Todas</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Límite</label>
+              <select id="limite_historial" onchange="cargarHistorialEnvios()">
+                <option value="20">20</option>
+                <option value="50" selected>50</option>
+                <option value="100">100</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="table-wrapper">
+            <table style="margin-top:15px">
+              <thead>
+                <tr>
+                  <th>Fecha/Hora</th>
+                  <th>Configuración</th>
+                  <th>Docs Procesados</th>
+                  <th>Emails Enviados</th>
+                  <th>Estado</th>
+                  <th>Duración</th>
+                  <th>Mensaje</th>
+                </tr>
+              </thead>
+              <tbody id="historialEnviosBody">
+                <tr><td colspan="7" style="text-align:center;padding:30px;color:var(--txt-muted)">Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <!-- TAB 4: Logs del Sistema -->
+      <div class="tab-content">
+        <div class="section">
+          <h3>📊 Logs del Sistema</h3>
+          <div class="grid">
+            <div class="form-group">
+              <label>Nivel</label>
+              <select id="filtro_nivel" onchange="cargarLogs()">
+                <option value="">Todos</option>
+                <option value="DEBUG">DEBUG</option>
+                <option value="INFO">INFO</option>
+                <option value="WARNING">WARNING</option>
+                <option value="ERROR">ERROR</option>
+                <option value="CRITICAL">CRITICAL</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Módulo</label>
+              <select id="filtro_modulo" onchange="cargarLogs()">
+                <option value="">Todos</option>
+                <option value="APP">APP</option>
+                <option value="DATABASE">DATABASE</option>
+                <option value="EMAIL">EMAIL</option>
+                <option value="API">API</option>
+                <option value="UPLOAD">UPLOAD</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Límite de registros</label>
+              <input type="number" id="limite_logs" value="100" min="10" max="1000" onchange="cargarLogs()">
+            </div>
+          </div>
+          
+          <button class="btn btn-primary" onclick="cargarLogs()" style="margin-bottom:15px">🔄 Actualizar Logs</button>
+          
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Nivel</th>
+                  <th>Módulo</th>
+                  <th>Operación</th>
+                  <th>Mensaje</th>
+                </tr>
+              </thead>
+              <tbody id="logsBody">
+                <tr><td colspan="5" style="text-align:center;padding:30px;color:var(--txt-muted)">Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      
+      <!-- TAB 5: Gestión de Datos (NUEVO 16 Feb 2026) -->
+      <div class="tab-content">
+        <div class="section">
+          <h3>🗑️ Eliminación Masiva de Datos</h3>
+          
+          <div style="margin-bottom:20px;padding:15px;background:rgba(233,68,68,0.1);border-left:4px solid #e94444;border-radius:8px">
+            <strong style="color:#e94444">⚠️ ADVERTENCIA CRÍTICA</strong>
+            <p style="margin:8px 0 0 0;color:var(--txt);font-size:13px;line-height:1.5">
+              Esta funcionalidad elimina <strong>PERMANENTEMENTE</strong> datos de la base de datos. 
+              La acción es <strong>IRREVERSIBLE</strong>. Se enviará un código de validación por correo 
+              electrónico para confirmar la operación.
+            </p>
+          </div>
+          
+          <div class="grid" style="grid-template-columns: 1fr 1fr 1fr;gap:15px;margin-bottom:15px">
+            <div class="form-group">
+              <label>📅 Tipo de Rango *</label>
+              <select id="tipo_rango_eliminacion" onchange="actualizarCamposFechas()">
+                <option value="">Seleccione...</option>
+                <option value="dias">Rango de Días</option>
+                <option value="meses">Rango de Meses</option>
+                <option value="año">Año Completo</option>
+              </select>
+            </div>
+            
+            <div class="form-group" id="campo_fecha_inicio" style="display:none">
+              <label>Fecha Inicio *</label>
+              <input type="date" id="fecha_inicio_eliminacion">
+            </div>
+            
+            <div class="form-group" id="campo_fecha_fin" style="display:none">
+              <label>Fecha Fin *</label>
+              <input type="date" id="fecha_fin_eliminacion">
+            </div>
+          </div>
+          
+          <div class="form-group" style="margin-bottom:15px">
+            <label><strong>📊 Tablas a Eliminar:</strong> <span style="color:var(--txt-muted);font-size:13px">(Seleccione al menos una)</span></label>
+            <div style="padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--bd);margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+              <label class="label-eliminar" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;border-radius:6px;border:2px solid transparent;transition:all 0.3s ease">
+                <input type="checkbox" class="checkbox-eliminar" id="eliminar_dian" value="dian">
+                <div>
+                  <strong style="color:var(--txt)">📊 Facturas DIAN</strong>
+                  <span style="color:var(--txt-muted);font-size:12px;display:block">(maestro_dian_vs_erp + dian)</span>
+                </div>
+              </label>
+              
+              <label class="label-eliminar" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;border-radius:6px;border:2px solid transparent;transition:all 0.3s ease">
+                <input type="checkbox" class="checkbox-eliminar" id="eliminar_acuses" value="acuses">
+                <div>
+                  <strong style="color:var(--txt)">✅ Acuses</strong>
+                  <span style="color:var(--txt-muted);font-size:12px;display:block">(acuses)</span>
+                </div>
+              </label>
+              
+              <label class="label-eliminar" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;border-radius:6px;border:2px solid transparent;transition:all 0.3s ease">
+                <input type="checkbox" class="checkbox-eliminar" id="eliminar_erp_financiero" value="erp_financiero">
+                <div>
+                  <strong style="color:var(--txt)">💰 ERP Financiero</strong>
+                  <span style="color:var(--txt-muted);font-size:12px;display:block">(erp_financiero)</span>
+                </div>
+              </label>
+              
+              <label class="label-eliminar" style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;border-radius:6px;border:2px solid transparent;transition:all 0.3s ease">
+                <input type="checkbox" class="checkbox-eliminar" id="eliminar_erp_comercial" value="erp_comercial">
+                <div>
+                  <strong style="color:var(--txt)">🏪 ERP Comercial</strong>
+                  <span style="color:var(--txt-muted);font-size:12px;display:block">(erp_comercial)</span>
+                </div>
+              </label>
+            </div>
+          </div>
+          
+          <div style="margin-bottom:15px;padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--bd)">
+            <h4 style="margin:0 0 8px 0;color:var(--txt);font-size:14px">🔐 Proceso de Eliminación Segura:</h4>
+            <ol style="margin:0;padding-left:20px;color:var(--txt-muted);font-size:13px;line-height:1.6">
+              <li>Seleccione el tipo de rango y las fechas</li>
+              <li>Click en "Solicitar Eliminación" - se generará un código de 6 dígitos</li>
+              <li>Revise su correo electrónico y copie el código recibido</li>
+              <li>Ingrese el código en el formulario de confirmación</li>
+              <li>La eliminación se ejecutará automáticamente al validar el código</li>
+            </ol>
+            <p style="margin:8px 0 0 0;color:var(--txt-muted);font-size:12px">
+              <strong>Validez:</strong> 10 minutos | <strong>Email:</strong> Se enviará a su usuario registrado
+            </p>
+          </div>
+          
+          <button class="btn btn-danger" onclick="solicitarEliminacion()" style="font-size:15px;padding:10px 20px">
+            🔐 Solicitar Eliminación
+          </button>
+        </div>
+        
+        <!-- Sección de Confirmación -->
+        <div class="section" id="seccion_confirmacion" style="display:none">
+          <h3>✅ Código Enviado</h3>
+          
+          <div style="margin-bottom:20px;padding:15px;background:rgba(0,200,117,0.1);border-left:4px solid #00c875;border-radius:8px">
+            <p style="margin:0;color:var(--txt);font-size:14px">
+              📧 Se ha enviado un código de validación de 6 dígitos a: <strong id="email_enviado"></strong>
+            </p>
+            <p style="margin:8px 0 0 0;color:var(--txt-muted);font-size:13px">
+              Validez: <strong>10 minutos</strong>
+            </p>
+          </div>
+          
+          <div class="form-group" style="max-width:300px">
+            <label>🔢 Código de Validación *</label>
+            <input type="text" id="codigo_validacion" placeholder="123456" maxlength="6" 
+                   style="font-size:24px;text-align:center;letter-spacing:8px;font-family:monospace">
+          </div>
+          
+          <button class="btn btn-danger" onclick="confirmarEliminacion()" style="font-size:16px;padding:12px 24px">
+            ✅ Confirmar y Ejecutar Eliminación
+          </button>
+          
+          <button class="btn" onclick="cancelarEliminacion()" style="background:#666;color:#fff;margin-left:10px">
+            ❌ Cancelar
+          </button>
+        </div>
+        
+        <!-- Resultado -->
+        <div class="section" id="seccion_resultado" style="display:none">
+          <h3 id="resultado_titulo">✅ Eliminación Completada</h3>
+          <div id="resultado_contenido"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para agregar usuario -->
+  <div id="modalAgregarUsuario" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10000;align-items:center;justify-content:center" onclick="if(event.target===this) this.style.display='none'">
+    <div style="background:var(--panel);border-radius:12px;padding:30px;max-width:600px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.3)" onclick="event.stopPropagation()">
+      <h2 style="margin:0 0 20px 0;color:var(--txt)">➕ Agregar Usuario</h2>
+      
+      <div class="form-group">
+        <label>NIT del Emisor *</label>
+        <input type="text" id="modal_nit" placeholder="900123456">
+      </div>
+      
+      <div class="form-group">
+        <label>Razón Social *</label>
+        <input type="text" id="modal_razon" placeholder="EMPRESA EJEMPLO S.A.S.">
+      </div>
+      
+      <div class="form-group">
+        <label>Tipo de Usuario *</label>
+        <select id="modal_tipo">
+          <option value="SOLICITANTE">Solicitante</option>
+          <option value="APROBADOR">Aprobador</option>
+        </select>
+      </div>
+      
+      <div class="grid">
+        <div class="form-group">
+          <label>Nombres *</label>
+          <input type="text" id="modal_nombres" placeholder="Juan Carlos">
+        </div>
+        <div class="form-group">
+          <label>Apellidos *</label>
+          <input type="text" id="modal_apellidos" placeholder="Pérez García">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Correo Electrónico *</label>
+        <input type="email" id="modal_correo" placeholder="jperez@empresa.com">
+      </div>
+      
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input type="tel" id="modal_telefono" placeholder="3001234567">
+      </div>
+      
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button class="btn btn-primary" onclick="guardarNuevoUsuario()" style="flex:1">💾 Guardar</button>
+        <button class="btn btn-danger" onclick="document.getElementById('modalAgregarUsuario').style.display='none'" style="flex:1">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para EDITAR Usuario -->
+  <div id="modalEditarUsuario" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10000;align-items:center;justify-content:center" onclick="if(event.target===this) this.style.display='none'">
+    <div style="background:var(--panel);border-radius:12px;padding:30px;max-width:600px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.3)" onclick="event.stopPropagation()">
+      <h2 style="margin:0 0 20px 0;color:var(--txt)">✏️ Editar Usuario</h2>
+      
+      <input type="hidden" id="edit_usuario_id">
+      
+      <div class="form-group">
+        <label>NIT del Emisor *</label>
+        <input type="text" id="edit_nit" placeholder="900123456" readonly style="background:var(--hdr);opacity:0.7;cursor:not-allowed">
+      </div>
+      
+      <div class="form-group">
+        <label>Razón Social *</label>
+        <input type="text" id="edit_razon" placeholder="EMPRESA EJEMPLO S.A.S.">
+      </div>
+      
+      <div class="form-group">
+        <label>Tipo de Usuario *</label>
+        <select id="edit_tipo">
+          <option value="SOLICITANTE">Solicitante</option>
+          <option value="APROBADOR">Aprobador</option>
+        </select>
+      </div>
+      
+      <div class="grid">
+        <div class="form-group">
+          <label>Nombres *</label>
+          <input type="text" id="edit_nombres" placeholder="Juan Carlos">
+        </div>
+        <div class="form-group">
+          <label>Apellidos *</label>
+          <input type="text" id="edit_apellidos" placeholder="Pérez García">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Correo Electrónico *</label>
+        <input type="email" id="edit_correo" placeholder="jperez@empresa.com">
+      </div>
+      
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input type="tel" id="edit_telefono" placeholder="3001234567">
+      </div>
+      
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button class="btn btn-primary" onclick="guardarEdicionUsuario()" style="flex:1">💾 Guardar Cambios</button>
+        <button class="btn btn-danger" onclick="document.getElementById('modalEditarUsuario').style.display='none'" style="flex:1">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para EDITAR Usuario -->
+  <div id="modalEditarUsuario" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10000;align-items:center;justify-content:center" onclick="if(event.target===this) this.style.display='none'">
+    <div style="background:var(--panel);border-radius:12px;padding:30px;max-width:600px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.3)" onclick="event.stopPropagation()">
+      <h2 style="margin:0 0 20px 0;color:var(--txt)">✏️ Editar Usuario</h2>
+      
+      <input type="hidden" id="edit_usuario_id">
+      
+      <div class="form-group">
+        <label>NIT del Emisor *</label>
+        <input type="text" id="edit_nit" placeholder="900123456" readonly style="background:var(--hdr);opacity:0.7;cursor:not-allowed">
+      </div>
+      
+      <div class="form-group">
+        <label>Razón Social *</label>
+        <input type="text" id="edit_razon" placeholder="EMPRESA EJEMPLO S.A.S.">
+      </div>
+      
+      <div class="form-group">
+        <label>Tipo de Usuario *</label>
+        <select id="edit_tipo">
+          <option value="SOLICITANTE">Solicitante</option>
+          <option value="APROBADOR">Aprobador</option>
+        </select>
+      </div>
+      
+      <div class="grid">
+        <div class="form-group">
+          <label>Nombres *</label>
+          <input type="text" id="edit_nombres" placeholder="Juan Carlos">
+        </div>
+        <div class="form-group">
+          <label>Apellidos *</label>
+          <input type="text" id="edit_apellidos" placeholder="Pérez García">
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label>Correo Electrónico *</label>
+        <input type="email" id="edit_correo" placeholder="jperez@empresa.com">
+      </div>
+      
+      <div class="form-group">
+        <label>Teléfono</label>
+        <input type="tel" id="edit_telefono" placeholder="3001234567">
+      </div>
+      
+      <div style="display:flex;gap:10px;margin-top:20px">
+        <button class="btn btn-primary" onclick="guardarEdicionUsuario()" style="flex:1">💾 Guardar Cambios</button>
+        <button class="btn btn-danger" onclick="document.getElementById('modalEditarUsuario').style.display='none'" style="flex:1">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================
+    // FUNCIONES DE MODAL GENÉRICO
+    // ============================================
+    window.mostrarModal = function(html) {
+      // Crear contenedor de modal si no existe
+      let modalContainer = document.getElementById('modalContainer');
+      if (!modalContainer) {
+        modalContainer = document.createElement('div');
+        modalContainer.id = 'modalContainer';
+        modalContainer.style.cssText = 'display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10000;align-items:center;justify-content:center;overflow-y:auto;padding:20px';
+        document.body.appendChild(modalContainer);
+      }
+      
+      modalContainer.innerHTML = html;
+      modalContainer.style.display = 'flex';
+      
+      // Cerrar al hacer clic fuera del modal
+      modalContainer.onclick = function(e) {
+        if (e.target === modalContainer) {
+          cerrarModal();
+        }
+      };
+    }
+    
+    window.cerrarModal = function() {
+      const modalContainer = document.getElementById('modalContainer');
+      if (modalContainer) {
+        modalContainer.style.display = 'none';
+        modalContainer.innerHTML = '';
+      }
+      
+      // 🆕 RESTAURAR FORMULARIO PARA "NUEVA CONFIGURACIÓN"
+      const modal = document.getElementById('modalNuevaConfig');
+      if (modal) {
+        modal.style.display = 'none';
+        
+        // Restaurar título
+        const titulo = modal.querySelector('h3');
+        if (titulo) titulo.textContent = '➕ Nueva Configuración de Envío';
+        
+        // Restaurar función del formulario
+        const form = document.getElementById('formNuevaConfig');
+        if (form) {
+          form.onsubmit = function(e) {
+            e.preventDefault();
+            crearConfiguracion();
+          };
+          form.reset();  // Limpiar campos
+        }
+      }
+    }
+    
+    // ============================================
+    // TAB 1: CONFIGURACIÓN EMAILS
+    // ============================================
+    
+    // Cargar configuración existente al iniciar
+    function cargarConfigSMTP(){
+      fetch('/api/config/smtp')
+        .then(r => r.json())
+        .then(response => {
+          if(response.exito && response.config){
+            const c = response.config;
+            document.getElementById('smtp_host').value = c.smtp_host || 'smtp.gmail.com';
+            document.getElementById('smtp_port').value = c.smtp_port || '465';
+            document.getElementById('smtp_user').value = c.smtp_user || '';
+            document.getElementById('from_name').value = c.from_name || 'Sistema Facturas DIAN';
+            document.getElementById('from_email').value = c.from_email || c.smtp_user || '';
+            document.getElementById('use_ssl').checked = c.use_ssl !== false;
+            document.getElementById('use_tls').checked = c.use_tls === true;
+            // No cargar la contraseña por seguridad (viene como ***)
+            if(c.smtp_pass && c.smtp_pass !== '***'){
+              document.getElementById('smtp_pass').value = c.smtp_pass;
+            }
+          }
+        })
+        .catch(err => console.error('Error cargando config SMTP:', err));
+    }
+    
+    function guardarConfigSMTP(){
+      const config = {
+        smtp_host: document.getElementById('smtp_host').value,
+        smtp_port: document.getElementById('smtp_port').value,
+        smtp_user: document.getElementById('smtp_user').value,
+        smtp_pass: document.getElementById('smtp_pass').value,
+        from_name: document.getElementById('from_name').value,
+        from_email: document.getElementById('from_email').value,
+        use_ssl: document.getElementById('use_ssl').checked,
+        use_tls: document.getElementById('use_tls').checked
+      };
+      
+      // Validar campos requeridos
+      if(!config.smtp_host || !config.smtp_port || !config.smtp_user || !config.smtp_pass){
+        alert('❌ Por favor completa todos los campos obligatorios (servidor, puerto, usuario, contraseña)');
+        return;
+      }
+      
+      // Advertencia si ambos SSL y TLS están marcados
+      if(config.use_ssl && config.use_tls){
+        alert('⚠️ Advertencia: SSL y TLS no deben estar activos simultáneamente. Se usará SSL (puerto 465).');
+        config.use_tls = false;
+      }
+      
+      fetch('/api/config/smtp', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(config)
+      })
+      .then(r => r.json())
+      .then(data => {
+        alert(data.exito ? '✅ ' + data.mensaje : '❌ ' + data.mensaje);
+        if(data.exito){
+          cargarConfigSMTP(); // Recargar configuración
+        }
+      })
+      .catch(err => alert('❌ Error al guardar configuración: ' + err));
+    }
+    
+    function probarConexionSMTP(){
+      fetch('/api/config/smtp/probar')
+        .then(r => r.json())
+        .then(data => {
+          alert(data.mensaje || (data.exito ? '✅ Conexión exitosa' : '❌ Error desconocido'));
+        })
+        .catch(err => alert('❌ Error al probar conexión: ' + err));
+    }
+    
+    // ============================================
+    // TAB 2: USUARIOS
+    // ============================================
+    function abrirModalAgregarUsuario(){
+      document.getElementById('modalAgregarUsuario').style.display = 'flex';
+    }
+    
+    function guardarNuevoUsuario(){
+      const data = {
+        nit: document.getElementById('modal_nit').value,
+        razon_social: document.getElementById('modal_razon').value,
+        tipo_usuario: document.getElementById('modal_tipo').value,
+        nombres: document.getElementById('modal_nombres').value,
+        apellidos: document.getElementById('modal_apellidos').value,
+        correo: document.getElementById('modal_correo').value,
+        telefono: document.getElementById('modal_telefono').value
+      };
+      
+      fetch('/dian_vs_erp/api/usuarios/agregar', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      })
+      .then(r => r.json())
+      .then(response => {
+        if(response.exito){
+          alert('✅ ' + response.mensaje);
+          document.getElementById('modalAgregarUsuario').style.display = 'none';
+          cargarTodosLosUsuarios();
+        } else {
+          alert('❌ ' + response.mensaje);
+        }
+      })
+      .catch(err => alert('❌ Error al guardar usuario'));
+    }
+    
+    function cargarTodosLosUsuarios(){
+      fetch('/dian_vs_erp/api/usuarios/todos')
+        .then(r => r.json())
+        .then(response => {
+          if(!response.exito) return;
+          
+          const tbody = document.getElementById('usuariosBody');
+          tbody.innerHTML = '';
+          
+          if(response.nits.length === 0){
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--txt-muted)">No hay usuarios registrados</td></tr>';
+            return;
+          }
+          
+          response.nits.forEach(nit => {
+            fetch(`/dian_vs_erp/api/usuarios/por_nit/${nit.nit}`)
+              .then(r => r.json())
+              .then(data => {
+                data.usuarios.forEach(u => {
+                  const tr = document.createElement('tr');
+                  tr.innerHTML = `
+                    <td>${u.nit}</td>
+                    <td>${u.razon_social || '-'}</td>
+                    <td><span class="badge badge-info">${u.tipo_usuario}</span></td>
+                    <td>${u.nombres} ${u.apellidos}</td>
+                    <td>${u.correo}</td>
+                    <td>${u.telefono || '-'}</td>
+                    <td><span class="badge ${u.activo ? 'badge-success' : 'badge-danger'}">${u.activo ? 'Activo' : 'Inactivo'}</span></td>
+                    <td>
+                      <button class="btn" style="padding:5px 10px;background:#2563eb;color:#fff" onclick="editarUsuario(${u.id})">✏️</button>
+                      <button class="btn btn-danger" style="padding:5px 10px" onclick="desactivarUsuario(${u.id})">🗑️</button>
+                    </td>
+                  `;
+                  tbody.appendChild(tr);
+                });
+              });
+          });
+        });
+    }
+    
+    function desactivarUsuario(id){
+      if(!confirm('¿Desactivar este usuario?')) return;
+      
+      fetch(`/dian_vs_erp/api/usuarios/desactivar/${id}`, {method: 'POST'})
+        .then(r => r.json())
+        .then(data => {
+          alert(data.exito ? '✅ ' + data.mensaje : '❌ ' + data.mensaje);
+          cargarTodosLosUsuarios();
+        });
+    }
+    
+    // ============================================
+    // TAB 2: USUARIOS POR NIT
+    // ============================================
+    
+    function abrirModalAgregarUsuario() {
+      document.getElementById('modalAgregarUsuario').style.display = 'flex';
+      
+      // Agregar event listener al campo NIT para autocompletar razón social
+      const nitInput = document.getElementById('modal_nit');
+      if (nitInput && !nitInput.hasAutocompleteListener) {
+        nitInput.hasAutocompleteListener = true;
+        nitInput.addEventListener('blur', async function() {
+          const nit = this.value.trim();
+          if (nit) {
+            await buscarRazonSocialPorNIT(nit);
+          }
+        });
+      }
+    }
+    
+    // Función para buscar razón social por NIT en PostgreSQL
+    async function buscarRazonSocialPorNIT(nit) {
+      try {
+        const razonInput = document.getElementById('modal_razon');
+        
+        // Mostrar indicador de carga
+        razonInput.value = 'Buscando...';
+        razonInput.disabled = true;
+        
+        console.log('🔍 Buscando NIT:', nit);
+        const response = await fetch(`/facturas-digitales/api/buscar-tercero?nit=${nit}`);
+        console.log('📡 Response status:', response.status);
+        const data = await response.json();
+        console.log('📦 Data recibida:', data);
+        
+        if (data.existe && data.razon_social) {
+          // Autorellenar con la razón social encontrada
+          razonInput.value = data.razon_social;
+          razonInput.style.borderColor = '#00c875'; // Verde para indicar éxito
+          
+          // Mostrar mensaje temporal
+          const label = razonInput.previousElementSibling;
+          const originalText = label.textContent;
+          label.textContent = 'Razón Social * ✅ Encontrado';
+          label.style.color = '#00c875';
+          
+          console.log('✅ Razón social encontrada:', data.razon_social);
+          
+          setTimeout(() => {
+            label.textContent = originalText;
+            label.style.color = '';
+            razonInput.style.borderColor = '';
+          }, 2000);
+        } else {
+          // NIT no encontrado - permitir edición manual
+          razonInput.value = '';
+          razonInput.placeholder = 'NIT no encontrado - Ingrese manualmente';
+          razonInput.style.borderColor = '#ffc107'; // Amarillo para advertencia
+          
+          console.log('⚠️ NIT no encontrado');
+          
+          setTimeout(() => {
+            razonInput.placeholder = 'EMPRESA EJEMPLO S.A.S.';
+            razonInput.style.borderColor = '';
+          }, 3000);
+        }
+        
+        razonInput.disabled = false;
+        razonInput.focus();
+        
+      } catch (error) {
+        console.error('❌ Error buscando razón social:', error);
+        const razonInput = document.getElementById('modal_razon');
+        razonInput.value = '';
+        razonInput.disabled = false;
+        razonInput.placeholder = 'Error al buscar - Ingrese manualmente';
+        razonInput.style.borderColor = '#e94444'; // Rojo para error
+        
+        setTimeout(() => {
+          razonInput.placeholder = 'EMPRESA EJEMPLO S.A.S.';
+          razonInput.style.borderColor = '';
+        }, 3000);
+      }
+    }
+    
+    function guardarNuevoUsuario() {
+      const data = {
+        nit: document.getElementById('modal_nit').value,
+        razon_social: document.getElementById('modal_razon').value,
+        tipo_usuario: document.getElementById('modal_tipo').value,
+        nombres: document.getElementById('modal_nombres').value,
+        apellidos: document.getElementById('modal_apellidos').value,
+        correo: document.getElementById('modal_correo').value,
+        telefono: document.getElementById('modal_telefono').value
+      };
+      
+      // Validaciones básicas
+      if (!data.nit || !data.nombres || !data.apellidos || !data.correo) {
+        alert('⚠️ Por favor complete todos los campos obligatorios');
+        return;
+      }
+      
+      fetch('/dian_vs_erp/api/usuarios/agregar', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      })
+      .then(r => r.json())
+      .then(response => {
+        alert(response.exito ? '✅ Usuario agregado correctamente' : '❌ ' + response.mensaje);
+        if (response.exito) {
+          document.getElementById('modalAgregarUsuario').style.display = 'none';
+          cargarTodosLosUsuarios();
+        }
+      })
+      .catch(err => {
+        console.error('Error al guardar usuario:', err);
+        alert('❌ Error al guardar el usuario');
+      });
+    }
+    
+    function cargarTodosLosUsuarios() {
+      fetch('/dian_vs_erp/api/usuarios/todos')
+        .then(r => r.json())
+        .then(data => {
+          const tbody = document.getElementById('usuariosBody');
+          tbody.innerHTML = '';
+          
+          if (!data.usuarios || data.usuarios.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--txt-muted)">No hay usuarios registrados</td></tr>';
+            return;
+          }
+          
+          data.usuarios.forEach(u => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${u.nit}</td>
+              <td>${u.razon_social}</td>
+              <td>${u.tipo_usuario}</td>
+              <td>${u.nombres} ${u.apellidos}</td>
+              <td>${u.correo}</td>
+              <td>${u.telefono || '-'}</td>
+              <td><span class="badge" style="background:${u.activo ? '#00c87520' : '#e9444420'};color:${u.activo ? '#00c875' : '#e94444'}">${u.activo ? 'Activo' : 'Inactivo'}</span></td>
+              <td>
+                <button class="btn" onclick="editarUsuario(${u.usuario_id})" style="padding:5px 10px;font-size:12px;background:#2563eb;color:#fff;margin-right:5px" title="Editar">✏️ Editar</button>
+                <button class="btn" onclick="desactivarUsuario(${u.usuario_id})" style="padding:5px 10px;font-size:12px">${u.activo ? '🔴 Desactivar' : '✅ Activar'}</button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        })
+        .catch(err => console.error('Error cargando usuarios:', err));
+    }
+    
+    function buscarUsuarios() {
+      const termino = document.getElementById('buscar_nit').value.toLowerCase();
+      const filas = document.querySelectorAll('#usuariosBody tr');
+      
+      filas.forEach(fila => {
+        const texto = fila.textContent.toLowerCase();
+        fila.style.display = texto.includes(termino) ? '' : 'none';
+      });
+    }
+    
+    function desactivarUsuario(id) {
+      if (!confirm('¿Confirma cambiar el estado de este usuario?')) return;
+      
+      // Obtener el estado actual del usuario
+      fetch(`/dian_vs_erp/api/usuarios/obtener/${id}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.exito && data.usuario) {
+            const estaActivo = data.usuario.activo;
+            
+            // Llamar al endpoint correcto según el estado actual
+            const endpoint = estaActivo 
+              ? `/dian_vs_erp/api/usuarios/desactivar/${id}`
+              : `/dian_vs_erp/api/usuarios/activar/${id}`;
+            
+            fetch(endpoint, {method: 'POST'})
+              .then(r => r.json())
+              .then(result => {
+                alert(result.exito ? '✅ ' + result.mensaje : '❌ ' + result.mensaje);
+                cargarTodosLosUsuarios();
+              });
+          } else {
+            alert('❌ Error al verificar estado del usuario');
+          }
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          alert('❌ Error al cambiar estado del usuario');
+        });
+    }
+    
+    function editarUsuario(id) {
+      // Obtener datos del usuario desde la API
+      fetch(`/dian_vs_erp/api/usuarios/obtener/${id}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.exito && data.usuario) {
+            const u = data.usuario;
+            
+            // Llenar el formulario de edición
+            document.getElementById('edit_usuario_id').value = u.usuario_id;
+            document.getElementById('edit_nit').value = u.nit;
+            document.getElementById('edit_razon').value = u.razon_social || '';
+            document.getElementById('edit_tipo').value = u.tipo_usuario;
+            document.getElementById('edit_nombres').value = u.nombres;
+            document.getElementById('edit_apellidos').value = u.apellidos;
+            document.getElementById('edit_correo').value = u.correo;
+            document.getElementById('edit_telefono').value = u.telefono || '';
+            
+            // Mostrar modal
+            document.getElementById('modalEditarUsuario').style.display = 'flex';
+          } else {
+            alert('❌ Error al cargar datos del usuario');
+          }
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          alert('❌ Error al obtener datos del usuario');
+        });
+    }
+    
+    function guardarEdicionUsuario() {
+      const id = document.getElementById('edit_usuario_id').value;
+      const data = {
+        razon_social: document.getElementById('edit_razon').value,
+        tipo_usuario: document.getElementById('edit_tipo').value,
+        nombres: document.getElementById('edit_nombres').value,
+        apellidos: document.getElementById('edit_apellidos').value,
+        correo: document.getElementById('edit_correo').value,
+        telefono: document.getElementById('edit_telefono').value
+      };
+      
+      // Validaciones
+      if (!data.nombres || !data.apellidos || !data.correo) {
+        alert('⚠️ Por favor complete todos los campos obligatorios');
+        return;
+      }
+      
+      fetch(`/dian_vs_erp/api/usuarios/editar/${id}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      })
+      .then(r => r.json())
+      .then(response => {
+        alert(response.exito ? '✅ Usuario actualizado correctamente' : '❌ ' + response.mensaje);
+        if (response.exito) {
+          document.getElementById('modalEditarUsuario').style.display = 'none';
+          cargarTodosLosUsuarios();
+        }
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        alert('❌ Error al actualizar el usuario');
+      });
+    }
+    
+    function editarUsuario(id) {
+      // Obtener datos del usuario desde la API
+      fetch(`/dian_vs_erp/api/usuarios/obtener/${id}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.exito && data.usuario) {
+            const u = data.usuario;
+            
+            // Llenar el formulario de edición
+            document.getElementById('edit_usuario_id').value = u.usuario_id;
+            document.getElementById('edit_nit').value = u.nit;
+            document.getElementById('edit_razon').value = u.razon_social || '';
+            document.getElementById('edit_tipo').value = u.tipo_usuario;
+            document.getElementById('edit_nombres').value = u.nombres;
+            document.getElementById('edit_apellidos').value = u.apellidos;
+            document.getElementById('edit_correo').value = u.correo;
+            document.getElementById('edit_telefono').value = u.telefono || '';
+            
+            // Mostrar modal
+            document.getElementById('modalEditarUsuario').style.display = 'flex';
+          } else {
+            alert('❌ Error al cargar datos del usuario');
+          }
+        })
+        .catch(err => {
+          console.error('Error:', err);
+          alert('❌ Error al obtener datos del usuario');
+        });
+    }
+    
+    function guardarEdicionUsuario() {
+      const id = document.getElementById('edit_usuario_id').value;
+      const data = {
+        razon_social: document.getElementById('edit_razon').value,
+        tipo_usuario: document.getElementById('edit_tipo').value,
+        nombres: document.getElementById('edit_nombres').value,
+        apellidos: document.getElementById('edit_apellidos').value,
+        correo: document.getElementById('edit_correo').value,
+        telefono: document.getElementById('edit_telefono').value
+      };
+      
+      // Validaciones
+      if (!data.nombres || !data.apellidos || !data.correo) {
+        alert('⚠️ Por favor complete todos los campos obligatorios');
+        return;
+      }
+      
+      fetch(`/dian_vs_erp/api/usuarios/editar/${id}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      })
+      .then(r => r.json())
+      .then(response => {
+        alert(response.exito ? '✅ Usuario actualizado correctamente' : '❌ ' + response.mensaje);
+        if (response.exito) {
+          document.getElementById('modalEditarUsuario').style.display = 'none';
+          cargarTodosLosUsuarios();
+        }
+      })
+      .catch(err => {
+        console.error('Error:', err);
+        alert('❌ Error al actualizar el usuario');
+      });
+    }
+    
+    // ============================================
+    // TAB 3: ENVÍOS PROGRAMADOS
+    // ============================================
+    
+    // --- CONFIGURACIONES DE ENVÍO ---
+    function cargarConfiguracionesEnvios() {
+      fetch('/dian_vs_erp/api/config/envios')
+        .then(r => r.json())
+        .then(response => {
+          const tbody = document.getElementById('configProgramadasBody');
+          tbody.innerHTML = '';
+          
+          if (!response.exito || response.envios.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--txt-muted)">No hay configuraciones programadas</td></tr>';
+            return;
+          }
+          
+          // Actualizar filtro de configuraciones en historial
+          const filtroConfig = document.getElementById('filtro_config_id');
+          filtroConfig.innerHTML = '<option value="">Todas</option>';
+          
+          response.envios.forEach(envio => {
+            // Agregar opción al filtro
+            const option = document.createElement('option');
+            option.value = envio.id;
+            option.textContent = envio.nombre;
+            filtroConfig.appendChild(option);
+            
+            // Renderizar fila
+            const tr = document.createElement('tr');
+            
+            // 🆕 Badge de supervisión (prioridad sobre tipo)
+            let tipoBadge;
+            if (envio.es_supervision) {
+              tipoBadge = '<span class="badge" style="background:#ff980720;color:#ff9800;font-weight:bold">🔍 SUPERVISIÓN</span>';
+            } else {
+              tipoBadge = envio.tipo === 'PENDIENTES_DIAS' 
+                ? '<span class="badge" style="background:#ffc10720;color:#ffc107">⏰ Pendientes</span>'
+                : '<span class="badge" style="background:#e9444420;color:#e94444">⚠️ Sin Acuses</span>';
+            }
+            
+            // Criterios (mostrar email supervisor si es supervisión)
+            let criterios = '';
+            if (envio.es_supervision) {
+              criterios = `📧 ${envio.email_supervisor || 'Sin email'}`;
+            } else if (envio.tipo === 'PENDIENTES_DIAS') {
+              criterios = `≥ ${envio.dias_minimos} días`;
+            } else {
+              criterios = `< ${envio.requiere_acuses_minimo} acuses`;
+            }
+            
+            // Frecuencia (mostrar días si es supervisión)
+            let frecuencia;
+            if (envio.es_supervision) {
+              const dias = envio.frecuencia_dias || 1;
+              frecuencia = dias === 1 ? '📅 Diario' : dias === 7 ? '📆 Semanal' : `🔄 Cada ${dias} días`;
+            } else {
+              frecuencia = envio.frecuencia === 'DIARIO' ? '📅 Diario' : '📆 Semanal';
+            }
+            
+            // Próximo envío
+            const proximoEnvio = envio.proximo_envio 
+              ? new Date(envio.proximo_envio).toLocaleString('es-CO', {
+                  day: '2-digit', 
+                  month: '2-digit', 
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })
+              : 'N/A';
+            
+            // Estado
+            const estadoBadge = envio.activo
+              ? '<span class="badge" style="background:#00c87520;color:#00c875">✓ Activo</span>'
+              : '<span class="badge" style="background:#cccccc40;color:#666;font-weight:600">✗ Inactivo</span>';
+            
+            tr.innerHTML = `
+              <td>${envio.nombre}</td>
+              <td>${tipoBadge}</td>
+              <td>${criterios}</td>
+              <td>${frecuencia}</td>
+              <td>${envio.hora_envio}</td>
+              <td>${proximoEnvio}</td>
+              <td>${estadoBadge}</td>
+              <td>
+                <button class="btn btn-sm" onclick="editarConfigEnvio(${envio.id})" title="Editar configuración" style="background:#2563eb;color:#fff">
+                  ✏️
+                </button>
+                <button class="btn btn-sm" onclick="toggleConfigEnvio(${envio.id})" title="${envio.activo ? 'Desactivar' : 'Activar'}">
+                  ${envio.activo ? '⏸' : '▶'}
+                </button>
+                <button class="btn btn-sm" onclick="ejecutarConfigEnvio(${envio.id})" title="Ejecutar envío ahora - Enviará correos reales a los usuarios">
+                  ▶️
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="eliminarConfigEnvio(${envio.id})" title="Eliminar">
+                  🗑
+                </button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        })
+        .catch(err => {
+          document.getElementById('configProgramadasBody').innerHTML = 
+            '<tr><td colspan="8" style="text-align:center;padding:30px;color:#e94444">Error cargando configuraciones</td></tr>';
+          console.error(err);
+        });
+    }
+    
+    // Definir funciones globalmente para que sean accesibles desde onclick
+    window.modalNuevaConfiguracion = function() {
+      console.log('🔧 modalNuevaConfiguracion() llamada');
+      const html = `
+        <div class="modal-form-dark" style="max-width:600px;margin:0 auto;background:white;padding:30px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.2)">
+          <h3 style="margin-top:0;color:#000;font-weight:700">➕ Nueva Configuración de Envío</h3>
+          <form id="formNuevaConfig" onsubmit="event.preventDefault(); crearConfiguracion();">
+            
+            <div class="form-group">
+              <label>Nombre de la configuración *</label>
+              <input type="text" id="cfg_nombre" required maxlength="200" placeholder="Ej: Alertar docs pendientes +7 días">
+            </div>
+            
+            <div class="form-group">
+              <label>Tipo de envío *</label>
+              <select id="cfg_tipo" required onchange="actualizarCriterios()">
+                <option value="">Seleccione...</option>
+                <option value="PENDIENTES_DIAS">⏰ Documentos pendientes por días</option>
+                <option value="CREDITO_SIN_ACUSES">⚠️ Créditos sin acuses completos</option>
+              </select>
+            </div>
+            
+            <div id="criterios_pendientes" style="display:none">
+              <div class="form-group">
+                <label>Días mínimos desde emisión *</label>
+                <input type="number" id="cfg_dias_minimos" min="1" max="365" value="3">
+              </div>
+              <div class="form-group">
+                <label>Excluir estados (separados por coma)</label>
+                <input type="text" id="cfg_estados_excluidos" placeholder="Ej: Causada, Recibida">
+                <small style="color:#000;display:block;margin-top:5px;font-weight:600">
+                  Los documentos con estos estados NO recibirán alertas
+                </small>
+              </div>
+              
+              <!-- 🆕 FILTRO TIPO DE TERCERO -->
+              <div class="form-group">
+                <label style="color:#000;font-weight:600;display:block;margin-bottom:10px">🏢 Filtrar por Tipo de Tercero</label>
+                <div style="background:#f8f9fa;padding:15px;border:1px solid #dee2e6;border-radius:8px">
+                  <div style="margin-bottom:8px">
+                    <label style="display:flex;align-items:center;color:#000;font-weight:500;cursor:pointer">
+                      <input type="checkbox" name="tipos_tercero" value="PROVEEDORES" style="width:18px;height:18px;margin-right:10px;cursor:pointer">
+                      <span>📦 Proveedores</span>
+                    </label>
+                  </div>
+                  <div style="margin-bottom:8px">
+                    <label style="display:flex;align-items:center;color:#000;font-weight:500;cursor:pointer">
+                      <input type="checkbox" name="tipos_tercero" value="ACREEDORES" style="width:18px;height:18px;margin-right:10px;cursor:pointer">
+                      <span>💳 Acreedores</span>
+                    </label>
+                  </div>
+                  <div style="margin-bottom:8px">
+                    <label style="display:flex;align-items:center;color:#000;font-weight:500;cursor:pointer">
+                      <input type="checkbox" name="tipos_tercero" value="PROVEEDORES Y ACREEDORES" style="width:18px;height:18px;margin-right:10px;cursor:pointer">
+                      <span>🔗 Proveedores y Acreedores</span>
+                    </label>
+                  </div>
+                  <div>
+                    <label style="display:flex;align-items:center;color:#000;font-weight:500;cursor:pointer">
+                      <input type="checkbox" name="tipos_tercero" value="NO REGISTRADOS" style="width:18px;height:18px;margin-right:10px;cursor:pointer">
+                      <span>❓ No Registrados</span>
+                    </label>
+                  </div>
+                </div>
+                <small style="color:#000;display:block;margin-top:8px;font-weight:600">
+                  ✅ Selecciona uno o varios tipos. Si no seleccionas ninguno, se incluirán todos los tipos.
+                </small>
+              </div>
+            </div>
+            
+            <div id="criterios_acuses" style="display:none">
+              <div class="form-group">
+                <label>Acuses mínimos requeridos *</label>
+                <input type="number" id="cfg_acuses_minimo" min="1" max="3" value="2">
+                <small style="color:#000;display:block;margin-top:5px;font-weight:600">
+                  ⚠️ Se enviará alerta si el documento tiene <strong>menos de</strong> este número de acuses (ej: si configuras 2, alertará documentos con 0 o 1 acuses)
+                </small>
+              </div>
+              
+              <!-- 🆕 FILTRO TIPO DE TERCERO -->
+              <div class="form-group">
+                <label style="color:#000;font-weight:600;display:block;margin-bottom:10px">🏢 Filtrar por Tipo de Tercero</label>
+                <div style="background:#f8f9fa;padding:15px;border:1px solid #dee2e6;border-radius:8px">
+                  <div style="margin-bottom:8px">
+                    <label style="display:flex;align-items:center;color:#000;font-weight:500;cursor:pointer">
+                      <input type="checkbox" name="tipos_tercero_acuses" value="PROVEEDORES" style="width:18px;height:18px;margin-right:10px;cursor:pointer">
+                      <span>📦 Proveedores</span>
+                    </label>
+                  </div>
+                  <div style="margin-bottom:8px">
+                    <label style="display:flex;align-items:center;color:#000;font-weight:500;cursor:pointer">
+                      <input type="checkbox" name="tipos_tercero_acuses" value="ACREEDORES" style="width:18px;height:18px;margin-right:10px;cursor:pointer">
+                      <span>💳 Acreedores</span>
+                    </label>
+                  </div>
+                  <div style="margin-bottom:8px">
+                    <label style="display:flex;align-items:center;color:#000;font-weight:500;cursor:pointer">
+                      <input type="checkbox" name="tipos_tercero_acuses" value="PROVEEDORES Y ACREEDORES" style="width:18px;height:18px;margin-right:10px;cursor:pointer">
+                      <span>🔗 Proveedores y Acreedores</span>
+                    </label>
+                  </div>
+                  <div>
+                    <label style="display:flex;align-items:center;color:#000;font-weight:500;cursor:pointer">
+                      <input type="checkbox" name="tipos_tercero_acuses" value="NO REGISTRADOS" style="width:18px;height:18px;margin-right:10px;cursor:pointer">
+                      <span>❓ No Registrados</span>
+                    </label>
+                  </div>
+                </div>
+                <small style="color:#000;display:block;margin-top:8px;font-weight:600">
+                  ✅ Selecciona uno o varios tipos. Si no seleccionas ninguno, se incluirán todos los tipos.
+                </small>
+              </div>
+            </div>
+            
+            <!-- 🆕 FILTRO POR RANGO DE FECHAS -->
+            <div style="background:#e3f2fd;border:2px solid #2196f3;border-radius:8px;padding:15px;margin:20px 0">
+              <h4 style="margin-top:0;color:#1976d2;font-weight:700;display:flex;align-items:center;gap:10px">
+                <span>📅</span> Filtro por Rango de Fechas (Opcional)
+              </h4>
+              <small style="color:#0d47a1;display:block;margin-bottom:15px;font-weight:600">
+                Limita los documentos a un rango específico de fechas de emisión. Si no ingresas fechas, se procesarán todos los documentos que cumplan los criterios anteriores.
+              </small>
+              
+              <div class="grid" style="grid-template-columns:1fr 1fr;gap:15px">
+                <div class="form-group">
+                  <label style="color:#1976d2;font-weight:600">📆 Fecha Inicio</label>
+                  <input type="date" id="cfg_fecha_inicio" class="form-control" placeholder="Desde" style="color:#000">
+                  <small style="color:#0d47a1;display:block;margin-top:5px">
+                    Desde qué fecha considerar documentos
+                  </small>
+                </div>
+                <div class="form-group">
+                  <label style="color:#1976d2;font-weight:600">📆 Fecha Fin</label>
+                  <input type="date" id="cfg_fecha_fin" class="form-control" placeholder="Hasta" style="color:#000">
+                  <small style="color:#0d47a1;display:block;margin-top:5px">
+                    Hasta qué fecha considerar documentos
+                  </small>
+                </div>
+              </div>
+              
+              <div style="background:#fff9e6;border-left:4px solid #ffc107;padding:10px;margin-top:10px;border-radius:4px">
+                <strong style="color:#f57f17">💡 Ejemplo:</strong>
+                <p style="color:#000;margin:5px 0 0 0;font-size:14px">
+                  Si configuras <strong>Fecha Inicio: 2026-01-01</strong> y <strong>Fecha Fin: 2026-01-31</strong>, solo se procesarán documentos emitidos en enero de 2026.
+                </p>
+              </div>
+            </div>
+            
+            <!-- 🆕 SECCIÓN DE SUPERVISIÓN -->
+            <div style="background:#fff3cd;border:2px solid #ff9800;border-radius:8px;padding:15px;margin:20px 0">
+              <div class="form-group" style="margin-bottom:10px">
+                <label style="display:flex;align-items:center;gap:10px;cursor:pointer;color:#000">
+                  <input type="checkbox" id="cfg_es_supervision" onchange="toggleSupervision()">
+                  <span style="font-weight:bold;font-size:16px;color:#000">🔍 Es Configuración de SUPERVISIÓN</span>
+                </label>
+                <small style="color:#664d03;display:block;margin-top:5px;font-weight:500">
+                  ⚠️ Si activas esto, el correo se enviará al <strong>supervisor</strong> con TODOS los documentos consolidados (no agrupa por NIT)
+                </small>
+              </div>
+              
+              <div id="campos_supervision" style="display:none;margin-top:15px;padding-top:15px;border-top:2px solid #ff9800">
+                <div class="form-group">
+                  <label style="color:#000;font-weight:600">📧 Email del Supervisor *</label>
+                  <input type="email" id="cfg_email_supervisor" placeholder="supervisor@empresa.com" style="color:#000">
+                  <small style="color:#664d03;display:block;margin-top:5px;font-weight:500">
+                    Este correo recibirá el reporte consolidado con todos los documentos
+                  </small>
+                </div>
+                
+                <div class="form-group">
+                  <label style="color:#000;font-weight:600">🔄 Frecuencia de Supervisión (días) *</label>
+                  <select id="cfg_frecuencia_dias" style="color:#000">
+                    <option value="1">📅 Diario (cada día)</option>
+                    <option value="4" selected>📆 Cada 4 días</option>
+                    <option value="7">📊 Semanal (cada 7 días)</option>
+                    <option value="15">📈 Quincenal (cada 15 días)</option>
+                  </select>
+                  <small style="color:#664d03;display:block;margin-top:5px;font-weight:500">
+                    Define cada cuántos días se enviará el reporte al supervisor
+                  </small>
+                </div>
+              </div>
+            </div>
+            
+            <div class="grid" style="grid-template-columns:1fr 1fr;gap:15px">
+              <div class="form-group">
+                <label>Hora de envío *</label>
+                <input type="time" id="cfg_hora_envio" required value="08:00">
+              </div>
+              <div class="form-group">
+                <label>Frecuencia *</label>
+                <select id="cfg_frecuencia" required onchange="actualizarDiasSemana()">
+                  <option value="DIARIO">📅 Diario</option>
+                  <option value="SEMANAL">📆 Semanal</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>Tipo de destinatario *</label>
+              <select id="cfg_tipo_destinatario" required>
+                <option value="">Seleccione...</option>
+                <option value="Causado">📝 Causador (persona que causó el documento)</option>
+                <option value="Todos">👥 Todos los usuarios de causación</option>
+                <option value="UsuariosNIT">🏢 Usuarios asignados al NIT emisor</option>
+              </select>
+              <small style="color:#000;display:block;margin-top:5px;font-weight:600">
+                Define quién recibirá el correo de alerta. Si selecciona "Usuarios asignados al NIT", se enviará al usuario del NIT emisor del documento.
+              </small>
+            </div>
+            
+            <div id="dias_semana_grupo" style="display:none">
+              <div class="form-group">
+                <label>Días de la semana</label>
+                <div style="display:flex;gap:10px;flex-wrap:wrap">
+                  <label style="display:flex;align-items:center;gap:5px">
+                    <input type="checkbox" value="1" class="dia_semana"> Lunes
+                  </label>
+                  <label style="display:flex;align-items:center;gap:5px">
+                    <input type="checkbox" value="2" class="dia_semana"> Martes
+                  </label>
+                  <label style="display:flex;align-items:center;gap:5px">
+                    <input type="checkbox" value="3" class="dia_semana"> Miércoles
+                  </label>
+                  <label style="display:flex;align-items:center;gap:5px">
+                    <input type="checkbox" value="4" class="dia_semana"> Jueves
+                  </label>
+                  <label style="display:flex;align-items:center;gap:5px">
+                    <input type="checkbox" value="5" class="dia_semana"> Viernes
+                  </label>
+                  <label style="display:flex;align-items:center;gap:5px">
+                    <input type="checkbox" value="6" class="dia_semana"> Sábado
+                  </label>
+                  <label style="display:flex;align-items:center;gap:5px">
+                    <input type="checkbox" value="0" class="dia_semana"> Domingo
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <div style="display:flex;gap:10px;margin-top:25px">
+              <button type="submit" class="btn btn-primary">💾 Crear Configuración</button>
+              <button type="button" class="btn" onclick="cerrarModal()">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      `;
+      
+      mostrarModal(html);
+    }
+    
+    window.actualizarCriterios = function() {
+      const tipoElement = document.getElementById('cfg_tipo');
+      const criteriosPendientes = document.getElementById('criterios_pendientes');
+      const criteriosAcuses = document.getElementById('criterios_acuses');
+      
+      if (tipoElement && criteriosPendientes && criteriosAcuses) {
+        const tipo = tipoElement.value;
+        criteriosPendientes.style.display = tipo === 'PENDIENTES_DIAS' ? 'block' : 'none';
+        criteriosAcuses.style.display = tipo === 'CREDITO_SIN_ACUSES' ? 'block' : 'none';
+      }
+    }
+    
+    function actualizarDiasSemana() {
+      const frecuenciaElement = document.getElementById('cfg_frecuencia');
+      const diasSemanaGrupo = document.getElementById('dias_semana_grupo');
+      
+      if (frecuenciaElement && diasSemanaGrupo) {
+        const frecuencia = frecuenciaElement.value;
+        diasSemanaGrupo.style.display = frecuencia === 'SEMANAL' ? 'block' : 'none';
+      }
+    }
+    
+    // 🆕 FUNCIÓN PARA MOSTRAR/OCULTAR CAMPOS DE SUPERVISIÓN
+    window.toggleSupervision = function() {
+      const esSupervision = document.getElementById('cfg_es_supervision').checked;
+      const camposSupervision = document.getElementById('campos_supervision');
+      
+      if (esSupervision) {
+        camposSupervision.style.display = 'block';
+        // Hacer email supervisor requerido
+        document.getElementById('cfg_email_supervisor').required = true;
+      } else {
+        camposSupervision.style.display = 'none';
+        // Remover requerimiento
+        document.getElementById('cfg_email_supervisor').required = false;
+      }
+    }
+    
+    window.crearConfiguracion = function() {
+      const tipo = document.getElementById('cfg_tipo').value;
+      const frecuencia = document.getElementById('cfg_frecuencia').value;
+      const esSupervision = document.getElementById('cfg_es_supervision').checked;
+      
+      // 🆕 VALIDAR CAMPOS DE SUPERVISIÓN
+      if (esSupervision) {
+        const emailSupervisor = document.getElementById('cfg_email_supervisor').value.trim();
+        if (!emailSupervisor) {
+          alert('⚠️ Debes ingresar el email del supervisor');
+          return;
+        }
+        if (!emailSupervisor.includes('@')) {
+          alert('⚠️ Email del supervisor inválido');
+          return;
+        }
+      }
+      
+      // Preparar estados excluidos
+      let estadosExcluidos = [];
+      if (tipo === 'PENDIENTES_DIAS') {
+        const estadosText = document.getElementById('cfg_estados_excluidos').value;
+        if (estadosText.trim()) {
+          estadosExcluidos = estadosText.split(',').map(e => e.trim()).filter(e => e);
+        }
+      }
+      
+      // 🆕 PREPARAR TIPOS DE TERCERO (checkboxes)
+      let tiposTercero = [];
+      const checkboxName = tipo === 'PENDIENTES_DIAS' ? 'tipos_tercero' : 'tipos_tercero_acuses';
+      const checkboxes = document.querySelectorAll(`input[name="${checkboxName}"]:checked`);
+      
+      if (checkboxes && checkboxes.length > 0) {
+        tiposTercero = Array.from(checkboxes).map(cb => cb.value);
+      }
+      
+      // Preparar días de semana
+      let diasSemana = [];
+      if (frecuencia === 'SEMANAL') {
+        document.querySelectorAll('.dia_semana:checked').forEach(cb => {
+          diasSemana.push(parseInt(cb.value));
+        });
+        
+        if (diasSemana.length === 0) {
+          alert('⚠️ Para frecuencia semanal, debe seleccionar al menos un día');
+          return;
+        }
+      }
+      
+      const data = {
+        nombre: document.getElementById('cfg_nombre').value.trim(),
+        tipo: tipo,
+        dias_minimos: tipo === 'PENDIENTES_DIAS' ? parseInt(document.getElementById('cfg_dias_minimos').value) : null,
+        requiere_acuses_minimo: tipo === 'CREDITO_SIN_ACUSES' ? parseInt(document.getElementById('cfg_acuses_minimo').value) : null,
+        estados_excluidos: estadosExcluidos,
+        tipos_tercero: tiposTercero,  // 🆕 NUEVO FILTRO
+        // 🆕 FILTROS DE FECHA
+        fecha_inicio: document.getElementById('cfg_fecha_inicio').value || null,
+        fecha_fin: document.getElementById('cfg_fecha_fin').value || null,
+        hora_envio: document.getElementById('cfg_hora_envio').value,
+        frecuencia: frecuencia,
+        dias_semana: diasSemana,
+        tipo_destinatario: document.getElementById('cfg_tipo_destinatario').value,
+        activo: true,
+        // 🆕 CAMPOS DE SUPERVISIÓN
+        es_supervision: esSupervision,
+        email_supervisor: esSupervision ? document.getElementById('cfg_email_supervisor').value.trim() : null,
+        frecuencia_dias: esSupervision ? parseInt(document.getElementById('cfg_frecuencia_dias').value) : 1
+      };
+      
+      fetch('/dian_vs_erp/api/config/envios', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      })
+        .then(r => r.json())
+        .then(response => {
+          if (response.exito) {
+            alert('✅ ' + response.mensaje);
+            cerrarModal();
+            cargarConfiguracionesEnvios();
+          } else {
+            alert('❌ ' + response.mensaje);
+          }
+        })
+        .catch(err => {
+          alert('❌ Error creando configuración');
+          console.error(err);
+        });
+    }
+    
+    window.toggleConfigEnvio = function(id) {
+      console.log('🔧 toggleConfigEnvio() llamada con id:', id);
+      if (!confirm('¿Confirma cambiar el estado de esta configuración?')) return;
+      
+      fetch(`/dian_vs_erp/api/config/envios/${id}/toggle`, {method: 'POST'})
+        .then(r => r.json())
+        .then(response => {
+          alert(response.exito ? '✅ ' + response.mensaje : '❌ ' + response.mensaje);
+          cargarConfiguracionesEnvios();
+        })
+        .catch(err => {
+          alert('❌ Error cambiando estado');
+          console.error(err);
+        });
+    }
+    
+    // 🆕 FUNCIÓN PARA EDITAR CONFIGURACIÓN
+    window.editarConfigEnvio = function(id) {
+      console.log('✏️ editarConfigEnvio() llamada con id:', id);
+      
+      // 🆕 PASO 1: Abrir el modal PRIMERO para que exista en el DOM
+      console.log('🔧 Abriendo modal con modalNuevaConfiguracion()...');
+      modalNuevaConfiguracion();
+      
+      // 🆕 PASO 2: Esperar 200ms a que el modal se renderice en el DOM
+      setTimeout(() => {
+        console.log('🔄 Modal renderizado, cargando configuración...');
+        
+        // Buscar la configuración
+        fetch(`/dian_vs_erp/api/config/envios`)
+          .then(r => {
+            console.log('✅ Fetch response recibido');
+            return r.json();
+          })
+          .then(response => {
+            console.log('✅ JSON parseado, envios:', response.envios?.length);
+            const config = response.envios.find(e => e.id === id);
+            if (!config) {
+              console.error('❌ Config no encontrado para id:', id);
+              alert('❌ Configuración no encontrada');
+              cerrarModal();
+              return;
+            }
+            console.log('✅ Config encontrado:', config.nombre);
+            
+            try {
+              // Cargar valores en el formulario CON VALIDACIONES NULL-SAFE
+              console.log('📝 Cargando valores básicos...');
+              const cfgNombre = document.getElementById('cfg_nombre');
+              const cfgTipo = document.getElementById('cfg_tipo');
+              const cfgHoraEnvio = document.getElementById('cfg_hora_envio');
+              const cfgFrecuencia = document.getElementById('cfg_frecuencia');
+              const cfgTipoDestinatario = document.getElementById('cfg_tipo_destinatario');
+              
+              if (cfgNombre) cfgNombre.value = config.nombre || '';
+              if (cfgTipo) cfgTipo.value = config.tipo || '';
+              if (cfgHoraEnvio) cfgHoraEnvio.value = config.hora_envio || '';
+              if (cfgFrecuencia) cfgFrecuencia.value = config.frecuencia || '';
+              if (cfgTipoDestinatario) cfgTipoDestinatario.value = config.tipo_destinatario || '';
+              console.log('✅ Valores básicos cargados');
+              
+              // Actualizar criterios PRIMERO para mostrar/ocultar secciones correctas
+              console.log('🔄 Llamando actualizarCriterios()...');
+              actualizarCriterios();
+              console.log('✅ actualizarCriterios() completado');
+            
+            // Esperar un momento para que el DOM se actualice
+            setTimeout(() => {
+              // Criterios según tipo (solo llenar si el elemento existe)
+              if (config.tipo === 'PENDIENTES_DIAS') {
+              const diasMinimos = document.getElementById('cfg_dias_minimos');
+              const estadosExcluidos = document.getElementById('cfg_estados_excluidos');
+              
+              if (diasMinimos) diasMinimos.value = config.dias_minimos || 3;
+              if (estadosExcluidos) {
+                try {
+                  estadosExcluidos.value = config.estados_excluidos ? JSON.parse(config.estados_excluidos).join(', ') : '';
+                } catch (e) {
+                  estadosExcluidos.value = '';
+                }
+              }
+              
+              // Tipos de tercero (checkboxes) - con validaciones robustas
+              try {
+                let tiposTercero = [];
+                if (config.tipos_tercero && config.tipos_tercero !== 'null' && config.tipos_tercero !== '') {
+                  tiposTercero = JSON.parse(config.tipos_tercero);
+                }
+                const checkboxes = document.querySelectorAll('input[name="tipos_tercero"]');
+                checkboxes.forEach(cb => {
+                  cb.checked = Array.isArray(tiposTercero) && tiposTercero.includes(cb.value);
+                });
+              } catch (e) {
+                console.error('Error cargando tipos_tercero:', e);
+                // Limpiar checkboxes si hay error
+                document.querySelectorAll('input[name="tipos_tercero"]').forEach(cb => cb.checked = false);
+              }
+            } else if (config.tipo === 'CREDITO_SIN_ACUSES') {
+              const acusesMinimo = document.getElementById('cfg_acuses_minimo');
+              
+              if (acusesMinimo) acusesMinimo.value = config.requiere_acuses_minimo || 2;
+              
+              // Tipos de tercero para acuses (checkboxes) - con validaciones robustas
+              try {
+                let tiposTercero = [];
+                if (config.tipos_tercero && config.tipos_tercero !== 'null' && config.tipos_tercero !== '') {
+                  tiposTercero = JSON.parse(config.tipos_tercero);
+                }
+                const checkboxes = document.querySelectorAll('input[name="tipos_tercero_acuses"]');
+                checkboxes.forEach(cb => {
+                  cb.checked = Array.isArray(tiposTercero) && tiposTercero.includes(cb.value);
+                });
+              } catch (e) {
+                console.error('Error cargando tipos_tercero_acuses:', e);
+                // Limpiar checkboxes si hay error
+                document.querySelectorAll('input[name="tipos_tercero_acuses"]').forEach(cb => cb.checked = false);
+              }
+            }
+            
+            // Fechas de filtro
+            const fechaInicio = document.getElementById('cfg_fecha_inicio');
+            const fechaFin = document.getElementById('cfg_fecha_fin');
+            if (fechaInicio) fechaInicio.value = config.fecha_inicio || '';
+            if (fechaFin) fechaFin.value = config.fecha_fin || '';
+          
+            // Supervisión
+            const esSupervisionCheck = document.getElementById('cfg_es_supervision');
+            if (esSupervisionCheck) {
+              esSupervisionCheck.checked = config.es_supervision || false;
+              toggleSupervision();
+              
+              if (config.es_supervision) {
+                const emailSupervisor = document.getElementById('cfg_email_supervisor');
+                const frecuenciaDias = document.getElementById('cfg_frecuencia_dias');
+                if (emailSupervisor) emailSupervisor.value = config.email_supervisor || '';
+                if (frecuenciaDias) frecuenciaDias.value = config.frecuencia_dias || 4;
+              }
+            }
+            
+            // Frecuencia
+            actualizarDiasSemana();
+            if (config.frecuencia === 'SEMANAL') {
+              const diasSemana = config.dias_semana ? JSON.parse(config.dias_semana) : [];
+              document.querySelectorAll('.dia_semana').forEach(cb => {
+                cb.checked = diasSemana.includes(parseInt(cb.value));
+              });
+            }
+            
+            // Cambiar título del modal
+            console.log('📝 Cambiando título del modal...');
+            const modalTitle = document.querySelector('.modal-form-dark h3');
+            if (modalTitle) modalTitle.textContent = '✏️ Editar Configuración de Envío';
+            
+            // Cambiar función del formulario a actualizar
+            console.log('📝 Configurando form.onsubmit...');
+            const form = document.getElementById('formNuevaConfig');
+            if (form) {
+              form.onsubmit = function(e) {
+                e.preventDefault();
+                actualizarConfiguracion(id);
+              };
+            }
+            
+            console.log('✅ MODAL LISTO PARA EDITAR');
+            
+          }, 100); // Fin del setTimeout interno
+          
+          } catch (error) {
+            console.error('❌ ERROR en editarConfigEnvio:', error);
+            alert('❌ Error: ' + error.message);
+            cerrarModal();
+          }
+        })
+        .catch(err => {
+          console.error('❌ ERROR en fetch:', err);
+          alert('❌ Error cargando configuración: ' + err.message);
+          cerrarModal();
+        });
+      }, 200); // Fin del setTimeout principal que espera que el modal se renderice
+    }
+    
+    // 🆕 FUNCIÓN PARA ACTUALIZAR CONFIGURACIÓN
+    window.actualizarConfiguracion = function(id) {
+      const tipo = document.getElementById('cfg_tipo').value;
+      const frecuencia = document.getElementById('cfg_frecuencia').value;
+      const esSupervision = document.getElementById('cfg_es_supervision').checked;
+      
+      // Validar campos de supervisión
+      if (esSupervision) {
+        const emailSupervisor = document.getElementById('cfg_email_supervisor').value.trim();
+        if (!emailSupervisor) {
+          alert('⚠️ Debes ingresar el email del supervisor');
+          return;
+        }
+        if (!emailSupervisor.includes('@')) {
+          alert('⚠️ Email del supervisor inválido');
+          return;
+        }
+      }
+      
+      // Preparar estados excluidos
+      let estadosExcluidos = [];
+      if (tipo === 'PENDIENTES_DIAS') {
+        const estadosText = document.getElementById('cfg_estados_excluidos').value;
+        if (estadosText.trim()) {
+          estadosExcluidos = estadosText.split(',').map(e => e.trim()).filter(e => e);
+        }
+      }
+      
+      // Preparar tipos de tercero
+      let tiposTercero = [];
+      const checkboxName = tipo === 'PENDIENTES_DIAS' ? 'tipos_tercero' : 'tipos_tercero_acuses';
+      const checkboxes = document.querySelectorAll(`input[name="${checkboxName}"]:checked`);
+      
+      if (checkboxes && checkboxes.length > 0) {
+        tiposTercero = Array.from(checkboxes).map(cb => cb.value);
+      }
+      
+      // Preparar días de semana
+      let diasSemana = [];
+      if (frecuencia === 'SEMANAL') {
+        document.querySelectorAll('.dia_semana:checked').forEach(cb => {
+          diasSemana.push(parseInt(cb.value));
+        });
+        
+        if (diasSemana.length === 0) {
+          alert('⚠️ Para frecuencia semanal, debe seleccionar al menos un día');
+          return;
+        }
+      }
+      
+      const data = {
+        nombre: document.getElementById('cfg_nombre').value.trim(),
+        tipo: tipo,
+        dias_minimos: tipo === 'PENDIENTES_DIAS' ? parseInt(document.getElementById('cfg_dias_minimos').value) : null,
+        requiere_acuses_minimo: tipo === 'CREDITO_SIN_ACUSES' ? parseInt(document.getElementById('cfg_acuses_minimo').value) : null,
+        estados_excluidos: estadosExcluidos,
+        tipos_tercero: tiposTercero,
+        fecha_inicio: document.getElementById('cfg_fecha_inicio').value || null,
+        fecha_fin: document.getElementById('cfg_fecha_fin').value || null,
+        hora_envio: document.getElementById('cfg_hora_envio').value,
+        frecuencia: frecuencia,
+        dias_semana: diasSemana,
+        tipo_destinatario: document.getElementById('cfg_tipo_destinatario').value,
+        activo: true,
+        es_supervision: esSupervision,
+        email_supervisor: esSupervision ? document.getElementById('cfg_email_supervisor').value.trim() : null,
+        frecuencia_dias: esSupervision ? parseInt(document.getElementById('cfg_frecuencia_dias').value) : 1
+      };
+      
+      fetch(`/dian_vs_erp/api/config/envios/${id}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      })
+        .then(r => r.json())
+        .then(response => {
+          if (response.exito) {
+            alert('✅ ' + response.mensaje);
+            cerrarModal();
+            cargarConfiguracionesEnvios();
+          } else {
+            alert('❌ ' + response.mensaje);
+          }
+        })
+        .catch(err => {
+          alert('❌ Error actualizando configuración');
+          console.error(err);
+        });
+    }
+    
+    window.ejecutarConfigEnvio = function(id) {
+      console.log('🚀 ejecutarConfigEnvio() llamada con id:', id);
+      if (!confirm('¿Ejecutar esta configuración ahora?\n\n📧 Se enviarán correos REALES a todos los usuarios que tengan un NIT emisor con documentos que cumplan las condiciones configuradas.')) return;
+      
+      alert('⏳ Ejecutando envío programado...\n\nSe están procesando documentos y enviando correos.\nRevise el historial en unos momentos.');
+      
+      fetch(`/dian_vs_erp/api/config/envios/${id}/ejecutar`, {method: 'POST'})
+        .then(r => r.json())
+        .then(response => {
+          if (response.exito) {
+            setTimeout(() => {
+              cargarHistorialEnvios();
+              alert('✅ ' + response.mensaje);
+            }, 2000);
+          } else {
+            alert('❌ ' + response.mensaje);
+          }
+        })
+        .catch(err => {
+          alert('❌ Error ejecutando configuración');
+          console.error(err);
+        });
+    }
+    
+    window.eliminarConfigEnvio = function(id) {
+      if (!confirm('¿Eliminar esta configuración?\n\nEsta acción no se puede deshacer.')) return;
+      
+      fetch(`/dian_vs_erp/api/config/envios/${id}`, {method: 'DELETE'})
+        .then(r => r.json())
+        .then(response => {
+          alert(response.exito ? '✅ ' + response.mensaje : '❌ ' + response.mensaje);
+          cargarConfiguracionesEnvios();
+        })
+        .catch(err => {
+          alert('❌ Error eliminando configuración');
+          console.error(err);
+        });
+    }
+    
+    // --- USUARIOS DE CAUSACIÓN ---
+    function cargarUsuariosCausacion() {
+      fetch('/dian_vs_erp/api/usuarios-causacion')
+        .then(r => r.json())
+        .then(response => {
+          const tbody = document.getElementById('usuariosCausacionBody');
+          tbody.innerHTML = '';
+          
+          if (!response.exito || response.usuarios.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--txt-muted)">No hay usuarios de causación configurados</td></tr>';
+            return;
+          }
+          
+          response.usuarios.forEach(usuario => {
+            const tr = document.createElement('tr');
+            
+            const estadoBadge = usuario.activo
+              ? '<span class="badge" style="background:#00c87520;color:#00c875">✓ Activo</span>'
+              : '<span class="badge" style="background:#cccccc40;color:#666;font-weight:600">✗ Inactivo</span>';
+            
+            const ultimoDoc = usuario.ultimo_documento_fecha || 'N/A';
+            
+            tr.innerHTML = `
+              <td>${usuario.nombre_causador}</td>
+              <td>${usuario.email}</td>
+              <td>${usuario.total_documentos || 0}</td>
+              <td>${ultimoDoc}</td>
+              <td>${estadoBadge}</td>
+              <td>
+                <button class="btn btn-sm" onclick="editarUsuarioCausacion(${usuario.id})" title="Editar">
+                  ✏️
+                </button>
+                <button class="btn btn-sm" onclick="toggleUsuarioCausacion(${usuario.id})" title="${usuario.activo ? 'Desactivar' : 'Activar'}">
+                  ${usuario.activo ? '⏸' : '▶'}
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="eliminarUsuarioCausacion(${usuario.id})" title="Eliminar">
+                  🗑
+                </button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        })
+        .catch(err => {
+          document.getElementById('usuariosCausacionBody').innerHTML = 
+            '<tr><td colspan="6" style="text-align:center;padding:30px;color:#e94444">Error cargando usuarios</td></tr>';
+          console.error(err);
+        });
+    }
+    
+    window.modalNuevoUsuarioCausacion = function() {
+      console.log('👤 modalNuevoUsuarioCausacion() llamada');
+      const html = `
+        <div class="modal-form-dark" style="max-width:500px;margin:0 auto;background:white;padding:30px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.2)">
+          <h3 style="margin-top:0;color:#000;font-weight:700">➕ Nuevo Usuario de Causación</h3>
+          <form id="formNuevoUsuarioCausacion" onsubmit="event.preventDefault(); crearUsuarioCausacion();">
+            
+            <div class="form-group">
+              <label style="color:#1a1a1a;font-weight:500;font-size:14px">Nombre del causador *</label>
+              <input type="text" id="uc_nombre" required maxlength="100" 
+                     placeholder="Ej: PAOLA ANDREA LOZANO GONZALEZ"
+                     style="text-transform:uppercase">
+              <small style="color:#000;display:block;margin-top:5px;font-weight:600">
+                Debe coincidir exactamente con el nombre en la columna "doc causado por"
+              </small>
+            </div>
+            
+            <div class="form-group">
+              <label style="color:#1a1a1a;font-weight:500;font-size:14px">Email *</label>
+              <input type="email" id="uc_email" required maxlength="255" 
+                     placeholder="correo@supertiendascanaveral.com">
+            </div>
+            
+            <div style="margin-top:15px">
+              <button type="button" class="btn btn-secondary" onclick="cargarCausadoresDisponibles()" style="font-size:13px">
+                📋 Ver causadores existentes en maestro
+              </button>
+              <div id="causadores_disponibles" style="margin-top:10px;max-height:150px;overflow-y:auto;background:#f5f5f5;padding:10px;border-radius:4px;display:none">
+              </div>
+            </div>
+            
+            <div style="display:flex;gap:10px;margin-top:25px">
+              <button type="submit" class="btn btn-primary">💾 Crear Usuario</button>
+              <button type="button" class="btn" onclick="cerrarModal()">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      `;
+      
+      mostrarModal(html);
+    }
+    
+    window.cargarCausadoresDisponibles = function() {
+      const div = document.getElementById('causadores_disponibles');
+      div.innerHTML = '<small>Cargando...</small>';
+      div.style.display = 'block';
+      
+      fetch('/dian_vs_erp/api/causadores/disponibles')
+        .then(r => r.json())
+        .then(response => {
+          if (!response.exito || response.causadores.length === 0) {
+            div.innerHTML = '<small style="color:#666;font-weight:600">No hay causadores en el maestro</small>';
+            return;
+          }
+          
+          let html = '<small style="font-weight:bold;display:block;margin-bottom:8px;color:#333">Click para copiar:</small>';
+          response.causadores.forEach(c => {
+            html += `<div style="padding:8px 12px;cursor:pointer;font-size:13px;background:#166534;color:white;margin:3px 0;border-radius:4px;transition:all 0.2s;border:1px solid #065f46" 
+                          onmouseover="this.style.background='#15803d';this.style.transform='scale(1.02)'" 
+                          onmouseout="this.style.background='#166534';this.style.transform='scale(1)'"
+                          onclick="document.getElementById('uc_nombre').value='${c}'; alert('✅ Copiado: ${c}')">
+                       📝 ${c}
+                     </div>`;
+          });
+          div.innerHTML = html;
+        })
+        .catch(err => {
+          div.innerHTML = '<small style="color:#e94444">Error cargando</small>';
+          console.error(err);
+        });
+    }
+    
+    window.crearUsuarioCausacion = function() {
+      const data = {
+        nombre_causador: document.getElementById('uc_nombre').value.trim().toUpperCase(),
+        email: document.getElementById('uc_email').value.trim().toLowerCase(),
+        activo: true
+      };
+      
+      fetch('/dian_vs_erp/api/usuarios-causacion', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      })
+        .then(r => r.json())
+        .then(response => {
+          if (response.exito) {
+            alert('✅ ' + response.mensaje);
+            cerrarModal();
+            cargarUsuariosCausacion();
+          } else {
+            alert('❌ ' + response.mensaje);
+          }
+        })
+        .catch(err => {
+          alert('❌ Error creando usuario');
+          console.error(err);
+        });
+    }
+    
+    function editarUsuarioCausacion(id) {
+      // Obtener datos actuales
+      fetch('/dian_vs_erp/api/usuarios-causacion')
+        .then(r => r.json())
+        .then(response => {
+          const usuario = response.usuarios.find(u => u.id === id);
+          if (!usuario) {
+            alert('❌ Usuario no encontrado');
+            return;
+          }
+          
+          const html = `
+            <div style="max-width:500px;margin:0 auto;background:white;padding:30px;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.2)">
+              <h3 style="margin-top:0">✏️ Editar Usuario de Causación</h3>
+              <form id="formEditarUsuarioCausacion" onsubmit="event.preventDefault(); actualizarUsuarioCausacion(${id});">
+                
+                <div class="form-group">
+                  <label>Nombre del causador *</label>
+                  <input type="text" id="uc_nombre_edit" required maxlength="100" 
+                         value="${usuario.nombre_causador}"
+                         style="text-transform:uppercase">
+                </div>
+                
+                <div class="form-group">
+                  <label>Email *</label>
+                  <input type="email" id="uc_email_edit" required maxlength="255" 
+                         value="${usuario.email}">
+                </div>
+                
+                <div style="display:flex;gap:10px;margin-top:25px">
+                  <button type="submit" class="btn btn-primary">💾 Actualizar</button>
+                  <button type="button" class="btn" onclick="cerrarModal()">Cancelar</button>
+                </div>
+              </form>
+            </div>
+          `;
+          
+          mostrarModal(html);
+        });
+    }
+    
+    function actualizarUsuarioCausacion(id) {
+      const data = {
+        nombre_causador: document.getElementById('uc_nombre_edit').value.trim().toUpperCase(),
+        email: document.getElementById('uc_email_edit').value.trim().toLowerCase()
+      };
+      
+      fetch(`/dian_vs_erp/api/usuarios-causacion/${id}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(data)
+      })
+        .then(r => r.json())
+        .then(response => {
+          if (response.exito) {
+            alert('✅ ' + response.mensaje);
+            cerrarModal();
+            cargarUsuariosCausacion();
+          } else {
+            alert('❌ ' + response.mensaje);
+          }
+        })
+        .catch(err => {
+          alert('❌ Error actualizando usuario');
+          console.error(err);
+        });
+    }
+    
+    window.toggleUsuarioCausacion = function(id) {
+      if (!confirm('¿Confirma cambiar el estado de este usuario?')) return;
+      
+      fetch(`/dian_vs_erp/api/usuarios-causacion/${id}/toggle`, {method: 'POST'})
+        .then(r => r.json())
+        .then(response => {
+          alert(response.exito ? '✅ ' + response.mensaje : '❌ ' + response.mensaje);
+          cargarUsuariosCausacion();
+        })
+        .catch(err => {
+          alert('❌ Error cambiando estado');
+          console.error(err);
+        });
+    }
+    
+    window.eliminarUsuarioCausacion = function(id) {
+      if (!confirm('¿Eliminar este usuario de causación?\n\nSolo se puede eliminar si no tiene documentos asociados.')) return;
+      
+      fetch(`/dian_vs_erp/api/usuarios-causacion/${id}`, {method: 'DELETE'})
+        .then(r => r.json())
+        .then(response => {
+          alert(response.exito ? '✅ ' + response.mensaje : '❌ ' + response.mensaje);
+          cargarUsuariosCausacion();
+        })
+        .catch(err => {
+          alert('❌ Error eliminando usuario');
+          console.error(err);
+        });
+    }
+    
+    // --- HISTORIAL DE ENVÍOS ---
+    function cargarHistorialEnvios() {
+      const configId = document.getElementById('filtro_config_id').value;
+      const limite = document.getElementById('limite_historial').value;
+      
+      let url = `/dian_vs_erp/api/historial-envios?limite=${limite}`;
+      if (configId) url += `&configuracion_id=${configId}`;
+      
+      fetch(url)
+        .then(r => r.json())
+        .then(response => {
+          const tbody = document.getElementById('historialEnviosBody');
+          tbody.innerHTML = '';
+          
+          if (!response.exito || response.historial.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--txt-muted)">No hay envíos registrados</td></tr>';
+            return;
+          }
+          
+          response.historial.forEach(h => {
+            const tr = document.createElement('tr');
+            
+            const estadoColor = {
+              'EXITOSO': '#00c875',
+              'PARCIAL': '#ffc107',
+              'FALLIDO': '#e94444'
+            };
+            
+            const estadoBadge = `<span class="badge" style="background:${estadoColor[h.estado]}20;color:${estadoColor[h.estado]}">${h.estado}</span>`;
+            
+            const duracion = h.duracion_segundos ? `${h.duracion_segundos.toFixed(2)}s` : 'N/A';
+            
+            tr.innerHTML = `
+              <td>${h.fecha_ejecucion}</td>
+              <td>${h.nombre_config}</td>
+              <td>${h.documentos_procesados}</td>
+              <td>${h.emails_enviados} / ${h.emails_enviados + h.emails_fallidos}</td>
+              <td>${estadoBadge}</td>
+              <td>${duracion}</td>
+              <td style="max-width:250px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${h.mensaje || ''}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        })
+        .catch(err => {
+          document.getElementById('historialEnviosBody').innerHTML = 
+            '<tr><td colspan="7" style="text-align:center;padding:30px;color:#e94444">Error cargando historial</td></tr>';
+          console.error(err);
+        });
+    }
+    
+    // ============================================
+    // TAB 4: LOGS
+    // ============================================
+    function cargarLogs(){
+      const nivel = document.getElementById('filtro_nivel').value;
+      const modulo = document.getElementById('filtro_modulo').value;
+      const limite = document.getElementById('limite_logs').value;
+      
+      let url = `/dian_vs_erp/api/logs/recientes?limite=${limite}`;
+      if(nivel) url += `&nivel=${nivel}`;
+      if(modulo) url += `&modulo=${modulo}`;
+      
+      fetch(url)
+        .then(r => r.json())
+        .then(response => {
+          const tbody = document.getElementById('logsBody');
+          tbody.innerHTML = '';
+          
+          if(!response.exito || response.logs.length === 0){
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--txt-muted)">No hay logs disponibles</td></tr>';
+            return;
+          }
+          
+          response.logs.forEach(log => {
+            const tr = document.createElement('tr');
+            const nivelColor = {
+              'DEBUG': '#6c757d',
+              'INFO': '#00c875',
+              'WARNING': '#ffc107',
+              'ERROR': '#e94444',
+              'CRITICAL': '#c93434'
+            };
+            
+            tr.innerHTML = `
+              <td>${log.timestamp}</td>
+              <td><span class="badge" style="background:${nivelColor[log.nivel]}20;color:${nivelColor[log.nivel]}">${log.nivel}</span></td>
+              <td>${log.modulo}</td>
+              <td>${log.operacion}</td>
+              <td>${log.mensaje}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        });
+    }
+    
+    // Cargar configuración y logs al abrir la página
+    window.addEventListener('DOMContentLoaded', function(){
+      cargarConfigSMTP();  // Cargar config SMTP al inicio
+      setTimeout(cargarLogs, 500);
+      
+      // 🎨 RESALTADO DE CHECKBOXES DE ELIMINACIÓN
+      document.querySelectorAll('.checkbox-eliminar').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+          const label = this.closest('.label-eliminar');
+          if (this.checked) {
+            // ✅ Checked → Borde rojo + fondo rojo suave
+            label.style.border = '2px solid #dc3545';
+            label.style.background = 'rgba(220, 53, 69, 0.1)';
+            label.style.boxShadow = '0 0 8px rgba(220, 53, 69, 0.3)';
+          } else {
+            // ❌ Unchecked → Volver a estado normal
+            label.style.border = '2px solid transparent';
+            label.style.background = 'transparent';
+            label.style.boxShadow = 'none';
+          }
+        });
+      });
+      
+      // 🔥 CRÍTICO: Sobrescribir switchTab DESPUÉS de que todas las funciones estén definidas
+      const switchTabBasic = window.switchTab;
+      
+      window.switchTab = function(index) {
+        console.log('switchTab completo llamado con index:', index);
+        
+        // Llamar a la función básica (cambiar tabs visualmente)
+        switchTabBasic(index);
+        
+        // Cargar datos según la pestaña activa
+        try {
+          if (index === 0) {
+            cargarConfigSMTP();
+          } else if (index === 1) {
+            cargarTodosLosUsuarios();
+          } else if (index === 2) {
+            cargarConfiguracionesEnvios();
+            cargarUsuariosCausacion();
+            cargarHistorialEnvios();
+          } else if (index === 3) {
+            cargarLogs();
+          } else if (index === 4) {
+            inicializarGestionDatos();
+          }
+        } catch(e) {
+          console.error('Error cargando datos del tab:', e);
+        }
+      };
+      
+      console.log('✅ switchTab completo activado');
+    });
+    
+    // ============================================================================
+    // GESTIÓN DE ELIMINACIÓN DE DATOS (16 Feb 2026)
+    // ============================================================================
+    
+    function actualizarCamposFechas() {
+      // ✅ VALIDAR que elementos existan antes de acceder
+      const tipoRangoEl = document.getElementById('tipo_rango_eliminacion');
+      const campoInicio = document.getElementById('campo_fecha_inicio');
+      const campoFin = document.getElementById('campo_fecha_fin');
+      const fechaInicio = document.getElementById('fecha_inicio_eliminacion');
+      const fechaFin = document.getElementById('fecha_fin_eliminacion');
+      
+      if (!tipoRangoEl || !campoInicio || !campoFin || !fechaInicio || !fechaFin) {
+        console.warn('⚠️ Elementos de gestión de datos no encontrados');
+        return;
+      }
+      
+      const tipoRango = tipoRangoEl.value;
+      
+      if (tipoRango === 'año') {
+        // Año completo: mostrar solo campo de año
+        campoInicio.style.display = 'block';
+        campoFin.style.display = 'none';
+        fechaInicio.type = 'text';
+        fechaInicio.placeholder = 'Año (ej: 2026)';
+        fechaInicio.value = '';
+        fechaInicio.maxLength = 4;
+      } else if (tipoRango === 'dias' || tipoRango === 'meses') {
+        campoInicio.style.display = 'block';
+        campoFin.style.display = 'block';
+        fechaInicio.type = 'date';
+        fechaInicio.placeholder = '';
+        fechaInicio.removeAttribute('maxLength');
+        fechaFin.type = 'date';
+      } else {
+        campoInicio.style.display = 'none';
+        campoFin.style.display = 'none';
+      }
+    }
+    
+    let emailUsuarioActual = 'ricardoriascos07@gmail.com';  // Variable global con email por defecto
+    
+    function inicializarGestionDatos() {
+      // ✅ VALIDAR elementos antes de limpiar
+      const tipoRango = document.getElementById('tipo_rango_eliminacion');
+      const fechaInicio = document.getElementById('fecha_inicio_eliminacion');
+      const fechaFin = document.getElementById('fecha_fin_eliminacion');
+      const campoInicio = document.getElementById('campo_fecha_inicio');
+      const campoFin = document.getElementById('campo_fecha_fin');
+      const seccionConfirmacion = document.getElementById('seccion_confirmacion');
+      const seccionResultado = document.getElementById('seccion_resultado');
+      
+      if (!tipoRango || !fechaInicio || !fechaFin || !campoInicio || !campoFin) {
+        console.warn('⚠️ No se puede inicializar gestión de datos - elementos no encontrados');
+        return;
+      }
+      
+      // Limpiar formulario
+      tipoRango.value = '';
+      fechaInicio.value = '';
+      fechaFin.value = '';
+      campoInicio.style.display = 'none';
+      campoFin.style.display = 'none';
+      if (seccionConfirmacion) seccionConfirmacion.style.display = 'none';
+      if (seccionResultado) seccionResultado.style.display = 'none';
+      
+      // Cargar email del usuario actual (actualiza el valor por defecto si está disponible)
+      fetch('/api/mis-permisos')
+        .then(r => r.json())
+        .then(data => {
+          console.log('Respuesta API mis-permisos:', data);
+          
+          // El email está en data.data.email (envuelto en success/data)
+          if (data.success && data.data && data.data.email) {
+            emailUsuarioActual = data.data.email;
+            console.log('✅ Email usuario cargado desde API:', emailUsuarioActual);
+          } else {
+            console.warn('⚠️ No se encontró email en API, manteniendo email por defecto:', emailUsuarioActual);
+          }
+        })
+        .catch(err => {
+          console.error('❌ Error obteniendo email:', err);
+          console.log('📧 Usando email por defecto:', emailUsuarioActual);
+        });
+    }
+    
+    function solicitarEliminacion() {
+      // ✅ VALIDAR elementos antes de acceder
+      const tipoRangoEl = document.getElementById('tipo_rango_eliminacion');
+      const fechaInicioEl = document.getElementById('fecha_inicio_eliminacion');
+      const fechaFinEl = document.getElementById('fecha_fin_eliminacion');
+      
+      if (!tipoRangoEl || !fechaInicioEl || !fechaFinEl) {
+        alert('❌ Error: Elementos del formulario no encontrados. Recarga la página.');
+        return;
+      }
+      
+      // Validar que tenemos email
+      if (!emailUsuarioActual) {
+        alert('❌ No se pudo obtener el email del usuario. Intente recargar la página.');
+        return;
+      }
+      
+      // Validar formulario
+      const tipoRango = tipoRangoEl.value;
+      const fechaInicio = fechaInicioEl.value;
+      const fechaFin = fechaFinEl.value;
+      
+      if (!tipoRango) {
+        alert('❌ Debe seleccionar un tipo de rango');
+        return;
+      }
+      
+      // Validar fechas
+      let fechaInicioFinal, fechaFinFinal;
+      
+      if (tipoRango === 'año') {
+        const año = fechaInicioEl.value;
+        if (!año || año.length !== 4) {
+          alert('❌ Debe ingresar un año válido (4 dígitos)');
+          return;
+        }
+        fechaInicioFinal = `${año}-01-01`;
+        fechaFinFinal = `${año}-12-31`;
+      } else {
+        if (!fechaInicio || !fechaFin) {
+          alert('❌ Debe especificar rango de fechas');
+          return;
+        }
+        fechaInicioFinal = fechaInicio;
+        fechaFinFinal = fechaFin;
+      }
+      
+      // Obtener tablas seleccionadas
+      const archivos = [];
+      const tablasNombres = [];
+      document.querySelectorAll('.checkbox-eliminar:checked').forEach(cb => {
+        archivos.push(cb.value);
+        const labelText = cb.parentElement.querySelector('strong').textContent.trim();
+        tablasNombres.push(labelText);
+      });
+      
+      // Validar que al menos una tabla esté seleccionada
+      if (archivos.length === 0) {
+        alert('❌ Debe seleccionar al menos una tabla para eliminar');
+        return;
+      }
+      
+      // Confirmación final
+      const confirmacion = confirm(
+        `⚠️ ¿Está SEGURO que desea eliminar datos?\n\n` +
+        `Tablas seleccionadas (${archivos.length}):\n${tablasNombres.join('\n')}\n\n` +
+        `Rango: ${fechaInicioFinal} a ${fechaFinFinal}\n\n` +
+        `Se enviará un código de confirmación a:\n${emailUsuarioActual}`
+      );
+      
+      if (!confirmacion) return;
+      
+      // Deshabilitar botón
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = '📧 Enviando código...';
+      
+      // Enviar solicitud
+      fetch('/dian_vs_erp/api/solicitar_eliminacion', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+          tipo_rango: tipoRango,
+          fecha_inicio: fechaInicioFinal,
+          fecha_fin: fechaFinFinal,
+          archivos: archivos,
+          email: emailUsuarioActual
+        })
+      })
+      .then(r => r.json())
+      .then(data => {
+        btn.disabled = false;
+        btn.textContent = '🔐 Solicitar Eliminación';
+        
+        if (data.success) {
+          // ✅ VALIDAR elementos antes de mostrar
+          const emailEnviado = document.getElementById('email_enviado');
+          const seccionConfirmacion = document.getElementById('seccion_confirmacion');
+          const codigoValidacion = document.getElementById('codigo_validacion');
+          
+          if (emailEnviado && seccionConfirmacion && codigoValidacion) {
+            // Mostrar sección de confirmación
+            emailEnviado.textContent = emailUsuarioActual;
+            seccionConfirmacion.style.display = 'block';
+            codigoValidacion.focus();
+            // Scroll suave
+            seccionConfirmacion.scrollIntoView({behavior: 'smooth', block: 'start'});
+          } else {
+            console.warn('⚠️ Elementos de confirmación no encontrados');
+          }
+          
+          alert(`✅ Código enviado a: ${emailUsuarioActual}\nValidez: 10 minutos`);
+        } else {
+          alert(`❌ Error: ${data.error || 'Error desconocido'}`);
+        }
+      })
+      .catch(err => {
+        btn.disabled = false;
+        btn.textContent = '🔐 Solicitar Eliminación';
+        alert(`❌ Error de conexión: ${err.message}`);
+        console.error(err);
+      });
+    }
+    
+    function confirmarEliminacion() {
+      // ✅ VALIDAR elemento antes de acceder
+      const codigoEl = document.getElementById('codigo_validacion');
+      
+      if (!codigoEl) {
+        alert('❌ Error: Campo de código no encontrado. Recarga la página.');
+        return;
+      }
+      
+      const codigo = codigoEl.value.trim();
+      
+      if (!codigo || codigo.length !== 6) {
+        alert('❌ Debe ingresar un código de 6 dígitos');
+        return;
+      }
+      
+      // Confirmación final
+      const confirmacion = confirm(
+        '⚠️⚠️⚠️ ÚLTIMA CONFIRMACIÓN ⚠️⚠️⚠️\n\n' +
+        'Esta acción eliminará PERMANENTEMENTE los datos seleccionados.\n' +
+        'NO SE PUEDE DESHACER.\n\n' +
+        '¿Confirmar eliminación?'
+      );
+      
+      if (!confirmacion) return;
+      
+      // Deshabilitar botón
+      const btn = event.target;
+      btn.disabled = true;
+      btn.textContent = '⏳ Eliminando...';
+      
+      // Enviar confirmación
+      fetch('/dian_vs_erp/api/confirmar_eliminacion', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({token: codigo})
+      })
+      .then(r => r.json())
+      .then(data => {
+        btn.disabled = false;
+        btn.textContent = '✅ Confirmar y Ejecutar Eliminación';
+        
+        if (data.success) {
+          // ✅ VALIDAR elementos antes de actualizar
+          const seccionConfirmacion = document.getElementById('seccion_confirmacion');
+          const resultadoTitulo = document.getElementById('resultado_titulo');
+          const resultadoContenido = document.getElementById('resultado_contenido');
+          const seccionResultado = document.getElementById('seccion_resultado');
+          
+          if (!seccionConfirmacion || !resultadoTitulo || !resultadoContenido || !seccionResultado) {
+            alert('✅ Datos eliminados pero no se puede mostrar resultado. Recarga la página.');
+            location.reload();
+            return;
+          }
+          
+          // Mostrar resultado
+          seccionConfirmacion.style.display = 'none';
+          resultadoTitulo.textContent = '✅ Eliminación Completada';
+          
+          let html = `
+            <div style="padding:20px;background:rgba(0,200,117,0.1);border-left:4px solid #00c875;border-radius:8px">
+              <h4 style="margin:0 0 15px 0;color:#00c875">Resultado de la Eliminación</h4>
+              <p><strong>Total de registros eliminados:</strong> ${data.resultado.total_eliminados.toLocaleString()}</p>
+              <ul style="margin:10px 0 0 20px">
+          `;
+          
+          for (const [tabla, cantidad] of Object.entries(data.resultado.por_tabla)) {
+            html += `<li><strong>${tabla}:</strong> ${cantidad.toLocaleString()} registros</li>`;
+          }
+          
+          html += `
+              </ul>
+            </div>
+            <button class="btn btn-primary" onclick="location.reload()" style="margin-top:15px">
+              🔄 Recargar Página
+            </button>
+          `;
+          
+          resultadoContenido.innerHTML = html;
+          seccionResultado.style.display = 'block';
+          seccionResultado.scrollIntoView({behavior: 'smooth', block: 'start'});
+          
+        } else {
+          alert(`❌ Error: ${data.error || 'Error desconocido'}`);
+        }
+      })
+      .catch(err => {
+        btn.disabled = false;
+        btn.textContent = '✅ Confirmar y Ejecutar Eliminación';
+        alert(`❌ Error de conexión: ${err.message}`);
+        console.error(err);
+      });
+    }
+    
+    function cancelarEliminacion() {
+      const confirmacion = confirm('¿Cancelar la eliminación solicitada?');
+      if (confirmacion) {
+        // ✅ VALIDAR elementos antes de acceder
+        const seccionConfirmacion = document.getElementById('seccion_confirmacion');
+        const codigoValidacion = document.getElementById('codigo_validacion');
+        
+        if (seccionConfirmacion) seccionConfirmacion.style.display = 'none';
+        if (codigoValidacion) codigoValidacion.value = '';
+      }
+    }
+  </script>
+    {% include '_session_expired_interceptor.html' %}
+  </body>
+</html>

@@ -1,0 +1,2797 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acceso y Registro - Gestor Documental Supertiendas Cañaveral</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient-start: #dcfce7; --bg-gradient-mid: #fefce8; --bg-gradient-end: #dbeafe;
+            --card-bg: rgba(255, 255, 255, 0.85); --text-color: #1f2937;
+            --brand-green-dark: #166534; --brand-yellow: #facc15; --brand-yellow-hover: #f59e0b;
+            --input-border: #d1d5db; --input-focus-shadow: rgba(22, 101, 52, 0.25);
+            --error-color: #dc2626; --success-color: #16a34a; --card-border: rgba(255, 255, 255, 0.4);
+        }
+        body.dark-mode {
+            /* Modo Oscuro */
+            --bg-gradient-start: #1e3c72;
+            --bg-gradient-end: #2a5298;
+            --card-bg: rgba(30, 30, 30, 0.8);
+            --text-color: #e0e0e0;
+            --brand-green-dark: #86efac; /* El verde oscuro se vuelve claro */
+            --input-border: #4b5563;
+            --input-focus-shadow: rgba(42, 82, 152, 0.4);
+            --error-color: #f87171;
+            --card-border: rgba(255, 255, 255, 0.1);
+        }
+        html, body { height: 100%; margin: 0; padding: 0; }
+        html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--bg-gradient-start), var(--bg-gradient-mid), var(--bg-gradient-end));
+            background-size: 400% 400%; animation: gradientAnimation 15s ease infinite;
+            display: flex; align-items: center;
+            transition: background 0.5s ease;
+        }
+        @keyframes gradientAnimation { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        
+        /* CONTENEDOR HORIZONTAL */
+        .horizontal-scroll-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+        }
+        
+        .main-container { 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 50px; 
+            padding: 40px; 
+            width: 100vw; 
+            min-width: 100vw;
+            height: 100vh;
+            flex-shrink: 0;
+            scroll-snap-align: start;
+        }
+        .image-container { flex: 1; max-width: 450px; text-align: center; animation: float 6s ease-in-out infinite; }
+        .image-container img { max-width: 100%; height: auto; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-20px); } 100% { transform: translateY(0px); } }
+        
+        .card {
+            flex: 1; box-sizing: border-box; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            background: var(--card-bg); border-radius: 25px; padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15); min-width: 320px; max-width: 500px;
+            text-align: center; border: 1px solid var(--card-border);
+            transition: all 0.5s;
+            /* 🆕 Layout con header/footer fijos para formulario de registro en pantallas grandes */
+            display: flex;
+            flex-direction: column;
+            max-height: 90vh; /* Altura máxima para evitar overflow */
+        }
+        .card.hidden { opacity: 0; transform: scale(0.95); pointer-events: none; position: absolute; }
+        
+        /* 🆕 Header fijo del formulario */
+        .card-header {
+            flex-shrink: 0; /* No se comprime */
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(22, 101, 52, 0.1);
+            margin-bottom: 15px;
+        }
+        
+        /* 🆕 Contenido scrolleable del formulario */
+        .card-body {
+            flex: 1; /* Toma todo el espacio disponible */
+            overflow-y: auto; /* Scroll vertical */
+            overflow-x: hidden;
+            padding-right: 5px; /* Espacio para scrollbar */
+            margin-bottom: 15px;
+        }
+        
+        /* 🆕 Footer fijo del formulario */
+        .card-footer {
+            flex-shrink: 0; /* No se comprime */
+            padding-top: 15px;
+            border-top: 2px solid rgba(22, 101, 52, 0.1);
+            background: var(--card-bg);
+        }
+        
+        /* 🆕 Scrollbar personalizado para el body */
+        .card-body::-webkit-scrollbar {
+            width: 8px;
+        }
+        .card-body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+        .card-body::-webkit-scrollbar-thumb {
+            background: var(--brand-green-dark);
+            border-radius: 10px;
+        }
+        .card-body::-webkit-scrollbar-thumb:hover {
+            background: #0f5429;
+        }
+        .card h1 { font-weight: 900; font-size: 1.5em; color: var(--brand-green-dark); margin-bottom: 5px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
+        .card h2 { font-weight: 700; font-size: 1.2em; color: var(--text-color); margin: 20px 0 15px 0; text-align: left; display: flex; justify-content: space-between; align-items: center; cursor: pointer;}
+        .card h2 .status-icon { transition: opacity 0.5s; opacity: 0; }
+        .card h2 .status-icon.visible { opacity: 1; }
+        .card p { font-weight: 400; color: var(--text-color); margin-bottom: 30px; font-size: 1em; }
+        .form-group { position: relative; margin-bottom: 20px; text-align: left;}
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-color); }
+        .form-group input, .form-group select { width: 100%; box-sizing: border-box; padding: 12px 15px; border: 1px solid var(--input-border); border-radius: 10px; font-size: 1em; background-color: transparent; color: var(--text-color); transition: all 0.3s ease; }
+        /* .form-group input.uppercase { text-transform: uppercase; } */ /* ✅ Removido: Ahora permite mayúsculas y minúsculas */
+        .form-group input:disabled { background-color: rgba(128, 128, 128, 0.1); cursor: not-allowed; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--brand-green-dark); box-shadow: 0 0 0 4px var(--input-focus-shadow); }
+        .form-group.error input { border-color: var(--error-color); }
+        .password-toggle { position: absolute; right: 15px; top: 50%; transform: translateY(10%); cursor: pointer; color: var(--text-color); z-index: 2;}
+        
+        .btn-primary { width: 100%; padding: 15px; border: none; border-radius: 10px; background-color: var(--brand-yellow); color: var(--brand-green-dark); font-weight: 700; font-size: 1.1em; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(250, 204, 21, 0.3); }
+        .btn-primary:disabled { background-color: #ccc; color: #666; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-primary:not(:disabled):hover { transform: translateY(-3px); background-color: var(--brand-yellow-hover); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4); }
+        
+        .btn-secondary { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; margin-top: 10px; border: 2px solid var(--brand-green-dark); border-radius: 10px; background-color: transparent; color: var(--brand-green-dark); font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
+        .btn-secondary:hover:not(:disabled) { background-color: var(--brand-green-dark); color: var(--card-bg); }
+        .btn-secondary:disabled { border-color: #9ca3af; color: #9ca3af; cursor: not-allowed; background-color: transparent;}
+        
+        .btn-danger { padding: 6px 12px; border: 2px solid #dc2626; border-radius: 6px; background-color: transparent; color: #dc2626; font-weight: 600; cursor: pointer; transition: all 0.3s ease; font-size: 0.8em; }
+        .btn-danger:hover:not(:disabled) { background-color: #dc2626; color: white; }
+        
+        .doc-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .file-name { font-size: 0.8em; color: #666; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .document-upload-item { 
+            display: flex; 
+            flex-direction: row; 
+            align-items: center; 
+            gap: 8px; 
+            padding: 4px 8px; 
+            border: 1px solid #e5e7eb; 
+            border-radius: 4px; 
+            margin-bottom: 3px; 
+            background-color: #f9fafb;
+            min-height: 30px;
+            font-size: 0.8em;
+            transition: all 0.3s ease;
+        }
+        
+        .document-upload-item.has-file { 
+            border-color: #16a34a; 
+            background-color: #f0fdf4; 
+        }
+        
+        /* 🆕 NUEVO: Estado colapsado (documento ya cargado) */
+        .document-upload-item.collapsed {
+            padding: 3px 8px;
+            background: rgba(22, 101, 52, 0.05);
+            border-color: var(--brand-green);
+            cursor: pointer;
+        }
+        
+        .document-upload-item.collapsed:hover {
+            background: rgba(22, 101, 52, 0.1);
+        }
+        
+        .document-upload-item.collapsed .doc-controls button {
+            display: none !important;  /* Ocultar botones en colapsado */
+        }
+        
+        .document-upload-item.collapsed label {
+            font-weight: bold;
+            color: var(--brand-green-dark);
+        }
+        
+        .document-upload-item.collapsed .file-name {
+            color: #666;
+            font-size: 0.75em;
+        }
+        
+        /* Estado sin archivo (obligatorio) */
+        .document-upload-item.missing-required {
+            border-color: #ff6b6b;
+            border-width: 2px;
+            background-color: #fff5f5;
+        }
+        
+        .document-upload-item label { 
+            flex: 1; 
+            font-size: 0.75em; 
+            margin: 0; 
+            font-weight: 500;
+            color: #374151;
+            line-height: 1.2;
+        }
+        
+        .doc-controls { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            margin-top: 8px;
+        }
+        
+        .doc-controls .btn-secondary { 
+            padding: 6px 12px; 
+            margin: 0; 
+            font-size: 0.8em; 
+            min-width: 80px;
+            width: auto;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .doc-controls .btn-danger { 
+            padding: 6px 12px; 
+            font-size: 0.8em; 
+            min-width: 80px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .file-status { 
+            font-size: 0.75em; 
+            color: #16a34a; 
+            display: flex; 
+            align-items: center; 
+            gap: 4px;
+        }
+        
+        .document-upload-container { 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: max-height 0.5s ease-out;
+        }
+        
+        .document-upload-container.expanded { 
+            max-height: 600px; 
+        }
+
+        .links { margin-top: 25px; font-size: 0.9em; display: flex; justify-content: space-between; }
+        .links a { color: var(--text-color); text-decoration: none; font-weight: 600; transition: color 0.3s ease; cursor: pointer; }
+        .toggle-mode { position: fixed; top: 20px; right: 20px; background: var(--card-bg); backdrop-filter: blur(5px); border-radius: 50%; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: 1px solid var(--card-border); z-index: 1000; }
+        
+        .message-box { padding: 12px; margin: 10px 0; border-radius: 8px; font-weight: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; animation: fadeInMessage 0.5s ease; text-align: center; }
+        @keyframes fadeInMessage { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .error-message { background-color: rgba(220, 38, 38, 0.1); color: var(--error-color); }
+        .info-message { background-color: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+        .success-message { background-color: rgba(22, 163, 74, 0.1); color: var(--success-color); }
+        .warning-message { background-color: rgba(245, 158, 11, 0.1); color: #d97706; border-left: 4px solid #f59e0b; }
+
+        .form-group-conditional, .sub-section, .step-section { display: none; }
+        .checkbox-group { display: flex; align-items: center; text-align: left; gap: 10px; margin-bottom: 20px; }
+        .checkbox-group label { margin-bottom: 0; font-weight: normal; font-size: 0.9em; color: var(--text-color); }
+        .password-strength { font-size: 0.8em; text-align: left; margin-top: -10px; margin-bottom: 15px; }
+        .password-strength ul { list-style-type: none; padding-left: 5px; margin: 5px 0; }
+        .user-form-block { border: 1px solid var(--input-border); border-radius: 15px; padding: 20px; margin-top: 15px; position: relative; animation: fadeInMessage 0.5s; }
+        .remove-user-btn { position: absolute; top: 8px; right: 8px; background: transparent; border: none; cursor: pointer; padding: 5px;}
+        hr { border: none; height: 1px; background-color: var(--input-border); margin: 25px 0; }
+        #register-view .links a, #forgot-password-view .links a { display: block; width: 100%; text-align: center; }
+        .collapsible-content { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out; }
+        .collapsible-content.expanded { max-height: 1500px; }
+        
+        .option-button { width: 100%; margin-bottom: 10px; text-align: left; }
+        .document-upload-item { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-size: 0.9em; }
+        .document-upload-item label { flex-grow: 1; text-align: left; color: var(--text-color);}
+        .document-upload-item .status { width: 24px; height: 24px; }
+
+        @media (max-width: 768px) {
+            body { padding-top: 1rem; padding-bottom: 1rem; }
+            .main-container { flex-direction: column; gap: 20px; align-items: stretch; padding: 10px;}
+            .image-container { display: none; }
+            .card { 
+                width: 100%; 
+                padding: 25px; 
+                max-width: none; 
+                position: relative; 
+                max-height: 85vh; 
+                overflow-y: auto;
+                /* 🆕 En móviles, desactivar layout de header/footer fijos */
+                display: block;
+                max-height: none;
+            }
+            .card.hidden { display: none; }
+            
+            /* 🆕 En móviles, card-body no tiene altura fija */
+            .card-body {
+                overflow-y: visible;
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="toggle-mode" id="toggleModeBtn" title="Cambiar modo"></div>
+<!-- BOTÓN DE CESTA ELIMINADO - Ya no es necesario porque se limpia automáticamente -->
+<div class="main-container">
+    <div class="image-container"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ8twqevaQsT21o9O-SVNAnjxKL90Kwpj4UQj-MSbnnFEUbDcszLkSHTYeEKMjlvYZtqnc&usqp=CAU" alt="Supertiendas Cañaveral ¡Más Cerca de Ti!"></div>
+    <div id="card-container" style="position: relative;">
+        <!-- VISTA DE LOGIN -->
+        <div class="card" id="login-view">
+            <h1>Supertiendas Cañaveral</h1><p>Accede a tu portal de proveedor</p>
+            <form id="loginForm">
+                <div id="login-error-message" style="display:none;"></div>
+                <div class="form-group"><label for="nit">NIT:</label><input type="text" id="nit" class="uppercase" required placeholder="Digite su NIT"></div>
+                <div class="form-group"><label for="usuario">Usuario:</label><input type="text" id="usuario" required placeholder="Digite su usuario"></div>
+                <div class="form-group"><label for="password">Contraseña:</label><input type="password" id="password" required placeholder="Digite su contraseña"><span class="password-toggle" id="loginPasswordToggle"></span></div>
+                <button type="submit" class="btn-primary" id="btnLogin" disabled>Ingresar</button>
+            </form>
+            <div class="links"><a onclick="showView('register-view')">Registrarse</a><a onclick="showView('forgot-password-view')">¿Olvidaste tu contraseña?</a></div>
+        </div>
+
+        <!-- VISTA DE REGISTRO -->
+        <div class="card hidden" id="register-view">
+            <!-- 🆕 HEADER FIJO: Título siempre visible -->
+            <div class="card-header">
+                <h1>Registro de Proveedor</h1>
+            </div>
+            
+            <!-- 🆕 BODY SCROLLEABLE: Contenido del formulario con scroll independiente -->
+            <div class="card-body">
+                <div id="register-step1">
+                    <p>Ingresa tu NIT o Cédula para comenzar.</p><div id="register-step1-message"></div>
+                    <form id="checkNitForm"><div class="form-group"><label for="register-nit">NIT o Cédula:</label><input type="text" id="register-nit" class="uppercase" required placeholder="Ej: 123456789"></div><button type="submit" class="btn-primary">Verificar</button></form>
+                </div>
+                <div id="register-step1-options" style="display:none;">
+                    <p>El NIT/Cédula está disponible. ¿Qué deseas hacer?</p>
+                    <button class="btn-secondary option-button" data-option="create">1. Tengo los documentos para creación</button>
+                    <button class="btn-secondary option-button" data-option="no-docs">2. No tengo los documentos</button>
+                    <button class="btn-secondary option-button" data-option="radicado">3. Tengo número de Radicado</button>
+                </div>
+                <div class="sub-section" id="create-section">
+                    <form id="registerForm" novalidate>
+                        <div class="form-group"><label for="validated-nit">NIT / Cédula</label><input type="text" id="validated-nit" disabled></div><hr>
+                        <h2 class="collapsible-trigger" data-target="provider-content">Datos del Proveedor <span class="status-icon"></span></h2>
+                        <div id="provider-content" class="collapsible-content">
+                            <div id="provider-data-section">
+                                <div class="form-group"><label for="tipo_persona">Tipo de Persona:</label><select id="tipo_persona" name="tipo_persona"><option value="natural">Persona Natural</option><option value="juridica">Persona Jurídica</option></select></div>
+                                <div id="persona-natural-fields" class="form-group-conditional">
+                                    <div class="form-group"><input type="text" class="uppercase" name="primer_nombre" placeholder="Primer Nombre"></div>
+                                    <div class="form-group"><input type="text" class="uppercase" name="segundo_nombre" placeholder="Segundo Nombre"></div>
+                                    <div class="form-group"><input type="text" class="uppercase" name="primer_apellido" placeholder="Primer Apellido"></div>
+                                    <div class="form-group"><input type="text" class="uppercase" name="segundo_apellido" placeholder="Segundo Apellido"></div>
+                                </div>
+                                <div id="persona-juridica-fields" class="form-group-conditional">
+                                    <div class="form-group"><input type="text" class="uppercase" name="razon_social" placeholder="Razón Social"></div>
+                                </div>
+                                <div class="form-group"><input type="email" name="correo" placeholder="Correo Electrónico *" required></div>
+                                <div class="form-group"><input type="text" name="celular" placeholder="Número de Celular *" required></div>
+                                <div class="checkbox-group"><input type="checkbox" id="acepta_terminos" name="acepta_terminos" required><label for="acepta_terminos">Acepto los <a href="#" target="_blank">Términos y Condiciones</a> *</label></div>
+                                <div class="checkbox-group"><input type="checkbox" id="acepta_contacto" name="acepta_contacto"><label for="acepta_contacto">Acepto ser contactado para mayor información.</label></div>
+                            </div>
+                            <div id="provider-registration-status" style="display: none; margin-top: 10px;"></div>
+                            <button type="submit" class="btn-success" id="register-provider-button" style="width: 100%; margin-top: 15px;">Validar Datos del Proveedor</button>
+                        </div>
+                        <h2 class="collapsible-trigger" data-target="users-content">Usuarios de Acceso <span class="status-icon"></span></h2>
+                        <div id="users-content" class="collapsible-content">
+                            <div id="user-forms-container"></div>
+                            <button type="button" class="btn-secondary" id="add-user-button"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>Agregar Usuario</button>
+                        </div>
+                        <h2 class="collapsible-trigger" data-target="docs-content">Cargar Documentación Firmada <span class="status-icon"></span></h2>
+                        <div id="docs-content" class="collapsible-content">
+                            <div id="document-upload-container"></div>
+                            <div id="upload-message"></div>
+                            <button type="button" class="btn-secondary" id="upload-docs-button" disabled>Cargar Documentos</button>
+                        </div>
+                        <div id="final-message" style="display: none;"></div>
+                        
+                        <!-- Mensaje informativo importante -->
+                        <div class="message-box info-message" style="margin: 15px 0; font-size: 0.9em;">
+                            <strong>📋 ANTES DE ENVIAR:</strong> Verifique que la información sea correcta:
+                            <ul style="text-align: left; margin: 10px 0; padding-left: 20px;">
+                                <li><strong>Nombres de usuario:</strong> Deben ser diferentes a usuarios ya existentes</li>
+                                <li><strong>Correos electrónicos:</strong> Cada uno debe ser único (no repetido)</li>  
+                                <li><strong>Documentos:</strong> Todos los archivos PDF requeridos deben estar cargados</li>
+                            </ul>
+                            <small style="color: #666; display: block; margin-top: 8px;">
+                                💡 Si recibe un error, revise que no esté usando datos ya registrados en el sistema
+                            </small>
+                        </div>
+                    </form>
+                </div>
+                <div class="sub-section" id="no-docs-section">
+                    <div class="message-box info-message"><p><b>Instrucciones:</b></p><p style="text-align: left; font-size: 0.9em; margin-bottom: 15px;">1. Descargue los archivos desde el siguiente enlace.<br>2. Diligéncielos completamente.<br>3. Firme aquellos que lo requieran.<br>4. Guárdelos en formato PDF.<br>5. Vuelva y seleccione la opción "1. Tengo los documentos para creación".</p><a href="/ruta/a/documentos.zip" download class="btn-primary" style="text-decoration: none;">Descargue Documentos Aquí</a></div>
+                </div>
+                <div class="sub-section" id="radicado-section">
+                    <form id="checkRadicadoForm"><div class="form-group"><label for="radicado-input">Número de Radicado:</label><input type="text" id="radicado-input" class="uppercase" required placeholder="Ej: RAD-123XYZ"></div><button type="submit" class="btn-primary">Consultar</button></form>
+                    <div id="radicado-status-result" style="margin-top: 20px;"></div>
+                </div>
+            </div>
+            
+            <!-- 🆕 FOOTER FIJO: Botón y enlace siempre visibles -->
+            <div class="card-footer">
+                <button type="button" id="final-submit-button" class="btn-primary" disabled onclick="console.log('⚡ ONCLICK INLINE EJECUTADO!');">Enviar Solicitud</button>
+                <div class="links" style="margin-top: 15px;"><a onclick="volverAlLoginYLimpiar()">Volver al inicio de sesión</a></div>
+            </div>
+        </div>
+        
+        <!-- VISTA DE ÉXITO REGISTRO -->
+        <div id="register-success-view" class="card hidden" style="display:none; max-height: 90vh; overflow-y: auto;">
+            <div style="text-align: center; padding: 20px;">
+                <!-- Icono de éxito -->
+                <div style="font-size: 3em; color: #22c55e; margin-bottom: 15px;">✅</div>
+                
+                <!-- Título principal -->
+                <h1 style="color: #16a34a; margin-bottom: 15px; font-size: 1.8em;">¡Solicitud Radicada Exitosamente!</h1>
+                
+                <!-- Contenedor del mensaje con radicado -->
+                <div id="success-radicado-message" style="margin: 15px 0;"></div>
+                
+                <!-- Información adicional -->
+                <div style="background-color: #f0fdf4; border: 2px solid #22c55e; border-radius: 10px; padding: 18px; margin: 18px 0; text-align: left;">
+                    <h3 style="color: #16a34a; margin-top: 0; text-align: center; margin-bottom: 12px; font-size: 1.1em;">📋 Próximos Pasos</h3>
+                    <ul style="color: #374151; line-height: 1.6; margin: 0; padding-left: 20px; font-size: 0.95em;">
+                        <li>Su solicitud será <strong>revisada por nuestro equipo</strong></li>
+                        <li>En un término de <strong>5 días hábiles</strong> daremos respuesta</li>
+                        <li>Nos contactaremos por el <strong>correo electrónico suministrado</strong></li>
+                        <li>Una vez aprobada, recibirá sus <strong>credenciales de acceso</strong></li>
+                    </ul>
+                </div>
+                
+                <!-- Información importante -->
+                <div style="background-color: #eff6ff; border: 2px solid #3b82f6; border-radius: 8px; padding: 12px; margin: 15px 0;">
+                    <p style="color: #1d4ed8; margin: 0; font-size: 0.9em;">
+                        <strong>💡 Importante:</strong> Conserve este número de radicado para futuras consultas
+                    </p>
+                </div>
+                
+                <!-- Botón para volver -->
+                <button id="success-back-button" class="btn-primary" style="margin-top: 20px; padding: 14px 28px; font-size: 1.1em; background: linear-gradient(145deg, #2563eb, #1d4ed8); border: none; border-radius: 10px; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); transition: all 0.3s ease; cursor: pointer;">
+                    ✅ Aceptar y Volver al Login
+                </button>
+            </div>
+        </div>
+        
+        <!-- VISTA DE OLVIDÓ CONTRASEÑA -->
+        <div class="card hidden" id="forgot-password-view">
+            <h1>Recuperar Contraseña</h1>
+            
+            <!-- PASO 1: Solicitar código -->
+            <div class="step-section" id="forgot-step1" style="display:block;">
+                <p>Ingresa tus datos para validar tu identidad y te enviaremos un <strong>código de 6 dígitos</strong> por correo para recuperar tu contraseña.</p>
+                <form id="forgotForm" novalidate>
+                    <div class="form-group"><input type="text" name="forgot_nit" id="forgot_nit" class="uppercase" placeholder="NIT o Cédula *" required></div>
+                    <div class="form-group"><input type="text" name="forgot_user" id="forgot_user" placeholder="Usuario *" required></div>
+                    <div class="form-group"><input type="email" name="forgot_email" id="forgot_email" placeholder="Correo Electrónico *" required></div>
+                    <div id="forgot-step1-message"></div>
+                    <button type="submit" class="btn-primary" id="sendRecoveryBtn" disabled>Solicitar Código</button>
+                </form>
+            </div>
+            
+            <!-- PASO 2: Verificar código -->
+            <div class="step-section" id="forgot-step2" style="display:none;">
+                <p>Ingresa el <strong>código de 6 dígitos</strong> que te enviamos a tu correo electrónico.</p>
+                <form id="verifyTokenForm" novalidate>
+                    <div class="form-group">
+                        <input type="text" name="forgot_token" id="forgot_token" placeholder="Código de 6 dígitos *" maxlength="6" pattern="[0-9]{6}" required style="text-align: center; font-size: 1.5em; letter-spacing: 0.3em;">
+                    </div>
+                    <div id="forgot-step2-message"></div>
+                    <button type="submit" class="btn-primary" id="verifyTokenBtn">Verificar Código</button>
+                </form>
+                <div class="links"><a onclick="volverPaso1Forgot()">← Volver a solicitar código</a></div>
+            </div>
+            
+            <!-- PASO 3: Cambiar contraseña -->
+            <div class="step-section" id="forgot-step3" style="display:none;">
+                <p>Ingresa tu nueva contraseña. Debe tener al menos 8 caracteres.</p>
+                <form id="changePasswordForm" novalidate>
+                    <div class="form-group password-input-group">
+                        <input type="password" name="new_password" id="new_password" placeholder="Nueva Contraseña *" required minlength="8">
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('new_password')"></button>
+                    </div>
+                    <div class="form-group password-input-group">
+                        <input type="password" name="confirm_password" id="confirm_password" placeholder="Confirmar Contraseña *" required minlength="8">
+                        <button type="button" class="toggle-password" onclick="togglePasswordVisibility('confirm_password')"></button>
+                    </div>
+                    <div id="forgot-step3-message"></div>
+                    <button type="submit" class="btn-primary" id="changePasswordBtn">Actualizar Contraseña</button>
+                </form>
+            </div>
+            
+            <div class="links"><a onclick="volverAlLoginYLimpiar()">Volver al inicio de sesión</a></div>
+        </div>
+    </div>
+</div>
+<footer class="footer">Supertiendas Cañaveral SAS – Gestor Documental</footer>
+
+<script>
+    const ICONS = {
+        eye: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`,
+        eyeOff: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.91 4.24A9.91 9.91 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`,
+        moon: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`,
+        sun: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`,
+        trash: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--error-color);"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`,
+        check: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--success-color)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+    };
+    const SIMULATED_EXISTING_NIT = "123456789";
+    const SIMULATED_USED_PASSWORDS = ["Password123*", "Supertienda2024!"];
+    const REQUIRED_DOCS = [ "RUT", "Cámara de Comercio", "Cédula Representante Legal", "Certificación Bancaria", "FORMULARIO UNIFICADO CONOCIMIENTO PROVEEDORES", "DECLARACIÓN FONDOS PERSONA JURÍDICA", "DECLARACIÓN FONDOS PERSONA NATURAL" ];
+    
+    // Mapeo de nombres mostrados al usuario -> nombres técnicos para el servidor
+    const DOC_NAME_MAPPING = {
+        "RUT": "RUT",
+        "Cámara de Comercio": "CAMARA_COMERCIO",
+        "Cédula Representante Legal": "CEDULA_REPRESENTANTE", 
+        "Certificación Bancaria": "CERTIFICACION_BANCARIA",
+        "FORMULARIO UNIFICADO CONOCIMIENTO PROVEEDORES": "FORMULARIO_CONOCIMIENTO_PROVEEDORES",
+        "DECLARACIÓN FONDOS PERSONA JURÍDICA": "DECLARACION_FONDOS_JURIDICA",
+        "DECLARACIÓN FONDOS PERSONA NATURAL": "DECLARACION_FONDOS_NATURAL"
+    };
+
+    
+    // ====================================================================
+    // FUNCIÓN PARA VOLVER AL LOGIN Y LIMPIAR DATOS
+    // ====================================================================
+    function volverAlLoginYLimpiar() {
+        console.log('🔄 Volviendo al login y limpiando datos del registro...');
+        
+        // Limpiar TODOS los datos del localStorage relacionados con el registro
+        Object.values(STORAGE_KEYS).forEach(key => {
+            localStorage.removeItem(key);
+            console.log(`🗑️ Limpiado: ${key}`);
+        });
+        
+        // Limpiar variables globales
+        window.currentRadicado = null;
+        window.currentNit = null;
+        window.currentRazonSocial = null;
+        window.currentTerceroId = null;
+        
+        // Limpiar datos de recuperación de contraseña
+        sessionStorage.removeItem('forgot_temp_data');
+        sessionStorage.removeItem('forgot_verified_token');
+        
+        // Resetear pasos de recuperación de contraseña
+        document.getElementById('forgot-step1').style.display = 'block';
+        document.getElementById('forgot-step2').style.display = 'none';
+        document.getElementById('forgot-step3').style.display = 'none';
+        
+        // Limpiar campos de recuperación
+        document.getElementById('forgot_nit').value = '';
+        document.getElementById('forgot_user').value = '';
+        document.getElementById('forgot_email').value = '';
+        document.getElementById('forgot_token').value = '';
+        document.getElementById('new_password').value = '';
+        document.getElementById('confirm_password').value = '';
+        
+        // Limpiar mensajes
+        document.getElementById('forgot-step1-message').innerHTML = '';
+        document.getElementById('forgot-step2-message').innerHTML = '';
+        document.getElementById('forgot-step3-message').innerHTML = '';
+        
+        // Mostrar la vista de login
+        showView('login-view');
+        
+        console.log('✅ Datos limpiados y usuario redirigido al login');
+    }
+
+    function showView(viewId) {
+        console.log('🔄 Cambiando a vista:', viewId);
+        
+        // Ocultar todas las vistas principales
+        document.querySelectorAll('#card-container > .card').forEach(card => {
+            card.classList.add('hidden');
+            card.style.display = 'none';
+        });
+        
+        // Mostrar la vista solicitada
+        const targetView = document.getElementById(viewId);
+        if (targetView) {
+            targetView.classList.remove('hidden');
+            targetView.style.display = 'block';
+            console.log('✅ Vista mostrada:', viewId);
+        } else {
+            console.error('❌ No se encontró la vista:', viewId);
+        }
+        
+        // Gestionar la bandera de restauración según la vista
+        if(viewId === 'login-view') {
+            // Usuario está en login - NO restaurar progreso en próxima carga
+            localStorage.removeItem(STORAGE_KEYS.IN_REGISTRATION_VIEW);
+            resetRegistrationForm();
+            resetForgotPasswordForm();
+            clearRegistrationState();
+        } else if(viewId === 'register-view') {
+            // Usuario está en registro - PERMITIR restaurar progreso si recarga
+            saveFormData(STORAGE_KEYS.IN_REGISTRATION_VIEW, true);
+            // Limpiar campos de login al ir a registro
+            document.getElementById('loginForm').reset();
+            document.getElementById('login-error-message').style.display = 'none';
+            updateLoginButtonState();
+        } else if(viewId === 'register-success-view') {
+            // Usuario vio el éxito - NO restaurar progreso en próxima carga
+            localStorage.removeItem(STORAGE_KEYS.IN_REGISTRATION_VIEW);
+        } else if(viewId === 'forgot-password-view') {
+            // Limpiar campos de login al ir a recuperar contraseña
+            document.getElementById('loginForm').reset();
+            document.getElementById('login-error-message').style.display = 'none';
+            updateLoginButtonState();
+        }
+    }
+    
+    function setupSuccessBackButton() {
+        const successBackButton = document.getElementById('success-back-button');
+        if (successBackButton) {
+            successBackButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('🔵 Botón "Aceptar y Volver al Login" presionado');
+                clearRegistrationAndGoToLogin();
+            });
+            console.log('✅ Botón de éxito configurado correctamente');
+        } else {
+            console.warn('⚠️ No se encontró el botón success-back-button');
+        }
+    }
+    
+    function showMessage(containerId, message, type = 'error') {
+        const container = document.getElementById(containerId);
+        container.innerHTML = `<div class="message-box ${type}-message">${message}</div>`;
+        container.style.display = 'block';
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        setupDarkMode();
+        setupLogin();
+        setupRegistration();
+        setupForgotPassword();
+        setupInputTransformations();
+        setupFinalSubmit();
+        setupProgressClearButton();
+        setupSuccessBackButton(); // Nuevo: configurar botón de éxito
+        
+        // 💾 Restaurar progreso guardado
+        setTimeout(() => {
+            restoreProgress();
+        }, 100); // Pequeño delay para asegurar que el DOM esté completamente listo
+    });
+    
+    // ====================================================================
+    // LIMPIAR DATOS AL CERRAR EL NAVEGADOR
+    // ====================================================================
+    window.addEventListener('beforeunload', function(e) {
+        // Solo limpiar si el usuario está cerrando el navegador/pestaña
+        // NO limpiar si está recargando (F5)
+        
+        // Detectar si es un reload (F5) vs cerrar pestaña
+        const navigation = performance.getEntriesByType('navigation')[0];
+        
+        // Si es un reload, NO limpiar datos
+        if (navigation && navigation.type === 'reload') {
+            console.log('🔄 Recarga detectada - Manteniendo datos guardados');
+            return;
+        }
+        
+        // Si es cerrar navegador/pestaña, limpiar datos del registro
+        console.log('🚪 Cierre de navegador detectado - Limpiando datos del registro');
+        
+        // Limpiar SOLO datos del registro, mantener tema
+        Object.values(STORAGE_KEYS).forEach(key => {
+            localStorage.removeItem(key);
+        });
+        
+        // Limpiar variables globales
+        window.currentRadicado = null;
+        window.currentNit = null;
+        window.currentRazonSocial = null;
+        window.currentTerceroId = null;
+    });
+    
+    function setupDarkMode() {
+        const body = document.body;
+        const toggleModeBtn = document.getElementById('toggleModeBtn');
+        const updateModeIcon = (isDarkMode) => { toggleModeBtn.innerHTML = isDarkMode ? ICONS.sun : ICONS.moon; };
+        toggleModeBtn.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+            const isDarkMode = body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            updateModeIcon(isDarkMode);
+        });
+        const savedTheme = localStorage.getItem('theme');
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (savedTheme === 'dark' || (!savedTheme && prefersDark)) { body.classList.add('dark-mode'); updateModeIcon(true); } else { updateModeIcon(false); }
+    }
+    
+    // Función para limpiar progreso eliminada - Ya no se usa el botón de cesta
+    function setupProgressClearButton() {
+        // Esta función ya no hace nada, el botón fue eliminado
+        console.log('⚠️ setupProgressClearButton: Botón de cesta eliminado');
+    }
+
+    function setupLogin(){
+        const passwordInput = document.getElementById('password');
+        const passwordToggleIcon = document.getElementById('loginPasswordToggle');
+        passwordToggleIcon.innerHTML = ICONS.eye;
+        passwordToggleIcon.addEventListener('click', () => togglePasswordVisibility(passwordInput, passwordToggleIcon) );
+        const loginForm = document.getElementById('loginForm');
+        const btnLogin = document.getElementById('btnLogin');
+        const allLoginInputs = [...loginForm.querySelectorAll('input')];
+        function checkLoginInputs() { btnLogin.disabled = !allLoginInputs.every(input => input.value.trim() !== ''); }
+        allLoginInputs.forEach(input => input.addEventListener('input', checkLoginInputs));
+        
+        // 🔐 EVENTO DE LOGIN CON BACKEND
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const nitInput = document.getElementById('nit');
+            const usuarioInput = document.getElementById('usuario');
+            const errorContainer = document.getElementById('login-error-message');
+            
+            const loginData = {
+                nit: nitInput.value.trim().toUpperCase(),
+                usuario: usuarioInput.value.trim().toUpperCase(),
+                password: passwordInput.value
+            };
+            
+            // UI: Mostrar estado de carga
+            btnLogin.textContent = 'Verificando...';
+            btnLogin.disabled = true;
+            errorContainer.style.display = 'none';
+            
+            try {
+                // 🔥 LLAMADA A LA API DE BACKEND
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: JSON.stringify(loginData),
+                    credentials: 'same-origin'
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    // ✅ LOGIN EXITOSO
+                    showMessage('login-error-message', '✅ ¡Bienvenido! Redirigiendo...', 'success');
+                    
+                    // Guardar sesión del usuario (usando datos del backend)
+                    const usuarioData = result.usuario || {};
+                    localStorage.setItem('sesion', JSON.stringify({
+                        nombre: usuarioData.razon_social || usuarioData.nombre || loginData.usuario,
+                        rol: usuarioData.rol || 'externo',
+                        nit: usuarioData.nit || loginData.nit,
+                        email: usuarioData.email || '',
+                        usuario: loginData.usuario,
+                        sessionToken: result.sessionToken,
+                        permisos: usuarioData.rol === 'interno' 
+                            ? ["todos"] 
+                            : ["facturas", "radicados", "usuario"]
+                    }));
+                    
+                    // 🆕 GUARDAR DATOS PARA MÓDULOS (Recibir Facturas, etc.)
+                    localStorage.setItem('userData', JSON.stringify({
+                        id: result.usuario_id || usuarioData.id,
+                        usuario: loginData.usuario,
+                        rol: usuarioData.rol || 'externo',
+                        tercero_id: result.tercero_id || usuarioData.tercero_id,
+                        nombre_completo: usuarioData.razon_social || usuarioData.nombre || loginData.usuario,
+                        nit: usuarioData.nit || loginData.nit
+                    }));
+                    
+                    // Redirigir al dashboard
+                    setTimeout(() => {
+                        window.location.href = result.redirectUrl || '/dashboard';
+                    }, 1500);
+                    
+                } else {
+                    // ❌ ERROR DE AUTENTICACIÓN
+                    const errorMsg = result.message || 'Credenciales incorrectas';
+                    showMessage('login-error-message', `⚠️ ${errorMsg}`, 'error');
+                    
+                    // Limpiar contraseña por seguridad
+                    passwordInput.value = '';
+                    checkLoginInputs();
+                }
+                
+            } catch (error) {
+                // ❌ ERROR DE CONEXIÓN
+                console.error('Error de conexión:', error);
+                showMessage('login-error-message', '❌ Error de conexión con el servidor. Verifique su conexión a internet.', 'error');
+            }
+            
+            // Restaurar botón
+            btnLogin.textContent = 'Ingresar';
+            btnLogin.disabled = false;
+        });
+    }
+
+    function setupRegistration() {
+        const checkNitForm = document.getElementById('checkNitForm');
+        const nitInput = document.getElementById('register-nit');
+        
+        // Auto-guardar NIT cuando cambie
+        nitInput.addEventListener('input', () => {
+            if (nitInput.value.trim()) {
+                saveFormData(STORAGE_KEYS.NIT, nitInput.value.trim());
+            }
+        });
+        
+        checkNitForm.addEventListener('submit', async function(e){
+            e.preventDefault();
+            const nitValue = document.getElementById('register-nit').value.trim();
+            
+            if (nitValue === '') {
+                showMessage('register-step1-message', 'Por favor, ingrese un NIT o Cédula.', 'error');
+                return;
+            }
+            
+            try {
+                // Mostrar indicador de carga
+                const submitBtn = checkNitForm.querySelector('button[type="submit"]');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Verificando...';
+                submitBtn.disabled = true;
+                
+                // Verificar si el NIT ya existe en el backend
+                const response = await fetch('/api/registro/check_nit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ nit: nitValue })
+                });
+                
+                const result = await response.json();
+                
+                if (result.exists) {
+                    // ❌ NIT ya existe - Verificar estado y radicado
+                    const tercero = result.tercero;
+                    const radicado = result.radicado;
+                    
+                    // � BLOQUEO CRÍTICO: Ocultar TODAS las secciones de registro
+                    document.getElementById('register-step1-options').style.display = 'none';
+                    document.getElementById('create-section').style.display = 'none';
+                    document.getElementById('no-docs-section').style.display = 'none';
+                    document.getElementById('radicado-section').style.display = 'none';
+                    
+                    // 🔍 CASO 1: Tiene radicado PENDIENTE
+                    if (radicado && radicado.estado === 'pendiente') {
+                        let msg = `
+                            <div style="text-align: left;">
+                                <strong>📋 Solicitud en Proceso</strong><br><br>
+                                El NIT <strong>${nitValue}</strong> tiene una solicitud de registro pendiente:<br><br>
+                                <strong>🎯 Radicado:</strong> ${radicado.numero}<br>
+                                <strong>📅 Fecha:</strong> ${radicado.fecha}<br>
+                                <strong>📊 Estado:</strong> Pendiente por Revisión<br><br>
+                                Su solicitud está siendo revisada por nuestro equipo.<br><br>
+                                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                                    <button class="btn-primary" onclick="consultarRadicadoDirecto('${radicado.numero}')" style="flex: 1;">
+                                        📄 Consultar Estado
+                                    </button>
+                                    <button class="btn-secondary" onclick="showView('login-view')" style="flex: 1;">
+                                        🏠 Ir a Login
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        showMessage('register-step1-message', msg, 'info');
+                    }
+                    // 🔍 CASO 2: Radicado APROBADO o RECHAZADO
+                    else if (radicado && (radicado.estado === 'aprobado' || radicado.estado === 'rechazado')) {
+                        let estadoTexto = radicado.estado === 'aprobado' ? 'Aprobado ✅' : 'Rechazado ❌';
+                        let msg = `
+                            <div style="text-align: left;">
+                                <strong>ℹ️ Proveedor Registrado</strong><br><br>
+                                El NIT <strong>${nitValue}</strong> ya está registrado en el sistema.<br><br>
+                                <strong>🎯 Radicado:</strong> ${radicado.numero}<br>
+                                <strong>📅 Fecha:</strong> ${radicado.fecha}<br>
+                                <strong>📊 Estado:</strong> ${estadoTexto}<br><br>
+                                ${radicado.estado === 'aprobado' ? 
+                                    'Puede iniciar sesión con sus credenciales de acceso.' : 
+                                    'Su solicitud fue revisada. Para más información, contacte al administrador.'
+                                }<br><br>
+                                <button class="btn-primary" onclick="showView('login-view')" style="width: 100%;">
+                                    🏠 Ir a Login
+                                </button>
+                            </div>
+                        `;
+                        showMessage('register-step1-message', msg, 'info');
+                    }
+                    // 🔍 CASO 3: Existe sin radicado (caso raro, pero manejar)
+                    else {
+                        let msg = `El NIT <strong>${nitValue}</strong> ya está registrado. <br>Ingrese con sus credenciales de acceso. <br><br> <button class="btn-primary" onclick="showView('login-view')">Ir a Login</button>`;
+                        showMessage('register-step1-message', msg, 'info');
+                    }
+                    
+                } else {
+                    // ✅ NIT no existe - continuar con registro
+                    document.getElementById('register-step1').style.display = 'none';
+                    document.getElementById('register-step1-options').style.display = 'block';
+                    document.getElementById('validated-nit').value = nitValue;
+                }
+                
+                // Restaurar botón
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+                
+            } catch (error) {
+                console.error('Error verificando NIT:', error);
+                showMessage('register-step1-message', 'Error de conexión. Intente nuevamente.', 'error');
+                
+                // Restaurar botón
+                const submitBtn = checkNitForm.querySelector('button[type="submit"]');
+                submitBtn.textContent = 'Verificar';
+                submitBtn.disabled = false;
+            }
+        });
+        document.getElementById('register-step1-options').addEventListener('click', (e) => {
+            if(e.target.matches('.option-button')) {
+                const option = e.target.dataset.option;
+                document.getElementById('register-step1-options').style.display = 'none';
+                document.querySelectorAll('.sub-section').forEach(s => s.style.display = 'none');
+                if (option === 'create') {
+                    document.getElementById('create-section').style.display = 'block';
+                    // Expandir contenedor de documentos gradualmente
+                    setTimeout(() => {
+                        const docContainer = document.getElementById('document-upload-container');
+                        if (docContainer) docContainer.classList.add('expanded');
+                    }, 100);
+                }
+                if (option === 'no-docs') document.getElementById('no-docs-section').style.display = 'block';
+                if (option === 'radicado') document.getElementById('radicado-section').style.display = 'block';
+            }
+        });
+        setupFullRegistrationForm();
+        setupRadicadoCheck();
+    }
+
+    // Función para registrar proveedor en el backend
+    async function registerProviderInBackend() {
+        const form = document.getElementById('registerForm');
+        const formData = new FormData(form);
+        
+        const data = {
+            nit: document.getElementById('validated-nit').value,
+            tipoPersona: formData.get('tipo_persona'),
+            primerNombre: formData.get('primer_nombre'),
+            segundoNombre: formData.get('segundo_nombre'),
+            primerApellido: formData.get('primer_apellido'),
+            segundoApellido: formData.get('segundo_apellido'),
+            razonSocial: formData.get('razon_social'),
+            correoElectronico: formData.get('correo'),
+            numeroCelular: formData.get('celular'),
+            aceptaTerminos: formData.get('acepta_terminos') === 'on',
+            aceptaContacto: formData.get('acepta_contacto') === 'on'
+        };
+        
+        try {
+            // Mostrar indicador de carga
+            const registerBtn = document.getElementById('register-provider-button');
+            const originalText = registerBtn.textContent;
+            registerBtn.textContent = 'Validando...';
+            registerBtn.disabled = true;
+            
+            // Enviar al backend
+            const response = await fetch('/api/registro/proveedor', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // ✅ ÉXITO - Datos válidos, guardar temporalmente
+                console.log('Datos del proveedor validados correctamente');
+                console.log('Respuesta del backend:', result.data);
+                
+                // Guardar TODOS los datos del formulario usando razonSocial del backend
+                const formData = {
+                    nit: data.nit,
+                    tipoPersona: data.tipoPersona,
+                    razonSocial: result.data.razon_social || data.razonSocial, // Usar razon_social del backend
+                    primerNombre: data.primerNombre,
+                    segundoNombre: data.segundoNombre,
+                    primerApellido: data.primerApellido,
+                    segundoApellido: data.segundoApellido,
+                    correoElectronico: data.correoElectronico,
+                    numeroCelular: data.numeroCelular,
+                    aceptaTerminos: data.aceptaTerminos,
+                    aceptaContacto: data.aceptaContacto,
+                    validated: true // Marcar como validado
+                };
+                console.log('💾 Guardando en localStorage:', formData);
+                saveFormData(STORAGE_KEYS.TERCERO_DATA, formData);
+                
+                // VERIFICAR que se guardó correctamente
+                const verificacion = loadFormData(STORAGE_KEYS.TERCERO_DATA);
+                console.log('✅ Verificación de guardado:', verificacion);
+                console.log('✅ Flag validated:', verificacion?.validated);
+                
+                autoSaveProgress();
+                
+                // BLOQUEAR TODOS LOS CAMPOS DEL FORMULARIO DE PROVEEDOR
+                lockProviderFields();
+                
+                // Actualizar botón de registro
+                registerBtn.textContent = 'Datos Validados ✅';
+                registerBtn.disabled = true;
+                
+                // Actualizar UI - FORZAR actualización del check verde INMEDIATAMENTE
+                console.log('🔵 Forzando actualización del check verde para provider-content - FASE 1');
+                updateStatusIcon('provider-content', true);
+                
+                // Segunda actualización inmediata para asegurar
+                console.log('🔵 Forzando actualización del check verde para provider-content - FASE 2');
+                setTimeout(() => {
+                    updateStatusIcon('provider-content', true);
+                }, 10);
+                
+                // Llamar checkFormValidity después de un delay mayor para no sobrescribir
+                setTimeout(() => {
+                    console.log('🔵 Ejecutando checkFormValidity()');
+                    checkFormValidity();
+                    
+                    // Forzar una última vez después de checkFormValidity
+                    console.log('🔵 Forzando actualización del check verde para provider-content - FASE 3 (POST checkFormValidity)');
+                    updateStatusIcon('provider-content', true);
+                }, 100);
+                
+                showMessage('provider-registration-status', 
+                    `✅ Datos del proveedor validados correctamente. Puede continuar con los siguientes pasos.`, 'success');
+                
+                return true;
+            } else {
+                // ❌ ERROR
+                showMessage('provider-registration-status', 'Error: ' + result.message, 'error');
+                registerBtn.textContent = originalText;
+                registerBtn.disabled = false;
+                return false;
+            }
+            
+        } catch (error) {
+            console.error('Error al registrar proveedor:', error);
+            showMessage('provider-registration-status', 'Error de conexión al registrar proveedor.', 'error');
+            
+            // Restaurar botón
+            const registerBtn = document.getElementById('register-provider-button');
+            registerBtn.textContent = 'Validar Datos del Proveedor';
+            registerBtn.disabled = false;
+            return false;
+        }
+    }
+
+    // ====================================================================
+    // FUNCIONES PARA BLOQUEAR/DESBLOQUEAR CAMPOS
+    // ====================================================================
+    function lockProviderFields() {
+        console.log('🔒 Bloqueando campos del proveedor');
+        const providerSection = document.getElementById('provider-data-section');
+        
+        // Bloquear TODOS los inputs, selects y checkboxes del formulario de proveedor
+        providerSection.querySelectorAll('input, select').forEach(field => {
+            field.disabled = true;
+            field.style.backgroundColor = 'rgba(200, 200, 200, 0.3)';
+            field.style.cursor = 'not-allowed';
+        });
+    }
+
+    function unlockProviderFields() {
+        console.log('🔓 Desbloqueando campos del proveedor');
+        const providerSection = document.getElementById('provider-data-section');
+        
+        providerSection.querySelectorAll('input, select').forEach(field => {
+            field.disabled = false;
+            field.style.backgroundColor = '';
+            field.style.cursor = '';
+        });
+    }
+
+    function lockDocumentUpload() {
+        console.log('🔒 Bloqueando carga de documentos');
+        const uploadBtn = document.getElementById('upload-docs-button');
+        const fileInputs = document.querySelectorAll('#document-upload-container input[type="file"]');
+        
+        if (uploadBtn) uploadBtn.disabled = true;
+        fileInputs.forEach(input => input.disabled = true);
+    }
+
+    function setupFullRegistrationForm() {
+        const form = document.getElementById('registerForm');
+        document.querySelectorAll('.collapsible-trigger').forEach(trigger => {
+            trigger.addEventListener('click', () => {
+                const content = document.getElementById(trigger.dataset.target);
+                const isExpanded = content.classList.contains('expanded');
+                document.querySelectorAll('.collapsible-content').forEach(c => c.classList.remove('expanded'));
+                if (!isExpanded) content.classList.add('expanded');
+            });
+        });
+        const tipoPersonaSelect = document.getElementById('tipo_persona');
+        tipoPersonaSelect.addEventListener('change', () => {
+            const isNatural = tipoPersonaSelect.value === 'natural';
+            document.getElementById('persona-natural-fields').style.display = isNatural ? 'block' : 'none';
+            document.getElementById('persona-juridica-fields').style.display = !isNatural ? 'block' : 'none';
+            const fieldsToClear = isNatural ? '#persona-juridica-fields input' : '#persona-natural-fields input';
+            document.querySelectorAll(fieldsToClear).forEach(input => input.value = '');
+            checkFormValidity();
+        });
+        tipoPersonaSelect.dispatchEvent(new Event('change'));
+        setupUserCreation();
+        setupDocumentUploads();
+        
+        // Verificar estado inicial
+        setTimeout(() => {
+            checkFormValidity();
+        }, 100);
+        form.addEventListener('input', (e) => {
+            if (e.target.type === 'email') validateEmail(e.target);
+            checkFormValidity();
+        });
+        
+        // Botón independiente para registrar proveedor
+        const registerProviderButton = document.getElementById('register-provider-button');
+        registerProviderButton.addEventListener('click', async (e) => {
+            e.preventDefault();
+            e.stopPropagation(); // Evitar que active el submit del form
+            
+            if (!currentTerceroId) {
+                await registerProviderInBackend();
+            }
+        });
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Si el proveedor no está registrado, registrarlo primero
+            if (!currentTerceroId) {
+                const registered = await registerProviderInBackend();
+                if (!registered) {
+                    return; // Error en el registro, salir
+                }
+            }
+            
+            // El formulario principal ahora actúa como el botón final
+            // Pero solo debería ser accesible si TODO está completo
+            console.log('Formulario principal enviado - esto debería usar setupFinalSubmit');
+        });
+    }
+
+    function setupUserCreation() {
+        const addUserButton = document.getElementById('add-user-button');
+        const userFormsContainer = document.getElementById('user-forms-container');
+        let userCount = 0;
+        addUserButton.addEventListener('click', () => {
+            if (userCount >= 5) return;
+            userCount++;
+            const userForm = document.createElement('div');
+            userForm.className = 'user-form-block';
+            userForm.innerHTML = `<button type="button" class="remove-user-btn" title="Eliminar Usuario">${ICONS.trash}</button><div class="form-group"><input type="text" class="uppercase" name="user_name_${userCount}" placeholder="Nombre de Usuario *" required></div><div class="form-group"><input type="email" name="user_email_${userCount}" placeholder="Correo del Usuario *" required></div><div class="form-group"><input type="password" class="password-validate" placeholder="Contraseña *" required><span class="password-toggle"></span></div><div class="password-strength"></div><div class="form-group"><input type="password" class="password-confirm" placeholder="Confirmar Contraseña *" required><span class="password-toggle"></span></div>`;
+            userFormsContainer.appendChild(userForm);
+            if (userCount >= 5) addUserButton.disabled = true;
+            userForm.querySelectorAll('.password-toggle').forEach(toggle => {
+                toggle.innerHTML = ICONS.eye;
+                toggle.addEventListener('click', () => togglePasswordVisibility(toggle.previousElementSibling, toggle));
+            });
+            userForm.addEventListener('input', (e) => {
+                 if (e.target.type === 'email') validateEmail(e.target);
+                const pass = userForm.querySelector('.password-validate');
+                const strength = userForm.querySelector('.password-strength');
+                validatePassword(pass, strength);
+                checkFormValidity();
+                
+                // Auto-guardar datos de usuarios
+                autoSaveProgress();
+            });
+            checkFormValidity();
+        });
+        userFormsContainer.addEventListener('click', (e) => {
+            if (e.target.closest('.remove-user-btn')) {
+                e.target.closest('.user-form-block').remove();
+                userCount--;
+                addUserButton.disabled = false;
+                checkFormValidity();
+            }
+        });
+    }
+    
+    let documentsSetupCompleted = false; // Bandera para evitar múltiples configuraciones
+    
+    function setupDocumentUploads() {
+        const container = document.getElementById('document-upload-container');
+        const uploadButton = document.getElementById('upload-docs-button');
+        if (!container) return;
+        
+        // Remover TODOS los event listeners previos
+        const newContainer = container.cloneNode(false); // Clona sin hijos ni eventos
+        container.parentNode.replaceChild(newContainer, container);
+        
+        // Actualizar referencia
+        const cleanContainer = document.getElementById('document-upload-container');
+        let docsStatus = {};
+        let documentsLocked = false; // Para controlar si ya fueron "cargados"
+        
+        // Crear elementos para cada documento
+        REQUIRED_DOCS.forEach(doc => {
+            const docId = doc.replace(/[^a-zA-Z0-9]/g, '');
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'document-upload-item';
+            itemDiv.innerHTML = `
+                <label for="doc_${docId}">${doc.toUpperCase()}</label>
+                <input type="file" id="doc_${docId}" class="doc-input" accept=".pdf" style="display:none;" data-doc-name="${doc}">
+                <div class="doc-controls">
+                    <button type="button" class="btn-secondary select-btn" data-doc-id="${docId}">Seleccionar</button>
+                    <button type="button" class="btn-danger remove-btn" data-doc-id="${docId}" style="display:none;">Eliminar</button>
+                    <span class="file-name"></span>
+                    <span class="status"></span>
+                </div>
+            `;
+            cleanContainer.appendChild(itemDiv);
+            docsStatus[doc] = false;
+        });
+        
+        // Event listener ÚNICO para manejar todos los clicks
+        cleanContainer.addEventListener('click', (e) => {
+            // Si documentos están bloqueados, bloquear TODO
+            if (documentsLocked) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                return false;
+            }
+            
+            // 🆕 NUEVO: Expandir documento colapsado al hacer click
+            const clickedItem = e.target.closest('.document-upload-item');
+            if (clickedItem && clickedItem.classList.contains('collapsed') && !e.target.classList.contains('select-btn') && !e.target.classList.contains('remove-btn')) {
+                e.preventDefault();
+                clickedItem.classList.remove('collapsed');
+                clickedItem.classList.remove('missing-required');
+                console.log('📂 Documento expandido:', clickedItem.querySelector('label').textContent);
+                
+                // Auto-colapsar de nuevo después de 5 segundos si tiene archivo
+                setTimeout(() => {
+                    const input = clickedItem.querySelector('.doc-input');
+                    if (input && input.files.length > 0) {
+                        clickedItem.classList.add('collapsed');
+                        console.log('📁 Documento auto-colapsado de nuevo');
+                    }
+                }, 5000);
+                return;
+            }
+            
+            // Manejar click en botón seleccionar
+            if (e.target.classList.contains('select-btn')) {
+                e.preventDefault();
+                e.stopPropagation();
+                const docId = e.target.dataset.docId;
+                const fileInput = document.getElementById(`doc_${docId}`);
+                if (fileInput) {
+                    fileInput.click();
+                }
+                return;
+            }
+            
+            // Manejar click en botón eliminar
+            if (e.target.classList.contains('remove-btn')) {
+                e.preventDefault();
+                e.stopPropagation();
+                const docId = e.target.dataset.docId;
+                removeDocument(docId);
+                return;
+            }
+        });
+        
+        // Event listener para cambios en archivos (solo una vez)
+        cleanContainer.addEventListener('change', e => {
+            if (documentsLocked) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false; // Bloquear cambios si están bloqueados
+            }
+            
+            if (e.target.classList.contains('doc-input')) {
+                e.stopPropagation(); // Evitar propagación múltiple
+                const input = e.target;
+                const docName = input.dataset.docName;
+                const docId = input.id.replace('doc_', '');
+                const item = input.closest('.document-upload-item');
+                const statusSpan = item.querySelector('.status');
+                const fileNameSpan = item.querySelector('.file-name');
+                const selectBtn = item.querySelector('.select-btn');
+                const removeBtn = item.querySelector('.remove-btn');
+                
+                const hasFile = input.files.length > 0;
+                
+                if (hasFile) {
+                    const fileName = input.files[0].name;
+                    statusSpan.innerHTML = ICONS.check;
+                    fileNameSpan.textContent = fileName;
+                    fileNameSpan.style.display = 'inline';
+                    selectBtn.textContent = 'Cambiar';
+                    removeBtn.style.display = 'inline-block';
+                    docsStatus[docName] = true;
+                    item.classList.remove('missing-required');
+                    
+                    // 🆕 NUEVO: Auto-colapsar después de 500ms para que usuario vea el check
+                    setTimeout(() => {
+                        item.classList.add('collapsed');
+                        console.log('✅ Documento colapsado:', docName);
+                    }, 500);
+                } else {
+                    statusSpan.innerHTML = '';
+                    fileNameSpan.textContent = '';
+                    fileNameSpan.style.display = 'none';
+                    selectBtn.textContent = 'Seleccionar';
+                    removeBtn.style.display = 'none';
+                    docsStatus[docName] = false;
+                    
+                    // 🆕 NUEVO: Expandir si se elimina el archivo
+                    item.classList.remove('collapsed');
+                    console.log('❌ Documento expandido (sin archivo):', docName);
+                }
+                
+                // Actualizar estado del botón
+                const allSelected = Object.values(docsStatus).every(status => status);
+                uploadButton.disabled = !allSelected;
+                
+                // 🆕 NUEVO: Marcar documentos sin cargar con borde rojo
+                setTimeout(() => {
+                    checkFormValidity();
+                    markMissingDocuments();
+                }, 100);
+            }
+        });
+        
+        // 🆕 NUEVO: Función para marcar documentos faltantes con borde rojo
+        function markMissingDocuments() {
+            REQUIRED_DOCS.forEach(doc => {
+                const docId = doc.replace(/[^a-zA-Z0-9]/g, '');
+                const input = document.getElementById(`doc_${docId}`);
+                if (input) {
+                    const item = input.closest('.document-upload-item');
+                    const hasFile = docsStatus[doc];
+                    
+                    if (!hasFile && !item.classList.contains('collapsed')) {
+                        item.classList.add('missing-required');
+                    } else {
+                        item.classList.remove('missing-required');
+                    }
+                }
+            });
+        }
+        
+        // Función para eliminar documento
+        function removeDocument(docId) {
+            const input = document.getElementById(`doc_${docId}`);
+            const docName = input.dataset.docName;
+            const item = input.closest('.document-upload-item');
+            input.value = '';
+            
+            // 🆕 NUEVO: Expandir documento al eliminar
+            item.classList.remove('collapsed');
+            
+            // Triggerar el evento change para actualizar la UI
+            const event = new Event('change', { bubbles: true });
+            input.dispatchEvent(event);
+        }
+        
+        // Event listener para "cargar" documentos
+        uploadButton.addEventListener('click', () => {
+            if (documentsLocked) return;
+            
+            const allSelected = Object.values(docsStatus).every(status => status);
+            if (!allSelected) {
+                showMessage('upload-message', 'Debe seleccionar los 7 documentos antes de continuar.', 'error');
+                return;
+            }
+            
+            // Bloquear la edición de documentos
+            documentsLocked = true;
+            
+            // Actualizar UI
+            showMessage('upload-message', `✅ ${REQUIRED_DOCS.length} documentos listos para enviar.`, 'success');
+            uploadButton.disabled = true;
+            uploadButton.textContent = "Documentos Preparados ✅";
+            
+            // Ocultar botones de control
+            cleanContainer.querySelectorAll('.select-btn, .remove-btn').forEach(btn => {
+                btn.style.display = 'none';
+            });
+            
+            // BLOQUEAR COMPLETAMENTE LOS INPUTS DE ARCHIVO
+            cleanContainer.querySelectorAll('.doc-input').forEach(input => {
+                input.disabled = true;
+                input.style.pointerEvents = 'none';
+            });
+            
+            // BLOQUEAR LOS LABELS PARA QUE NO SEAN CLICKEABLES
+            cleanContainer.querySelectorAll('label').forEach(label => {
+                label.style.pointerEvents = 'none';
+                label.style.cursor = 'default';
+                label.style.opacity = '0.7';
+            });
+            
+            // ACTUALIZAR CHECK VERDE Y ESTADO DEL FORMULARIO
+            updateStatusIcon('docs-content', true);
+            
+            // BLOQUEAR TODO EL CONTENEDOR DE DOCUMENTOS
+            cleanContainer.style.pointerEvents = 'none';
+            cleanContainer.style.opacity = '0.8';
+            
+            // Marcar sección como completa
+            updateStatusIcon('docs-content', true);
+            
+            // LLAMAR A checkFormValidity() DESPUÉS DE TODO PARA HABILITAR EL BOTÓN
+            console.log('🔥 Documentos cargados - Llamando checkFormValidity()...');
+            setTimeout(() => {
+                checkFormValidity();
+                console.log('✅ checkFormValidity() ejecutado después de cargar documentos');
+            }, 100);
+            
+            // CONTRAER LA SECCIÓN DE DOCUMENTOS
+            setTimeout(() => {
+                const docsContent = document.getElementById('docs-content');
+                if (docsContent) {
+                    docsContent.classList.remove('expanded');
+                }
+                
+                // Mostrar mensaje de que está listo para enviar
+                showMessage('final-message', 
+                    '✅ Todos los pasos completados. Puede enviar la solicitud.', 'success');
+                
+            }, 1000); // Esperar 1 segundo antes de contraer
+            
+            checkFormValidity();
+        });
+        
+        // Marcar como configurado
+        documentsSetupCompleted = true;
+    }
+
+    function setupRadicadoCheck() {
+        document.getElementById('checkRadicadoForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const radicado = document.getElementById('radicado-input').value.trim().toUpperCase();
+            const resultContainer = document.getElementById('radicado-status-result');
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            
+            if (!radicado) {
+                resultContainer.innerHTML = `<div class="message-box error-message">Por favor ingrese un número de radicado</div>`;
+                return;
+            }
+            
+            try {
+                // Deshabilitar botón mientras consulta
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Consultando...';
+                
+                console.log('🔍 Consultando radicado:', radicado);
+                
+                const response = await fetch('/api/consulta/radicado', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ radicado })
+                });
+                
+                const result = await response.json();
+                console.log('📊 Respuesta del servidor:', result);
+                
+                if (result.success) {
+                    const data = result.data;
+                    let resultHtml = `
+                        <div class="message-box ${data.tipo}-message">
+                            <b>Estado:</b> ${data.estado}<br>
+                            <small>Días en estado: ${data.dias_en_estado}</small><br>
+                            <small>Fecha solicitud: ${data.fecha_solicitud}</small>
+                    `;
+                    
+                    if (data.observaciones) {
+                        resultHtml += `<hr style="width:80%; margin: 5px 0;"><b>Observaciones:</b> ${data.observaciones}`;
+                    }
+                    
+                    resultHtml += `</div>`;
+                    resultContainer.innerHTML = resultHtml;
+                    
+                } else {
+                    resultContainer.innerHTML = `<div class="message-box error-message"><b>Radicado no encontrado</b><br><small>Verifique el número e intente nuevamente</small></div>`;
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                resultContainer.innerHTML = `<div class="message-box error-message">Error de conexión. Intente nuevamente.</div>`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Consultar';
+            }
+        });
+    }
+    
+    // 🆕 Función para consultar radicado directamente (desde mensaje de NIT existente)
+    function consultarRadicadoDirecto(numeroRadicado) {
+        console.log('📄 Consultando radicado directo:', numeroRadicado);
+        
+        // Ocultar todas las secciones
+        document.getElementById('register-step1').style.display = 'none';
+        document.getElementById('register-step1-options').style.display = 'none';
+        document.getElementById('create-section').style.display = 'none';
+        document.getElementById('no-docs-section').style.display = 'none';
+        
+        // Mostrar sección de radicado
+        const radicadoSection = document.getElementById('radicado-section');
+        radicadoSection.style.display = 'block';
+        
+        // Pre-llenar el input con el número de radicado
+        const radicadoInput = document.getElementById('radicado-input');
+        radicadoInput.value = numeroRadicado;
+        radicadoInput.focus();
+        
+        // Hacer scroll hasta la sección
+        radicadoSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Opcional: Ejecutar la consulta automáticamente después de 500ms
+        setTimeout(() => {
+            const consultarBtn = radicadoSection.querySelector('button[type="submit"]');
+            if (consultarBtn) {
+                consultarBtn.click();
+            }
+        }, 500);
+    }
+
+    function setupForgotPassword() {
+        const form = document.getElementById('forgotForm');
+        const sendRecoveryBtn = document.getElementById('sendRecoveryBtn');
+        const emailInput = document.getElementById('forgot_email');
+        const nitInput = document.getElementById('forgot_nit');
+        const userInput = document.getElementById('forgot_user');
+
+        // Habilitar botón solo cuando todos los campos estén llenos
+        form.addEventListener('input', () => {
+            const correo = emailInput.value.trim();
+            const nit = nitInput.value.trim();
+            const usuario = userInput.value.trim();
+            sendRecoveryBtn.disabled = !(correo && nit && usuario);
+        });
+
+        // Solicitar recuperación de contraseña
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const correo = emailInput.value.trim();
+            const nit = nitInput.value.trim();
+            const usuario = userInput.value.trim();
+            
+            if (!correo || !nit || !usuario) {
+                showMessage('forgot-step1-message', 'Por favor completa todos los campos', 'error');
+                return;
+            }
+            
+            try {
+                sendRecoveryBtn.disabled = true;
+                sendRecoveryBtn.textContent = 'Enviando...';
+                
+                const response = await fetch('/api/auth/forgot_request', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ correo, nit, usuario })
+                });
+                
+                const result = await response.json();
+                
+                if (result.ok) {
+                    // Éxito: mostrar paso 2 para ingresar el código
+                    showMessage('forgot-step1-message', result.message || '✅ Código enviado correctamente', 'success');
+                    
+                    // Guardar datos temporales para pasos siguientes
+                    sessionStorage.setItem('forgot_temp_data', JSON.stringify({ correo, nit, usuario }));
+                    
+                    // Cambiar al paso 2 después de 1 segundo
+                    setTimeout(() => {
+                        document.getElementById('forgot-step1').style.display = 'none';
+                        document.getElementById('forgot-step2').style.display = 'block';
+                        document.getElementById('forgot_token').focus();
+                    }, 1000);
+                } else {
+                    showMessage('forgot-step1-message', result.message || 'Los datos proporcionados no son válidos', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('forgot-step1-message', 'Error de conexión. Intente nuevamente.', 'error');
+            } finally {
+                sendRecoveryBtn.disabled = false;
+                sendRecoveryBtn.textContent = 'Solicitar Código';
+            }
+        });
+        
+        // PASO 2: Verificar token
+        const verifyForm = document.getElementById('verifyTokenForm');
+        const verifyBtn = document.getElementById('verifyTokenBtn');
+        const tokenInput = document.getElementById('forgot_token');
+        
+        verifyForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const token = tokenInput.value.trim();
+            
+            if (token.length !== 6) {
+                showMessage('forgot-step2-message', 'El código debe tener 6 dígitos', 'error');
+                return;
+            }
+            
+            try {
+                verifyBtn.disabled = true;
+                verifyBtn.textContent = 'Verificando...';
+                
+                const response = await fetch('/api/auth/forgot_verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token })
+                });
+                
+                const result = await response.json();
+                
+                if (result.ok) {
+                    showMessage('forgot-step2-message', '✅ Código verificado correctamente', 'success');
+                    
+                    // Guardar token validado
+                    sessionStorage.setItem('forgot_verified_token', token);
+                    
+                    // Cambiar al paso 3
+                    setTimeout(() => {
+                        document.getElementById('forgot-step2').style.display = 'none';
+                        document.getElementById('forgot-step3').style.display = 'block';
+                        document.getElementById('new_password').focus();
+                    }, 1000);
+                } else {
+                    showMessage('forgot-step2-message', result.message || 'Código inválido o expirado', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('forgot-step2-message', 'Error de conexión. Intente nuevamente.', 'error');
+            } finally {
+                verifyBtn.disabled = false;
+                verifyBtn.textContent = 'Verificar Código';
+            }
+        });
+        
+        // PASO 3: Cambiar contraseña
+        const changeForm = document.getElementById('changePasswordForm');
+        const changeBtn = document.getElementById('changePasswordBtn');
+        const newPassInput = document.getElementById('new_password');
+        const confirmPassInput = document.getElementById('confirm_password');
+        
+        changeForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const newPassword = newPassInput.value.trim();
+            const confirmPassword = confirmPassInput.value.trim();
+            
+            if (newPassword !== confirmPassword) {
+                showMessage('forgot-step3-message', 'Las contraseñas no coinciden', 'error');
+                return;
+            }
+            
+            if (newPassword.length < 8) {
+                showMessage('forgot-step3-message', 'La contraseña debe tener al menos 8 caracteres', 'error');
+                return;
+            }
+            
+            const token = sessionStorage.getItem('forgot_verified_token');
+            if (!token) {
+                showMessage('forgot-step3-message', 'Sesión expirada. Por favor inicia el proceso nuevamente.', 'error');
+                return;
+            }
+            
+            try {
+                changeBtn.disabled = true;
+                changeBtn.textContent = 'Actualizando...';
+                
+                const response = await fetch('/api/auth/change_password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, new_password: newPassword })
+                });
+                
+                const result = await response.json();
+                
+                if (result.ok) {
+                    showMessage('forgot-step3-message', '✅ Contraseña actualizada correctamente. Redirigiendo al login...', 'success');
+                    
+                    // Limpiar datos temporales
+                    sessionStorage.removeItem('forgot_temp_data');
+                    sessionStorage.removeItem('forgot_verified_token');
+                    
+                    // Volver al login después de 2 segundos
+                    setTimeout(() => {
+                        volverAlLoginYLimpiar();
+                    }, 2000);
+                } else {
+                    showMessage('forgot-step3-message', result.message || 'Error al actualizar la contraseña', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('forgot-step3-message', 'Error de conexión. Intente nuevamente.', 'error');
+            } finally {
+                changeBtn.disabled = false;
+                changeBtn.textContent = 'Actualizar Contraseña';
+            }
+        });
+    }
+    
+    // Función para volver al paso 1 desde paso 2
+    function volverPaso1Forgot() {
+        document.getElementById('forgot-step2').style.display = 'none';
+        document.getElementById('forgot-step1').style.display = 'block';
+        document.getElementById('forgot_token').value = '';
+        document.getElementById('forgot-step2-message').innerHTML = '';
+    }
+
+    function checkFormValidity() {
+        console.log('🔍 checkFormValidity() ejecutándose...');
+        
+        // Verificar si los datos del tercero están validados en el backend
+        const terceroData = loadFormData(STORAGE_KEYS.TERCERO_DATA);
+        const isValidated = terceroData && terceroData.validated === true;
+        
+        console.log('📋 Tercero data:', terceroData);
+        console.log('📋 Is validated:', isValidated);
+        
+        // SOLO mostrar check verde si está validado en el backend
+        updateStatusIcon('provider-content', isValidated);
+        
+        const usersValid = areUsersValid();
+        console.log('👥 Users valid:', usersValid);
+        updateStatusIcon('users-content', usersValid);
+        
+        const docsValid = areDocsUploaded();
+        console.log('📄 Docs valid:', docsValid);
+        updateStatusIcon('docs-content', docsValid);
+        
+        // Habilitar botón solo si TODO está válido
+        const finalValid = (terceroData && terceroData.validated === true) && usersValid && docsValid;
+        console.log('🎯 Final valid:', finalValid, '= Tercero:', isValidated, '&& Users:', usersValid, '&& Docs:', docsValid);
+        
+        const finalButton = document.getElementById('final-submit-button');
+        if (finalButton) {
+            finalButton.disabled = !finalValid;
+            console.log(`🔘 Botón "Enviar Solicitud" ahora está: ${finalButton.disabled ? 'DESHABILITADO ❌' : 'HABILITADO ✅'}`);
+        } else {
+            console.error('❌ No se encontró el botón final-submit-button');
+        }
+    }
+    
+    function isProviderRegistered() {
+        // Verificar que los datos del proveedor están válidos y guardados temporalmente
+        const terceroData = loadFormData(STORAGE_KEYS.TERCERO_DATA);
+        console.log('🔍 isProviderRegistered - Verificando datos del proveedor:', terceroData);
+        
+        // Considerar registrado solo si tiene el flag validated=true
+        const isRegistered = terceroData && terceroData.validated === true && terceroData.nit;
+        
+        console.log('✅ Estado de registro:', { isRegistered, hasValidatedFlag: terceroData?.validated });
+        
+        const statusDiv = document.getElementById('provider-registration-status');
+        const registerButton = document.getElementById('register-provider-button');
+        
+        if (isRegistered) {
+            // Datos válidos - mostrar éxito y bloquear campos
+            statusDiv.innerHTML = `
+                <div class="message-box success-message">
+                    ✅ Datos del proveedor validados correctamente
+                </div>
+            `;
+            statusDiv.style.display = 'block';
+            if (registerButton) {
+                registerButton.textContent = 'Datos Validados ✅';
+                registerButton.disabled = true;
+            }
+            // Bloquear campos SOLO si están validados
+            lockProviderFields();
+        } else {
+            // Proveedor NO registrado - NO mostrar mensaje hasta que intente validar
+            // Solo asegurar que los campos están desbloqueados
+            if (registerButton && !registerButton.textContent.includes('✅')) {
+                registerButton.textContent = 'Validar Datos del Proveedor';
+                registerButton.disabled = false;
+            }
+            // NO bloquear campos si no están validados
+            unlockProviderFields();
+        }
+        
+        return isRegistered;
+    }
+    function isProviderDataValid() {
+        // VALIDACIÓN SIMPLIFICADA - Solo verificar campos mínimos
+        const nit = document.getElementById('validated-nit');
+        const tipoPersona = document.querySelector('input[name="tipo_persona"]:checked');
+        const correo = document.querySelector('input[name="correo"]');
+        const celular = document.querySelector('input[name="celular"]');
+        const terminos = document.querySelector('input[name="acepta_terminos"]');
+        
+        // Validar campos básicos
+        if (!nit || !nit.value) return false;
+        if (!tipoPersona) return false;
+        if (!correo || !correo.value || !isValidEmail(correo.value)) return false;
+        if (!celular || !celular.value) return false;
+        if (!terminos || !terminos.checked) return false;
+        
+        // Validar según tipo de persona
+        if (tipoPersona.value === 'natural') {
+            const primerNombre = document.querySelector('input[name="primer_nombre"]');
+            const primerApellido = document.querySelector('input[name="primer_apellido"]');
+            if (!primerNombre || !primerNombre.value) return false;
+            if (!primerApellido || !primerApellido.value) return false;
+        } else if (tipoPersona.value === 'juridica') {
+            const razonSocial = document.querySelector('input[name="razon_social"]');
+            if (!razonSocial || !razonSocial.value) return false;
+        }
+        
+        return true;
+    }
+    function areUsersValid() {
+        const userBlocks = document.querySelectorAll('.user-form-block');
+        if (userBlocks.length === 0) return false;
+        for (const block of userBlocks) {
+            for(const input of block.querySelectorAll('[required]')) {
+                if ((input.type === 'email' && !isValidEmail(input.value)) || !input.value.trim()) return false;
+            }
+            const pass = block.querySelector('.password-validate');
+            const confirmPass = block.querySelector('.password-confirm');
+            if (pass.value !== confirmPass.value) return false;
+            if (!validatePassword(pass, null, false)) return false;
+        }
+        return true;
+    }
+    function areDocsUploaded() {
+        return document.getElementById('upload-docs-button').disabled && document.getElementById('upload-message').querySelector('.success-message');
+    }
+
+    function updateStatusIcon(contentId, isValid) {
+        console.log(`🔍 updateStatusIcon llamado: contentId="${contentId}", isValid=${isValid}`);
+        
+        const trigger = document.querySelector(`.collapsible-trigger[data-target="${contentId}"]`);
+        console.log('🔍 Trigger encontrado:', trigger);
+        
+        if (trigger) {
+            const icon = trigger.querySelector('.status-icon');
+            console.log('🔍 Icon encontrado:', icon);
+            
+            if (icon) {
+                icon.innerHTML = isValid ? ICONS.check : '';
+                icon.classList.toggle('visible', isValid);
+                console.log(`✅ Icon actualizado: ${isValid ? 'CHECK VERDE' : 'VACÍO'}`);
+            } else {
+                console.error('❌ No se encontró el elemento .status-icon dentro del trigger');
+            }
+        } else {
+            console.error(`❌ No se encontró trigger con data-target="${contentId}"`);
+        }
+    }
+    
+    function validatePassword(passwordInput, strengthIndicator, isRecovery = false) {
+        const form = passwordInput.closest('form');
+        const password = passwordInput.value;
+        const confirmInput = form.querySelector('.password-confirm');
+        const feedback = [];
+        let criteria = {
+            length: password.length >= 8, uppercase: /[A-Z]/.test(password), lowercase: /[a-z]/.test(password),
+            number: /[0-9]/.test(password), special: /[\W_]/.test(password), used: !SIMULATED_USED_PASSWORDS.includes(password),
+            match: password && confirmInput.value && password === confirmInput.value
+        };
+        if (strengthIndicator) {
+            feedback.push(`<li style="color:${criteria.length ? 'var(--success-color)' : 'var(--error-color)'}">Mínimo 8 caracteres</li>`);
+            feedback.push(`<li style="color:${criteria.uppercase ? 'var(--success-color)' : 'var(--error-color)'}">Una mayúscula</li>`);
+            feedback.push(`<li style="color:${criteria.lowercase ? 'var(--success-color)' : 'var(--error-color)'}">Una minúscula</li>`);
+            feedback.push(`<li style="color:${criteria.number ? 'var(--success-color)' : 'var(--error-color)'}">Un número</li>`);
+            feedback.push(`<li style="color:${criteria.special ? 'var(--success-color)' : 'var(--error-color)'}">Un caracter especial</li>`);
+            if(!criteria.used) feedback.push(`<li style="color:var(--error-color)">Contraseña usada anteriormente</li>`);
+            if (confirmInput.value) feedback.push(`<li style="color:${criteria.match ? 'var(--success-color)' : 'var(--error-color)'}">Las contraseñas coinciden</li>`);
+            strengthIndicator.innerHTML = `<ul>${feedback.join('')}</ul>`;
+        }
+        const allValid = Object.values(criteria).every(v => v);
+        if(isRecovery) form.querySelector('button[type="submit"]').disabled = !allValid;
+        return allValid;
+    }
+    
+    function togglePasswordVisibility(input, icon) {
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        icon.innerHTML = isPassword ? ICONS.eyeOff : ICONS.eye;
+    }
+    
+    function setupInputTransformations() {
+        document.querySelectorAll('input.uppercase').forEach(input => {
+            input.addEventListener('input', () => { input.value = input.value.toUpperCase(); });
+        });
+    }
+
+    function resetRegistrationForm() {
+        console.log('🔄 Reseteando formulario de registro...');
+        
+        // Ocultar todas las sub-secciones y la vista de éxito
+        document.querySelectorAll('.sub-section, #register-step1-options, #register-success-view').forEach(el => el.style.display = 'none');
+        
+        // Mostrar el paso inicial
+        document.getElementById('register-step1').style.display = 'block';
+        
+        // Resetear formularios
+        document.getElementById('checkNitForm').reset();
+        document.getElementById('registerForm').reset();
+        
+        // Limpiar contenedores dinámicos
+        document.getElementById('user-forms-container').innerHTML = '';
+        document.getElementById('document-upload-container').innerHTML = '';
+        document.getElementById('radicado-status-result').innerHTML = '';
+        
+        // Limpiar TODOS los checkmarks verdes
+        document.querySelectorAll('.status-icon').forEach(icon => {
+            icon.innerHTML = '';
+            icon.classList.remove('visible');
+        });
+        
+        // Desbloquear campos del proveedor
+        unlockProviderFields();
+        
+        // Resetear botón de validación del proveedor
+        const registerProviderButton = document.getElementById('register-provider-button');
+        if (registerProviderButton) {
+            registerProviderButton.textContent = 'Validar Datos del Proveedor';
+            registerProviderButton.disabled = false;
+        }
+        
+        // Limpiar mensajes de estado
+        const providerStatusDiv = document.getElementById('provider-registration-status');
+        if (providerStatusDiv) {
+            providerStatusDiv.innerHTML = '';
+            providerStatusDiv.style.display = 'none';
+        }
+        
+        // Resetear bandera y reconfigurar documentos
+        documentsSetupCompleted = false;
+        setupDocumentUploads();
+        document.getElementById('add-user-button').disabled = false;
+        document.getElementById('final-submit-button').disabled = true;
+        
+        console.log('✅ Formulario de registro reseteado completamente');
+    }
+    
+    function resetForgotPasswordForm() {
+        const view = document.getElementById('forgot-password-view');
+        view.querySelectorAll('.step-section').forEach((step, i) => step.style.display = i === 0 ? 'block' : 'none');
+        view.querySelectorAll('form').forEach(form => form.reset());
+        view.querySelectorAll('button').forEach(btn => btn.disabled = true);
+        view.querySelectorAll('.message-box').forEach(box => box.style.display = 'none');
+    }
+
+    function validateEmail(emailInput) {
+        const formGroup = emailInput.parentElement;
+        if (!isValidEmail(emailInput.value) && emailInput.value.length > 0) {
+            formGroup.classList.add('error');
+        } else {
+            formGroup.classList.remove('error');
+        }
+    }
+    
+    function isValidEmail(email) {
+        const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+        return re.test(String(email).toLowerCase());
+    }
+
+    // ==============================================
+    // 🆕 NUEVAS FUNCIONES PARA BACKEND INTEGRATION
+    // ==============================================
+    
+    // Variable global para guardar el tercero_id después del registro
+    let currentTerceroId = null;
+    
+    // ==============================================
+    // 💾 SISTEMA DE PERSISTENCIA DE FORMULARIO
+    // ==============================================
+    
+    const STORAGE_KEYS = {
+        NIT: 'gestor_form_nit',
+        TERCERO_DATA: 'gestor_tercero_data',
+        USERS: 'gestor_form_users',
+        DOCUMENTS: 'gestor_form_documents',
+        CURRENT_VIEW: 'gestor_current_view',
+        TERCERO_ID: 'gestor_tercero_id',
+        IN_REGISTRATION_VIEW: 'gestor_in_registration_view'
+    };
+    
+    // Guardar datos del formulario
+    function saveFormData(key, data) {
+        try {
+            localStorage.setItem(key, JSON.stringify(data));
+        } catch (e) {
+            console.warn('No se pudo guardar en localStorage:', e);
+        }
+    }
+    
+    // Cargar datos del formulario
+    function loadFormData(key) {
+        try {
+            const data = localStorage.getItem(key);
+            return data ? JSON.parse(data) : null;
+        } catch (e) {
+            console.warn('No se pudo cargar de localStorage:', e);
+            return null;
+        }
+    }
+    
+    // Limpiar datos persistidos
+    function clearPersistedData() {
+        Object.values(STORAGE_KEYS).forEach(key => {
+            localStorage.removeItem(key);
+        });
+    }
+    
+    // Guardar progreso automáticamente
+    function autoSaveProgress() {
+        // Guardar NIT si existe
+        const nitInput = document.getElementById('register-nit');
+        if (nitInput && nitInput.value) {
+            saveFormData(STORAGE_KEYS.NIT, nitInput.value);
+        }
+        
+        // Guardar tercero_id si existe
+        if (currentTerceroId) {
+            saveFormData(STORAGE_KEYS.TERCERO_ID, currentTerceroId);
+        }
+        
+        // Guardar datos de usuarios
+        const userForms = document.querySelectorAll('.user-form-block');
+        const usersData = [];
+        userForms.forEach(form => {
+            const nombreUsuario = form.querySelector('input[placeholder*="Nombre de Usuario"]')?.value || '';
+            const correo = form.querySelector('input[type="email"]')?.value || '';
+            const password = form.querySelector('.password-validate')?.value || '';
+            
+            if (nombreUsuario || correo || password) {
+                usersData.push({ nombreUsuario, correo, password });
+            }
+        });
+        if (usersData.length > 0) {
+            saveFormData(STORAGE_KEYS.USERS, usersData);
+        }
+        
+        // Guardar estado de documentos (solo nombres, no archivos por seguridad)
+        const docInputs = document.querySelectorAll('.doc-input');
+        const docsData = [];
+        docInputs.forEach(input => {
+            if (input.files && input.files[0]) {
+                docsData.push({
+                    docName: input.dataset.docName,
+                    fileName: input.files[0].name,
+                    hasFile: true
+                });
+            }
+        });
+        if (docsData.length > 0) {
+            saveFormData(STORAGE_KEYS.DOCUMENTS, docsData);
+        }
+    }
+    
+    // Restaurar progreso al cargar página
+    function restoreProgress() {
+        console.log('🔄 Intentando restaurar progreso...');
+        
+        // IMPORTANTE: Solo restaurar si el usuario estaba en la vista de registro
+        // NO restaurar automáticamente al abrir la página en login
+        const wasInRegistration = loadFormData(STORAGE_KEYS.IN_REGISTRATION_VIEW);
+        
+        if (!wasInRegistration) {
+            console.log('⚠️ Usuario no estaba en registro - NO restaurar progreso');
+            // Limpiar cualquier dato residual
+            Object.values(STORAGE_KEYS).forEach(key => {
+                localStorage.removeItem(key);
+            });
+            return;
+        }
+        
+        console.log('✅ Usuario estaba en registro - Restaurando progreso...');
+        
+        // Restaurar NIT
+        const savedNit = loadFormData(STORAGE_KEYS.NIT);
+        if (savedNit) {
+            const nitInput = document.getElementById('register-nit');
+            if (nitInput) {
+                nitInput.value = savedNit;
+            }
+        }
+        
+        // Restaurar tercero_id
+        const savedTerceroId = loadFormData(STORAGE_KEYS.TERCERO_ID);
+        if (savedTerceroId) {
+            currentTerceroId = savedTerceroId;
+        }
+        
+        // Restaurar usuarios
+        const savedUsers = loadFormData(STORAGE_KEYS.USERS);
+        if (savedUsers && savedUsers.length > 0) {
+            // Mostrar sección de usuarios si hay datos guardados
+            const terceroData = loadFormData(STORAGE_KEYS.TERCERO_DATA);
+            if (terceroData) {
+                showRegisterStep2(terceroData);
+                
+                // Esperar a que se cree el DOM y luego restaurar
+                setTimeout(() => {
+                    savedUsers.forEach((userData, index) => {
+                        if (index > 0) {
+                            addUserForm(); // Agregar formularios adicionales
+                        }
+                        
+                        const userForms = document.querySelectorAll('.user-form-block');
+                        const form = userForms[index];
+                        if (form) {
+                            const nombreInput = form.querySelector('input[placeholder*="Nombre de Usuario"]');
+                            const correoInput = form.querySelector('input[type="email"]');
+                            const passwordInput = form.querySelector('.password-validate');
+                            
+                            if (nombreInput) nombreInput.value = userData.nombreUsuario || '';
+                            if (correoInput) correoInput.value = userData.correo || '';
+                            if (passwordInput) passwordInput.value = userData.password || '';
+                        }
+                    });
+                }, 100);
+            }
+        }
+        
+        // Mostrar mensaje de restauración si hay datos
+        if (savedNit || savedUsers) {
+            showMessage('nit-message', '📋 Formulario restaurado desde la sesión anterior', 'info');
+        }
+        
+        // ✅ RESTAURAR ESTADO DE VALIDACIÓN Y CHECKS VERDES
+        const terceroData = loadFormData(STORAGE_KEYS.TERCERO_DATA);
+        if (terceroData && terceroData.validated === true) {
+            console.log('🔄 Restaurando estado de validación del proveedor');
+            
+            // Forzar actualización del check verde
+            setTimeout(() => {
+                updateStatusIcon('provider-content', true);
+                
+                // Bloquear campos
+                lockProviderFields();
+                
+                // Actualizar botón
+                const registerButton = document.getElementById('register-provider-button');
+                if (registerButton) {
+                    registerButton.textContent = 'Datos Validados ✅';
+                    registerButton.disabled = true;
+                }
+                
+                // Actualizar validación general
+                checkFormValidity();
+            }, 200);
+        }
+    }
+    
+    // Función para limpiar estado entre registros
+    function clearRegistrationState() {
+        currentTerceroId = null;
+        
+        // Limpiar datos persistidos
+        clearPersistedData();
+        
+        // 🧹 LIMPIAR TODOS LOS MENSAJES DE REGISTRO
+        const messagesToClear = [
+            'register-step1-message',
+            'nit-message', 
+            'final-message',
+            'provider-registration-status'
+        ];
+        
+        messagesToClear.forEach(messageId => {
+            const messageEl = document.getElementById(messageId);
+            if (messageEl) {
+                messageEl.innerHTML = '';
+                messageEl.style.display = 'none';
+            }
+        });
+        
+        // 🔄 RESETEAR FORMULARIO DE NIT
+        const nitInput = document.getElementById('register-nit');
+        if (nitInput) {
+            nitInput.value = '';
+        }
+        
+        const validatedNitInput = document.getElementById('validated-nit');
+        if (validatedNitInput) {
+            validatedNitInput.value = '';
+        }
+        
+        // 🔄 LIMPIAR CAMPO DE CONSULTA DE RADICADO
+        const radicadoInput = document.getElementById('radicado-input');
+        if (radicadoInput) {
+            radicadoInput.value = '';
+        }
+        
+        // 🧹 LIMPIAR RESULTADO DE CONSULTA DE RADICADO
+        const radicadoResult = document.getElementById('radicado-status-result');
+        if (radicadoResult) {
+            radicadoResult.innerHTML = '';
+        }
+        
+        // Limpiar mensajes de documentos
+        const uploadMessage = document.getElementById('upload-message');
+        if (uploadMessage) {
+            uploadMessage.innerHTML = '';
+            uploadMessage.style.display = 'none';
+        }
+        
+        // Resetear estado de documentos
+        const uploadButton = document.getElementById('upload-docs-button');
+        if (uploadButton) {
+            uploadButton.textContent = 'Cargar Documentos';
+            uploadButton.disabled = true;
+        }
+        
+        // DESBLOQUEAR DOCUMENTOS completamente
+        const container = document.getElementById('document-upload-container');
+        if (container) {
+            container.style.pointerEvents = 'auto';
+            container.style.opacity = '1';
+            
+            // Habilitar inputs de archivo
+            container.querySelectorAll('.doc-input').forEach(input => {
+                input.disabled = false;
+                input.style.pointerEvents = 'auto';
+                input.value = '';
+            });
+            
+            // Habilitar labels
+            container.querySelectorAll('label').forEach(label => {
+                label.style.pointerEvents = 'auto';
+                label.style.cursor = 'pointer';
+                label.style.opacity = '1';
+            });
+        }
+        
+        // Limpiar archivos seleccionados y estados
+        document.querySelectorAll('.doc-input').forEach(input => {
+            const statusSpan = input.parentElement.querySelector('.status');
+            const fileNameSpan = input.parentElement.querySelector('.file-name');
+            if (statusSpan) statusSpan.innerHTML = '';
+            if (fileNameSpan) {
+                fileNameSpan.textContent = '';
+                fileNameSpan.style.display = 'none';
+            }
+        });
+        
+        // Mostrar botones de selección nuevamente y ocultar botones de eliminar
+        document.querySelectorAll('.document-upload-container .select-btn').forEach(btn => {
+            btn.style.display = 'inline-block';
+            btn.textContent = 'Seleccionar';
+        });
+        document.querySelectorAll('.document-upload-container .remove-btn').forEach(btn => {
+            btn.style.display = 'none';
+        });
+    }
+    
+    // Función para manejar el envío final de la solicitud
+    function setupFinalSubmit() {
+        console.log('🔧 setupFinalSubmit ejecutándose...');
+        const finalSubmitButton = document.getElementById('final-submit-button');
+        console.log('🔘 Botón encontrado:', finalSubmitButton);
+        console.log('🔘 Botón ya tiene listener?:', finalSubmitButton?.hasEventListener);
+        
+        if (finalSubmitButton && !finalSubmitButton.hasEventListener) {
+            console.log('✅ Agregando event listener al botón de envío final');
+            finalSubmitButton.hasEventListener = true;
+            finalSubmitButton.addEventListener('click', async (e) => {
+                console.log('🚀 CLICK EN BOTÓN DE ENVÍO FINAL DETECTADO!');
+                e.preventDefault();
+                
+                // Mostrar confirmación antes del envío
+                const confirmMsg = `¿Está seguro de enviar la solicitud?\n\nEsta acción registrará:\n• Los datos del proveedor\n• Los usuarios de acceso\n• Todos los documentos cargados\n\n¿Desea continuar?`;
+                
+                if (!confirm(confirmMsg)) {
+                    return; // Usuario canceló
+                }
+                
+                console.log('Iniciando envío de solicitud completa...');
+                
+                try {
+                    // Deshabilitar botón y mostrar progreso
+                    finalSubmitButton.disabled = true;
+                    finalSubmitButton.textContent = 'Procesando...';
+                    
+                    // Mostrar mensaje de procesamiento
+                    showMessage('final-message', '⏳ Procesando su solicitud... Por favor espere.', 'info');
+                    
+                    // 1. Recopilar datos del tercero
+                    const terceroData = loadFormData(STORAGE_KEYS.TERCERO_DATA);
+                    if (!terceroData || !terceroData.nit) {
+                        throw new Error('No se encontraron los datos del proveedor. Complete primero el registro.');
+                    }
+                    
+                    // 2. Recopilar usuarios
+                    const usuariosData = collectUsers();
+                    
+                    // 3. Cargar documentos temporalmente
+                    showMessage('final-message', '📄 Cargando documentos...', 'info');
+                    await uploadDocuments();
+                    
+                    // 4. Enviar todo al servidor para registro completo
+                    showMessage('final-message', '💾 Finalizando registro...', 'info');
+                    const finalizarResponse = await fetch('/api/registro/finalizar', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            tercero_data: terceroData,
+                            usuarios_data: usuariosData
+                        })
+                    });
+                    
+                    const finalizarResult = await finalizarResponse.json();
+                    
+                    console.log('📦 Respuesta completa del servidor:', finalizarResult);
+                    console.log('✅ Success:', finalizarResult.success);
+                    console.log('📋 Data:', finalizarResult.data);
+                    console.log('🎯 Radicado:', finalizarResult.data?.radicado);
+                    
+                    if (!finalizarResult.success) {
+                        // Mostrar mensaje específico del servidor
+                        const errorMsg = finalizarResult.message || 'Error al procesar la solicitud';
+                        console.error('❌ Error del servidor:', finalizarResult);
+                        throw new Error(errorMsg);
+                    }
+                    
+                    console.log('✅ Registro finalizado exitosamente:', finalizarResult);
+                    console.log('🎯 Radicado generado:', finalizarResult.data?.radicado);
+                    
+                    // Guardar radicado en variables globales para asegurar que esté disponible
+                    if (finalizarResult.data && finalizarResult.data.radicado) {
+                        window.currentRadicado = finalizarResult.data.radicado;
+                        window.currentNit = terceroData.nit;
+                        window.currentRazonSocial = terceroData.razonSocial;
+                        console.log('💾 Variables globales guardadas:', {
+                            radicado: window.currentRadicado,
+                            nit: window.currentNit,
+                            razonSocial: window.currentRazonSocial
+                        });
+                    }
+                    
+                    // Ocultar mensaje de procesamiento
+                    const finalMessage = document.getElementById('final-message');
+                    if (finalMessage) {
+                        finalMessage.style.display = 'none';
+                    }
+                    
+                    // 5. Mostrar mensaje de éxito con el radicado INMEDIATAMENTE
+                    console.log('🎉 Llamando a showSuccessMessage con radicado:', finalizarResult.data.radicado);
+                    
+                    // Usar setTimeout para asegurar que se ejecute después de limpiar el DOM
+                    setTimeout(() => {
+                        showSuccessMessage(finalizarResult.data.radicado);
+                        console.log('✅ showSuccessMessage ejecutado');
+                    }, 200);
+                    
+                    console.log('✅ Proceso de éxito completado');
+                    
+                    // NOTA: Los datos se limpian automáticamente desde showSuccessMessage después de mostrar la información
+                    
+                } catch (error) {
+                    console.error('Error en envío final:', error);
+                    
+                    // Mostrar mensaje de error específico
+                    let errorMessage = error.message;
+                    
+                    // Personalizar mensajes comunes
+                    if (errorMessage.includes('ya existe') || errorMessage.includes('duplicado')) {
+                        errorMessage = `⚠️ ${errorMessage}\n\nPor favor, use un usuario y correo únicos que no estén registrados en el sistema.`;
+                    } else if (errorMessage.includes('Documentos incompletos')) {
+                        errorMessage = `📄 ${errorMessage}\n\n💡 Debe cargar todos los 7 documentos PDF requeridos antes de continuar.`;
+                    } else if (errorMessage.includes('documentos requeridos')) {
+                        errorMessage = `📄 ${errorMessage}\n\nAsegúrese de haber cargado todos los documentos requeridos.`;
+                    } else if (errorMessage.includes('incompletos')) {
+                        errorMessage = `📝 ${errorMessage}\n\nVerifique que todos los campos obligatorios estén completos.`;
+                    }
+                    
+                    // Mostrar el mensaje de error y hacer scroll hasta él
+                    showMessage('final-message', errorMessage, 'error');
+                    
+                    // Hacer scroll hasta el mensaje de error para que sea visible
+                    const messageElement = document.getElementById('final-message');
+                    if (messageElement) {
+                        messageElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    
+                    // Si el error es por documentos faltantes, mostrar cuántos se cargaron
+                    if (errorMessage.includes('documentos requeridos')) {
+                        const documentInputs = document.querySelectorAll('.doc-input');
+                        let cargados = 0;
+                        documentInputs.forEach(input => {
+                            if (input.files && input.files[0]) cargados++;
+                        });
+                        
+                        const detalleError = `📄 Solo se han cargado ${cargados} de 7 documentos requeridos. Por favor, cargue todos los documentos antes de continuar.`;
+                        showMessage('final-message', detalleError, 'error');
+                    }
+                    
+                    // Rehabilitar el botón para permitir reintento
+                    finalSubmitButton.disabled = false;
+                    finalSubmitButton.textContent = 'Enviar Solicitud';
+                }
+            });
+        }
+    }
+    
+    // Función para validar y recopilar usuarios (sin enviar al servidor)
+    function collectUsers() {
+        const userForms = document.querySelectorAll('.user-form-block');
+        const usuarios = [];
+        
+        userForms.forEach(form => {
+            const nombreUsuario = form.querySelector('input[placeholder*="Nombre de Usuario"]').value.trim();
+            const correo = form.querySelector('input[type="email"]').value.trim();
+            const password = form.querySelector('.password-validate').value;
+            
+            if (nombreUsuario && correo && password) {
+                usuarios.push({
+                    nombre_usuario: nombreUsuario,
+                    correo: correo,
+                    password: password
+                });
+            }
+        });
+        
+        if (usuarios.length === 0) {
+            throw new Error('Debe crear al menos un usuario de acceso');
+        }
+        
+        console.log('Usuarios recopilados:', usuarios.length);
+        return usuarios;
+    }
+    
+    // Función para cargar documentos
+    async function uploadDocuments() {
+        // Obtener NIT desde los datos guardados
+        const terceroData = loadFormData(STORAGE_KEYS.TERCERO_DATA) || {};
+        const nit = terceroData.nit || document.getElementById('validated-nit')?.value;
+        
+        if (!nit) {
+            throw new Error('No se encontró el NIT. Complete primero los datos del proveedor.');
+        }
+        
+        const formData = new FormData();
+        formData.append('nit', nit);
+        
+        const documentInputs = document.querySelectorAll('.doc-input');
+        let documentCount = 0;
+        
+        documentInputs.forEach(input => {
+            if (input.files && input.files[0]) {
+                const docDisplayName = input.dataset.docName;
+                const docTechnicalName = DOC_NAME_MAPPING[docDisplayName];
+                console.log(`Documento encontrado: ${docDisplayName} -> ${docTechnicalName} - ${input.files[0].name}`);
+                
+                if (docTechnicalName) {
+                    formData.append(`doc_${docTechnicalName}`, input.files[0]);
+                    documentCount++;
+                } else {
+                    console.error(`No se encontró mapeo para documento: ${docDisplayName}`);
+                }
+            } else {
+                console.log(`Documento faltante: ${input.dataset.docName || 'sin nombre'}`);
+            }
+        });
+        
+        console.log(`Total documentos encontrados: ${documentCount} de 7 requeridos`);
+        
+        if (documentCount < 7) {
+            throw new Error(`Debe cargar los 7 documentos requeridos. Solo se encontraron ${documentCount} documentos.`);
+        }
+        
+        const response = await fetch('/api/documentos/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        if (!result.success) {
+            throw new Error(result.message || 'Error al cargar documentos');
+        }
+        
+        console.log('Documentos cargados temporalmente:', result.data);
+        
+        // Guardar información del radicado para mostrar después
+        window.currentRadicado = result.data.radicado;
+        window.currentNit = result.data.nit;
+        window.currentRazonSocial = result.data.razon_social;
+        
+        return result.data;
+    }
+    
+    // Función para mostrar mensaje de éxito
+    function showSuccessMessage(radicadoGenerado = null) {
+        console.log('🎉 === INICIO showSuccessMessage ===');
+        console.log('🎉 Parámetro radicadoGenerado:', radicadoGenerado);
+        
+        // Obtener datos desde localStorage o variables globales
+        const terceroData = loadFormData(STORAGE_KEYS.TERCERO_DATA) || {};
+        console.log('📦 terceroData desde localStorage:', terceroData);
+        console.log('🌐 window.currentRadicado:', window.currentRadicado);
+        console.log('🌐 window.currentNit:', window.currentNit);
+        console.log('🌐 window.currentRazonSocial:', window.currentRazonSocial);
+        
+        const radicado = radicadoGenerado || window.currentRadicado || terceroData.radicado || 'N/A';
+        const nit = window.currentNit || terceroData.nit || document.getElementById('validated-nit')?.value || 'N/A';
+        const razonSocial = window.currentRazonSocial || terceroData.razonSocial || 'Empresa registrada';
+        
+        console.log('📋 Datos finales del éxito:');
+        console.log('   - radicado:', radicado);
+        console.log('   - nit:', nit);
+        console.log('   - razonSocial:', razonSocial);
+        
+        // Mensaje mejorado y más atractivo para el contenedor del radicado
+        const radicadoMessage = `
+            <div style="background: linear-gradient(145deg, #f0fdf4, #dcfce7); border: 3px solid #22c55e; border-radius: 20px; padding: 25px; margin: 20px 0; box-shadow: 0 8px 25px rgba(34, 197, 94, 0.15);">
+                <h2 style="color: #15803d; margin: 0 0 15px 0; font-size: 1.4em; text-align: center; font-weight: 600;">🎯 Su Número de Radicado</h2>
+                <div style="background-color: white; border: 2px solid #16a34a; border-radius: 12px; padding: 20px; text-align: center;">
+                    <div style="font-size: 2.8em; font-weight: bold; color: #15803d; letter-spacing: 3px; margin: 5px 0; font-family: 'Courier New', monospace; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">${radicado}</div>
+                </div>
+                <div style="color: #374151; font-size: 0.95em; margin-top: 15px; text-align: center; background-color: rgba(255,255,255,0.7); padding: 10px; border-radius: 8px;">
+                    <strong>🏢 NIT:</strong> ${nit} <br>
+                    <strong>🏪 Empresa:</strong> ${razonSocial}
+                </div>
+            </div>
+        `;
+        
+        // Insertar el mensaje en el contenedor
+        const container = document.getElementById('success-radicado-message');
+        console.log('📦 Contenedor success-radicado-message:', container);
+        
+        if (container) {
+            container.innerHTML = radicadoMessage;
+            console.log('✅ Mensaje HTML insertado en el contenedor');
+        } else {
+            console.error('❌ No se encontró el contenedor success-radicado-message');
+        }
+        
+        // Pequeño delay para asegurar que el DOM está listo, luego mostrar la vista
+        setTimeout(() => {
+            console.log('🎯 Ejecutando showView("register-success-view")');
+            showView('register-success-view');
+            console.log('✅ showView ejecutado');
+        }, 100);
+        
+        console.log('🎉 === FIN showSuccessMessage ===');
+    }
+    
+    // Función para limpiar el registro y volver al login
+    function clearRegistrationAndGoToLogin() {
+        try {
+            console.log('🧹 === INICIANDO LIMPIEZA Y RETORNO AL LOGIN ===');
+            
+            // 1. Limpiar TODOS los datos del localStorage relacionados con el registro
+            Object.values(STORAGE_KEYS).forEach(key => {
+                try {
+                    localStorage.removeItem(key);
+                    console.log(`🗑️ Limpiado: ${key}`);
+                } catch (e) {
+                    console.error(`❌ Error limpiando ${key}:`, e);
+                }
+            });
+            
+            // 2. Limpiar variables globales
+            window.currentRadicado = null;
+            window.currentNit = null;
+            window.currentRazonSocial = null;
+            window.currentTerceroId = null;
+            console.log('🗑️ Variables globales limpiadas');
+            
+            // 3. Resetear el formulario de registro completo
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.reset();
+                console.log('🗑️ Formulario de registro reseteado');
+            }
+            
+            // 4. Limpiar contenedores de usuarios dinámicos
+            const userFormsContainer = document.getElementById('user-forms-container');
+            if (userFormsContainer) {
+                userFormsContainer.innerHTML = '';
+                console.log('🗑️ Usuarios limpiados');
+            }
+            
+            // 5. Limpiar archivos cargados
+            const documentInputs = document.querySelectorAll('.doc-input');
+            documentInputs.forEach(input => {
+                input.value = '';
+                const fileLabel = input.parentElement?.querySelector('.file-label');
+                if (fileLabel) {
+                    fileLabel.textContent = 'Seleccionar archivo';
+                    fileLabel.style.backgroundColor = '';
+                }
+            });
+            console.log('🗑️ Documentos limpiados');
+            
+            // 6. Resetear mensajes de estado
+            document.querySelectorAll('.message-container').forEach(container => {
+                container.innerHTML = '';
+                container.style.display = 'none';
+            });
+            
+            // Limpiar específicamente el mensaje de éxito
+            const successRadicadoMessage = document.getElementById('success-radicado-message');
+            if (successRadicadoMessage) {
+                successRadicadoMessage.innerHTML = '';
+                console.log('🗑️ Mensaje de radicado limpiado');
+            }
+            
+            // 7. Resetear los checkmarks verdes
+            document.querySelectorAll('.status-icon').forEach(icon => {
+                icon.innerHTML = '';
+                icon.classList.remove('visible');
+            });
+            console.log('🗑️ Checkmarks limpiados');
+            
+            // 8. Desbloquear todos los campos que puedan estar bloqueados
+            if (typeof unlockProviderFields === 'function') {
+                unlockProviderFields();
+                console.log('🗑️ Campos desbloqueados');
+            }
+            
+            // 9. Resetear botones
+            const registerProviderButton = document.getElementById('register-provider-button');
+            if (registerProviderButton) {
+                registerProviderButton.textContent = 'Validar Datos del Proveedor';
+                registerProviderButton.disabled = false;
+            }
+            
+            const finalSubmitButton = document.getElementById('final-submit-button');
+            if (finalSubmitButton) {
+                finalSubmitButton.disabled = true;
+                finalSubmitButton.textContent = 'Enviar Solicitud';
+            }
+            console.log('🗑️ Botones reseteados');
+            
+            // 10. Limpiar campos del login
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.reset();
+            }
+            
+            // 11. Limpiar mensajes de error del login
+            const loginErrorMessage = document.getElementById('login-error-message');
+            if (loginErrorMessage) {
+                loginErrorMessage.style.display = 'none';
+                loginErrorMessage.innerHTML = '';
+            }
+            
+            // 12. Ocultar NIT validado y mostrar input de NIT
+            const nitValidatedSection = document.getElementById('nit-validated-section');
+            const nitInputSection = document.getElementById('nit-input-section');
+            if (nitValidatedSection) nitValidatedSection.style.display = 'none';
+            if (nitInputSection) nitInputSection.style.display = 'block';
+            
+            // 13. Resetear el formulario de verificación de NIT en registro
+            const checkNitForm = document.getElementById('checkNitForm');
+            if (checkNitForm) {
+                checkNitForm.reset();
+                const registerNitInput = document.getElementById('register-nit');
+                if (registerNitInput) registerNitInput.value = '';
+            }
+            
+            // Ocultar todas las secciones de registro
+            const sections = ['register-step1-options', 'create-section', 'no-docs-section', 'radicado-section'];
+            sections.forEach(sectionId => {
+                const section = document.getElementById(sectionId);
+                if (section) section.style.display = 'none';
+            });
+            
+            console.log('🗑️ Formularios limpiados');
+            
+            // 14. Actualizar estado del botón de login
+            if (typeof updateLoginButtonState === 'function') {
+                updateLoginButtonState();
+            }
+            
+            // 15. Volver a la vista de login
+            console.log('🔄 Cambiando a vista de login...');
+            showView('login-view');
+            
+            console.log('✅ === LIMPIEZA COMPLETADA - USUARIO EN LOGIN ===');
+            
+        } catch (error) {
+            console.error('❌ Error en clearRegistrationAndGoToLogin:', error);
+            // Aún así intentar volver al login
+            showView('login-view');
+        }
+    }
+    
+    // Función para mostrar mensaje de éxito obsoleta - mantener por compatibilidad
+    function showSuccessMessageOld(radicadoGenerado = null) {
+        setTimeout(() => {
+            clearRegistrationState();
+            
+            // Ocultar botón de limpiar progreso ya que se completó exitosamente
+            const clearBtn = document.getElementById('clearProgressBtn');
+            // Botón de limpiar eliminado - Ya no es necesario
+        }, 5000);
+    }
+</script>
+<script>
+    document.getElementById('registerForm').addEventListener('submit', async function(event) {
+        event.preventDefault(); // Evitar el envío predeterminado del formulario
+
+        const formData = new FormData(event.target);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+            const response = await fetch('/api/registro', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert('Registro exitoso');
+            } else {
+                alert(`Error: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('Error al enviar el formulario:', error);
+            alert('Ocurrió un error al procesar la solicitud.');
+        }
+    });
+</script>
+
+<!-- Modal de sesión expirada por inactividad -->
+<style>
+    #session-expired-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 9999; }
+    #session-expired-modal { background: #ffffff; color: #0f172a; width: min(420px,90vw); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); overflow: hidden; }
+    #session-expired-modal header { background: #14532d; color: #fff; padding: 12px 16px; font-weight: 600; }
+    #session-expired-modal .body { padding: 16px; line-height: 1.45; }
+    #session-expired-modal footer { padding: 14px 16px; text-align: right; background: #f8fafc; }
+    #session-expired-modal button { background: #166534; color: #fff; border: 0; padding: 10px 16px; border-radius: 8px; cursor: pointer; }
+    #session-expired-modal button:hover { background: #15803d; }
+    .hidden { display: none; }
+    .flex { display: flex; }
+    .center { align-items: center; justify-content: center; }
+    .icon { margin-right: 8px; }
+</style>
+
+<div id="session-expired-backdrop" class="hidden">
+    <div id="session-expired-modal">
+        <header>Sesión finalizada</header>
+        <div class="body">
+            <p>Tu sesión se cerró por inactividad. Por seguridad debes iniciar sesión nuevamente.</p>
+        </div>
+        <footer>
+            <button id="sessionExpiredAccept">Aceptar</button>
+        </footer>
+    </div>
+    <script>
+        (function(){
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('expired') === '1') {
+                const backdrop = document.getElementById('session-expired-backdrop');
+                if (backdrop) backdrop.classList.remove('hidden');
+                const btn = document.getElementById('sessionExpiredAccept');
+                if (btn) {
+                    btn.addEventListener('click', () => {
+                        // Limpiar bandera de la URL sin recargar
+                        const url = new URL(window.location.href);
+                        url.searchParams.delete('expired');
+                        window.history.replaceState({}, document.title, url.toString());
+                        // Permanecer en login (ya estamos aquí) o forzar vista login en SPA
+                        if (typeof showView === 'function') { try { showView('login-view'); } catch(e){} }
+                        const backdrop2 = document.getElementById('session-expired-backdrop');
+                        if (backdrop2) backdrop2.classList.add('hidden');
+                    });
+                }
+            }
+        })();
+    </script>
+</div>
+
+</body>
+</html>
+

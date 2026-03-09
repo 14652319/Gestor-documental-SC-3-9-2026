@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor Documental - Generar Relación</title>
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📋</text></svg>">
+    <style>
+        /* =============================================
+           🎨 VARIABLES CSS (LIGHT & DARK MODE)
+           ============================================= */
+        :root {
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #e1e8ed;
+            --input-bg: #ffffff;
+            --input-border: #cbd5e0;
+            --brand-green: #166534;
+            --brand-green-dark: #14532d;
+            --brand-green-light: #dcfce7;
+            --red-error: #dc2626;
+            --red-light: #fef2f2;
+            --orange-warning: #ea580c;
+            --blue-info: #2563eb;
+            --yellow-highlight: #fff3cd;
+            --yellow-text: #856404;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --border-color: #404040;
+            --input-bg: #3a3a3a;
+            --input-border: #505050;
+            --brand-green: #22c55e;
+            --brand-green-dark: #16a34a;
+            --brand-green-light: #14532d;
+            --red-error: #ef5350;
+            --red-light: #4a1f1f;
+            --orange-warning: #ff9800;
+            --blue-info: #42a5f5;
+            --yellow-highlight: #4a3f1f;
+            --yellow-text: #fbbf24;
+        }
+
+        /* =============================================
+           📐 BASE STYLES
+           ============================================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* =============================================
+           🎯 HEADER FIJO
+           ============================================= */
+        .header {
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+            color: white;
+            padding: 15px 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dark-mode-toggle {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .dark-mode-toggle:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .btn-salir {
+            background: var(--red-error);
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.2s;
+        }
+
+        .btn-salir:hover {
+            transform: scale(1.05);
+        }
+
+        /* =============================================
+           📋 CONTENEDOR PRINCIPAL
+           ============================================= */
+        .container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* =============================================
+           🎴 CARDS
+           ============================================= */
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: box-shadow 0.3s;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+        }
+
+        .card h3 {
+            color: var(--brand-green);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* =============================================
+           📝 FORMULARIOS
+           ============================================= */
+        .filtros {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        select, input[type="date"] {
+            padding: 10px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            width: 100%;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.9em;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--brand-green);
+            box-shadow: 0 0 0 3px var(--brand-green-light);
+        }
+
+        /* =============================================
+           🔘 BOTONES
+           ============================================= */
+        .btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-generar {
+            background: var(--blue-info);
+            color: white;
+        }
+
+        .btn-secundario {
+            background: var(--brand-green);
+            color: white;
+        }
+
+        .btn-secundario:hover {
+            background: var(--brand-green-dark);
+        }
+
+        .btn-filtrar {
+            background: var(--orange-warning);
+            color: white;
+        }
+
+        /* =============================================
+           📊 TABLA
+           ============================================= */
+        .actions-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .contador {
+            font-weight: 600;
+            font-size: 1em;
+            color: var(--brand-green);
+        }
+
+        .tabla-container {
+            max-height: 450px;
+            overflow: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--brand-green);
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 11px;
+        }
+
+        tbody tr {
+            transition: background-color 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: var(--brand-green-light);
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: var(--bg-color);
+        }
+
+        td:first-child, th:first-child {
+            text-align: center;
+        }
+
+        /* Factura ya relacionada - AMARILLO SUAVE */
+        .relacionada {
+            background-color: #fff3cd !important;  /* Amarillo suave */
+            border-left: 4px solid #ffc107 !important;  /* Borde amarillo */
+        }
+        
+        .relacionada:hover {
+            background-color: #ffe69c !important;  /* Amarillo más intenso en hover */
+        }
+        
+        .relacionada td {
+            color: #856404 !important;  /* Texto marrón oscuro */
+            font-weight: 600;
+        }
+
+        /* =============================================
+           📄 PAGINACIÓN
+           ============================================= */
+        .paginacion {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: var(--card-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .paginacion-info {
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+        
+        .paginacion-botones {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-pagina {
+            padding: 8px 12px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            text-decoration: none;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-pagina:hover {
+            background: var(--brand-green);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+        
+        .btn-pagina.activa {
+            background: var(--brand-green);
+            color: white;
+            font-weight: bold;
+            cursor: default;
+            pointer-events: none;
+        }
+        
+        /* =============================================
+           ⚠️ ALERTAS
+           ============================================= */
+        .alerta {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .alerta.success {
+            background-color: var(--brand-green-light);
+            color: var(--brand-green-dark);
+        }
+
+        .alerta.warning {
+            background-color: var(--red-light);
+            color: var(--red-error);
+        }
+
+        /* =============================================
+           � PAGINACIÓN
+           ============================================= */
+        .paginacion {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .paginacion-info {
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 0.95em;
+        }
+
+        .paginacion-botones {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .btn-pagina {
+            padding: 8px 14px;
+            background: var(--input-bg);
+            border: 2px solid var(--input-border);
+            border-radius: 6px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .btn-pagina:hover {
+            background: var(--brand-green);
+            color: white;
+            border-color: var(--brand-green);
+            transform: translateY(-2px);
+        }
+
+        .btn-pagina.activa {
+            background: var(--brand-green-dark);
+            color: white;
+            border-color: var(--brand-green-dark);
+            cursor: default;
+        }
+
+        /* =============================================
+           �📱 RESPONSIVE
+           ============================================= */
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+            
+            .paginacion-botones {
+                flex-direction: column;
+            }
+            
+            .btn-pagina {
+                width: 100%;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .actions-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            td, th {
+                padding: 8px;
+            }
+            
+            .filtros {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- =============================================
+         🎯 HEADER
+         ============================================= -->
+    <header class="header">
+        <h1>📋 Generar Relación de Facturas</h1>
+        <div class="header-actions">
+            <div class="user-info" title="Usuario conectado">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
+                    <path d="M12 12c2.761 0 5-2.462 5-5.5S14.761 1 12 1 7 3.462 7 6.5 9.239 12 12 12zm0 2c-4.418 0-8 3.009-8 6.72C4 22.403 5.567 23 7.5 23h9c1.933 0 3.5-.597 3.5-2.28C20 17.009 16.418 14 12 14z"/>
+                </svg>
+                <span>{{ session['usuario']|upper }}</span>
+            </div>
+            <button type="button" class="dark-mode-toggle" id="toggleModeBtn" title="Cambiar modo" onclick="toggleDarkMode()">🌙</button>
+            <button type="button" class="btn-salir" onclick="confirmarSalida()">🏠 Volver al Menú</button>
+        </div>
+    </header>
+
+    <!-- =============================================
+         📋 CONTENEDOR PRINCIPAL
+         ============================================= -->
+    <div class="container">
+        <!-- Mensajes Flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alerta {{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+
+        <!-- =============================================
+             🔍 CARD DE FILTROS
+             ============================================= -->
+        <div class="card">
+            <h3>🔍 Opciones de Filtrado</h3>
+            <form method="get" class="filtros">
+                <div class="form-group">
+                    <label>Centro Operación:</label>
+                    <select name="co">
+                        <option value="">Todos</option>
+                        {% for item in lista_co %}
+                          <option value="{{ item }}" {% if item == co %}selected{% endif %}>{{ item }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Destino:</label>
+                    <select name="destino">
+                        <option value="CONTABILIDAD" {% if destino=='CONTABILIDAD' %}selected{% endif %}>CONTABILIDAD</option>
+                        <option value="PAGOS" {% if destino=='PAGOS' %}selected{% endif %}>PAGOS</option>
+                        <option value="SUMINISTROS" {% if destino=='SUMINISTROS' %}selected{% endif %}>SUMINISTROS</option>
+                        <option value="OTRO" {% if destino=='OTRO' %}selected{% endif %}>OTRO</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Formato:</label>
+                    <select name="formato">
+                        <option value="Excel" {% if formato=='Excel' %}selected{% endif %}>📊 Excel (Físico)</option>
+                        <option value="pdf" {% if formato=='pdf' %}selected{% endif %}>📄 PDF (Físico)</option>
+                        <option value="digital" {% if formato=='digital' %}selected{% endif %}>📱 Digital (Sin Impresión)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Desde:</label>
+                    <input type="date" name="desde" value="{{ desde }}">
+                </div>
+                <div class="form-group">
+                    <label>Hasta:</label>
+                    <input type="date" name="hasta" value="{{ hasta }}">
+                </div>
+                <button type="submit" class="btn btn-filtrar">🔍 Filtrar</button>
+            </form>
+        </div>
+
+        <!-- =============================================
+             📊 CARD DE FACTURAS
+             ============================================= -->
+        <div class="card">
+            <form method="post" action="/relaciones/generar_relacion" id="form-generar">
+                <input type="hidden" name="co" value="{{ co }}">
+                <input type="hidden" name="destino" value="{{ destino }}">
+                <input type="hidden" name="formato" value="{{ formato }}">
+
+                <div class="actions-header">
+                    <button type="submit" form="form-generar" class="btn btn-generar">📥 Generar Relación</button>
+                    <button type="button" class="btn btn-secundario" onclick="irReimprimir()">🔄 Reimprimir Relación Anterior</button>
+                    <div class="contador"><span id="contador">0 documentos seleccionados</span></div>
+                </div>
+
+                <div class="tabla-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" onclick="toggleSeleccion(this)" title="Seleccionar Todo"></th>
+                                <th>NIT</th>
+                                <th>Razón Social</th>
+                                <th>C.O</th>
+                                <th>Empresa</th>
+                                <th>Prefijo</th>
+                                <th>Folio</th>
+                                <th>Fecha Expedición</th>
+                                <th>Valor</th>
+                                <th>No. Relación</th>
+                                <th>Fecha Relación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for f in facturas %}
+                              <tr class="{{ f.color }}" title="{{ f.tooltip }}">
+                                <td><input type="checkbox" name="factura" value="{{ f['clave'] }}" onchange="contarSeleccionados()"></td>
+                                <td>{{ f['nit'] }}</td>
+                                <td>{{ f['razon_social'] }}</td>
+                                <td>{{ f['co'] }}</td>
+                                <td><strong>{{ f['empresa_id'] }}</strong></td>
+                                <td>{{ f['prefijo'] }}</td>
+                                <td>{{ f['folio'] }}</td>
+                                <td>{{ f['fecha_expedicion'] }}</td>
+                                <td>${{ "{:,.0f}".format(f['valor']|float) }}</td>
+                                <td>{{ f['numero_relacion'] }}</td>
+                                <td>{{ f['fecha_relacion'] }}</td>
+                              </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- 🆕 CONTROLES DE PAGINACIÓN -->
+                {% if total_paginas and total_paginas > 1 %}
+                <div class="paginacion">
+                    <div class="paginacion-info">
+                        Mostrando página {{ pagina }} de {{ total_paginas }} ({{ total_facturas }} facturas totales)
+                    </div>
+                    <div class="paginacion-botones">
+                        {% if pagina > 1 %}
+                        <a href="?desde={{ desde }}&hasta={{ hasta }}&co={{ co }}&destino={{ destino }}&formato={{ formato }}&pagina=1" class="btn-pagina">« Primera</a>
+                        <a href="?desde={{ desde }}&hasta={{ hasta }}&co={{ co }}&destino={{ destino }}&formato={{ formato }}&pagina={{ pagina - 1 }}" class="btn-pagina">‹ Anterior</a>
+                        {% endif %}
+                        
+                        <!-- Números de página (mostrar ±2 páginas alrededor de la actual) -->
+                        {% for p in range([1, pagina - 2]|max, [total_paginas, pagina + 2]|min + 1) %}
+                          {% if p == pagina %}
+                          <span class="btn-pagina activa">{{ p }}</span>
+                          {% else %}
+                          <a href="?desde={{ desde }}&hasta={{ hasta }}&co={{ co }}&destino={{ destino }}&formato={{ formato }}&pagina={{ p }}" class="btn-pagina">{{ p }}</a>
+                          {% endif %}
+                        {% endfor %}
+                        
+                        {% if pagina < total_paginas %}
+                        <a href="?desde={{ desde }}&hasta={{ hasta }}&co={{ co }}&destino={{ destino }}&formato={{ formato }}&pagina={{ pagina + 1 }}" class="btn-pagina">Siguiente ›</a>
+                        <a href="?desde={{ desde }}&hasta={{ hasta }}&co={{ co }}&destino={{ destino }}&formato={{ formato }}&pagina={{ total_paginas }}" class="btn-pagina">Última »</a>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+                
+            </form>
+        </div>
+    </div>
+
+    <!-- =============================================
+         💻 JAVASCRIPT
+         ============================================= -->
+    <!-- 🥯 TOAST UI: aviso no intrusivo -->
+    <style>
+        .toast-notice {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            background: var(--brand-green-dark, #166534);
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 10px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+        .toast-notice.show {
+            opacity: 0.98;
+            transform: translateY(0);
+        }
+    </style>
+    <div id="toastExcel" class="toast-notice" role="status" aria-live="polite" aria-atomic="true" style="display:none;"></div>
+    <script>
+        // --- TOAST HELPER ---
+        function showToast(msg) {
+            const t = document.getElementById('toastExcel');
+            if (!t) return;
+            t.textContent = msg;
+            t.style.display = 'block';
+            requestAnimationFrame(() => t.classList.add('show'));
+        }
+        function hideToast() {
+            const t = document.getElementById('toastExcel');
+            if (!t) return;
+            t.classList.remove('show');
+            setTimeout(() => { t.style.display = 'none'; }, 200);
+        }
+        // --- CONTADOR DE FACTURAS SELECCIONADAS ---
+        function contarSeleccionados() {
+            const seleccionados = document.querySelectorAll('input[name="factura"]:checked').length;
+            document.getElementById("contador").innerText = `${seleccionados} documentos seleccionados`;
+        }
+
+        // --- SELECCIONAR/DESELECCIONAR TODAS ---
+        function toggleSeleccion(check) {
+            const todos = document.querySelectorAll('input[name="factura"]');
+            todos.forEach(c => c.checked = check.checked);
+            contarSeleccionados();
+        }
+
+        // --- CONFIRMAR SALIDA ---
+        function confirmarSalida() {
+            window.location.href = "/dashboard";
+        }
+
+        // --- IR A REIMPRIMIR RELACIÓN ---
+        function irReimprimir() {
+            window.location.href = "{{ url_for('relaciones.reimprimir_relacion') }}";
+        }
+
+        // --- VALIDAR ENVÍO DEL FORMULARIO CON DETECCIÓN DE RELACIONADAS ---
+        function validarEnvio() {
+            const seleccionados = document.querySelectorAll('input[name="factura"]:checked');
+            
+            if (seleccionados.length === 0) {
+                alert("❌ Debe seleccionar al menos una factura para generar la relación.");
+                return false;
+            }
+
+            // 🆕 VERIFICAR SI HAY FACTURAS YA RELACIONADAS
+            let facturasRelacionadas = [];
+            seleccionados.forEach(checkbox => {
+                const fila = checkbox.closest('tr');
+                if (fila.classList.contains('relacionada')) {
+                    const nit = fila.cells[1].textContent;
+                    const prefijo = fila.cells[4].textContent;
+                    const folio = fila.cells[5].textContent;
+                    const numeroRelacion = fila.cells[8].textContent;
+                    facturasRelacionadas.push(`${prefijo}-${folio} (NIT: ${nit}) ya está en ${numeroRelacion}`);
+                }
+            });
+
+            if (facturasRelacionadas.length > 0) {
+                let mensaje = "⚠️ ATENCIÓN: Has seleccionado facturas que YA TIENEN RELACIÓN:\n\n";
+                facturasRelacionadas.forEach(f => {
+                    mensaje += `• ${f}\n`;
+                });
+                mensaje += "\n❌ NO puedes generar una nueva relación con estas facturas.\n";
+                mensaje += "✅ Por favor, utiliza la opción 'Reimprimir Relación' si necesitas una copia.";
+                
+                alert(mensaje);
+                return false;  // 🆕 BLOQUEAR ENVÍO
+            }
+
+            return true;
+        }
+
+        // --- LIMPIAR SELECCIÓN DE FACTURAS ---
+        function limpiarSeleccion() {
+            const master = document.querySelector('th input[type="checkbox"]');
+            if (master) master.checked = false;
+            document.querySelectorAll('input[name="factura"]').forEach(cb => cb.checked = false);
+        }
+
+        // --- MODO OSCURO ---
+        function toggleDarkMode() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            const btn = document.getElementById('toggleModeBtn');
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            // Cambiar emoji del botón
+            btn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // --- INICIALIZACIÓN ---
+        document.addEventListener('DOMContentLoaded', function() {
+            // Restaurar tema guardado
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+            const btn = document.getElementById('toggleModeBtn');
+            
+            document.documentElement.setAttribute('data-theme', theme);
+            btn.textContent = theme === 'dark' ? '☀️' : '🌙';
+            
+            // Inicializar contador
+            contarSeleccionados();
+
+            // 🆕 Manejar envío para refrescar y limpiar tras generar Excel/PDF
+            const form = document.getElementById('form-generar');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    // Validación centralizada
+                    if (!validarEnvio()) {
+                        e.preventDefault();
+                        return false;
+                    }
+
+                    const formatoInput = document.querySelector('input[name="formato"]');
+                    const formato = (formatoInput ? formatoInput.value : '').toLowerCase();
+
+                    // Para formatos físicos (Excel/PDF), abrir en nueva pestaña y limpiar/recargar la página actual
+                    if (formato && formato !== 'digital') {
+                        showToast('📊 Descargando Excel… refrescando la página');
+                        this.setAttribute('target', '_blank');
+                        // Dar tiempo a que inicie la descarga en la pestaña nueva
+                        setTimeout(() => {
+                            limpiarSeleccion();
+                            contarSeleccionados();
+                            // Refrescar la página para recargar estados y desmarcar visualmente
+                            window.location.reload();
+                        }, 800);
+                    } else {
+                        // En modo digital, trabajar en la misma pestaña
+                        this.removeAttribute('target');
+                    }
+                });
+            }
+        });
+    </script>
+
+    <!-- ✅ INACTIVITY WARNING MODAL (25 MIN CON ADVERTENCIA 1 MIN ANTES) -->
+    {% include '_inactivity_warning.html' %}
+
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+    {% include '_session_expired_interceptor.html' %}
+  </body>
+  </html>

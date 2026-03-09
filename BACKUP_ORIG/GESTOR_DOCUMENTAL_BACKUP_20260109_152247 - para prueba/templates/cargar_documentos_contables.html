@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archivo Digital - Cargar Documento</title>
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📁</text></svg>">
+    <style>
+        /* =============================================
+           🎨 VARIABLES CSS (COLORES INSTITUCIONALES)
+           ============================================= */
+        :root {
+            --bg-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #2c3e50;
+            --border-color: #e1e8ed;
+            --input-bg: #ffffff;
+            --input-border: #cbd5e0;
+            --brand-green: #166534;
+            --brand-green-dark: #14532d;
+            --brand-green-light: #dcfce7;
+            --red-error: #dc2626;
+            --blue-info: #2563eb;
+            --yellow-warning: #eab308;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --text-color: #e0e0e0;
+            --border-color: #404040;
+            --input-bg: #3a3a3a;
+            --input-border: #505050;
+            --brand-green: #22c55e;
+            --brand-green-dark: #16a34a;
+            --brand-green-light: #14532d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* =============================================
+           🎯 HEADER FIJO CON USUARIO
+           ============================================= */
+        .header {
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+            color: white;
+            padding: 15px 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .header h1 {
+            font-size: 1.5em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dark-mode-toggle {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: background 0.3s;
+        }
+
+        .dark-mode-toggle:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .btn-salir, .btn-volver {
+            background: var(--red-error);
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: transform 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-volver {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .btn-salir:hover, .btn-volver:hover {
+            transform: scale(1.05);
+        }
+
+        /* =============================================
+           📋 CONTENEDOR PRINCIPAL
+           ============================================= */
+        .container {
+            flex: 1;
+            overflow-y: auto; /* ✅ Scroll general de la página */
+            overflow-x: hidden;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 900px;
+            overflow: visible; /* Sin scroll en la card */
+            height: auto; /* Altura automática */
+        }
+
+        .card h3 {
+            color: var(--brand-green);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* =============================================
+           📝 FORMULARIO
+           ============================================= */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-weight: 600;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            color: var(--text-color);
+        }
+
+        label .required {
+            color: var(--red-error);
+            margin-left: 3px;
+        }
+
+        input, select, textarea {
+            padding: 10px;
+            background-color: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 8px;
+            color: var(--text-color);
+            font-size: 0.95em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--brand-green);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* =============================================
+           📎 ZONA DE CARGA DE ARCHIVOS
+           ============================================= */
+        .upload-section {
+            margin-top: 20px;
+            padding: 20px;
+            background: var(--brand-green-light);
+            border-radius: 12px;
+            border: 2px dashed var(--brand-green);
+        }
+
+        .upload-section h4 {
+            color: var(--brand-green-dark);
+            margin-bottom: 15px;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background: var(--brand-green);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .file-label:hover {
+            background: var(--brand-green-dark);
+        }
+
+        .file-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+
+        .adjuntos-list {
+            margin-top: 15px;
+            max-height: 400px; /* Altura máxima para scroll */
+            overflow-y: auto;  /* Scroll vertical automático */
+            overflow-x: hidden;
+            padding-right: 10px; /* Espacio para scrollbar */
+        }
+
+        /* Scrollbar personalizado para lista de anexos */
+        .adjuntos-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .adjuntos-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .adjuntos-list::-webkit-scrollbar-thumb {
+            background: var(--brand-green);
+            border-radius: 10px;
+        }
+
+        .adjuntos-list::-webkit-scrollbar-thumb:hover {
+            background: var(--brand-green-dark);
+        }
+
+        .adjunto-item {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            padding: 12px;
+            background: white;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            gap: 6px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .adjunto-item .adjunto-info {
+            font-size: 0.9em;
+            color: #374151;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .adjunto-item .adjunto-label-text {
+            font-size: 0.8em;
+            color: var(--brand-green-dark);
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .adjunto-item .adjunto-label {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9em;
+            margin-bottom: 4px;
+        }
+
+        .adjunto-item .adjunto-label:focus {
+            outline: none;
+            border-color: var(--brand-green);
+        }
+
+        .adjunto-item button {
+            background: var(--red-error);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            width: 100%;
+            margin-top: 5px;
+        }
+
+        .adjunto-item button:hover {
+            background: #dc2626;
+        }
+
+        /* =============================================
+           🔘 BOTONES
+           ============================================= */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--brand-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--brand-green-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* =============================================
+           📱 RESPONSIVE
+           ============================================= */
+        @media (max-width: 768px) {
+            .header {
+                padding: 10px 15px;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .header h1 {
+                font-size: 1.2em;
+            }
+
+            .header-actions {
+                flex-direction: column;
+                gap: 5px;
+                width: 100%;
+            }
+
+            .btn-volver, .btn-salir {
+                width: 100%;
+                text-align: center;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .upload-section {
+                padding: 15px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            /* Adjuntos responsivos en móvil */
+            .adjuntos-list {
+                max-height: 250px; /* Menos altura en móviles */
+            }
+
+            .adjunto-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+
+            .adjunto-item .adjunto-info {
+                font-size: 0.85em;
+            }
+
+            .adjunto-item .adjunto-label {
+                width: 100%;
+            }
+
+            .adjunto-item button {
+                width: 100%;
+            }
+        }
+
+        /* =============================================
+           ✅ MENSAJES DE ALERTA
+           ============================================= */
+        .alert {
+            padding: 12px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border-left: 4px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border-left: 4px solid #ef4444;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border-left: 4px solid #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <!-- =============================================
+         🎯 HEADER FIJO
+         ============================================= -->
+    <div class="header">
+        <h1>📁 Archivo Digital - Cargar Documento</h1>
+        <div class="header-actions">
+            <span class="user-info">
+                👤 <span id="nombreUsuario">{{ session.get('usuario', 'Usuario') }}</span>
+            </span>
+            <button class="dark-mode-toggle" id="toggleModeBtn" onclick="toggleTheme()">🌙</button>
+            <a href="/dashboard" class="btn-volver">🔙 Dashboard</a>
+            <button class="btn-salir" onclick="cerrarSesion()">🏠 Volver al Menú</button>
+        </div>
+    </div>
+
+    <!-- =============================================
+         📋 CONTENIDO PRINCIPAL
+         ============================================= -->
+    <div class="container">
+        <div class="card">
+            <!-- Alertas -->
+            <div id="alertSuccess" class="alert alert-success"></div>
+            <div id="alertError" class="alert alert-error"></div>
+            <div id="alertInfo" class="alert alert-info"></div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--border-color);">
+                <h3 style="margin: 0;">📄 Cargar Nuevo Documento Contable</h3>
+                
+                <!-- =============================================
+                     🔘 BOTONES DE ACCIÓN (PARTE SUPERIOR)
+                     ============================================= -->
+                <div class="btn-group" style="margin: 0;">
+                    <button type="button" class="btn btn-secondary" onclick="limpiarFormulario()">
+                        🔄 Limpiar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btnGuardar" onclick="guardarDocumento(event)">
+                        💾 Guardar Documento
+                    </button>
+                </div>
+            </div>
+
+            <form id="formCargarDocumento">
+                <div class="form-grid">
+                    <!-- Tipo de Documento -->
+                    <div class="form-group">
+                        <label>Tipo de Documento <span class="required">*</span></label>
+                        <select id="tipoDocumento" name="tipo_documento_id" required>
+                            <option value="">Seleccione...</option>
+                            <!-- Se llena dinámicamente desde BD -->
+                        </select>
+                    </div>
+
+                    <!-- Centro de Operación -->
+                    <div class="form-group">
+                        <label>Centro de Operación (C.O.) <span class="required">*</span></label>
+                        <select id="centroOperacion" name="centro_operacion_id" required>
+                            <option value="">Seleccione...</option>
+                            <!-- Se llena dinámicamente desde BD -->
+                        </select>
+                    </div>
+
+                    <!-- Consecutivo -->
+                    <div class="form-group">
+                        <label>Consecutivo <span class="required">*</span></label>
+                        <input type="text" id="consecutivo" name="consecutivo" 
+                               placeholder="Ej: 00000123" required
+                               pattern="[0-9]+" maxlength="20"
+                               onblur="validarConsecutivo()">
+                        <small style="color: var(--brand-green); display: none;" id="consecutivoOk">✅ Disponible</small>
+                        <small style="color: var(--red-error); display: none;" id="consecutivoError">❌ Ya existe</small>
+                    </div>
+
+                    <!-- Fecha del Documento -->
+                    <div class="form-group">
+                        <label>Fecha del Documento <span class="required">*</span></label>
+                        <input type="date" id="fechaDocumento" name="fecha_documento" required>
+                    </div>
+
+                    <!-- Empresa -->
+                    <div class="form-group">
+                        <label>Empresa <span class="required">*</span></label>
+                        <select id="empresa" name="empresa" required>
+                            <option value="">Seleccione...</option>
+                            <!-- Se llena dinámicamente desde BD -->
+                        </select>
+                    </div>
+
+                    <!-- Nombre del Archivo (solo lectura - se genera automáticamente) -->
+                    <div class="form-group">
+                        <label>Nombre del Archivo (Generado Automáticamente)</label>
+                        <input type="text" id="nombreArchivo" name="nombre_archivo" 
+                               placeholder="Se generará al seleccionar Tipo, Centro y Consecutivo" readonly
+                               style="background-color: #e8f5e9; cursor: default; color: #2e7d32; font-weight: 500;">
+                    </div>
+
+                    <!-- Observaciones -->
+                    <div class="form-group full-width">
+                        <label>Observaciones</label>
+                        <textarea id="observaciones" name="observaciones" 
+                                  placeholder="Comentarios adicionales sobre el documento..."></textarea>
+                    </div>
+                </div>
+
+                <!-- =============================================
+                     📎 SECCIÓN DE CARGA DE ARCHIVOS
+                     ============================================= -->
+                <div class="upload-section">
+                    <h4>📎 Archivo Principal (PDF) <span class="required">*</span></h4>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="archivoPrincipal" name="archivo_principal" 
+                               accept=".pdf" required onchange="mostrarArchivoPrincipal()">
+                        <label for="archivoPrincipal" class="file-label">
+                            📄 Seleccionar PDF Principal
+                        </label>
+                    </div>
+                    <div id="archivoPrincipalInfo" class="file-info" style="display: none;"></div>
+
+                    <h4 style="margin-top: 20px;">📎 Adjuntos Opcionales (Excel, Imágenes)</h4>
+                    <div class="file-input-wrapper">
+                        <input type="file" id="adjuntos" name="adjuntos[]" 
+                               accept=".pdf,.xlsx,.xls,.jpg,.jpeg,.png" 
+                               multiple onchange="agregarAdjuntos()">
+                        <label for="adjuntos" class="file-label">
+                            📎 Agregar Adjuntos
+                        </label>
+                    </div>
+                    <div id="adjuntosList" class="adjuntos-list"></div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =============================================
+         💻 JAVASCRIPT
+         ============================================= -->
+    <script>
+        let adjuntosArray = [];
+
+        // ===== INICIALIZACIÓN =====
+        document.addEventListener('DOMContentLoaded', () => {
+            cargarOpcionesIniciales();
+            setFechaHoy();
+            cargarTemaGuardado();
+            
+            // Agregar listeners para generar nombre automático
+            document.getElementById('tipoDocumento').addEventListener('change', generarNombreArchivo);
+            document.getElementById('centroOperacion').addEventListener('change', generarNombreArchivo);
+            document.getElementById('consecutivo').addEventListener('input', generarNombreArchivo);
+        });
+
+        // ===== GENERAR NOMBRE DE ARCHIVO AUTOMÁTICAMENTE =====
+        function generarNombreArchivo() {
+            const selectTipo = document.getElementById('tipoDocumento');
+            const selectCentro = document.getElementById('centroOperacion');
+            const consecutivo = document.getElementById('consecutivo').value;
+            
+            // Obtener siglas del tipo seleccionado
+            const tipoSiglas = selectTipo.options[selectTipo.selectedIndex]?.textContent || '';
+            
+            // Obtener código del centro (formato: "002 - SC PALMITEX")
+            const centroTexto = selectCentro.options[selectCentro.selectedIndex]?.textContent || '';
+            const codigoCentro = centroTexto.split(' - ')[0] || '';
+            
+            // Generar nombre si todos los campos están llenos
+            if (tipoSiglas && codigoCentro && consecutivo) {
+                // Rellenar consecutivo con ceros a la izquierda (8 dígitos)
+                const consecutivoFormateado = consecutivo.padStart(8, '0');
+                const nombreGenerado = `${codigoCentro}-${tipoSiglas}-${consecutivoFormateado}`;
+                document.getElementById('nombreArchivo').value = nombreGenerado;
+            } else {
+                document.getElementById('nombreArchivo').value = '';
+            }
+        }
+
+        // ===== CARGAR OPCIONES DESDE BD =====
+        async function cargarOpcionesIniciales() {
+            try {
+                const response = await fetch('/api/notas/dashboard/opciones');
+                const data = await response.json();
+
+                if (data.success) {
+                    // Llenar selector de Tipos de Documento (solo siglas)
+                    const selectTipo = document.getElementById('tipoDocumento');
+                    data.tipos.forEach(tipo => {
+                        const option = document.createElement('option');
+                        option.value = tipo.id;
+                        option.textContent = tipo.siglas; // Solo siglas
+                        selectTipo.appendChild(option);
+                    });
+
+                    // Llenar selector de Centros de Operación
+                    const selectCentro = document.getElementById('centroOperacion');
+                    data.centros.forEach(centro => {
+                        const option = document.createElement('option');
+                        option.value = centro.id;
+                        option.textContent = `${centro.codigo} - ${centro.nombre}`;
+                        selectCentro.appendChild(option);
+                    });
+
+                    // Llenar selector de Empresas
+                    const selectEmpresa = document.getElementById('empresa');
+                    data.empresas.forEach(empresa => {
+                        const option = document.createElement('option');
+                        option.value = empresa.sigla;
+                        option.textContent = `${empresa.sigla} - ${empresa.nombre}`;
+                        selectEmpresa.appendChild(option);
+                    });
+                } else {
+                    mostrarAlerta('error', 'No se pudieron cargar las opciones de formulario');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('error', 'Error al cargar opciones del formulario');
+            }
+        }
+
+        // ===== VALIDAR CONSECUTIVO ÚNICO =====
+        async function validarConsecutivo() {
+            const tipoId = document.getElementById('tipoDocumento').value;
+            const centroId = document.getElementById('centroOperacion').value;
+            const consecutivo = document.getElementById('consecutivo').value;
+
+            if (!tipoId || !centroId || !consecutivo) return;
+
+            try {
+                const response = await fetch('/api/notas/cargar/validar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tipo_documento_id: tipoId,
+                        centro_operacion_id: centroId,
+                        consecutivo: consecutivo
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('consecutivoOk').style.display = 'block';
+                    document.getElementById('consecutivoError').style.display = 'none';
+                } else {
+                    document.getElementById('consecutivoOk').style.display = 'none';
+                    document.getElementById('consecutivoError').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // ===== MOSTRAR ARCHIVO PRINCIPAL =====
+        function mostrarArchivoPrincipal() {
+            const input = document.getElementById('archivoPrincipal');
+            const info = document.getElementById('archivoPrincipalInfo');
+
+            if (input.files.length > 0) {
+                const file = input.files[0];
+                const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                info.innerHTML = `<strong>📄 ${file.name}</strong> (${sizeMB} MB)`;
+                info.style.display = 'block';
+            } else {
+                info.style.display = 'none';
+            }
+        }
+
+        // ===== AGREGAR ADJUNTOS =====
+        function agregarAdjuntos() {
+            const input = document.getElementById('adjuntos');
+            const list = document.getElementById('adjuntosList');
+
+            Array.from(input.files).forEach(file => {
+                if (!adjuntosArray.find(a => a.file && a.file.name === file.name)) {
+                    // Generar etiqueta por defecto: ANEXO_{nombre_sin_extension}
+                    const nombreSinExt = file.name.replace(/\.[^/.]+$/, '');
+                    const etiquetaDefault = `ANEXO_${nombreSinExt}`;
+                    
+                    // Guardar archivo con su etiqueta
+                    adjuntosArray.push({
+                        file: file,
+                        label: etiquetaDefault
+                    });
+
+                    const item = document.createElement('div');
+                    item.className = 'adjunto-item';
+                    item.innerHTML = `
+                        <span class="adjunto-info">📎 ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                        <label class="adjunto-label-text">Etiqueta corta para renombrar:</label>
+                        <input type="text" class="adjunto-label" value="${etiquetaDefault}" 
+                               placeholder="Etiqueta del anexo" 
+                               onchange="actualizarEtiquetaAdjunto('${file.name}', this.value)"
+                               oninput="protegerPrefijoANEXO(this, event)"
+                               onkeydown="protegerPrefijoANEXO(this, event)"
+                               onfocus="enfocarEtiqueta(this)"
+                               onclick="enfocarEtiqueta(this)">
+                        <button type="button" onclick="eliminarAdjunto('${file.name}')">❌ Eliminar</button>
+                    `;
+                    list.appendChild(item);
+                }
+            });
+
+            input.value = '';
+        }
+
+        // ===== ACTUALIZAR ETIQUETA DE ADJUNTO =====
+        function actualizarEtiquetaAdjunto(nombreArchivo, nuevaEtiqueta) {
+            const adjunto = adjuntosArray.find(a => a.file && a.file.name === nombreArchivo);
+            if (adjunto) {
+                adjunto.label = nuevaEtiqueta;
+            }
+        }
+
+        // ===== PROTEGER PREFIJO "ANEXO_" EN ETIQUETAS =====
+        function protegerPrefijoANEXO(input, event) {
+            const prefijo = "ANEXO_";
+            const valor = input.value;
+            
+            // En keydown, prevenir edición antes del prefijo
+            if (event && event.type === 'keydown') {
+                const cursorPos = input.selectionStart;
+                const cursorEnd = input.selectionEnd;
+                const key = event.key;
+                
+                // Si el cursor está en la zona del prefijo
+                if (cursorPos < prefijo.length) {
+                    // Prevenir Backspace, Delete y escritura
+                    if (key === 'Backspace' || key === 'Delete' || (key.length === 1 && !event.ctrlKey && !event.metaKey)) {
+                        event.preventDefault();
+                        input.setSelectionRange(prefijo.length, prefijo.length);
+                        return;
+                    }
+                }
+                
+                // Si intenta borrar hacia atrás desde justo después del prefijo
+                if (key === 'Backspace' && cursorPos === prefijo.length && cursorEnd === prefijo.length) {
+                    event.preventDefault();
+                    return;
+                }
+                
+                // Si tiene selección que incluye el prefijo
+                if ((key === 'Backspace' || key === 'Delete') && cursorPos < prefijo.length && cursorEnd > cursorPos) {
+                    event.preventDefault();
+                    // Mantener la selección después del prefijo
+                    const nuevoInicio = Math.max(cursorPos, prefijo.length);
+                    input.setSelectionRange(nuevoInicio, cursorEnd);
+                    return;
+                }
+            }
+            
+            // En input, validar que siempre empiece con el prefijo
+            if (event && event.type === 'input') {
+                if (!valor.startsWith(prefijo)) {
+                    // Restaurar prefijo y mantener el resto del texto
+                    const textoSinPrefijo = valor.replace(prefijo, '');
+                    input.value = prefijo + textoSinPrefijo;
+                }
+            }
+        }
+        
+        // ===== EVENTO PARA CLICK EN ETIQUETA (MOVER CURSOR) =====
+        function enfocarEtiqueta(input) {
+            const prefijo = "ANEXO_";
+            setTimeout(() => {
+                const cursorPos = input.selectionStart;
+                const cursorEnd = input.selectionEnd;
+                
+                // Si el cursor o la selección está antes del prefijo, moverlo después
+                if (cursorPos < prefijo.length) {
+                    input.setSelectionRange(prefijo.length, Math.max(prefijo.length, cursorEnd));
+                }
+            }, 0);
+        }
+
+        // ===== ELIMINAR ADJUNTO =====
+        function eliminarAdjunto(nombre) {
+            adjuntosArray = adjuntosArray.filter(a => !(a.file && a.file.name === nombre));
+            const list = document.getElementById('adjuntosList');
+            list.innerHTML = '';
+            adjuntosArray.forEach(adjunto => {
+                const file = adjunto.file;
+                const item = document.createElement('div');
+                item.className = 'adjunto-item';
+                item.innerHTML = `
+                    <span class="adjunto-info">📎 ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                    <label class="adjunto-label-text">Etiqueta corta para renombrar:</label>
+                    <input type="text" class="adjunto-label" value="${adjunto.label}" 
+                           placeholder="Etiqueta del anexo"
+                           onchange="actualizarEtiquetaAdjunto('${file.name}', this.value)"
+                           oninput="protegerPrefijoANEXO(this, event)"
+                           onkeydown="protegerPrefijoANEXO(this, event)"
+                           onfocus="enfocarEtiqueta(this)"
+                           onclick="enfocarEtiqueta(this)">
+                    <button type="button" onclick="eliminarAdjunto('${file.name}')">❌ Eliminar</button>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        // ===== GUARDAR DOCUMENTO =====
+        async function guardarDocumento(event) {
+            if (event) event.preventDefault();
+
+            const formData = new FormData();
+
+            // Agregar campos del formulario
+            formData.append('tipo_documento_id', document.getElementById('tipoDocumento').value);
+            formData.append('centro_operacion_id', document.getElementById('centroOperacion').value);
+            formData.append('consecutivo', document.getElementById('consecutivo').value);
+            formData.append('fecha_documento', document.getElementById('fechaDocumento').value);
+            formData.append('empresa', document.getElementById('empresa').value);
+            formData.append('nombre_archivo', document.getElementById('nombreArchivo').value);
+            formData.append('observaciones', document.getElementById('observaciones').value);
+            formData.append('created_by', '{{ session.get("usuario", "sistema") }}');
+
+            // Agregar archivo principal
+            const archivoPrincipal = document.getElementById('archivoPrincipal').files[0];
+            if (!archivoPrincipal) {
+                mostrarAlerta('error', '❌ Debe seleccionar un archivo principal');
+                return;
+            }
+            formData.append('archivo_principal', archivoPrincipal);
+
+            // Agregar adjuntos con sus etiquetas personalizadas
+            adjuntosArray.forEach(adjunto => {
+                formData.append('adjuntos[]', adjunto.file);
+                formData.append('etiquetas[]', adjunto.label); // Etiqueta personalizada
+            });
+
+            try {
+                const btnGuardar = document.getElementById('btnGuardar');
+                btnGuardar.disabled = true;
+                btnGuardar.textContent = '⏳ Cargando...';
+
+                const response = await fetch('/api/notas/cargar/subir', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    mostrarAlerta('success', `✅ ${data.message}\n📁 Carpeta: ${data.data.ruta_carpeta}`);
+                    setTimeout(() => {
+                        window.location.href = '/archivo_digital/visor';
+                    }, 2000);
+                } else {
+                    mostrarAlerta('error', `❌ ${data.message}`);
+                    btnGuardar.disabled = false;
+                    btnGuardar.textContent = '💾 Guardar Documento';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                mostrarAlerta('error', '❌ Error al cargar documento');
+                document.getElementById('btnGuardar').disabled = false;
+                document.getElementById('btnGuardar').textContent = '💾 Guardar Documento';
+            }
+        }
+
+        // ===== ENVIAR FORMULARIO (Legacy - mantener por compatibilidad) =====
+        document.getElementById('formCargarDocumento').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await guardarDocumento(e);
+        });
+
+        // ===== UTILIDADES =====
+        function setFechaHoy() {
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fechaDocumento').value = hoy;
+        }
+
+        function limpiarFormulario() {
+            document.getElementById('formCargarDocumento').reset();
+            adjuntosArray = [];
+            document.getElementById('adjuntosList').innerHTML = '';
+            document.getElementById('archivoPrincipalInfo').style.display = 'none';
+            document.getElementById('consecutivoOk').style.display = 'none';
+            document.getElementById('consecutivoError').style.display = 'none';
+            setFechaHoy();
+        }
+
+        function mostrarAlerta(tipo, mensaje) {
+            const alertId = tipo === 'success' ? 'alertSuccess' : (tipo === 'error' ? 'alertError' : 'alertInfo');
+            const alert = document.getElementById(alertId);
+            alert.textContent = mensaje;
+            alert.classList.add('show');
+            setTimeout(() => alert.classList.remove('show'), 5000);
+        }
+
+        // ===== MODO OSCURO =====
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme-archivo-digital', newTheme);
+            document.getElementById('toggleModeBtn').textContent = newTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        function cargarTemaGuardado() {
+            const savedTheme = localStorage.getItem('theme-archivo-digital') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('toggleModeBtn').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+        }
+
+        // ===== CERRAR SESIÓN =====
+        async function cerrarSesion() {
+            window.location.href = '/dashboard';
+        }
+    </script>
+
+    <!-- ✅ MODAL DE INACTIVIDAD (25 MIN) -->
+    {% include '_inactivity_warning.html' %}
+
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

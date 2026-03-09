@@ -1,0 +1,1352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Tercero - Gestión Avanzada</title>
+    <style>
+        /* ========================================================================= */
+        /*                     COLORES INSTITUCIONALES                              */
+        /* ========================================================================= */
+        :root {
+            --primary-green: #166534;
+            --primary-green-dark: #14532d;
+            --primary-green-light: #22c55e;
+            --secondary-orange: #f97316;
+            --secondary-orange-dark: #ea580c;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-yellow: #eab308;
+            --success-green: #10b981;
+            --warning-orange: #f59e0b;
+            --danger-red: #ef4444;
+            --info-blue: #06b6d4;
+            --dark-gray: #374151;
+            --light-gray: #f3f4f6;
+            --white: #ffffff;
+            --border-color: #d1d5db;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--light-gray) 0%, #e5e7eb 100%);
+            min-height: 100vh;
+            color: var(--dark-gray);
+        }
+
+        /* ========================================================================= */
+        /*                              HEADER FIJO                                 */
+        /* ========================================================================= */
+        .header-fijo {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, var(--warning-orange) 0%, var(--secondary-orange-dark) 100%);
+            padding: 1rem 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-titulo h1 {
+            color: var(--white);
+            font-size: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-header {
+            background: var(--primary-green);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-header:hover {
+            background: var(--primary-green-dark);
+            transform: translateY(-1px);
+        }
+
+        /* ========================================================================= */
+        /*                         CONTENEDOR PRINCIPAL                             */
+        /* ========================================================================= */
+        .contenedor-principal {
+            margin-top: 80px;
+            padding: 2rem;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ========================================================================= */
+        /*                           INFORMACIÓN ACTUAL                             */
+        /* ========================================================================= */
+        .info-actual {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .info-header {
+            background: linear-gradient(135deg, var(--info-blue) 0%, #0891b2 100%);
+            color: var(--white);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-body {
+            padding: 1.5rem 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .info-campo {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+        }
+
+        .info-valor {
+            font-size: 1rem;
+            color: var(--dark-gray);
+            font-weight: 500;
+        }
+
+        .estado-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .estado-activo {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success-green);
+        }
+
+        .estado-inactivo {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger-red);
+        }
+
+        /* ========================================================================= */
+        /*                              FORMULARIO                                  */
+        /* ========================================================================= */
+        .formulario-container {
+            background: var(--white);
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .formulario-header {
+            background: linear-gradient(135deg, var(--warning-orange) 0%, var(--secondary-orange-dark) 100%);
+            color: var(--white);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .formulario-titulo {
+            font-size: 1.3rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .progreso-pasos {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .paso {
+            padding: 0.25rem 0.75rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .paso.activo {
+            background: var(--primary-green);
+        }
+
+        .formulario-body {
+            padding: 2rem;
+        }
+
+        /* ========================================================================= */
+        /*                              SECCIONES                                   */
+        /* ========================================================================= */
+        .seccion {
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .seccion.activa {
+            display: block;
+        }
+
+        .seccion-titulo {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--warning-orange);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .grid-campos {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .campo-grupo {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .campo-label {
+            font-weight: 600;
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .campo-label.requerido::after {
+            content: '*';
+            color: var(--danger-red);
+            font-weight: bold;
+        }
+
+        .campo-input, .campo-select, .campo-textarea {
+            padding: 0.75rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: var(--white);
+        }
+
+        .campo-input:focus, .campo-select:focus, .campo-textarea:focus {
+            outline: none;
+            border-color: var(--warning-orange);
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        }
+
+        .campo-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .campo-ayuda {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+
+        .campo-error {
+            font-size: 0.8rem;
+            color: var(--danger-red);
+            margin-top: 0.25rem;
+            display: none;
+        }
+
+        .campo-grupo.error .campo-input,
+        .campo-grupo.error .campo-select {
+            border-color: var(--danger-red);
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        .campo-grupo.error .campo-error {
+            display: block;
+        }
+
+        /* Campo modificado */
+        .campo-grupo.modificado {
+            background: rgba(249, 115, 22, 0.05);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(249, 115, 22, 0.2);
+        }
+
+        .campo-grupo.modificado .campo-label::before {
+            content: '📝 ';
+        }
+
+        /* ========================================================================= */
+        /*                              BOTONES                                     */
+        /* ========================================================================= */
+        .formulario-footer {
+            background: var(--light-gray);
+            padding: 1.5rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--warning-orange);
+            color: var(--white);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: var(--secondary-orange-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: var(--light-gray);
+            color: var(--dark-gray);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+        }
+
+        .btn-success {
+            background: var(--success-green);
+            color: var(--white);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #059669;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: var(--danger-red);
+            color: var(--white);
+        }
+
+        .btn-danger:hover:not(:disabled) {
+            background: #dc2626;
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* ========================================================================= */
+        /*                              LOADING                                     */
+        /* ========================================================================= */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(249, 115, 22, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--warning-orange);
+            animation: spin 1s linear infinite;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .loading-overlay.activo {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .loading-content {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ========================================================================= */
+        /*                              RESPONSIVE                                  */
+        /* ========================================================================= */
+        @media (max-width: 768px) {
+            .contenedor-principal {
+                padding: 1rem;
+                margin-top: 100px;
+            }
+
+            .grid-campos {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .formulario-header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+
+            .formulario-footer {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .header-fijo {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .info-body {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- LOADING OVERLAY -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-content">
+            <div class="loading" style="width: 40px; height: 40px; margin: 0 auto 1rem;"></div>
+            <h3>Cargando información del tercero...</h3>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!--                              HEADER FIJO                                 -->
+    <!-- ========================================================================= -->
+    <header class="header-fijo">
+        <div class="header-titulo">
+            <h1>
+                <span>✏️</span>
+                Editar Tercero - <span id="header-nit">Cargando...</span>
+            </h1>
+        </div>
+        <div class="header-acciones">
+            <a href="/terceros/consulta" class="btn-header">
+                <span>📋</span>
+                Lista de Terceros
+            </a>
+            <a href="/terceros/" class="btn-header">
+                <span>🏠</span>
+                Dashboard
+            </a>
+        </div>
+    </header>
+
+    <!-- ========================================================================= -->
+    <!--                         CONTENEDOR PRINCIPAL                             -->
+    <!-- ========================================================================= -->
+    <div class="contenedor-principal">
+        <!-- ===== INFORMACIÓN ACTUAL ===== -->
+        <div class="info-actual" id="info-actual" style="display: none;">
+            <div class="info-header">
+                <div class="formulario-titulo">
+                    <span>📊</span>
+                    Información Actual del Tercero
+                </div>
+                <div>
+                    <span id="info-fecha-registro"></span>
+                </div>
+            </div>
+            <div class="info-body" id="info-body">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+
+        <!-- ===== FORMULARIO DE EDICIÓN ===== -->
+        <div class="formulario-container">
+            <!-- HEADER DEL FORMULARIO -->
+            <div class="formulario-header">
+                <div class="formulario-titulo">
+                    <span>✏️</span>
+                    Modificar Información del Tercero
+                </div>
+                <div class="progreso-pasos">
+                    <div class="paso activo">1. Datos Básicos</div>
+                    <div class="paso">2. Información Extendida</div>
+                    <div class="paso">3. Configuración</div>
+                </div>
+            </div>
+
+            <!-- CUERPO DEL FORMULARIO -->
+            <div class="formulario-body">
+                <form id="formulario-tercero">
+                    <!-- ===== SECCIÓN 1: DATOS BÁSICOS ===== -->
+                    <div class="seccion activa" id="seccion-basicos">
+                        <div class="seccion-titulo">
+                            <span>📝</span>
+                            Datos Básicos del Tercero
+                        </div>
+                        
+                        <div class="grid-campos">
+                            <div class="campo-grupo">
+                                <label class="campo-label requerido">
+                                    🆔 Número de Identificación (NIT)
+                                </label>
+                                <input type="text" id="nit" class="campo-input" readonly style="background-color: #f9fafb;">
+                                <div class="campo-ayuda">El NIT no se puede modificar después de la creación</div>
+                                <div class="campo-error">El NIT es obligatorio y debe ser único</div>
+                            </div>
+
+                            <div class="campo-grupo">
+                                <label class="campo-label requerido">
+                                    🏢 Razón Social / Nombre Completo
+                                </label>
+                                <input type="text" id="razon_social" class="campo-input" placeholder="Ej: EMPRESA EJEMPLO S.A.S" required>
+                                <div class="campo-ayuda">Nombre completo de la empresa o persona natural</div>
+                                <div class="campo-error">La razón social es obligatoria</div>
+                            </div>
+
+                            <div class="campo-grupo">
+                                <label class="campo-label requerido">
+                                    📧 Correo Electrónico
+                                </label>
+                                <input type="email" id="email" class="campo-input" placeholder="contacto@empresa.com" required>
+                                <div class="campo-ayuda">Correo principal para comunicaciones</div>
+                                <div class="campo-error">Ingrese un correo electrónico válido</div>
+                            </div>
+
+                            <div class="campo-grupo">
+                                <label class="campo-label">
+                                    📞 Teléfono Principal
+                                </label>
+                                <input type="tel" id="telefono" class="campo-input" placeholder="Ej: 601-2345678">
+                                <div class="campo-ayuda">Número de contacto principal</div>
+                            </div>
+
+                            <div class="campo-grupo">
+                                <label class="campo-label">
+                                    📍 Dirección
+                                </label>
+                                <textarea id="direccion" class="campo-textarea" placeholder="Dirección completa..."></textarea>
+                                <div class="campo-ayuda">Dirección física de la empresa o domicilio</div>
+                            </div>
+
+                            <div class="campo-grupo">
+                                <label class="campo-label">
+                                    ✅ Estado
+                                </label>
+                                <select id="activo" class="campo-select">
+                                    <option value="false">Inactivo</option>
+                                    <option value="true">Activo</option>
+                                </select>
+                                <div class="campo-ayuda">Estado actual del tercero en el sistema</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== SECCIÓN 2: INFORMACIÓN EXTENDIDA ===== -->
+                    <div class="seccion" id="seccion-extendida">
+                        <div class="seccion-titulo">
+                            <span>🔍</span>
+                            Información Extendida
+                        </div>
+                        
+                        <div class="grid-campos">
+                            <div class="campo-grupo">
+                                <label class="campo-label">
+                                    📞 Teléfono Secundario
+                                </label>
+                                <input type="tel" id="telefono_secundario" class="campo-input" placeholder="Ej: 300-1234567">
+                                <div class="campo-ayuda">Número alternativo de contacto</div>
+                            </div>
+
+                            <div class="campo-grupo">
+                                <label class="campo-label">
+                                    👤 Contacto Principal
+                                </label>
+                                <input type="text" id="contacto_principal" class="campo-input" placeholder="Nombre del contacto">
+                                <div class="campo-ayuda">Persona responsable del contacto</div>
+                            </div>
+
+                            <div class="campo-grupo">
+                                <label class="campo-label">
+                                    💼 Cargo del Contacto
+                                </label>
+                                <input type="text" id="cargo_contacto" class="campo-input" placeholder="Ej: Gerente General">
+                                <div class="campo-ayuda">Cargo o posición del contacto principal</div>
+                            </div>
+
+                            <div class="campo-grupo">
+                                <label class="campo-label">
+                                    📊 Categoría del Tercero
+                                </label>
+                                <select id="categoria_tercero" class="campo-select">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="proveedor">Proveedor</option>
+                                    <option value="cliente">Cliente</option>
+                                    <option value="empleado">Empleado</option>
+                                    <option value="contratista">Contratista</option>
+                                    <option value="aliado">Aliado Estratégico</option>
+                                    <option value="otro">Otro</option>
+                                </select>
+                                <div class="campo-ayuda">Tipo de relación comercial</div>
+                            </div>
+
+                            <div class="campo-grupo">
+                                <label class="campo-label">
+                                    ⭐ Clasificación
+                                </label>
+                                <select id="clasificacion" class="campo-select">
+                                    <option value="">Seleccionar...</option>
+                                    <option value="A">A - Alta importancia</option>
+                                    <option value="B">B - Importancia media</option>
+                                    <option value="C">C - Importancia básica</option>
+                                </select>
+                                <div class="campo-ayuda">Clasificación según volumen/importancia</div>
+                            </div>
+
+                            <div class="campo-grupo">
+                                <label class="campo-label">
+                                    💰 Límite de Crédito
+                                </label>
+                                <input type="number" id="limite_credito" class="campo-input" placeholder="0.00" min="0" step="0.01">
+                                <div class="campo-ayuda">Límite de crédito en pesos colombianos</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== SECCIÓN 3: CONFIGURACIÓN ===== -->
+                    <div class="seccion" id="seccion-configuracion">
+                        <div class="seccion-titulo">
+                            <span>⚙️</span>
+                            Configuración de Notificaciones
+                        </div>
+                        
+                        <div class="grid-campos">
+                            <div class="campo-grupo">
+                                <label class="campo-label">
+                                    📅 Frecuencia de Notificación (días)
+                                </label>
+                                <input type="number" id="frecuencia_notificacion" class="campo-input" min="1" max="9999">
+                                <div class="campo-ayuda">Cada cuántos días enviar recordatorio de actualización</div>
+                            </div>
+
+                            <div class="campo-grupo">
+                                <label class="campo-label">
+                                    🔔 Notificaciones Activas
+                                </label>
+                                <select id="notificaciones_activas" class="campo-select">
+                                    <option value="true">Sí, enviar notificaciones</option>
+                                    <option value="false">No, desactivar notificaciones</option>
+                                </select>
+                                <div class="campo-ayuda">Habilitar o deshabilitar envío automático de correos</div>
+                            </div>
+
+                            <div class="campo-grupo">
+                                <label class="campo-label">
+                                    📝 Datos Adicionales (JSON)
+                                </label>
+                                <textarea id="datos_adicionales" class="campo-textarea" placeholder='{"campo_personalizado": "valor", "otro_campo": "otro_valor"}'></textarea>
+                                <div class="campo-ayuda">Información adicional en formato JSON para futuras extensiones</div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- FOOTER DEL FORMULARIO -->
+            <div class="formulario-footer">
+                <div>
+                    <button type="button" class="btn btn-secondary" id="btn-anterior" onclick="retrocederSeccion()" style="display: none;">
+                        <span>⬅️</span>
+                        Anterior
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="eliminarTercero()">
+                        <span>🗑️</span>
+                        Eliminar
+                    </button>
+                </div>
+                
+                <div>
+                    <button type="button" class="btn btn-secondary" onclick="resetearCambios()">
+                        <span>↩️</span>
+                        Resetear
+                    </button>
+                    <button type="button" class="btn btn-primary" id="btn-siguiente" onclick="avanzarSeccion()">
+                        Siguiente
+                        <span>➡️</span>
+                    </button>
+                    <button type="button" class="btn btn-success" id="btn-guardar" onclick="actualizarTercero()" style="display: none;">
+                        <span>💾</span>
+                        Actualizar Tercero
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =====================================================================
+        //                           VARIABLES GLOBALES
+        // =====================================================================
+        
+        let seccionActual = 1;
+        const totalSecciones = 3;
+        let datosOriginales = {};
+        let terceroId = null;
+
+        // =====================================================================
+        //                           NAVEGACIÓN ENTRE SECCIONES
+        // =====================================================================
+        
+        function avanzarSeccion() {
+            if (seccionActual < totalSecciones) {
+                // Validar sección actual antes de avanzar
+                if (validarSeccionActual()) {
+                    seccionActual++;
+                    mostrarSeccion(seccionActual);
+                    actualizarProgreso();
+                    actualizarBotones();
+                }
+            }
+        }
+
+        function retrocederSeccion() {
+            if (seccionActual > 1) {
+                seccionActual--;
+                mostrarSeccion(seccionActual);
+                actualizarProgreso();
+                actualizarBotones();
+            }
+        }
+
+        function mostrarSeccion(numeroSeccion) {
+            // Ocultar todas las secciones
+            document.querySelectorAll('.seccion').forEach(seccion => {
+                seccion.classList.remove('activa');
+            });
+
+            // Mostrar sección actual
+            const seccionMostrar = document.getElementById(`seccion-${getSectionName(numeroSeccion)}`);
+            if (seccionMostrar) {
+                seccionMostrar.classList.add('activa');
+            }
+        }
+
+        function getSectionName(numero) {
+            const nombres = ['basicos', 'extendida', 'configuracion'];
+            return nombres[numero - 1];
+        }
+
+        function actualizarProgreso() {
+            const pasos = document.querySelectorAll('.paso');
+            pasos.forEach((paso, index) => {
+                if (index + 1 <= seccionActual) {
+                    paso.classList.add('activo');
+                } else {
+                    paso.classList.remove('activo');
+                }
+            });
+        }
+
+        function actualizarBotones() {
+            const btnAnterior = document.getElementById('btn-anterior');
+            const btnSiguiente = document.getElementById('btn-siguiente');
+            const btnGuardar = document.getElementById('btn-guardar');
+
+            // Botón anterior
+            if (seccionActual > 1) {
+                btnAnterior.style.display = 'inline-flex';
+            } else {
+                btnAnterior.style.display = 'none';
+            }
+
+            // Botones siguiente/guardar
+            if (seccionActual === totalSecciones) {
+                btnSiguiente.style.display = 'none';
+                btnGuardar.style.display = 'inline-flex';
+            } else {
+                btnSiguiente.style.display = 'inline-flex';
+                btnGuardar.style.display = 'none';
+            }
+        }
+
+        // =====================================================================
+        //                           CARGA DE DATOS
+        // =====================================================================
+        
+        async function cargarDatosTercero() {
+            mostrarLoading(true);
+            
+            try {
+                // Obtener ID del tercero desde la URL
+                const urlParams = new URLSearchParams(window.location.search);
+                terceroId = urlParams.get('id');
+                
+                if (!terceroId) {
+                    throw new Error('ID del tercero no especificado');
+                }
+
+                const response = await fetch(`/terceros/api/obtener/${terceroId}`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Error obteniendo datos del tercero');
+                }
+
+                const tercero = data.data;
+                datosOriginales = { ...tercero };
+
+                // Llenar formulario
+                llenarFormulario(tercero);
+                
+                // Mostrar información actual
+                mostrarInformacionActual(tercero);
+
+                // Actualizar header
+                document.getElementById('header-nit').textContent = tercero.nit;
+
+            } catch (error) {
+                console.error('Error cargando tercero:', error);
+                alert(`❌ Error cargando tercero: ${error.message}`);
+                window.location.href = '/terceros/consulta';
+            } finally {
+                mostrarLoading(false);
+            }
+        }
+
+        function llenarFormulario(tercero) {
+            // Datos básicos
+            document.getElementById('nit').value = tercero.nit || '';
+            document.getElementById('razon_social').value = tercero.razon_social || '';
+            document.getElementById('email').value = tercero.email || '';
+            document.getElementById('telefono').value = tercero.telefono || '';
+            document.getElementById('direccion').value = tercero.direccion || '';
+            document.getElementById('activo').value = tercero.activo ? 'true' : 'false';
+
+            // Datos extendidos
+            document.getElementById('telefono_secundario').value = tercero.telefono_secundario || '';
+            document.getElementById('contacto_principal').value = tercero.contacto_principal || '';
+            document.getElementById('cargo_contacto').value = tercero.cargo_contacto || '';
+            document.getElementById('categoria_tercero').value = tercero.categoria_tercero || '';
+            document.getElementById('clasificacion').value = tercero.clasificacion || '';
+            document.getElementById('limite_credito').value = tercero.limite_credito || '';
+
+            // Configuración
+            document.getElementById('frecuencia_notificacion').value = tercero.frecuencia_notificacion || 365;
+            document.getElementById('notificaciones_activas').value = tercero.notificaciones_activas ? 'true' : 'false';
+            
+            // Datos adicionales JSON
+            const datosAdicionales = tercero.datos_adicionales ? JSON.stringify(tercero.datos_adicionales, null, 2) : '';
+            document.getElementById('datos_adicionales').value = datosAdicionales;
+        }
+
+        function mostrarInformacionActual(tercero) {
+            const infoBody = document.getElementById('info-body');
+            infoBody.innerHTML = `
+                <div class="info-campo">
+                    <div class="info-label">NIT</div>
+                    <div class="info-valor">${tercero.nit}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-label">Razón Social</div>
+                    <div class="info-valor">${tercero.razon_social}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-label">Estado</div>
+                    <div class="info-valor">
+                        <span class="estado-badge ${tercero.activo ? 'estado-activo' : 'estado-inactivo'}">
+                            ${tercero.activo ? '✅ Activo' : '❌ Inactivo'}
+                        </span>
+                    </div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-label">Email</div>
+                    <div class="info-valor">${tercero.email || 'No especificado'}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-label">Teléfono</div>
+                    <div class="info-valor">${tercero.telefono || 'No especificado'}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-label">Categoría</div>
+                    <div class="info-valor">${tercero.categoria_tercero || 'No especificado'}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-label">Clasificación</div>
+                    <div class="info-valor">${tercero.clasificacion || 'No especificado'}</div>
+                </div>
+                <div class="info-campo">
+                    <div class="info-label">Última Actualización</div>
+                    <div class="info-valor">${formatearFecha(tercero.fecha_actualizacion || tercero.fecha_registro)}</div>
+                </div>
+            `;
+
+            // Mostrar fecha de registro en header
+            document.getElementById('info-fecha-registro').textContent = 
+                `Registrado: ${formatearFecha(tercero.fecha_registro)}`;
+
+            document.getElementById('info-actual').style.display = 'block';
+        }
+
+        function formatearFecha(fecha) {
+            if (!fecha) return 'No especificado';
+            const date = new Date(fecha);
+            return date.toLocaleDateString('es-CO', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // =====================================================================
+        //                           VALIDACIÓN
+        // =====================================================================
+        
+        function validarSeccionActual() {
+            switch (seccionActual) {
+                case 1:
+                    return validarDatosBasicos();
+                case 2:
+                    return validarDatosExtendidos();
+                case 3:
+                    return validarConfiguracion();
+                default:
+                    return true;
+            }
+        }
+
+        function validarDatosBasicos() {
+            let esValido = true;
+
+            // Validar Razón Social
+            const razonSocial = document.getElementById('razon_social').value.trim();
+            if (!razonSocial || razonSocial.length < 3) {
+                mostrarErrorCampo('razon_social', 'La razón social es obligatoria (mínimo 3 caracteres)');
+                esValido = false;
+            } else {
+                limpiarErrorCampo('razon_social');
+            }
+
+            // Validar Email
+            const email = document.getElementById('email').value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email) {
+                mostrarErrorCampo('email', 'El correo electrónico es obligatorio');
+                esValido = false;
+            } else if (!emailRegex.test(email)) {
+                mostrarErrorCampo('email', 'Ingrese un correo electrónico válido');
+                esValido = false;
+            } else {
+                limpiarErrorCampo('email');
+            }
+
+            return esValido;
+        }
+
+        function validarDatosExtendidos() {
+            let esValido = true;
+
+            // Validar límite de crédito si se especifica
+            const limiteCredito = document.getElementById('limite_credito').value;
+            if (limiteCredito && (isNaN(limiteCredito) || limiteCredito < 0)) {
+                mostrarErrorCampo('limite_credito', 'El límite de crédito debe ser un número válido mayor o igual a 0');
+                esValido = false;
+            } else {
+                limpiarErrorCampo('limite_credito');
+            }
+
+            return esValido;
+        }
+
+        function validarConfiguracion() {
+            let esValido = true;
+
+            // Validar frecuencia de notificación
+            const frecuencia = document.getElementById('frecuencia_notificacion').value;
+            if (!frecuencia || frecuencia < 1) {
+                mostrarErrorCampo('frecuencia_notificacion', 'La frecuencia debe ser mayor a 0 días');
+                esValido = false;
+            } else {
+                limpiarErrorCampo('frecuencia_notificacion');
+            }
+
+            // Validar JSON si se especifica
+            const datosAdicionales = document.getElementById('datos_adicionales').value.trim();
+            if (datosAdicionales) {
+                try {
+                    JSON.parse(datosAdicionales);
+                    limpiarErrorCampo('datos_adicionales');
+                } catch (e) {
+                    mostrarErrorCampo('datos_adicionales', 'El formato JSON no es válido');
+                    esValido = false;
+                }
+            }
+
+            return esValido;
+        }
+
+        function mostrarErrorCampo(campoId, mensaje) {
+            const campo = document.getElementById(campoId);
+            const grupo = campo.closest('.campo-grupo');
+            const errorElement = grupo.querySelector('.campo-error');
+            
+            grupo.classList.add('error');
+            if (errorElement) {
+                errorElement.textContent = mensaje;
+            }
+        }
+
+        function limpiarErrorCampo(campoId) {
+            const campo = document.getElementById(campoId);
+            const grupo = campo.closest('.campo-grupo');
+            grupo.classList.remove('error');
+        }
+
+        // =====================================================================
+        //                           DETECTAR CAMBIOS
+        // =====================================================================
+        
+        function detectarCambios() {
+            // Comparar campos actuales con datos originales
+            const camposFormulario = [
+                'razon_social', 'email', 'telefono', 'direccion', 'activo',
+                'telefono_secundario', 'contacto_principal', 'cargo_contacto',
+                'categoria_tercero', 'clasificacion', 'limite_credito',
+                'frecuencia_notificacion', 'notificaciones_activas', 'datos_adicionales'
+            ];
+
+            camposFormulario.forEach(campo => {
+                const elemento = document.getElementById(campo);
+                const grupo = elemento.closest('.campo-grupo');
+                let valorActual = elemento.value;
+                let valorOriginal = datosOriginales[campo];
+
+                // Manejar casos especiales
+                if (campo === 'activo' || campo === 'notificaciones_activas') {
+                    valorActual = valorActual === 'true';
+                    valorOriginal = Boolean(valorOriginal);
+                } else if (campo === 'limite_credito') {
+                    valorActual = parseFloat(valorActual) || 0;
+                    valorOriginal = parseFloat(valorOriginal) || 0;
+                } else if (campo === 'datos_adicionales') {
+                    try {
+                        valorActual = JSON.stringify(JSON.parse(valorActual || '{}'));
+                        valorOriginal = JSON.stringify(valorOriginal || {});
+                    } catch (e) {
+                        valorActual = valorActual || '';
+                        valorOriginal = JSON.stringify(valorOriginal || {});
+                    }
+                } else {
+                    valorOriginal = valorOriginal || '';
+                }
+
+                // Marcar como modificado si hay diferencia
+                if (valorActual !== valorOriginal) {
+                    grupo.classList.add('modificado');
+                } else {
+                    grupo.classList.remove('modificado');
+                }
+            });
+        }
+
+        // =====================================================================
+        //                           ACCIONES PRINCIPALES
+        // =====================================================================
+        
+        async function actualizarTercero() {
+            // Validar todas las secciones
+            if (!validarDatosBasicos() || !validarDatosExtendidos() || !validarConfiguracion()) {
+                alert('❌ Por favor corrija los errores antes de actualizar');
+                return;
+            }
+
+            const btnGuardar = document.getElementById('btn-guardar');
+            btnGuardar.disabled = true;
+            btnGuardar.innerHTML = '<div class="loading"></div> Actualizando...';
+
+            try {
+                // Recopilar datos del formulario
+                const datosActualizados = {
+                    razon_social: document.getElementById('razon_social').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    telefono: document.getElementById('telefono').value.trim() || null,
+                    direccion: document.getElementById('direccion').value.trim() || null,
+                    activo: document.getElementById('activo').value === 'true',
+                    telefono_secundario: document.getElementById('telefono_secundario').value.trim() || null,
+                    contacto_principal: document.getElementById('contacto_principal').value.trim() || null,
+                    cargo_contacto: document.getElementById('cargo_contacto').value.trim() || null,
+                    categoria_tercero: document.getElementById('categoria_tercero').value || null,
+                    clasificacion: document.getElementById('clasificacion').value || null,
+                    limite_credito: parseFloat(document.getElementById('limite_credito').value) || 0,
+                    frecuencia_notificacion: parseInt(document.getElementById('frecuencia_notificacion').value),
+                    notificaciones_activas: document.getElementById('notificaciones_activas').value === 'true',
+                    datos_adicionales: {}
+                };
+
+                // Parsear datos adicionales JSON si existen
+                const datosAdicionalesTexto = document.getElementById('datos_adicionales').value.trim();
+                if (datosAdicionalesTexto) {
+                    try {
+                        datosActualizados.datos_adicionales = JSON.parse(datosAdicionalesTexto);
+                    } catch (e) {
+                        alert('❌ Error en el formato JSON de datos adicionales');
+                        return;
+                    }
+                }
+
+                // Enviar al servidor
+                const response = await fetch(`/terceros/api/actualizar/${terceroId}`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(datosActualizados)
+                });
+
+                const resultado = await response.json();
+
+                if (resultado.success) {
+                    alert(`✅ Tercero actualizado exitosamente!\n\nNIT: ${resultado.data.nit}\nRazón Social: ${resultado.data.razon_social}`);
+                    
+                    // Actualizar datos originales
+                    datosOriginales = { ...resultado.data };
+                    detectarCambios();
+                    
+                    // Actualizar información actual
+                    mostrarInformacionActual(resultado.data);
+                    
+                } else {
+                    throw new Error(resultado.message);
+                }
+
+            } catch (error) {
+                console.error('Error actualizando tercero:', error);
+                alert(`❌ Error actualizando tercero: ${error.message}`);
+            } finally {
+                btnGuardar.disabled = false;
+                btnGuardar.innerHTML = '<span>💾</span> Actualizar Tercero';
+            }
+        }
+
+        function resetearCambios() {
+            if (confirm('¿Está seguro que desea deshacer todos los cambios realizados?')) {
+                llenarFormulario(datosOriginales);
+                detectarCambios();
+            }
+        }
+
+        async function eliminarTercero() {
+            if (!confirm(`¿Está seguro que desea ELIMINAR el tercero ${datosOriginales.nit} - ${datosOriginales.razon_social}?\n\nEsta acción NO se puede deshacer.`)) {
+                return;
+            }
+
+            if (!confirm('⚠️ CONFIRMACIÓN FINAL: Esta acción eliminará permanentemente el tercero y toda su información asociada. ¿Continuar?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/terceros/api/eliminar/${terceroId}`, {
+                    method: 'DELETE'
+                });
+
+                const resultado = await response.json();
+
+                if (resultado.success) {
+                    alert('✅ Tercero eliminado exitosamente');
+                    window.location.href = '/terceros/consulta';
+                } else {
+                    throw new Error(resultado.message);
+                }
+
+            } catch (error) {
+                console.error('Error eliminando tercero:', error);
+                alert(`❌ Error eliminando tercero: ${error.message}`);
+            }
+        }
+
+        function mostrarLoading(mostrar) {
+            const overlay = document.getElementById('loading-overlay');
+            if (mostrar) {
+                overlay.classList.add('activo');
+            } else {
+                overlay.classList.remove('activo');
+            }
+        }
+
+        // =====================================================================
+        //                           INICIALIZACIÓN
+        // =====================================================================
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar formulario
+            mostrarSeccion(1);
+            actualizarProgreso();
+            actualizarBotones();
+
+            // Cargar datos del tercero
+            cargarDatosTercero();
+
+            // Event listeners para detectar cambios
+            document.querySelectorAll('.campo-input, .campo-select, .campo-textarea').forEach(elemento => {
+                elemento.addEventListener('input', detectarCambios);
+                elemento.addEventListener('change', detectarCambios);
+            });
+
+            // Event listeners para validación en tiempo real
+            document.getElementById('email').addEventListener('blur', function() {
+                const email = this.value.trim();
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                
+                if (email && !emailRegex.test(email)) {
+                    mostrarErrorCampo('email', 'Formato de correo electrónico inválido');
+                } else {
+                    limpiarErrorCampo('email');
+                }
+            });
+
+            // Permitir navegación con teclado
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    if (seccionActual < totalSecciones) {
+                        avanzarSeccion();
+                    } else {
+                        actualizarTercero();
+                    }
+                }
+            });
+        });
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

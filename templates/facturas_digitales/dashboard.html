@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📄 Facturas Digitales - Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Colores Institucionales Supertiendas Cañaveral */
+            --canaveral-green: #0A6E3F;
+            --canaveral-green-dark: #085330;
+            --canaveral-yellow: #FFB900;
+            --canaveral-yellow-light: #FFD966;
+            --brand-primary: #0A6E3F;
+            --brand-secondary: #FFB900;
+            --brand-accent: #085330;
+            --bg-light: #F5F5F5;
+            --bg-dark: #1E1E1E;
+            --text-light: #212529;
+            --text-dark: #E9ECEF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .light-mode {
+            background-color: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        .dark-mode {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .container-custom {
+            max-width: 98%;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 16px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .dark-mode .card {
+            background: #2D2D2D;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        /* KPIs Compactos - MÁS REDUCIDOS */
+        .stat-card {
+            background: linear-gradient(135deg, var(--canaveral-green), var(--canaveral-green-dark));
+            color: white;
+            border-radius: 8px;
+            padding: 8px 10px;
+            min-height: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            border-top: 2px solid var(--canaveral-yellow);
+        }
+
+        .stat-card-yellow {
+            background: linear-gradient(135deg, var(--canaveral-yellow), #E6A500);
+            color: #333;
+            border-top: 3px solid var(--canaveral-green);
+        }
+
+        .stat-card-blue {
+            background: linear-gradient(135deg, #1E7E34, #155724);
+            border-top: 3px solid var(--canaveral-yellow);
+        }
+
+        .stat-card-success {
+            background: linear-gradient(135deg, #28a745, #218838);
+            border-top: 3px solid var(--canaveral-yellow);
+        }
+
+        .stat-card-orange {
+            background: linear-gradient(135deg, #fd7e14, #e8590c);
+            border-top: 3px solid var(--canaveral-yellow);
+        }
+
+        .stat-card-purple {
+            background: linear-gradient(135deg, #6f42c1, #5a2d9d);
+            border-top: 3px solid var(--canaveral-yellow);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .stat-card {
+                min-height: 90px;
+                padding: 12px;
+            }
+            
+            .stat-number {
+                font-size: 1.5rem !important;
+            }
+            
+            .stat-icon {
+                font-size: 2rem !important;
+            }
+            
+            .action-icon {
+                font-size: 1.5rem !important;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .container-custom {
+                padding: 0 10px;
+            }
+        }
+
+        /* Botones de Acción en Tabla */
+        .btn-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            margin: 2px;
+        }
+
+        .btn-view {
+            background: var(--canaveral-green);
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: var(--canaveral-green-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-adobe {
+            background: #DC143C;
+            color: white;
+        }
+
+        .btn-adobe:hover {
+            background: #B01030;
+            transform: translateY(-2px);
+        }
+
+        .btn-send {
+            background: var(--canaveral-yellow);
+            color: #333;
+        }
+
+        .btn-send:hover {
+            background: #E6A500;
+            transform: translateY(-2px);
+        }
+
+        .btn-download {
+            background: #0066CC;
+            color: white;
+        }
+
+        .btn-download:hover {
+            background: #0052A3;
+            transform: translateY(-2px);
+        }
+
+        .btn-edit {
+            background: #f59e0b;
+            color: white;
+            font-weight: 600;
+        }
+
+        .btn-edit:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+
+        /* Tabla más compacta */
+        .table-container {
+            max-height: 600px;
+        }
+
+        .table-container td {
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        .table-container th {
+            padding: 10px 12px;
+            font-size: 0.75rem;
+        }
+
+        .stat-number {
+            font-size: 1.25rem;
+            font-weight: 700;
+            line-height: 1;
+            margin: 4px 0;
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            opacity: 0.9;
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        .stat-icon {
+            position: absolute;
+            right: 8px;
+            bottom: 6px;
+            font-size: 1.5rem;
+            opacity: 0.2;
+        }
+
+        /* Botones de Acción Compactos - MÁS REDUCIDOS */
+        .action-card {
+            background: white;
+            border-radius: 8px;
+            padding: 8px 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .dark-mode .action-card {
+            background: #2D2D2D;
+        }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(10, 110, 63, 0.2);
+            border-color: var(--canaveral-green);
+            background: linear-gradient(135deg, rgba(10, 110, 63, 0.05), rgba(255, 185, 0, 0.05));
+        }
+
+        .action-icon {
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .action-title {
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-bottom: 2px;
+            color: var(--canaveral-green);
+        }
+
+        .dark-mode .action-title {
+            color: var(--canaveral-yellow);
+        }
+
+        .action-subtitle {
+            font-size: 0.6rem;
+            color: #666;
+        }
+
+        .dark-mode .action-subtitle {
+            color: #999;
+        }
+
+        /* Tabla con Encabezado Fijo */
+        .table-container {
+            position: relative;
+            max-height: 500px;
+            overflow-y: auto;
+            border-radius: 10px;
+        }
+
+        .table-container table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .table-container thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: linear-gradient(135deg, var(--canaveral-green), var(--canaveral-green-dark));
+            color: white;
+            border-bottom: 3px solid var(--canaveral-yellow);
+        }
+
+        .dark-mode .table-container thead {
+            background: linear-gradient(135deg, #0A6E3F, #064428);
+            border-bottom: 3px solid var(--canaveral-yellow);
+        }
+
+        .table-container th {
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-align: left;
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+        }
+
+        .table-container td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+        }
+
+        .dark-mode .table-container td {
+            border-bottom-color: #3a3a3a;
+        }
+
+        .table-container tbody tr:hover {
+            background-color: rgba(10, 110, 63, 0.08);
+        }
+
+        .dark-mode .table-container tbody tr:hover {
+            background-color: rgba(255, 185, 0, 0.1);
+        }
+
+        /* Sección Fija Superior */
+        .dashboard-header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: var(--bg-light);
+            padding-top: 20px;
+            padding-bottom: 10px;
+        }
+
+        .dark-mode .dashboard-header {
+            background: var(--bg-dark);
+        }
+
+        .btn-primary {
+            background: var(--brand-primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: var(--brand-secondary);
+            transform: scale(1.05);
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .badge-pendiente {
+            background: #FFF3CD;
+            color: #856404;
+        }
+
+        .badge-aprobado {
+            background: #D4EDDA;
+            color: #155724;
+        }
+
+        .badge-rechazado {
+            background: #F8D7DA;
+            color: #721C24;
+        }
+
+        .badge-enviado_a_firmar {
+            background: #FFE69C;
+            color: #664D00;
+        }
+
+        .badge-firmada {
+            background: #B3E5D9;
+            color: #0A5C45;
+        }
+
+        .badge-causada {
+            background: #CCE5FF;
+            color: #004085;
+        }
+
+        .badge-pagada {
+            background: #D4EDDA;
+            color: #155724;
+            font-weight: 700;
+        }
+
+        .dark-mode .badge-pendiente {
+            background: #664D03;
+            color: #FFF3CD;
+        }
+
+        .dark-mode .badge-aprobado {
+            background: #0F5132;
+            color: #D1E7DD;
+        }
+
+        .dark-mode .badge-rechazado {
+            background: #58151C;
+            color: #F8D7DA;
+        }
+
+        .dark-mode .badge-enviado_a_firmar {
+            background: #664D00;
+            color: #FFE69C;
+        }
+
+        .dark-mode .badge-firmada {
+            background: #0A5C45;
+            color: #B3E5D9;
+        }
+
+        .dark-mode .badge-causada {
+            background: #004085;
+            color: #CCE5FF;
+        }
+
+        .dark-mode .badge-pagada {
+            background: #155724;
+            color: #D4EDDA;
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <h1 class="text-2xl font-bold" style="color: var(--brand-primary);">
+                    📄 Facturas Digitales
+                </h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <!-- Toggle Dark Mode -->
+                <button id="toggleDarkMode" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <span id="darkModeIcon">🌙</span>
+                </button>
+                
+                <!-- Usuario -->
+                <div class="flex items-center gap-2 bg-gray-100 dark:bg-gray-700 px-4 py-2 rounded-lg">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="font-semibold">{{ session['usuario'] }}</span>
+                    <span class="text-xs px-2 py-1 rounded" style="background: var(--brand-primary); color: white;">
+                        {{ 'Proveedor' if tipo_usuario == 'externo' else 'Interno' }}
+                    </span>
+                </div>
+                
+                <!-- Botón Salir -->
+                <a href="{{ url_for('dashboard') }}" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-semibold transition">
+                    Volver al menú principal
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container-custom">
+        <!-- Sección Fija Superior -->
+        <div class="dashboard-header">
+            <!-- KPIs Compactos en 2 Filas -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+                <!-- Fila 1: Estados de Facturas -->
+                <div class="stat-card">
+                    <div class="stat-label">TOTAL FACTURAS</div>
+                    <div class="stat-number">{{ total_facturas }}</div>
+                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.9); font-weight: 600; margin-top: 4px;">
+                        ${{ "{:,.2f}".format(valor_total) }}
+                    </div>
+                    <div class="stat-icon">📊</div>
+                </div>
+
+                <div class="stat-card stat-card-yellow">
+                    <div class="stat-label">PENDIENTES</div>
+                    <div class="stat-number">{{ facturas_pendientes }}</div>
+                    <div style="font-size: 0.75rem; color: #333; font-weight: 600; margin-top: 4px;">
+                        ${{ "{:,.2f}".format(valor_pendientes|default(0)) }}
+                    </div>
+                    <div class="stat-icon">⏳</div>
+                </div>
+
+                <div class="stat-card stat-card-blue">
+                    <div class="stat-label">ENVIADAS A FIRMAR</div>
+                    <div class="stat-number">{{ facturas_enviadas }}</div>
+                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.9); font-weight: 600; margin-top: 4px;">
+                        ${{ "{:,.2f}".format(valor_enviadas|default(0)) }}
+                    </div>
+                    <div class="stat-icon">✉️</div>
+                </div>
+
+                <div class="stat-card stat-card-success">
+                    <div class="stat-label">FIRMADAS</div>
+                    <div class="stat-number">{{ facturas_firmadas }}</div>
+                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.9); font-weight: 600; margin-top: 4px;">
+                        ${{ "{:,.2f}".format(valor_firmadas|default(0)) }}
+                    </div>
+                    <div class="stat-icon">✅</div>
+                </div>
+
+                <div class="stat-card stat-card-orange">
+                    <div class="stat-label">CAUSADAS</div>
+                    <div class="stat-number">{{ facturas_causadas }}</div>
+                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.9); font-weight: 600; margin-top: 4px;">
+                        ${{ "{:,.2f}".format(valor_causadas|default(0)) }}
+                    </div>
+                    <div class="stat-icon">📝</div>
+                </div>
+
+                <div class="stat-card stat-card-purple">
+                    <div class="stat-label">PAGADAS</div>
+                    <div class="stat-number">{{ facturas_pagadas }}</div>
+                    <div style="font-size: 0.75rem; color: rgba(255,255,255,0.9); font-weight: 600; margin-top: 4px;">
+                        ${{ "{:,.2f}".format(valor_pagadas|default(0)) }}
+                    </div>
+                    <div class="stat-icon">💰</div>
+                </div>
+            </div>
+
+            <!-- Botones de Acción Compactos - 4 en línea -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+                <a href="{{ url_for('facturas_digitales.cargar') }}" class="action-card">
+                    <div class="action-icon">📥</div>
+                    <div class="action-title">Radicar Facturas</div>
+                    <div class="action-subtitle">Cargar nuevas facturas digitales</div>
+                </a>
+
+                <a href="{{ url_for('facturas_digitales.ordenes_compra') }}" class="action-card" style="border-top: 3px solid #007bff;">
+                    <div class="action-icon">📝</div>
+                    <div class="action-title">Órdenes de Compra</div>
+                    <div class="action-subtitle">Generar OCR para proveedores</div>
+                </a>
+
+                <a href="{{ url_for('facturas_digitales.listado') }}" class="action-card">
+                    <div class="action-icon">📋</div>
+                    <div class="action-title">Ver Listado</div>
+                    <div class="action-subtitle">Consulta todas las facturas</div>
+                </a>
+
+                {% if tipo_usuario == 'interno' %}
+                <a href="{{ url_for('facturas_digitales.configuracion') }}" class="action-card">
+                    <div class="action-icon">⚙️</div>
+                    <div class="action-title">Configuración</div>
+                    <div class="action-subtitle">Ajustes del módulo</div>
+                </a>
+                
+                <a href="{{ url_for('config_facturas.index') }}" class="action-card" style="border-top: 3px solid var(--canaveral-yellow);">
+                    <div class="action-icon">📝</div>
+                    <div class="action-title">Otras Configuraciones</div>
+                    <div class="action-subtitle">Gestión de catálogos</div>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Últimas Facturas con Encabezado Fijo -->
+        <div class="card" style="padding: 0; overflow: hidden; border-top: 3px solid var(--canaveral-yellow);">
+            <div class="flex justify-between items-center px-5 py-4 border-b dark:border-gray-700" style="background: linear-gradient(90deg, rgba(10, 110, 63, 0.05), transparent);">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <h2 class="text-xl font-bold" style="color: var(--canaveral-green); margin: 0;">📋 Últimas Facturas Registradas</h2>
+                    <span id="contador-facturas" style="background: var(--canaveral-yellow); color: #333; padding: 4px 12px; border-radius: 12px; font-weight: 600; font-size: 0.8rem;">
+                        0 doc(s)
+                    </span>
+                </div>
+                <a href="{{ url_for('facturas_digitales.listado') }}" class="text-sm font-semibold hover:underline" style="color: var(--canaveral-yellow); background: var(--canaveral-green); padding: 8px 16px; border-radius: 6px;">
+                    Ver todas →
+                </a>
+            </div>
+
+            <!-- Acciones Masivas + Filtros de Fecha (TODO EN UNA FILA) -->
+            <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <button onclick="seleccionarTodas()" style="padding: 8px 16px; background: var(--canaveral-green); color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer;">
+                    ☑️ Seleccionar Todo
+                </button>
+                <button onclick="deseleccionarTodas()" style="padding: 8px 16px; background: #666; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer;">
+                    ⬜ Deseleccionar
+                </button>
+                <button id="btnEnviarFirmaMasiva" onclick="enviarFirmaMasiva()" style="padding: 8px 16px; background: var(--canaveral-yellow); color: #333; border: none; border-radius: 6px; font-weight: 700; font-size: 0.8rem; cursor: pointer; display: none;">
+                    ✉️ Enviar <span id="contadorSeleccionadas">0</span> a Firmar
+                </button>
+                <button onclick="limpiarFiltros()" style="padding: 8px 16px; background: #f0f0f0; color: #333; border: 2px solid #ddd; border-radius: 6px; font-weight: 600; font-size: 0.8rem; cursor: pointer;">
+                    🔄 Limpiar Filtros
+                </button>
+                
+                <!-- 🔥 FILTROS DE FECHA COMPACTOS AL LADO -->
+                <div style="display: flex; gap: 8px; align-items: center; margin-left: 15px; padding-left: 15px; border-left: 2px solid #e0e0e0;">
+                    <span style="font-size: 0.75rem; color: #666; font-weight: 600;">📅 Desde:</span>
+                    <input type="date" id="fechaInicioDashboard" style="padding: 6px 8px; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.75rem; width: 130px;">
+                    <span style="font-size: 0.75rem; color: #666; font-weight: 600;">Hasta:</span>
+                    <input type="date" id="fechaFinDashboard" style="padding: 6px 8px; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.75rem; width: 130px;">
+                    <button onclick="aplicarFiltroDashboard()" style="padding: 6px 12px; background: var(--canaveral-green); color: white; border: none; border-radius: 4px; font-weight: 600; font-size: 0.75rem; cursor: pointer;">
+                        🔍 Filtrar
+                    </button>
+                    <button onclick="resetearFiltroDashboard()" style="padding: 6px 12px; background: #6c757d; color: white; border: none; border-radius: 4px; font-weight: 600; font-size: 0.75rem; cursor: pointer;">
+                        ♻️ 90 días
+                    </button>
+                </div>
+                
+                <span id="contadorFiltrados" style="margin-left: auto; font-size: 0.85rem; color: #666; font-weight: 600;"></span>
+            </div>
+
+            <!-- Info del Filtro y Advertencias (DEBAJO) -->
+            <div style="padding: 8px 12px; background: #f8f9fa; border-radius: 6px; margin-bottom: 10px;">
+                <div id="info-filtro-dashboard" style="font-size: 13px; color: #6c757d;"></div>
+                <div id="advertencia-filtro-dashboard" style="margin-top: 8px; padding: 8px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; display: none; font-size: 13px;">
+                    <strong>⚠️ Advertencia:</strong> <span id="texto-advertencia-dashboard"></span>
+                </div>
+            </div>
+
+            <!-- Tabla con Filtros en Columnas -->
+            <div class="table-container" style="overflow-x: auto;">
+                <table id="tablaFacturas" style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+                    <thead>
+                        <!-- Fila 1: Encabezados con ordenamiento -->
+                        <tr style="background: var(--canaveral-green); color: white;">
+                            <th style="width: 35px; padding: 6px 4px; text-align: center;">
+                                <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()" style="cursor: pointer;">
+                            </th>
+                            <th onclick="ordenarTabla('fecha_expedicion')" style="cursor: pointer; padding: 6px 8px; font-size: 0.7rem; width: 85px;">
+                                F. EXPED. <span class="sort-icon">⇅</span>
+                            </th>
+                            <th onclick="ordenarTabla('fecha_radicacion')" style="cursor: pointer; padding: 6px 8px; font-size: 0.7rem; width: 85px;">
+                                F. RADIC. <span class="sort-icon">⇅</span>
+                            </th>
+                            <th onclick="ordenarTabla('empresa')" style="cursor: pointer; padding: 6px 8px; font-size: 0.7rem; width: 50px;">
+                                EMP <span class="sort-icon">⇅</span>
+                            </th>
+                            <th onclick="ordenarTabla('departamento')" style="cursor: pointer; padding: 6px 8px; font-size: 0.7rem; width: 50px;">
+                                DEPTO <span class="sort-icon">⇅</span>
+                            </th>
+                            <th onclick="ordenarTabla('nit')" style="cursor: pointer; padding: 6px 8px; font-size: 0.7rem; width: 95px;">
+                                NIT <span class="sort-icon">⇅</span>
+                            </th>
+                            <th onclick="ordenarTabla('proveedor')" style="cursor: pointer; padding: 6px 8px; font-size: 0.7rem; width: 100px; max-width: 100px;">
+                                PROVEEDOR <span class="sort-icon">⇅</span>
+                            </th>
+                            <th onclick="ordenarTabla('prefijo')" style="cursor: pointer; padding: 6px 8px; font-size: 0.7rem; width: 50px;">
+                                PRE <span class="sort-icon">⇅</span>
+                            </th>
+                            <th onclick="ordenarTabla('folio')" style="cursor: pointer; padding: 6px 8px; font-size: 0.7rem; width: 70px;">
+                                FOLIO <span class="sort-icon">⇅</span>
+                            </th>
+                            <th onclick="ordenarTabla('valor')" style="cursor: pointer; padding: 6px 8px; font-size: 0.7rem; text-align: right; width: 100px;">
+                                VALOR <span class="sort-icon">⇅</span>
+                            </th>
+                            <th style="text-align: center; padding: 6px 4px; font-size: 0.7rem; width: 45px;">📎</th>
+                            <th onclick="ordenarTabla('estado')" style="cursor: pointer; padding: 6px 8px; font-size: 0.7rem; width: 110px;">
+                                ESTADO <span class="sort-icon">⇅</span>
+                            </th>
+                            <th style="text-align: center; padding: 6px 8px; font-size: 0.7rem; width: 600px;">ACCIONES</th>
+                        </tr>
+                        <!-- Fila 2: Filtros por columna -->
+                        <tr style="background: #f8f8f8;">
+                            <th style="padding: 3px;"></th>
+                            <th style="padding: 3px;">
+                                <input type="date" id="filtroFechaExp" onchange="aplicarFiltros()" style="width: 100%; padding: 3px; font-size: 0.7rem; border: 1px solid #ddd; border-radius: 3px; color: #333; background: white;">
+                            </th>
+                            <th style="padding: 3px;">
+                                <input type="date" id="filtroFechaRad" onchange="aplicarFiltros()" style="width: 100%; padding: 3px; font-size: 0.7rem; border: 1px solid #ddd; border-radius: 3px; color: #333; background: white;">
+                            </th>
+                            <th style="padding: 3px;">
+                                <input type="text" id="filtroEmpresa" placeholder="SC..." onkeyup="aplicarFiltros()" style="width: 100%; padding: 3px; font-size: 0.7rem; border: 1px solid #ddd; border-radius: 3px; color: #333; background: white;">
+                            </th>
+                            <th style="padding: 3px;">
+                                <input type="text" id="filtroDepartamento" placeholder="TIC..." onkeyup="aplicarFiltros()" style="width: 100%; padding: 3px; font-size: 0.7rem; border: 1px solid #ddd; border-radius: 3px; color: #333; background: white;">
+                            </th>
+                            <th style="padding: 3px;">
+                                <input type="text" id="filtroNit" placeholder="NIT" onkeyup="aplicarFiltros()" style="width: 100%; padding: 3px; font-size: 0.7rem; border: 1px solid #ddd; border-radius: 3px; color: #333; background: white;">
+                            </th>
+                            <th style="padding: 3px;">
+                                <input type="text" id="filtroProveedor" placeholder="Nombre..." onkeyup="aplicarFiltros()" style="width: 100%; padding: 3px; font-size: 0.7rem; border: 1px solid #ddd; border-radius: 3px; color: #333; background: white;">
+                            </th>
+                            <th style="padding: 3px;">
+                                <input type="text" id="filtroPrefijo" placeholder="Pre" onkeyup="aplicarFiltros()" style="width: 100%; padding: 3px; font-size: 0.7rem; border: 1px solid #ddd; border-radius: 3px; color: #333; background: white;">
+                            </th>
+                            <th style="padding: 3px;">
+                                <input type="text" id="filtroFolio" placeholder="Folio" onkeyup="aplicarFiltros()" style="width: 100%; padding: 3px; font-size: 0.7rem; border: 1px solid #ddd; border-radius: 3px; color: #333; background: white;">
+                            </th>
+                            <th style="padding: 3px;">
+                                <input type="text" id="filtroValor" placeholder="Valor" onkeyup="aplicarFiltros()" style="width: 100%; padding: 3px; font-size: 0.7rem; border: 1px solid #ddd; border-radius: 3px; color: #333; background: white;">
+                            </th>
+                            <th style="padding: 3px;"></th>
+                            <th style="padding: 3px;">
+                                <input type="text" id="filtroEstado" placeholder="Estado" onkeyup="aplicarFiltros()" style="width: 100%; padding: 3px; font-size: 0.7rem; border: 1px solid #ddd; border-radius: 3px; color: #333; background: white;">
+                            </th>
+                            <th style="padding: 3px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="bodyFacturas">
+                        <!-- Las filas se generarán dinámicamente con JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 🔥 CONTROLES DE PAGINACIÓN -->
+            <div id="paginacion-dashboard" style="display: none; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 14px; color: #6c757d;">
+                    <strong>Mostrando:</strong> <span id="info-registros-dashboard"></span>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button id="btnPaginaAnteriorDashboard" onclick="cambiarPaginaDashboard('anterior')" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+                        ⬅️ Anterior
+                    </button>
+                    <span style="font-weight: 600; color: #495057;">
+                        Página <span id="pagina-actual-dashboard">1</span> de <span id="total-paginas-dashboard">1</span>
+                    </span>
+                    <button id="btnPaginaSiguienteDashboard" onclick="cambiarPaginaDashboard('siguiente')" style="padding: 8px 16px; background: #6c757d; color: white; border: none; border-radius: 6px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+                        Siguiente ➡️
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script de datos iniciales -->
+    <script>
+        // Variable de tipo de usuario (desde sesión)
+        const tipo_usuario = '{{ tipo_usuario }}';
+        
+        // 🔥 VARIABLES DE PAGINACIÓN Y FILTROS
+        let paginaActualDashboard = 1;
+        let totalPaginasDashboard = 1;
+        let totalRegistrosDashboard = 0;
+        let registrosDesdeDashboard = 0;
+        let registrosHastaDashboard = 0;
+        let filtroActualDashboard = {
+            fechaInicio: null,
+            fechaFin: null
+        };
+        
+        // 🔥 Datos de facturas - Se cargarán dinámicamente vía API
+        let facturasData = [];
+
+        // 🔥 INICIALIZAR AL CARGAR PÁGINA
+        document.addEventListener('DOMContentLoaded', function() {
+            establecerFechasPorDefectoDashboard();
+            cargarFacturasDashboard();
+        });
+
+        function establecerFechasPorDefectoDashboard() {
+            const hoy = new Date();
+            const hace90dias = new Date();
+            hace90dias.setDate(hoy.getDate() - 90);
+            
+            document.getElementById('fechaInicioDashboard').valueAsDate = hace90dias;
+            document.getElementById('fechaFinDashboard').valueAsDate = hoy;
+            
+            filtroActualDashboard.fechaInicio = formatearFecha(hace90dias);
+            filtroActualDashboard.fechaFin = formatearFecha(hoy);
+        }
+
+        function formatearFecha(fecha) {
+            const año = fecha.getFullYear();
+            const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+            const dia = String(fecha.getDate()).padStart(2, '0');
+            return `${año}-${mes}-${dia}`;
+        }
+
+        function aplicarFiltroDashboard() {
+            const fechaInicio = document.getElementById('fechaInicioDashboard').value;
+            const fechaFin = document.getElementById('fechaFinDashboard').value;
+            
+            if (!fechaInicio || !fechaFin) {
+                alert('⚠️ Por favor selecciona ambas fechas');
+                return;
+            }
+            
+            if (fechaInicio > fechaFin) {
+                alert('⚠️ La fecha inicial no puede ser mayor que la fecha final');
+                return;
+            }
+            
+            filtroActualDashboard.fechaInicio = fechaInicio;
+            filtroActualDashboard.fechaFin = fechaFin;
+            paginaActualDashboard = 1;
+            cargarFacturasDashboard();
+        }
+
+        function resetearFiltroDashboard() {
+            establecerFechasPorDefectoDashboard();
+            paginaActualDashboard = 1;
+            cargarFacturasDashboard();
+        }
+
+        function cambiarPaginaDashboard(direccion) {
+            if (direccion === 'anterior' && paginaActualDashboard > 1) {
+                paginaActualDashboard--;
+                cargarFacturasDashboard();
+            } else if (direccion === 'siguiente' && paginaActualDashboard < totalPaginasDashboard) {
+                paginaActualDashboard++;
+                cargarFacturasDashboard();
+            }
+        }
+
+        function cargarFacturasDashboard() {
+            console.log('🔄 Cargando facturas dashboard...');
+            
+            // Construir URL con parámetros
+            const params = new URLSearchParams({
+                page: paginaActualDashboard,
+                per_page: 50
+            });
+            
+            if (filtroActualDashboard.fechaInicio) {
+                params.append('fecha_inicio', filtroActualDashboard.fechaInicio);
+            }
+            if (filtroActualDashboard.fechaFin) {
+                params.append('fecha_fin', filtroActualDashboard.fechaFin);
+            }
+
+            fetch(`/facturas-digitales/api/listar-facturas-paginadas?${params.toString()}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('📊 Datos recibidos:', data);
+                    
+                    // Actualizar variables de paginación
+                    if (data.pagination) {
+                        paginaActualDashboard = data.pagination.page;
+                        totalPaginasDashboard = data.pagination.pages;
+                        totalRegistrosDashboard = data.pagination.total;
+                        registrosDesdeDashboard = ((paginaActualDashboard - 1) * data.pagination.per_page) + 1;
+                        registrosHastaDashboard = Math.min(paginaActualDashboard * data.pagination.per_page, totalRegistrosDashboard);
+                    }
+                    
+                    // Mostrar información del filtro
+                    if (data.filtro) {
+                        const infoFiltro = document.getElementById('info-filtro-dashboard');
+                        const diasRango = data.filtro.dias_rango || 90;
+                        const esDefault = data.filtro.es_rango_default ? ' (por defecto)' : '';
+                        infoFiltro.innerHTML = `📅 Mostrando facturas desde <strong>${data.filtro.fecha_inicio}</strong> hasta <strong>${data.filtro.fecha_fin}</strong> (${diasRango} días)${esDefault}`;
+                    }
+                    
+                    // Mostrar advertencia si existe
+                    const advertenciaDiv = document.getElementById('advertencia-filtro-dashboard');
+                    if (data.advertencia) {
+                        document.getElementById('texto-advertencia-dashboard').textContent = data.advertencia;
+                        advertenciaDiv.style.display = 'block';
+                    } else {
+                        advertenciaDiv.style.display = 'none';
+                    }
+                    
+                    // Actualizar contador
+                    document.getElementById('contador-facturas').textContent = `${totalRegistrosDashboard} doc(s)`;
+                    
+                    // Formatear y cargar facturas
+                    facturasData = data.facturas.map(f => ({
+            id: f.id,
+            fecha_expedicion: f.fecha_emision ? f.fecha_emision.split('T')[0] : '',
+            fecha_expedicion_fmt: f.fecha_emision ? new Date(f.fecha_emision).toLocaleDateString('es-CO') : 'N/A',
+            fecha_radicacion: f.fecha_carga ? f.fecha_carga.split('T')[0] : '',
+            fecha_radicacion_fmt: f.fecha_carga ? new Date(f.fecha_carga).toLocaleDateString('es-CO') : 'N/A',
+            empresa: (f.empresa && f.empresa !== 'null' && f.empresa !== '') ? f.empresa : null,
+            empresa_display: (f.empresa && f.empresa !== 'null' && f.empresa !== '') ? f.empresa : 'N/A',
+            departamento: (f.departamento && f.departamento !== 'null' && f.departamento !== '') ? f.departamento : null,
+            departamento_display: (f.departamento && f.departamento !== 'null' && f.departamento !== '') ? f.departamento : 'N/A',
+            valor: f.valor_total,
+            valor_fmt: '$' + f.valor_total.toLocaleString('es-CO', {minimumFractionDigits: 2, maximumFractionDigits: 2}),
+            proveedor: (f.razon_social_proveedor || '').replace(/[\n\r]/g, ' '),
+            nit: f.nit_proveedor,
+            prefijo: f.numero_factura.includes('-') ? f.numero_factura.split('-')[0] : 'N/A',
+            folio: f.numero_factura.includes('-') ? f.numero_factura.split('-')[1] : f.numero_factura,
+            numero_factura: f.numero_factura,
+            num_archivos: f.num_archivos || 1,
+            estado: f.estado,
+            estado_upper: f.estado.toUpperCase(),
+            fecha_envio_firma: f.fecha_envio_firma ? new Date(f.fecha_envio_firma).toLocaleString('es-CO') : '',
+            usuario_envio_firma: f.usuario_envio_firma || '',
+            fecha_firmado: f.fecha_firmado ? new Date(f.fecha_firmado).toLocaleString('es-CO') : '',
+            usuario_firmador: f.usuario_firmador || '',
+            historial_envios: (f.historial_envios || []).map(e => ({
+                fecha: e.fecha ? new Date(e.fecha).toLocaleString('es-CO') : '',
+                usuario: e.usuario,
+                email: e.email || ''
+            }))
+                    }));
+                    
+                    // Actualizar facturas filtradas y renderizar
+                    facturasFiltradas = [...facturasData];
+                    renderizarTabla();
+                    actualizarPaginacionDashboard();
+                })
+                .catch(error => {
+                    console.error('❌ Error al cargar facturas:', error);
+                    alert('Error al cargar facturas. Por favor, recarga la página.');
+                });
+        }
+
+        function actualizarPaginacionDashboard() {
+            const paginacionContainer = document.getElementById('paginacion-dashboard');
+            paginacionContainer.style.display = 'flex';
+            
+            document.getElementById('info-registros-dashboard').textContent = `${registrosDesdeDashboard} - ${registrosHastaDashboard} de ${totalRegistrosDashboard} facturas`;
+            document.getElementById('pagina-actual-dashboard').textContent = paginaActualDashboard;
+            document.getElementById('total-paginas-dashboard').textContent = totalPaginasDashboard;
+            
+            const btnAnterior = document.getElementById('btnPaginaAnteriorDashboard');
+            const btnSiguiente = document.getElementById('btnPaginaSiguienteDashboard');
+            
+            btnAnterior.disabled = paginaActualDashboard === 1;
+            btnSiguiente.disabled = paginaActualDashboard === totalPaginasDashboard;
+            
+            // Styling para botones deshabilitados
+            if (btnAnterior.disabled) {
+                btnAnterior.style.opacity = '0.5';
+                btnAnterior.style.cursor = 'not-allowed';
+            } else {
+                btnAnterior.style.opacity = '1';
+                btnAnterior.style.cursor = 'pointer';
+            }
+            
+            if (btnSiguiente.disabled) {
+                btnSiguiente.style.opacity = '0.5';
+                btnSiguiente.style.cursor = 'not-allowed';
+            } else {
+                btnSiguiente.style.opacity = '1';
+                btnSiguiente.style.cursor = 'pointer';
+            }
+        }
+
+        // Variables globales para filtros y ordenamiento
+        let facturasFiltradas = [];
+        let ordenActual = { campo: null, direccion: 'asc' };
+        let facturasSeleccionadas = new Set();
+
+        // Función para generar tooltip con información de trazabilidad
+        function obtenerTooltipEstado(factura) {
+            let tooltip = `Estado: ${factura.estado_upper}\n\n`;
+            
+            // Mostrar HISTORIAL COMPLETO de envíos (si existe)
+            if (factura.historial_envios && factura.historial_envios.length > 0) {
+                tooltip += `📋 HISTORIAL DE ENVÍOS (${factura.historial_envios.length}):\n`;
+                factura.historial_envios.forEach((envio, index) => {
+                    tooltip += `${index + 1}. 📤 ${envio.fecha} por ${envio.usuario}`;
+                    if (envio.email) {
+                        tooltip += ` → ${envio.email}`;
+                    }
+                    tooltip += '\n';
+                });
+                tooltip += '\n';
+            } else if (factura.fecha_envio_firma) {
+                // Fallback al campo legacy si no hay historial
+                tooltip += `📤 Enviado a firma: ${factura.fecha_envio_firma}`;
+                if (factura.usuario_envio_firma) {
+                    tooltip += ` por ${factura.usuario_envio_firma}`;
+                }
+                tooltip += '\n\n';
+            }
+            
+            // Mostrar información de firmado
+            if (factura.fecha_firmado) {
+                tooltip += `✅ FIRMADO: ${factura.fecha_firmado}`;
+                if (factura.usuario_firmador) {
+                    tooltip += ` por ${factura.usuario_firmador}`;
+                }
+                tooltip += '\n';
+            }
+            
+            if (!factura.historial_envios?.length && !factura.fecha_envio_firma && !factura.fecha_firmado) {
+                tooltip += 'Sin fechas de trazabilidad';
+            }
+            
+            return tooltip;
+        }
+
+        // 🔥 VISOR DE PDFs CON NAVEGACIÓN - Definir ANTES de renderizar tabla
+        let pdfViewerData = {
+            facturaId: null,
+            numeroFactura: '',
+            archivos: [],
+            currentIndex: 0
+        };
+
+        function abrirVisorPDFs(facturaId) {
+            console.log('🔍 abrirVisorPDFs llamado con ID:', facturaId);
+            
+            fetch(`/facturas-digitales/listar-archivos/${facturaId}`)
+                .then(response => {
+                    console.log('📡 Respuesta recibida:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('📄 Datos recibidos:', data);
+                    if (data.success) {
+                        pdfViewerData.facturaId = facturaId;
+                        pdfViewerData.numeroFactura = data.numero_factura;
+                        pdfViewerData.archivos = data.archivos;
+                        pdfViewerData.currentIndex = 0;
+                        
+                        console.log('✅ Abriendo modal con', data.archivos.length, 'archivos');
+                        mostrarModalVisor();
+                        cargarPDFActual();
+                    } else {
+                        console.error('❌ Error en respuesta:', data.error);
+                        alert('❌ Error: ' + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('❌ Error al cargar archivos:', error);
+                    alert('❌ Error al cargar archivos: ' + error.message);
+                });
+        }
+        
+        // Hacer funciones globales para onclick
+        window.abrirVisorPDFs = abrirVisorPDFs;
+
+        function mostrarModalVisor() {
+            console.log('🎭 mostrarModalVisor ejecutándose');
+            const modal = document.getElementById('modalVisorPDFs');
+            if (!modal) {
+                console.error('❌ Modal no encontrado!');
+                return;
+            }
+            console.log('✅ Modal encontrado, mostrando...');
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            console.log('✅ Modal visible');
+        }
+
+        function cerrarModalVisor() {
+            console.log('❌ Cerrando modal');
+            const modal = document.getElementById('modalVisorPDFs');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Hacer función global para onclick
+        window.cerrarModalVisor = cerrarModalVisor;
+
+        // 🔧 FUNCIÓN PARA COMPLETAR CAMPOS FALTANTES (MINI-FORMULARIO)
+        function editarFactura(facturaId) {
+            console.log('✏️ Función editarFactura llamada con ID:', facturaId);
+            console.log('🔍 Tipo de usuario actual:', tipo_usuario);
+            const url = `/facturas-digitales/completar-campos/${facturaId}`;
+            console.log('🌐 Redirigiendo a:', url);
+            window.location.href = url;
+        }
+        
+        // Hacer función global para onclick
+        window.editarFactura = editarFactura;
+        console.log('✅ Función editarFactura registrada globalmente');
+
+        function cargarPDFActual() {
+            console.log('📄 cargarPDFActual ejecutándose, índice:', pdfViewerData.currentIndex);
+            const archivo = pdfViewerData.archivos[pdfViewerData.currentIndex];
+            console.log('📄 Cargando archivo:', archivo);
+            const iframe = document.getElementById('iframePDFVisor');
+            const titulo = document.getElementById('tituloArchivoActual');
+            const contador = document.getElementById('contadorArchivos');
+            const btnAnterior = document.getElementById('btnAnterior');
+            const btnSiguiente = document.getElementById('btnSiguiente');
+            
+            titulo.textContent = `${archivo.tipo}: ${archivo.nombre}`;
+            contador.textContent = `Archivo ${pdfViewerData.currentIndex + 1} de ${pdfViewerData.archivos.length}`;
+            btnAnterior.disabled = pdfViewerData.currentIndex === 0;
+            btnSiguiente.disabled = pdfViewerData.currentIndex === pdfViewerData.archivos.length - 1;
+            
+            // Cargar PDF normalmente
+            const url = `/facturas-digitales/ver-pdf/${pdfViewerData.facturaId}/${encodeURIComponent(archivo.nombre)}`;
+            iframe.src = url;
+        }
+
+        function navegarPDF(direccion) {
+            console.log('🔄 navegarPDF llamado con:', direccion);
+            console.log('📊 Estado actual:', {
+                currentIndex: pdfViewerData.currentIndex,
+                totalArchivos: pdfViewerData.archivos.length,
+                direccion: direccion
+            });
+            
+            if (direccion === 'anterior' && pdfViewerData.currentIndex > 0) {
+                pdfViewerData.currentIndex--;
+                console.log('⬅️ Navegando a índice:', pdfViewerData.currentIndex);
+                cargarPDFActual();
+            } else if (direccion === 'siguiente' && pdfViewerData.currentIndex < pdfViewerData.archivos.length - 1) {
+                pdfViewerData.currentIndex++;
+                console.log('➡️ Navegando a índice:', pdfViewerData.currentIndex);
+                cargarPDFActual();
+            } else {
+                console.warn('⚠️ No se puede navegar:', {
+                    razon: direccion === 'anterior' ? 'Ya estás en el primer archivo' : 'Ya estás en el último archivo',
+                    currentIndex: pdfViewerData.currentIndex
+                });
+            }
+        }
+        
+        // Hacer función global para onclick
+        window.navegarPDF = navegarPDF;
+
+        // 🔥 Ya NO se renderiza aquí - se hace desde cargarFacturasDashboard()
+        // La carga inicial se hace desde el event listener DOMContentLoaded al inicio del script
+
+        // Renderizar tabla
+        function renderizarTabla() {
+            const tbody = document.getElementById('bodyFacturas');
+            
+            console.log('🔄 Renderizando tabla, facturas filtradas:', facturasFiltradas.length);
+            console.log('👤 Tipo usuario actual:', tipo_usuario);
+            
+            if (facturasFiltradas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="13" style="padding: 40px; text-align: center; color: #999;">📄 No se encontraron facturas</td></tr>`;
+                return;
+            }
+            
+            // Debug primera factura
+            if (facturasFiltradas.length > 0) {
+                const f = facturasFiltradas[0];
+                console.log('🔍 Primera factura ID:', f.id, 'Empresa:', f.empresa, 'Depto:', f.departamento);
+                console.log('🔍 Mostrar botón?', (!f.empresa || !f.departamento) && tipo_usuario !== 'externo');
+            }
+
+            tbody.innerHTML = facturasFiltradas.map(factura => `
+                <tr data-id="${factura.id}" class="${facturasSeleccionadas.has(factura.id) ? 'selected-row' : ''}" style="border-bottom: 1px solid #e5e7eb;">
+                    <td style="text-align: center; padding: 6px 4px;">
+                        <input type="checkbox" class="factura-checkbox" data-id="${factura.id}" ${facturasSeleccionadas.has(factura.id) ? 'checked' : ''} onchange="toggleSeleccion(${factura.id})">
+                    </td>
+                    <td style="padding: 6px 8px; font-size: 0.75rem; white-space: nowrap;">${factura.fecha_expedicion_fmt}</td>
+                    <td style="padding: 6px 8px; font-size: 0.75rem; white-space: nowrap;">${factura.fecha_radicacion_fmt}</td>
+                    <td style="padding: 6px 8px; font-weight: 600; color: var(--canaveral-green); font-size: 0.75rem; text-align: center;">${factura.empresa_display}</td>
+                    <td style="padding: 6px 8px; font-weight: 600; color: var(--canaveral-yellow); font-size: 0.75rem; text-align: center;">${factura.departamento_display}</td>
+                    <td style="padding: 6px 8px; font-size: 0.75rem; color: #666; font-family: monospace;">${factura.nit}</td>
+                    <td style="padding: 6px 8px; font-size: 0.75rem; font-weight: 500;">${factura.proveedor}</td>
+                    <td style="padding: 6px 8px; font-weight: 600; font-size: 0.75rem; text-align: center;">${factura.prefijo}</td>
+                    <td style="padding: 6px 8px; font-weight: 600; font-size: 0.75rem; text-align: center;">${factura.folio}</td>
+                    <td style="padding: 6px 8px; text-align: right; font-weight: 600; color: var(--canaveral-green); font-size: 0.75rem; white-space: nowrap;">${factura.valor_fmt}</td>
+                    <td style="text-align: center; padding: 6px 4px;"><span style="background: var(--canaveral-green); color: white; padding: 2px 8px; border-radius: 10px; font-weight: 700; font-size: 0.7rem;">${factura.num_archivos}</span></td>
+                    <td style="padding: 6px 8px;"><span class="badge badge-${factura.estado}" style="font-size: 0.7rem; padding: 3px 8px; cursor: help;" title="${obtenerTooltipEstado(factura)}">${factura.estado_upper}</span></td>
+                    <td style="text-align: center; padding: 6px 8px;"><div style="display: flex; flex-wrap: wrap; gap: 3px; justify-content: center;">
+                        <button onclick="abrirVisorPDFs(${factura.id})" class="btn-action btn-view" title="Ver TODOS los PDFs" style="font-size: 0.7rem; padding: 3px 6px;">👁️ Ver</button>
+                        <button onclick="abrirConAdobe(${factura.id})" class="btn-action btn-adobe" title="Adobe" style="font-size: 0.7rem; padding: 3px 6px;">🖊️ Adobe</button>
+                        <button onclick="enviarAFirmar(${factura.id}, '${factura.numero_factura}', '${factura.proveedor}')" class="btn-action btn-send" title="Firmar" style="font-size: 0.7rem; padding: 3px 6px;">✉️ Firmar</button>
+                        <a href="/facturas-digitales/descargar/${factura.id}" class="btn-action btn-download" title="Descargar" style="font-size: 0.7rem; padding: 3px 6px;">📥 Descargar</a>
+                        ${(!factura.empresa || !factura.departamento) && tipo_usuario !== 'externo' 
+                            ? `<button onclick="editarFactura(${factura.id})" class="btn-action btn-edit" title="Completar campos faltantes (Empresa/Departamento)" style="font-size: 0.7rem; padding: 3px 6px; background: #f59e0b; color: white;">✏️ Editar</button>` 
+                            : ''}
+                    </div></td>
+                </tr>
+            `).join('');
+        }
+
+        // 🔍 Aplicar Filtros (por columna individual)
+        function aplicarFiltros() {
+            const filtroFechaExp = document.getElementById('filtroFechaExp').value;
+            const filtroFechaRad = document.getElementById('filtroFechaRad').value;
+            const filtroEmpresa = document.getElementById('filtroEmpresa').value.toLowerCase();
+            const filtroDepartamento = document.getElementById('filtroDepartamento').value.toLowerCase();
+            const filtroValor = document.getElementById('filtroValor').value;
+            const filtroNit = document.getElementById('filtroNit').value.toLowerCase();
+            const filtroProveedor = document.getElementById('filtroProveedor').value.toLowerCase();
+            const filtroPrefijo = document.getElementById('filtroPrefijo').value.toLowerCase();
+            const filtroFolio = document.getElementById('filtroFolio').value.toLowerCase();
+            const filtroEstado = document.getElementById('filtroEstado').value.toLowerCase();
+
+            facturasFiltradas = facturasData.filter(factura => {
+                // Filtro Fecha Expedición
+                if (filtroFechaExp && factura.fecha_expedicion !== filtroFechaExp) return false;
+
+                // Filtro Fecha Radicación
+                if (filtroFechaRad && factura.fecha_radicacion !== filtroFechaRad) return false;
+
+                // Filtro Empresa (búsqueda parcial) - usa empresa_display para filtrado
+                if (filtroEmpresa && !factura.empresa_display.toLowerCase().includes(filtroEmpresa)) return false;
+
+                // Filtro Departamento (búsqueda parcial) - usa departamento_display para filtrado
+                if (filtroDepartamento && !factura.departamento_display.toLowerCase().includes(filtroDepartamento)) return false;
+
+                // Filtro Valor (búsqueda parcial en valor formateado)
+                if (filtroValor && !factura.valor_fmt.toLowerCase().includes(filtroValor)) return false;
+
+                // Filtro NIT (búsqueda parcial)
+                if (filtroNit && !factura.nit.toLowerCase().includes(filtroNit)) return false;
+
+                // Filtro Proveedor (búsqueda parcial)
+                if (filtroProveedor && !factura.proveedor.toLowerCase().includes(filtroProveedor)) return false;
+
+                // Filtro Prefijo (búsqueda parcial)
+                if (filtroPrefijo && !factura.prefijo.toLowerCase().includes(filtroPrefijo)) return false;
+
+                // Filtro Folio (búsqueda parcial)
+                if (filtroFolio && !factura.folio.toLowerCase().includes(filtroFolio)) return false;
+
+                // Filtro Estado (búsqueda parcial - como los demás campos)
+                if (filtroEstado && !factura.estado_upper.toLowerCase().includes(filtroEstado)) return false;
+
+                return true;
+            });
+
+            renderizarTabla();
+            actualizarContadores();
+            document.getElementById('contadorFiltrados').textContent = `📊 Mostrando: ${facturasFiltradas.length} de ${facturasData.length}`;
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('filtroFechaExp').value = '';
+            document.getElementById('filtroFechaRad').value = '';
+            document.getElementById('filtroEmpresa').value = '';
+            document.getElementById('filtroDepartamento').value = '';
+            document.getElementById('filtroValor').value = '';
+            document.getElementById('filtroNit').value = '';
+            document.getElementById('filtroProveedor').value = '';
+            document.getElementById('filtroPrefijo').value = '';
+            document.getElementById('filtroFolio').value = '';
+            document.getElementById('filtroEstado').value = '';
+            aplicarFiltros();
+        }
+
+        function ordenarTabla(campo) {
+            if (ordenActual.campo === campo) {
+                ordenActual.direccion = ordenActual.direccion === 'asc' ? 'desc' : 'asc';
+            } else {
+                ordenActual.campo = campo;
+                ordenActual.direccion = 'asc';
+            }
+            facturasFiltradas.sort((a, b) => {
+                let valorA, valorB;
+                if (campo === 'valor') { valorA = a.valor; valorB = b.valor; }
+                else if (campo === 'fecha_expedicion' || campo === 'fecha_radicacion') { valorA = a[campo]; valorB = b[campo]; }
+                else { valorA = a[campo] ? a[campo].toString().toLowerCase() : ''; valorB = b[campo] ? b[campo].toString().toLowerCase() : ''; }
+                if (valorA < valorB) return ordenActual.direccion === 'asc' ? -1 : 1;
+                if (valorA > valorB) return ordenActual.direccion === 'asc' ? 1 : -1;
+                return 0;
+            });
+            renderizarTabla();
+        }
+
+        function toggleSeleccion(id) {
+            if (facturasSeleccionadas.has(id)) { facturasSeleccionadas.delete(id); } else { facturasSeleccionadas.add(id); }
+            actualizarContadores();
+            renderizarTabla();
+        }
+
+        function seleccionarTodas() {
+            facturasFiltradas.forEach(factura => facturasSeleccionadas.add(factura.id));
+            document.getElementById('selectAllCheckbox').checked = true;
+            actualizarContadores();
+            renderizarTabla();
+        }
+
+        function deseleccionarTodas() {
+            facturasSeleccionadas.clear();
+            document.getElementById('selectAllCheckbox').checked = false;
+            actualizarContadores();
+            renderizarTabla();
+        }
+
+        function toggleSelectAll() {
+            const checkbox = document.getElementById('selectAllCheckbox');
+            if (checkbox.checked) { seleccionarTodas(); } else { deseleccionarTodas(); }
+        }
+
+        function actualizarContadores() {
+            const numSeleccionadas = facturasSeleccionadas.size;
+            document.getElementById('btnEnviarFirmaMasiva').style.display = numSeleccionadas > 0 ? 'block' : 'none';
+            document.getElementById('contadorSeleccionadas').textContent = numSeleccionadas;
+            document.getElementById('contadorFiltrados').textContent = `Mostrando ${facturasFiltradas.length} de ${facturasData.length} facturas`;
+        }
+
+        async function enviarFirmaMasiva() {
+            if (facturasSeleccionadas.size === 0) { alert('❌ Debe seleccionar al menos una factura'); return; }
+            const idsSeleccionados = Array.from(facturasSeleccionadas);
+            const facturasEnviar = facturasData.filter(f => idsSeleccionados.includes(f.id));
+            const confirmacion = confirm(`¿Enviar ${facturasEnviar.length} factura(s) a firmar?\n\n` + facturasEnviar.map(f => `• ${f.numero_factura} - ${f.proveedor}`).join('\n'));
+            if (!confirmacion) return;
+            try {
+                const response = await fetch('/facturas-digitales/api/enviar-firma-masiva', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: idsSeleccionados })
+                });
+                const data = await response.json();
+                if (data.success) { alert(`✅ ${data.enviadas} factura(s) enviadas`); deseleccionarTodas(); location.reload(); }
+                else { alert(`❌ Error: ${data.message}`); }
+            } catch (error) { console.error('Error:', error); alert('❌ Error al enviar'); }
+        }
+
+        async function enviarAFirmar(id, numeroFactura, proveedor) {
+            if (!confirm(`¿Enviar factura ${numeroFactura} del proveedor ${proveedor}?`)) return;
+            try {
+                const response = await fetch('/facturas-digitales/api/enviar-firma-masiva', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ids: [id] })
+                });
+                const data = await response.json();
+                if (data.success) { alert(`✅ Factura enviada`); location.reload(); }
+                else { alert(`❌ Error: ${data.message}`); }
+            } catch (error) { console.error('Error:', error); alert('❌ Error'); }
+        }
+
+        function abrirConAdobe(id) {
+            alert(`Función Adobe para factura ID ${id} - Implementar según requiera`);
+        }
+
+        const style = document.createElement('style');
+        style.textContent = `.selected-row { background: rgba(255, 185, 0, 0.1) !important; border-left: 4px solid var(--canaveral-yellow) !important; } .sort-icon { font-size: 0.7rem; color: #999; margin-left: 4px; } th:hover .sort-icon { color: var(--canaveral-yellow); }`;
+        document.head.appendChild(style);
+    </script>
+
+    <script>
+        // Dark Mode Toggle
+        const toggleBtn = document.getElementById('toggleDarkMode');
+        const darkModeIcon = document.getElementById('darkModeIcon');
+        const body = document.body;
+
+        // Cargar preferencia guardada
+        const darkMode = localStorage.getItem('darkMode') === 'true';
+        if (darkMode) {
+            body.classList.remove('light-mode');
+            body.classList.add('dark-mode');
+            darkModeIcon.textContent = '☀️';
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            body.classList.toggle('light-mode');
+            body.classList.toggle('dark-mode');
+            
+            const isDark = body.classList.contains('dark-mode');
+            darkModeIcon.textContent = isDark ? '☀️' : '🌙';
+            localStorage.setItem('darkMode', isDark);
+        });
+
+        // Función para abrir PDF con Adobe
+        async function abrirConAdobe(idFactura) {
+            try {
+                const response = await fetch(`/facturas-digitales/abrir-adobe/${idFactura}`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ ' + data.message);
+                } else {
+                    alert('❌ Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al intentar abrir con Adobe');
+            }
+        }
+
+        // Función para enviar a firmar
+        function enviarAFirmar(idFactura, numeroFactura, proveedor) {
+            // Información del proceso
+            const info = `
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 ENVIAR FACTURA A FIRMA DIGITAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Factura: ${numeroFactura}
+Proveedor: ${proveedor}
+
+⚠️ IMPORTANTE:
+1. Se enviará un correo al destinatario
+2. El correo contendrá enlace para firmar
+3. El estado cambiará a "ENVIADO A FIRMAR"
+4. El destinatario podrá:
+   • Ver el documento PDF
+   • Firmarlo digitalmente
+   • Devolverlo firmado
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️ NOTA: Esta es una simulación.
+Para envío real, integrar con:
+- Sistema de firma electrónica
+- Servicio de correo SMTP configurado
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+            `;
+            
+            alert(info);
+            
+            // Solicitar email del destinatario
+            const destinatario = prompt('📧 Ingrese el email del destinatario para firmar:');
+            if (!destinatario) {
+                alert('❌ Operación cancelada');
+                return;
+            }
+            
+            // Validar formato de email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(destinatario)) {
+                alert('❌ Email inválido. Formato: usuario@dominio.com');
+                return;
+            }
+            
+            const mensaje = prompt('💬 Mensaje para el destinatario (opcional):', 
+                'Por favor revise y firme digitalmente esta factura.');
+            
+            // Confirmación final
+            const confirmacion = confirm(`
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃  ✅ CONFIRMAR ENVÍO A FIRMA     ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+📄 Factura: ${numeroFactura}
+📧 Destinatario: ${destinatario}
+💬 Mensaje: ${mensaje || 'Sin mensaje'}
+
+¿Desea continuar?
+            `);
+            
+            if (!confirmacion) {
+                alert('❌ Envío cancelado');
+                return;
+            }
+            
+            // Enviar solicitud
+            fetch(`/facturas-digitales/enviar-firmar/${idFactura}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    destinatario: destinatario,
+                    mensaje: mensaje || 'Por favor firme este documento'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(`✅ ENVIADO CORRECTAMENTE
+
+📧 Correo enviado a: ${destinatario}
+📄 Factura: ${numeroFactura}
+📊 Estado actualizado: ENVIADO A FIRMAR
+
+El destinatario recibirá:
+• Link para ver el PDF
+• Instrucciones para firmar
+• Fecha límite de firma
+
+La página se recargará para mostrar el nuevo estado.`);
+                    location.reload();
+                } else {
+                    alert('❌ Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('❌ Error de conexión al enviar a firmar');
+            });
+        }
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+
+// Prevenir Ctrl+P (imprimir) en TODO el documento
+document.addEventListener('keydown', function(e) {
+    // Bloquear Ctrl+P o Cmd+P
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.keyCode === 80)) {
+        const modal = document.getElementById('modalVisorPDFs');
+        if (modal && modal.style.display === 'flex') {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            console.log('🚫 Ctrl+P bloqueado - Visor está abierto');
+            return false;
+        }
+    }
+}, true);
+
+// Atajos de teclado para el visor
+document.addEventListener('keydown', function(e) {
+    const modal = document.getElementById('modalVisorPDFs');
+    if (modal && modal.style.display === 'flex') {
+        if (e.key === 'ArrowLeft') {
+            navegarPDF('anterior');
+        } else if (e.key === 'ArrowRight') {
+            navegarPDF('siguiente');
+        } else if (e.key === 'Escape') {
+            cerrarModalVisor();
+        }
+    }
+});
+</script>
+
+<!-- 🔥 MODAL VISOR DE PDFs CON NAVEGACIÓN -->
+<div id="modalVisorPDFs" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center;">
+    <div style="width: 95%; height: 95%; background: white; border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 30px rgba(0,0,0,0.5);">
+        <!-- Header -->
+        <div style="background: var(--canaveral-green); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h2 style="margin: 0; font-size: 1.3rem; font-weight: 700;">📄 Visor de Documentos</h2>
+                <p id="tituloArchivoActual" style="margin: 5px 0 0 0; font-size: 0.9rem; opacity: 0.9;">Cargando...</p>
+            </div>
+            <button onclick="cerrarModalVisor()" style="background: transparent; border: 2px solid white; color: white; padding: 8px 15px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 1.1rem; transition: all 0.3s;" onmouseover="this.style.background='white'; this.style.color='var(--canaveral-green)';" onmouseout="this.style.background='transparent'; this.style.color='white';">
+                ✕ Cerrar
+            </button>
+        </div>
+        
+        <!-- Navegación -->
+        <div style="background: #f5f5f5; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #ddd;">
+            <button id="btnAnterior" onclick="navegarPDF('anterior')" style="background: var(--canaveral-yellow); color: #333; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 1rem; transition: all 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                ◀ Anterior
+            </button>
+            
+            <span id="contadorArchivos" style="font-weight: 600; font-size: 1rem; color: var(--canaveral-green);">
+                Archivo 1 de 1
+            </span>
+            
+            <button id="btnSiguiente" onclick="navegarPDF('siguiente')" style="background: var(--canaveral-yellow); color: #333; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: 700; font-size: 1rem; transition: all 0.3s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+                Siguiente ▶
+            </button>
+        </div>
+        
+        <!-- Visor PDF -->
+        <div style="flex: 1; background: #333; position: relative;">
+            <iframe id="iframePDFVisor" style="width: 100%; height: 100%; border: none;"></iframe>
+        </div>
+        
+        <!-- Footer con ayuda -->
+        <div style="background: #f5f5f5; padding: 8px 20px; text-align: center; font-size: 0.85rem; color: #666; border-top: 1px solid #ddd;">
+            💡 <strong>Atajos:</strong> Flecha ← (Anterior) | Flecha → (Siguiente) | ESC (Cerrar)
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

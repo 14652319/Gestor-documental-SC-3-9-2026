@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 Causaciones - Visor Mejorado</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* TEMA OSCURO (por defecto) - Colores mejorados más suaves */
+        :root {
+            --bg-primary: #1e2a3a;
+            --bg-secondary: #2c3e50;
+            --bg-tertiary: #34495e;
+            --border-primary: #4a5f7f;
+            --text-primary: #ecf0f1;
+            --text-secondary: #bdc3c7;
+            --text-muted: #95a5a6;
+            --brand-primary: #20c997;
+            --brand-secondary: #1aa079;
+            --brand-hover: #17a085;
+        }
+
+        /* TEMA CLARO - Inspirado en tus otros módulos */
+        [data-theme="light"] {
+            --bg-primary: #f0f4f8;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e8f5e9;
+            --border-primary: #c8e6c9;
+            --text-primary: #2e3a45;
+            --text-secondary: #546e7a;
+            --text-muted: #78909c;
+            --brand-primary: #20c997;
+            --brand-secondary: #1aa079;
+            --brand-hover: #17a085;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .panel-izquierdo {
+            width: 320px;
+            min-width: 200px;
+            max-width: 600px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-primary);
+            overflow-y: auto;
+            height: 100vh;
+            transition: background-color 0.3s, border-color 0.3s, transform 0.3s;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Divisor redimensionable */
+        .resizer {
+            width: 6px;
+            background: var(--border-primary);
+            cursor: col-resize;
+            flex-shrink: 0;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .resizer:hover {
+            background: var(--brand-primary);
+        }
+
+        .resizer::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 2px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }
+
+        body.resizing {
+            cursor: col-resize !important;
+            user-select: none;
+        }
+
+        body.resizing * {
+            cursor: col-resize !important;
+            user-select: none;
+        }
+
+        .panel-central {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+            height: 100vh;
+            overflow: hidden;
+            transition: background-color 0.3s;
+            min-width: 0;
+        }
+
+        .panel-derecho {
+            width: 320px;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border-primary);
+            overflow-y: auto;
+            height: 100vh;
+            display: none;
+            transition: background-color 0.3s, border-color 0.3s, transform 0.3s;
+            position: relative;
+            z-index: 10;
+        }
+
+        .panel-derecho.activo {
+            display: block;
+        }
+
+        /* Overlay para paneles móviles */
+        .panel-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 90;
+        }
+
+        .panel-overlay.activo {
+            display: block;
+        }
+
+        /* RESPONSIVE MÓVIL */
+        @media (max-width: 768px) {
+            .panel-izquierdo {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 280px;
+                transform: translateX(-100%);
+                box-shadow: 2px 0 8px rgba(0,0,0,0.3);
+                z-index: 100;
+            }
+
+            .panel-izquierdo.activo {
+                transform: translateX(0);
+            }
+
+            .panel-derecho {
+                position: fixed;
+                right: 0;
+                top: 0;
+                width: 280px;
+                transform: translateX(100%);
+                box-shadow: -2px 0 8px rgba(0,0,0,0.3);
+                z-index: 100;
+            }
+
+            .panel-derecho.activo {
+                display: block;
+                transform: translateX(0);
+            }
+
+            .panel-central {
+                width: 100%;
+            }
+        }
+
+        /* RESPONSIVE TABLET */
+        @media (min-width: 769px) and (max-width: 1200px) {
+            .panel-izquierdo {
+                width: 260px;
+            }
+
+            .panel-derecho {
+                width: 260px;
+            }
+        }
+
+        /* Botón de tema */
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
+            color: var(--text-primary);
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            background: var(--brand-primary);
+            color: white;
+            border-color: var(--brand-primary);
+        }
+
+        .lista-item {
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .lista-item:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--brand-primary) !important;
+        }
+
+        .lista-item.seleccionado {
+            background: var(--brand-secondary) !important;
+            border-color: var(--brand-primary) !important;
+            box-shadow: 0 0 15px rgba(32, 201, 151, 0.4);
+        }
+
+        .visor-pdf {
+            flex: 1;
+            background: #525252;
+            position: relative;
+        }
+
+        .visor-pdf iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .badge-metadata {
+            background: var(--bg-tertiary);
+            padding: 6px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            border: 1px solid var(--border-primary);
+            transition: background-color 0.3s, border-color 0.3s;
+        }
+
+        .observacion-item {
+            background: var(--bg-tertiary);
+            transition: background-color 0.3s;
+            padding: 8px;
+            border-radius: 4px;
+            border-left: 3px solid var(--brand-primary);
+            margin-bottom: 6px;
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #777; }
+
+        .btn-primary {
+            background: var(--brand-primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Botón Renombrar con animación */
+        #btn-renombrar {
+            animation: fadeInScale 0.3s ease-out;
+        }
+
+        #btn-renombrar:hover {
+            background: var(--brand-hover) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(32, 201, 151, 0.4);
+        }
+
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.8);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+
+        .btn-primary:hover {
+            background: var(--brand-secondary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(32, 201, 151, 0.4);
+        }
+
+        .btn-danger {
+            background: #ff4757;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-danger:hover {
+            background: #ee5a6f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 71, 87, 0.4);
+        }
+
+        .estado-cargando {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Overlay para cerrar paneles en móvil -->
+    <div class="panel-overlay" id="panel-overlay" onclick="cerrarPaneles()"></div>
+
+    <!-- Layout Principal: 3 columnas -->
+    <div class="flex h-screen">
+        
+        <!-- ============================================
+             PANEL IZQUIERDO: FILTROS Y LISTA DE ARCHIVOS
+             ============================================ -->
+        <div class="panel-izquierdo" id="panel-izquierdo">
+            <!-- Header -->
+            <div class="px-3 py-2 sticky top-0 z-10" style="background: var(--bg-secondary); border-bottom: 1px solid var(--border-primary);">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <!-- Botón cerrar panel (solo móvil) -->
+                        <button onclick="togglePanelIzquierdo()" class="md:hidden p-1 rounded transition" style="background: var(--bg-tertiary);" title="Cerrar panel">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                        <h1 class="text-lg font-bold text-[#20c997]">📁 Causaciones</h1>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <!-- Botón de Tema -->
+                        <button onclick="toggleTheme()" class="theme-toggle p-2 rounded transition" title="Cambiar tema">
+                            <svg id="icon-light" class="w-4 h-4 hidden" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"/>
+                            </svg>
+                            <svg id="icon-dark" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"/>
+                            </svg>
+                        </button>
+                        
+                        <!-- Botón Volver -->
+                        <a href="/dashboard" class="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded transition flex items-center space-x-1 text-xs">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                            </svg>
+                            <span class="hidden sm:inline">Volver</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Usuario logueado -->
+                {% if session.usuario %}
+                <div class="mb-2 px-2 py-1.5 rounded" style="background: var(--bg-tertiary); border: 1px solid var(--border-primary);">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-1.5">
+                            <svg class="w-4 h-4 text-[#20c997]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            <p class="text-xs font-semibold" style="color: var(--text-primary);">{{ session.usuario }}</p>
+                        </div>
+                        {% if session.rol %}
+                        <span class="px-1.5 py-0.5 bg-[#20c997] text-white text-xs font-bold rounded">
+                            {{ session.rol|upper }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Filtros -->
+                <form method="GET" action="{{ url_for('causaciones.index') }}" class="space-y-2">
+                    <!-- Selector de Sede -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="text-xs font-semibold" style="color: var(--text-secondary);">🏢 Sedes</label>
+                            <!-- Botones de filtro rápido inline -->
+                            <div class="flex space-x-1">
+                                <button type="button" onclick="seleccionarTodas()" 
+                                        class="px-1.5 py-0.5 bg-[#20c997] hover:bg-[#1aa079] text-white text-xs rounded transition" title="Todas">
+                                    📌
+                                </button>
+                                <button type="button" onclick="seleccionarAprobadas()" 
+                                        class="px-1.5 py-0.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition" title="Aprobadas">
+                                    ✅
+                                </button>
+                                <button type="button" onclick="seleccionarCausadas()" 
+                                        class="px-1.5 py-0.5 bg-purple-600 hover:bg-purple-700 text-white text-xs rounded transition" title="Causadas">
+                                    ✓
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <select name="sede" id="selector-sedes" multiple size="6" class="w-full rounded p-1.5 text-xs" style="background: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);">
+                            <option value="Todo" {% if 'Todo' in sede %}selected{% endif %} class="font-bold text-[#20c997]">📌 TODAS</option>
+                            {% for s in sedes if s != 'Todo' %}
+                            <option value="{{ s }}" {% if s in sede %}selected{% endif %}>
+                                {% if '_C' in s %}✓ {{ s }}{% elif 'CYS' in s %}⭐ {{ s }}{% else %}{{ s }}{% endif %}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Selector de Carpeta -->
+                    <div>
+                        <label class="text-xs font-semibold mb-1 block" style="color: var(--text-secondary);">📂 Carpeta</label>
+                        <select name="carpeta" class="w-full rounded p-1.5 text-xs" style="background: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);">
+                            <option value="__all__">Todas</option>
+                            {% for carpeta in carpetas %}
+                            <option value="{{ carpeta }}" {% if carpeta == ruta_relativa %}selected{% endif %}>{{ carpeta }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Filtro de texto -->
+                    <div>
+                        <label class="text-xs font-semibold mb-1 block" style="color: var(--text-secondary);">🔍 Buscar</label>
+                        <input type="text" name="filtro" value="{{ filtro }}" 
+                               placeholder="Archivo..." 
+                               class="w-full rounded p-1.5 text-xs" style="background: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-1.5">
+                        <button type="submit" class="btn-primary text-xs py-1.5">
+                            🔎 Filtrar
+                        </button>
+                        <button type="button" onclick="exportarExcel()" class="px-2 py-1.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded transition text-xs">
+                            📊 Excel
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Contador -->
+                <div class="mt-2 text-center text-xs font-semibold" style="color: var(--text-secondary);">
+                    📊 {{ cantidad_archivos }} archivos
+                </div>
+            </div>
+
+            <!-- Lista de Archivos -->
+            <div id="lista-documentos" class="p-1.5 space-y-1">
+                {% for item in archivos %}
+                    {% set nombre = item.archivo.split('/')[-1] %}
+                    {% set ruta_completa = item.sede ~ '/' ~ item.archivo %}
+                    
+                    <div data-archivo="{{ ruta_completa }}" 
+                         data-sede="{{ item.sede }}"
+                         data-archivo-path="{{ item.archivo }}"
+                         class="lista-item rounded p-2 cursor-pointer
+                                {% if ruta_completa == archivo_actual %}seleccionado{% endif %}"
+                         style="background: var(--bg-tertiary); border: 1px solid var(--border-primary);"
+                         onclick="cargarDocumento('{{ item.sede }}', '{{ item.archivo }}', '{{ nombre }}')">
+                        
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-semibold truncate text-[#20c997]" title="{{ nombre }}">
+                                📄 {{ nombre }}
+                            </p>
+                            <p class="text-xs mt-0.5" style="color: var(--text-muted);">
+                                🗓 {{ item.fecha }}
+                            </p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Paginación -->
+            {% if total_paginas > 1 %}
+            <div class="px-2 py-1.5 sticky bottom-0" style="border-top: 1px solid var(--border-primary); background: var(--bg-secondary);">
+                <div class="flex justify-center items-center space-x-1.5">
+                    {% if pagina > 1 %}
+                    <a href="?pagina={{ pagina - 1 }}&sede={{ sede | join(',') }}&carpeta={{ ruta_relativa }}&filtro={{ filtro }}&por_pagina={{ por_pagina }}"
+                       class="px-2 py-1 rounded text-xs transition" style="background: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);">
+                        ← Ant
+                    </a>
+                    {% endif %}
+                    
+                    <span class="text-xs font-semibold" style="color: var(--text-secondary);">
+                        {{ pagina }}/{{ total_paginas }}
+                    </span>
+                    
+                    {% if pagina < total_paginas %}
+                    <a href="?pagina={{ pagina + 1 }}&sede={{ sede | join(',') }}&carpeta={{ ruta_relativa }}&filtro={{ filtro }}&por_pagina={{ por_pagina }}"
+                       class="px-3 py-1 bg-[#2e2e2e] border border-gray-600 rounded text-sm hover:bg-[#3d3d3d]">
+                        Siguiente →
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Divisor redimensionable -->
+        <div class="resizer" id="resizer" title="Arrastra para redimensionar"></div>
+
+        <!-- ============================================
+             PANEL CENTRAL: VISOR DE PDF
+             ============================================ -->
+        <div class="panel-central">
+            <!-- Header del visor -->
+            <div class="px-3 py-2" style="background: var(--bg-secondary); border-bottom: 1px solid var(--border-primary);">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2 flex-1 min-w-0">
+                        <!-- Botón menú (solo móvil) -->
+                        <button onclick="togglePanelIzquierdo()" class="md:hidden p-1 rounded transition" style="background: var(--bg-tertiary);" title="Abrir filtros">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                            </svg>
+                        </button>
+                        <h2 class="text-sm font-bold truncate" id="nombre-archivo" style="color: var(--text-primary);">
+                            📄 Selecciona un documento
+                        </h2>
+                    </div>
+                    
+                    <div class="flex items-center space-x-1.5 ml-2">
+                        <!-- Botón Renombrar -->
+                        <button id="btn-renombrar" 
+                                onclick="irRenombrar()" 
+                                class="px-2 py-1 rounded transition text-xs font-semibold hidden"
+                                style="background: var(--brand-primary); color: white; border: 1px solid var(--brand-secondary);"
+                                title="Renombrar archivo">
+                            <span class="hidden sm:inline">✏️ Renombrar</span>
+                            <span class="sm:hidden">✏️</span>
+                        </button>
+                        
+                        <!-- Botón de información -->
+                        <button onclick="togglePanelDerecho()" 
+                                class="px-2 py-1 rounded transition text-xs font-semibold" style="background: var(--bg-tertiary); border: 1px solid var(--border-primary); color: var(--text-primary);">
+                            <span class="hidden sm:inline">ℹ️ Info</span>
+                            <span class="sm:hidden">ℹ️</span>
+                        </button>
+                        
+                        <!-- Botón Borrar (solo admins) -->
+                        {% if session.rol in ['admin', 'interno'] %}
+                        <button id="btn-eliminar" 
+                                onclick="eliminarDocumento()" 
+                                class="btn-danger hidden">
+                            <span class="hidden sm:inline">🗑️ Eliminar</span>
+                            <span class="sm:hidden">🗑️</span>
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visor de PDF -->
+            <div class="visor-pdf">
+                <div id="estado-inicial" class="flex items-center justify-center h-full" style="color: var(--text-muted);">
+                    <div class="text-center">
+                        <svg class="w-32 h-32 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: var(--text-muted);">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        <p class="text-xl font-semibold" style="color: var(--text-secondary);">Selecciona un documento de la lista</p>
+                        <p class="text-sm mt-2" style="color: var(--text-muted);">El visor de PDF aparecerá aquí</p>
+                    </div>
+                </div>
+                
+                <iframe id="pdf-viewer" class="hidden" style="width:100%;height:100%;"></iframe>
+                
+                <div id="estado-cargando" class="hidden flex items-center justify-center h-full" style="background: var(--bg-tertiary);">
+                    <div class="text-center">
+                        <div class="estado-cargando inline-block w-16 h-16 border-4 border-[#20c997] border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p class="text-lg font-semibold">Cargando documento...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================
+             PANEL DERECHO: METADATA Y OBSERVACIONES
+             ============================================ -->
+        <div class="panel-derecho" id="panel-metadata">
+            <div class="p-3">
+                <div class="flex items-center justify-between mb-3 sticky top-0 pb-2" style="background: var(--bg-secondary); border-bottom: 1px solid var(--border-primary);">
+                    <h3 class="text-sm font-bold text-[#20c997]">📊 Información</h3>
+                    <button onclick="togglePanelDerecho()" class="transition" style="color: var(--text-muted);">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div id="metadata-content">
+                    <p class="text-center py-4 text-xs" style="color: var(--text-muted);">Selecciona un documento</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let documentoActual = {
+            sede: null,
+            archivo: null,
+            nombre: null
+        };
+
+        // Cargar documento seleccionado
+        function cargarDocumento(sede, archivo, nombre) {
+            documentoActual = { sede, archivo, nombre };
+            
+            // Actualizar UI
+            document.getElementById('nombre-archivo').innerHTML = `📄 ${nombre}`;
+            document.getElementById('estado-inicial').classList.add('hidden');
+            document.getElementById('pdf-viewer').classList.add('hidden');
+            document.getElementById('estado-cargando').classList.remove('hidden');
+            
+            // Mostrar botón renombrar
+            const btnRenombrar = document.getElementById('btn-renombrar');
+            if (btnRenombrar) {
+                btnRenombrar.classList.remove('hidden');
+            }
+            
+            // Mostrar botón eliminar (si aplica)
+            const btnEliminar = document.getElementById('btn-eliminar');
+            if (btnEliminar) {
+                btnEliminar.classList.remove('hidden');
+            }
+            
+            // Marcar como seleccionado
+            document.querySelectorAll('.lista-item').forEach(item => {
+                item.classList.remove('seleccionado');
+            });
+            event.currentTarget.classList.add('seleccionado');
+            
+            // Cargar PDF - Encodear la ruta del archivo
+            const urlPdf = `/causaciones/ver/${encodeURIComponent(sede)}/${archivo}`;
+            console.log('🔍 Cargando PDF:', urlPdf);
+            
+            // MEJORA: Forzar limpieza y recarga inmediata
+            const viewer = document.getElementById('pdf-viewer');
+            viewer.src = 'about:blank'; // Limpiar primero
+            
+            setTimeout(() => {
+                document.getElementById('estado-cargando').classList.add('hidden');
+                viewer.src = urlPdf + '?t=' + Date.now(); // Cachebuster
+                viewer.classList.remove('hidden');
+                
+                // Listener para carga exitosa
+                viewer.onload = function() {
+                    console.log('✅ PDF cargado correctamente');
+                    // Mostrar panel de información
+                    mostrarInfoArchivo(sede, archivo, nombre);
+                };
+                
+                // Listener para errores de carga
+                viewer.onerror = function() {
+                    console.error('❌ Error cargando PDF:', urlPdf);
+                    document.getElementById('pdf-viewer').classList.add('hidden');
+                    document.getElementById('estado-cargando').innerHTML = `
+                        <div class="text-center">
+                            <p class="text-red-400 text-lg font-bold">❌ Error al cargar PDF</p>
+                            <p class="text-sm mt-2" style="color: var(--text-muted);">No se pudo cargar el documento</p>
+                        </div>
+                    `;
+                    document.getElementById('estado-cargando').classList.remove('hidden');
+                };
+            }, 100); // Reducido de 500ms a 100ms
+            
+            // Cargar metadata
+            cargarMetadata(sede, archivo);
+        }
+
+        // Cargar metadata del documento
+        async function cargarMetadata(sede, archivo) {
+            try {
+                const response = await fetch(`/causaciones/api/metadata/${sede}/${archivo}`);
+                const data = await response.json();
+                
+                if (data.success && data.metadata) {
+                    mostrarMetadata(data.metadata);
+                } else {
+                    document.getElementById('metadata-content').innerHTML = `
+                        <div class="text-yellow-400 text-center py-4">
+                            ⚠️ No se encontró información en la base de datos
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error cargando metadata:', error);
+                document.getElementById('metadata-content').innerHTML = `
+                    <div class="text-red-400 text-center py-4">
+                        ❌ Error al cargar información
+                    </div>
+                `;
+            }
+        }
+
+        // Mostrar metadata en el panel
+        function mostrarMetadata(metadata) {
+            let html = '';
+            
+            if (metadata.existe_en_bd) {
+                html = `
+                    <div class="space-y-2">
+                        <!-- Ubicación del Archivo -->
+                        <div class="badge-metadata bg-blue-900/30 border-blue-600">
+                            <h4 class="font-bold text-blue-400 mb-1 text-xs">📂 Ubicación</h4>
+                            <div class="text-xs break-all">
+                                <span class="font-mono" style="color: var(--text-secondary);">${metadata.ruta_completa || 'N/A'}</span>
+                            </div>
+                        </div>
+
+                        <!-- Información General -->
+                        <div class="badge-metadata">
+                            <h4 class="font-bold text-[#20c997] mb-1 text-xs">📋 Datos Generales</h4>
+                            <div class="space-y-1 text-xs">
+                                <div><span style="color: var(--text-muted);">Consecutivo:</span> <span class="font-semibold" style="color: var(--text-primary);">${metadata.consecutivo || 'N/A'}</span></div>
+                                <div><span style="color: var(--text-muted);">Tipo:</span> <span class="font-semibold" style="color: var(--text-primary);">${metadata.tipo_documento || 'N/A'}</span></div>
+                                <div><span style="color: var(--text-muted);">Centro:</span> <span class="font-semibold" style="color: var(--text-primary);">${metadata.centro_operacion || 'N/A'}</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Fechas -->
+                        <div class="badge-metadata">
+                            <h4 class="font-bold text-[#20c997] mb-1 text-xs">📅 Fechas</h4>
+                            <div class="space-y-1 text-xs">
+                                <div><span style="color: var(--text-muted);">Factura:</span> <span class="font-semibold" style="color: var(--text-primary);">${metadata.fecha_factura || 'N/A'}</span></div>
+                                <div><span style="color: var(--text-muted);">Recepción:</span> <span class="font-semibold" style="color: var(--text-primary);">${metadata.fecha_recepcion || 'N/A'}</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Tercero -->
+                        <div class="badge-metadata">
+                            <h4 class="font-bold text-[#20c997] mb-1 text-xs">🏢 Tercero</h4>
+                            <div class="space-y-1 text-xs">
+                                <div><span style="color: var(--text-muted);">NIT:</span> <span class="font-semibold" style="color: var(--text-primary);">${metadata.nit_tercero || 'N/A'}</span></div>
+                                <div><span style="color: var(--text-muted);">Razón Social:</span> <span class="font-semibold" style="color: var(--text-primary);">${metadata.razon_social || 'N/A'}</span></div>
+                            </div>
+                        </div>
+
+                        <!-- Valor -->
+                        <div class="badge-metadata">
+                            <h4 class="font-bold text-[#20c997] mb-1 text-xs">💰 Valor</h4>
+                            <div class="text-lg font-bold text-[#20c997]">
+                                $${new Intl.NumberFormat('es-CO').format(metadata.valor_total || 0)}
+                            </div>
+                        </div>
+
+                        <!-- Usuario -->
+                        <div class="badge-metadata">
+                            <h4 class="font-bold text-[#20c997] mb-1 text-xs">👤 Registro</h4>
+                            <div class="text-xs">
+                                <span class="font-semibold" style="color: var(--text-primary);">${metadata.usuario_registro || 'N/A'}</span>
+                            </div>
+                        </div>
+
+                        <!-- Observaciones -->
+                        ${metadata.observaciones && metadata.observaciones.length > 0 ? `
+                            <div>
+                                <h4 class="font-bold text-[#20c997] mb-2 text-xs">📝 Observaciones (${metadata.observaciones.length})</h4>
+                                <div class="space-y-1.5">
+                                    ${metadata.observaciones.map(obs => `
+                                        <div class="observacion-item">
+                                            <p class="text-sm text-white mb-1">${obs.observacion}</p>
+                                            <div class="flex justify-between text-xs text-gray-400">
+                                                <span>👤 ${obs.usuario}</span>
+                                                <span>🗓 ${obs.fecha}</span>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        ` : '<div class="text-gray-400 text-sm">Sin observaciones registradas</div>'}
+                    </div>
+                `;
+            } else {
+                // Si no existe en BD, al menos mostrar la ubicación
+                html = `
+                    <div class="space-y-2">
+                        <!-- Ubicación del Archivo -->
+                        <div class="badge-metadata bg-blue-900/30 border-blue-600">
+                            <h4 class="font-bold text-blue-400 mb-1 text-xs">📂 Ubicación</h4>
+                            <div class="text-xs break-all">
+                                <span class="font-mono" style="color: var(--text-secondary);">${metadata.ruta_completa || 'N/A'}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="badge-metadata text-center">
+                            <p class="text-yellow-400 text-xs">⚠️ Documento no registrado en la base de datos</p>
+                            <p class="text-xs mt-1" style="color: var(--text-muted);">Este archivo existe en el sistema pero no tiene información asociada.</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('metadata-content').innerHTML = html;
+        }
+
+        // NUEVA FUNCIÓN: Mostrar información del archivo en el panel derecho
+        function mostrarInfoArchivo(sede, archivo, nombre) {
+            const rutaCompleta = `${sede}/${archivo}`;
+            const infoHtml = `
+                <div class="space-y-2">
+                    <!-- Información del Archivo Activo -->
+                    <div class="badge-metadata bg-green-900/30 border-green-600">
+                        <h4 class="font-bold text-green-400 mb-2 text-xs">📄 Documento Actual</h4>
+                        <div class="space-y-1.5 text-xs">
+                            <div>
+                                <span style="color: var(--text-muted);">Nombre:</span>
+                                <div class="font-semibold break-all mt-0.5" style="color: var(--text-primary);">${nombre}</div>
+                            </div>
+                            <div class="mt-2">
+                                <span style="color: var(--text-muted);">Ruta completa:</span>
+                                <div class="font-mono text-[10px] break-all mt-0.5 p-2 rounded" style="background: var(--bg-tertiary); color: var(--text-secondary);">${rutaCompleta}</div>
+                            </div>
+                            <div class="mt-2">
+                                <span style="color: var(--text-muted);">Sede:</span>
+                                <span class="font-semibold" style="color: var(--text-primary);"> ${sede}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Insertar al inicio del panel de metadata
+            const metadataContent = document.getElementById('metadata-content');
+            metadataContent.innerHTML = infoHtml + metadataContent.innerHTML;
+            
+            // Abrir panel derecho automáticamente si está cerrado
+            const panel = document.getElementById('panel-metadata');
+            if (!panel.classList.contains('activo')) {
+                panel.classList.add('activo');
+            }
+        }
+
+        // Toggle panel derecho
+        function togglePanelDerecho() {
+            const panel = document.getElementById('panel-metadata');
+            panel.classList.toggle('activo');
+        }
+
+        // Exportar listado a Excel
+        function exportarExcel() {
+            // Obtener filtros actuales de la URL
+            const params = new URLSearchParams(window.location.search);
+            
+            // Construir URL de exportación con los mismos filtros
+            const exportUrl = `/causaciones/exportar/excel?${params.toString()}`;
+            
+            // Mostrar notificación
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            notification.innerHTML = '📊 Generando archivo Excel...';
+            document.body.appendChild(notification);
+            
+            // Abrir URL de descarga
+            window.location.href = exportUrl;
+            
+            // Remover notificación después de 3 segundos
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Ir a renombrar documento
+        function irRenombrar() {
+            if (!documentoActual.sede || !documentoActual.archivo) {
+                mostrarNotificacion('⚠️ No hay documento seleccionado', 'warning');
+                return;
+            }
+
+            // Obtener filtros actuales
+            const params = new URLSearchParams(window.location.search);
+            const carpeta = params.get('carpeta') || '';
+            const filtro = params.get('filtro') || '';
+            const pagina = params.get('pagina') || 1;
+            const por_pagina = params.get('por_pagina') || 50;
+
+            // Construir URL con filtros - NO encodear el archivo, solo la sede si es necesario
+            const url = `/causaciones/renombrar/${documentoActual.sede}/${documentoActual.archivo}?carpeta=${carpeta}&filtro=${filtro}&pagina=${pagina}&por_pagina=${por_pagina}`;
+            
+            console.log('Navegando a renombrar:', url);
+            console.log('Documento actual:', documentoActual);
+            
+            // Mostrar notificación
+            mostrarNotificacion('📝 Abriendo editor de nombre...', 'info');
+            
+            // Ir directamente sin timeout para ver errores
+            window.location.href = url;
+        }
+
+        // Eliminar documento (solo admins)
+        async function eliminarDocumento() {
+            if (!documentoActual.sede || !documentoActual.archivo) {
+                mostrarNotificacion('⚠️ No hay documento seleccionado', 'warning');
+                return;
+            }
+
+            if (!confirm(`¿Estás seguro de eliminar el archivo "${documentoActual.nombre}"?\n\nEsta acción no se puede deshacer.`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/causaciones/api/eliminar/${documentoActual.sede}/${documentoActual.archivo}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    mostrarNotificacion('✅ Archivo eliminado correctamente', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    mostrarNotificacion('❌ Error: ' + (data.error || 'No se pudo eliminar el archivo'), 'error');
+                }
+            } catch (error) {
+                console.error('Error eliminando archivo:', error);
+                mostrarNotificacion('❌ Error al eliminar el archivo', 'error');
+            }
+        }
+
+        // Sistema de notificaciones flotantes
+        function mostrarNotificacion(mensaje, tipo = 'info') {
+            const colores = {
+                'success': 'bg-green-600',
+                'error': 'bg-red-600',
+                'warning': 'bg-yellow-600',
+                'info': 'bg-[#20c997]'
+            };
+
+            const notificacion = document.createElement('div');
+            notificacion.className = `fixed top-4 right-4 ${colores[tipo]} text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-slideIn`;
+            notificacion.innerHTML = mensaje;
+            notificacion.style.animation = 'slideInRight 0.3s ease-out';
+            
+            document.body.appendChild(notificacion);
+            
+            setTimeout(() => {
+                notificacion.style.animation = 'slideOutRight 0.3s ease-in';
+                setTimeout(() => notificacion.remove(), 300);
+            }, 3000);
+        }
+
+        // Funciones de filtro rápido de sedes
+        function seleccionarTodas() {
+            const selector = document.getElementById('selector-sedes');
+            // Seleccionar la opción "Todo"
+            for (let option of selector.options) {
+                option.selected = (option.value === 'Todo');
+            }
+        }
+
+        function seleccionarAprobadas() {
+            const selector = document.getElementById('selector-sedes');
+            // Seleccionar todas las sedes que NO terminan en _C
+            for (let option of selector.options) {
+                if (option.value === 'Todo' || option.disabled) {
+                    option.selected = false;
+                } else {
+                    option.selected = !option.value.endsWith('_C');
+                }
+            }
+        }
+
+        function seleccionarCausadas() {
+            const selector = document.getElementById('selector-sedes');
+            // Seleccionar todas las sedes que terminan en _C
+            for (let option of selector.options) {
+                if (option.value === 'Todo' || option.disabled) {
+                    option.selected = false;
+                } else {
+                    option.selected = option.value.endsWith('_C');
+                }
+            }
+        }
+
+        // ============================================
+        // SISTEMA DE TEMAS (CLARO/OSCURO)
+        // ============================================
+        function toggleTheme() {
+            const body = document.body;
+            const iconLight = document.getElementById('icon-light');
+            const iconDark = document.getElementById('icon-dark');
+            
+            if (body.getAttribute('data-theme') === 'light') {
+                // Cambiar a oscuro
+                body.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'dark');
+                iconLight.classList.add('hidden');
+                iconDark.classList.remove('hidden');
+            } else {
+                // Cambiar a claro
+                body.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+                iconLight.classList.remove('hidden');
+                iconDark.classList.add('hidden');
+            }
+        }
+
+        // ============================================
+        // RESPONSIVE - TOGGLE PANELES MÓVIL
+        // ============================================
+        function togglePanelIzquierdo() {
+            const panel = document.getElementById('panel-izquierdo');
+            const overlay = document.getElementById('panel-overlay');
+            
+            panel.classList.toggle('activo');
+            
+            // Mostrar overlay en móvil
+            if (window.innerWidth <= 768) {
+                overlay.classList.toggle('activo');
+            }
+        }
+
+        // Override togglePanelDerecho para responsive
+        const togglePanelDerechoOriginal = togglePanelDerecho;
+        togglePanelDerecho = function() {
+            const panel = document.getElementById('panel-metadata');
+            const overlay = document.getElementById('panel-overlay');
+            
+            panel.classList.toggle('activo');
+            
+            // Mostrar overlay en móvil
+            if (window.innerWidth <= 768) {
+                overlay.classList.toggle('activo');
+            }
+        };
+
+        function cerrarPaneles() {
+            const panelIzq = document.getElementById('panel-izquierdo');
+            const panelDer = document.getElementById('panel-metadata');
+            const overlay = document.getElementById('panel-overlay');
+            
+            panelIzq.classList.remove('activo');
+            panelDer.classList.remove('activo');
+            overlay.classList.remove('activo');
+        }
+
+        // Cerrar panel izquierdo al seleccionar documento en móvil
+        const cargarDocumentoOriginal = cargarDocumento;
+        cargarDocumento = function(sede, archivo, nombre) {
+            cargarDocumentoOriginal(sede, archivo, nombre);
+            
+            // Cerrar panel izquierdo en móvil
+            if (window.innerWidth <= 768) {
+                cerrarPaneles();
+            }
+        };
+
+        // =============================================
+        // FUNCIONALIDAD DE PANELES REDIMENSIONABLES
+        // =============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            const panelIzq = document.getElementById('panel-izquierdo');
+            const resizer = document.getElementById('resizer');
+            let isResizing = false;
+            
+            // Iniciar el redimensionamiento
+            resizer.addEventListener('mousedown', function(e) {
+                isResizing = true;
+                document.body.classList.add('resizing');
+                e.preventDefault();
+            });
+            
+            // Durante el redimensionamiento
+            document.addEventListener('mousemove', function(e) {
+                if (!isResizing) return;
+                
+                const containerRect = panelIzq.parentElement.getBoundingClientRect();
+                const newWidth = e.clientX - containerRect.left;
+                const minWidth = 200;
+                const maxWidth = 600;
+                
+                // Aplicar restricciones
+                if (newWidth >= minWidth && newWidth <= maxWidth) {
+                    panelIzq.style.width = newWidth + 'px';
+                }
+            });
+            
+            // Finalizar el redimensionamiento
+            document.addEventListener('mouseup', function() {
+                if (isResizing) {
+                    isResizing = false;
+                    document.body.classList.remove('resizing');
+                    // Guardar el ancho en localStorage
+                    localStorage.setItem('panelIzqWidth', panelIzq.style.width);
+                }
+            });
+            
+            // Restaurar ancho guardado
+            const savedWidth = localStorage.getItem('panelIzqWidth');
+            if (savedWidth) {
+                panelIzq.style.width = savedWidth;
+            }
+        });
+
+        // Cargar tema guardado al iniciar
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme');
+            const iconLight = document.getElementById('icon-light');
+            const iconDark = document.getElementById('icon-dark');
+            
+            if (savedTheme === 'light') {
+                document.body.setAttribute('data-theme', 'light');
+                iconLight.classList.remove('hidden');
+                iconDark.classList.add('hidden');
+            } else {
+                iconLight.classList.add('hidden');
+                iconDark.classList.remove('hidden');
+            }
+        });
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

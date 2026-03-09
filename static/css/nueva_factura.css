@@ -1,0 +1,693 @@
+/* =============================================
+   🎨 NUEVA_FACTURA.CSS - DISEÑO PROFESIONAL
+   Supertiendas Cañaveral - 2025
+   ============================================= */
+
+/* =============================================
+   🎨 VARIABLES CSS - COLORES INSTITUCIONALES
+   ============================================= */
+:root {
+    /* Colores Base */
+    --bg-color: #f8f9fa;
+    --card-bg: #ffffff;
+    --text-color: #2c3e50;
+    --border-color: #dee2e6;
+    --input-bg: #ffffff;
+    --input-border: #ced4da;
+    
+    /* Verde Institucional Supertiendas Cañaveral */
+    --brand-green: #16a34a;
+    --brand-green-dark: #15803d;
+    --brand-green-light: #dcfce7;
+    --brand-green-hover: #22c55e;
+    
+    /* Colores de Estado */
+    --red-error: #dc3545;
+    --red-light: #f8d7da;
+    --orange-warning: #fd7e14;
+    --orange-light: #fff3cd;
+    --blue-info: #0d6efd;
+    --blue-light: #cfe2ff;
+    
+    /* Sombras */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+    --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+}
+
+/* =============================================
+   📐 BASE STYLES
+   ============================================= */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    line-height: 1.6;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+/* =============================================
+   🎯 HEADER FIJO
+   ============================================= */
+.header {
+    background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+    color: white;
+    padding: 12px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow-md);
+    flex-shrink: 0;
+    z-index: 1000;
+}
+
+.header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.user-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+}
+
+.dark-mode-toggle {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.dark-mode-toggle:hover {
+    background: rgba(255,255,255,0.25);
+}
+
+.btn-salir {
+    background: var(--red-error);
+    color: white;
+    padding: 6px 16px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s;
+}
+
+.btn-salir:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+}
+
+/* =============================================
+   📐 MAIN CONTENT (SCROLLEABLE)
+   ============================================= */
+.main-content {
+    flex: 1;
+    overflow: hidden;
+    padding: 15px;
+    display: flex;
+    gap: 15px;
+}
+
+/* =============================================
+   📐 LAYOUT: 40% FORMULARIO + 60% TABLA
+   ============================================= */
+.content-layout {
+    display: flex;
+    gap: 15px;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+}
+
+/* =============================================
+   📝 SECCIÓN FORMULARIO (IZQUIERDA 40%)
+   ============================================= */
+.form-section {
+    flex: 0 0 40%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 8px;
+}
+
+.card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow-md);
+}
+
+/* =============================================
+   📝 FORMULARIO - UNA COLUMNA VERTICAL
+   ============================================= */
+#registerForm {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.form-group label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: var(--text-color);
+    margin-bottom: 2px;
+}
+
+.form-group label.required::after {
+    content: " *";
+    color: var(--red-error);
+    font-weight: bold;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 8px 12px;
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    font-size: 0.875rem;
+    background: var(--input-bg);
+    color: var(--text-color);
+    transition: all 0.2s;
+    font-family: inherit;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--brand-green);
+    box-shadow: 0 0 0 3px var(--brand-green-light);
+}
+
+.form-group input:disabled,
+.form-group input:read-only {
+    background: #e9ecef;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* =============================================
+   📏 ANCHOS ESPECÍFICOS POR CAMPO (en ch = caracteres)
+   ============================================= */
+#prefijo { width: 12ch; } /* 10 caracteres + padding */
+#folio { width: 17ch; } /* 15 caracteres + padding */
+#nit_emisor { width: 22ch; } /* 20 caracteres + padding */
+#valor_bruto,
+#valor_total,
+#valor_iva,
+#valor_descuento,
+#valor_ret_fte,
+#valor_ret_ica,
+#valor_ret_iva { width: 14ch; } /* 12 caracteres + padding */
+#fecha_expedicion,
+#fecha_radicacion,
+#fecha_vencimiento { width: 14ch; } /* Fecha dd/mm/aaaa */
+#centro_operacion,
+#co { min-width: 32ch; } /* 30 caracteres + padding */
+
+/* Campos de texto largo (full width) */
+#usuario_solicita,
+#usuario_compra,
+#quien_recibe,
+#observaciones {
+    width: 100%;
+}
+
+/* =============================================
+   🎨 PANEL DE INFORMACIÓN DE TERCERO
+   ============================================= */
+#info_tercero {
+    display: none;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-size: 0.875rem;
+    border: 1px solid var(--border-color);
+    background: var(--bg-color);
+}
+
+#info_tercero.success {
+    background: var(--brand-green-light);
+    border-color: var(--brand-green);
+}
+
+#info_tercero.warning {
+    background: #fff4e6;
+    border-color: #ff9800;
+}
+
+#info_tercero p {
+    margin: 4px 0;
+}
+
+/* =============================================
+   🔽 SECCIÓN COLAPSABLE (RETENCIONES)
+   ============================================= */
+.collapsible-section {
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 8px 0;
+}
+
+.collapsible-header {
+    background: linear-gradient(to right, var(--brand-green-light), transparent);
+    padding: 10px 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--brand-green-dark);
+    transition: background 0.3s;
+}
+
+.collapsible-header:hover {
+    background: var(--brand-green-light);
+}
+
+.collapsible-icon {
+    transition: transform 0.3s;
+    font-size: 1.2rem;
+}
+
+.collapsible-section.open .collapsible-icon {
+    transform: rotate(180deg);
+}
+
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+.collapsible-section.open .collapsible-content {
+    max-height: 500px;
+    padding: 15px;
+}
+
+.expandable-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+/* =============================================
+   🎯 BOTONES DE ACCIÓN
+   ============================================= */
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 10px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn-primary {
+    background: var(--brand-green);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--brand-green-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-danger {
+    background: var(--red-error);
+    color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+    background: #c82333;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-warning {
+    background: var(--orange-warning);
+    color: white;
+}
+
+.btn-warning:hover:not(:disabled) {
+    background: #e8590c;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-info {
+    background: var(--blue-info);
+    color: white;
+}
+
+.btn-info:hover:not(:disabled) {
+    background: #0b5ed7;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* =============================================
+   📊 SECCIÓN TABLA (DERECHA 60%)
+   ============================================= */
+.table-section {
+    flex: 0 0 60%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.table-section .card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.table-section h3 {
+    color: var(--brand-green-dark);
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--brand-green-light);
+}
+
+/* =============================================
+   📊 TABLA DE FACTURAS (SCROLL INDEPENDIENTE)
+   ============================================= */
+.table-container {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--card-bg);
+    font-size: 0.8rem;
+}
+
+thead {
+    background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+thead th {
+    padding: 10px 8px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+tbody td {
+    padding: 8px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.8rem;
+}
+
+tbody tr:hover {
+    background: var(--brand-green-light);
+}
+
+tbody tr.duplicate {
+    background: var(--red-light) !important;
+}
+
+tbody tr.duplicate td {
+    color: var(--red-error);
+    font-weight: 600;
+}
+
+/* =============================================
+   ✅ CHECKBOX
+   ============================================= */
+input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--brand-green);
+}
+
+/* =============================================
+   📜 SCROLLBARS PERSONALIZADOS
+   ============================================= */
+.form-section::-webkit-scrollbar,
+.table-container::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.form-section::-webkit-scrollbar-track,
+.table-container::-webkit-scrollbar-track {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+
+.form-section::-webkit-scrollbar-thumb,
+.table-container::-webkit-scrollbar-thumb {
+    background: var(--brand-green);
+    border-radius: 10px;
+}
+
+.form-section::-webkit-scrollbar-thumb:hover,
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: var(--brand-green-dark);
+}
+
+/* =============================================
+   🔔 MENSAJES Y ALERTAS
+   ============================================= */
+.message {
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    font-weight: 500;
+    display: none;
+    border-left: 4px solid;
+}
+
+.message.success {
+    background: var(--brand-green-light);
+    color: var(--brand-green-dark);
+    border-color: var(--brand-green);
+}
+
+.message.error {
+    background: var(--red-light);
+    color: var(--red-error);
+    border-color: var(--red-error);
+}
+
+.message.warning {
+    background: var(--orange-light);
+    color: #856404;
+    border-color: var(--orange-warning);
+}
+
+.message.info {
+    background: var(--blue-light);
+    color: #084298;
+    border-color: var(--blue-info);
+}
+
+/* =============================================
+   🪟 MODAL
+   ============================================= */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(3px);
+}
+
+.modal-content {
+    background: var(--card-bg);
+    margin: 10% auto;
+    padding: 0;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: var(--shadow-lg);
+    animation: slideDown 0.3s ease-out;
+}
+
+.modal-header {
+    background: var(--brand-green);
+    color: white;
+    padding: 16px 20px;
+    border-radius: 12px 12px 0 0;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.modal-body {
+    padding: 20px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.modal-footer {
+    padding: 15px 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =============================================
+   📱 RESPONSIVE - MOBILE
+   ============================================= */
+@media (max-width: 1200px) {
+    .content-layout {
+        flex-direction: column;
+    }
+    
+    .form-section,
+    .table-section {
+        flex: 1 1 auto;
+        min-height: 400px;
+    }
+    
+    .form-row {
+        flex-wrap: wrap;
+    }
+    
+    /* En móvil, campos full width */
+    #prefijo, #folio, #nit_emisor,
+    #valor_bruto, #valor_total, #valor_iva,
+    #fecha_expedicion, #fecha_radicacion, #fecha_vencimiento,
+    #centro_operacion, #co {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    .button-group button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 10px;
+        padding: 10px;
+    }
+    
+    .header h2 {
+        font-size: 1.2rem;
+    }
+    
+    .header-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+    
+    .main-content {
+        padding: 10px;
+    }
+    
+    .card {
+        padding: 15px;
+    }
+    
+    thead th {
+        font-size: 0.7rem;
+        padding: 8px 4px;
+    }
+    
+    tbody td {
+        font-size: 0.7rem;
+        padding: 6px 4px;
+    }
+}

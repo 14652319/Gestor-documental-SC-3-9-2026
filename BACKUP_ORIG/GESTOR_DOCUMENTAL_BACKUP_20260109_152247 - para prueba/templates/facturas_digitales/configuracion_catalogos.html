@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Configuración de Catálogos - Facturas Digitales</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --canaveral-green: #0A6E3F;
+            --canaveral-green-dark: #085330;
+            --canaveral-yellow: #FFB900;
+            --canaveral-yellow-light: #FFD966;
+            --brand-primary: #0A6E3F;
+            --brand-secondary: #FFB900;
+            --bg-light: #F5F5F5;
+            --bg-dark: #1E1E1E;
+            --text-light: #212529;
+            --text-dark: #E9ECEF;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .light-mode {
+            background-color: var(--bg-light);
+            color: var(--text-light);
+        }
+
+        .dark-mode {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 24px;
+        }
+
+        .dark-mode .card {
+            background: #2D2D2D;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Tabs */
+        .tab-button {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            border-bottom: 3px solid transparent;
+            cursor: pointer;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab-button:hover {
+            color: var(--canaveral-green);
+        }
+
+        .tab-button.active {
+            color: var(--canaveral-green);
+            border-bottom-color: var(--canaveral-yellow);
+        }
+
+        .dark-mode .tab-button {
+            color: #aaa;
+        }
+
+        .dark-mode .tab-button.active {
+            color: var(--canaveral-yellow);
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--canaveral-green), var(--canaveral-green-dark));
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .dark-mode td {
+            border-bottom-color: #444;
+        }
+
+        tbody tr:hover {
+            background: rgba(10, 110, 63, 0.05);
+        }
+
+        .dark-mode tbody tr:hover {
+            background: rgba(255, 185, 0, 0.1);
+        }
+
+        /* Botones */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--canaveral-green), var(--canaveral-green-dark));
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(10, 110, 63, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--canaveral-yellow), #E6A500);
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #218838);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .dark-mode .modal-content {
+            background: #2D2D2D;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--canaveral-green);
+        }
+
+        .dark-mode .form-group label {
+            color: var(--canaveral-yellow);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--canaveral-green);
+        }
+
+        .dark-mode .form-control {
+            background: #1E1E1E;
+            border-color: #444;
+            color: white;
+        }
+
+        .dark-mode .form-control:focus {
+            border-color: var(--canaveral-yellow);
+        }
+
+        /* Badge Status */
+        .badge-activo {
+            background: #28a745;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-inactivo {
+            background: #dc3545;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Toggle */
+        .toggle-theme {
+            background: var(--canaveral-green);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 20px;
+            transition: all 0.3s;
+        }
+
+        .toggle-theme:hover {
+            background: var(--canaveral-green-dark);
+            transform: scale(1.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .tab-button {
+                padding: 10px 12px;
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 8px;
+                font-size: 13px;
+            }
+
+            .btn-primary {
+                padding: 8px 16px;
+                font-size: 14px;
+            }
+        }
+
+        /* Animaciones */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <!-- Header -->
+    <header style="background: linear-gradient(135deg, var(--canaveral-green), var(--canaveral-green-dark)); color: white; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <a href="/facturas-digitales/dashboard" style="background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 8px; color: white; text-decoration: none; font-weight: 600;">
+                    ← Volver
+                </a>
+                <h1 class="text-2xl font-bold">⚙️ Configuración de Catálogos</h1>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="font-semibold">👤 {{ usuario }}</span>
+                <button onclick="toggleTheme()" class="toggle-theme">🌓</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="container mx-auto mt-6 px-4 pb-6">
+        <!-- Tabs -->
+        <div class="card fade-in">
+            <div class="flex flex-wrap gap-2 border-b-2 border-gray-200 dark:border-gray-700 mb-6">
+                <button class="tab-button active" onclick="cambiarTab('tipo-documento')">📄 Tipo Documento</button>
+                <button class="tab-button" onclick="cambiarTab('forma-pago')">💳 Forma de Pago</button>
+                <button class="tab-button" onclick="cambiarTab('tipo-servicio')">🛠️ Tipo de Servicio</button>
+                <button class="tab-button" onclick="cambiarTab('departamento')">🏢 Departamentos</button>
+                <button class="tab-button" onclick="cambiarTab('usuarios')">👥 Usuarios</button>
+            </div>
+
+            <!-- Botón Nuevo -->
+            <div class="mb-4" id="btn-nuevo-container">
+                <button onclick="abrirModalNuevo()" class="btn-primary">
+                    ➕ Nuevo Registro
+                </button>
+            </div>
+            
+            <!-- Buscador de Usuarios (solo visible en tab usuarios) -->
+            <div class="mb-4" id="search-usuario-container" style="display: none;">
+                <div style="position: relative; max-width: 500px;">
+                    <input 
+                        type="text" 
+                        id="search-usuario" 
+                        placeholder="🔍 Buscar por usuario, email o departamento..." 
+                        onkeyup="buscarUsuario()"
+                        style="width: 100%; padding: 12px 40px 12px 40px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; transition: all 0.3s;"
+                        onfocus="this.style.borderColor='var(--canaveral-green)'; this.style.boxShadow='0 0 0 3px rgba(22, 101, 52, 0.1)';"
+                        onblur="this.style.borderColor='#e0e0e0'; this.style.boxShadow='none';"
+                    >
+                    <span style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #999; font-size: 18px; pointer-events: none;">🔍</span>
+                    <button 
+                        onclick="document.getElementById('search-usuario').value=''; buscarUsuario();" 
+                        style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; color: #999; font-size: 20px; cursor: pointer; padding: 5px; display: none;" 
+                        id="clear-search-btn"
+                        title="Limpiar búsqueda"
+                    >×</button>
+                </div>
+                <script>
+                    // Mostrar/ocultar botón limpiar según contenido
+                    document.getElementById('search-usuario').addEventListener('input', function() {
+                        const clearBtn = document.getElementById('clear-search-btn');
+                        clearBtn.style.display = this.value ? 'block' : 'none';
+                    });
+                </script>
+            </div>
+
+            <!-- Tabla de Datos -->
+            <div class="table-container">
+                <table id="tabla-datos">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Sigla</th>
+                            <th id="th-nombre">Descripción</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-datos">
+                        <tr>
+                            <td colspan="5" class="text-center">Cargando datos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Formulario -->
+    <div id="modal-form" class="modal">
+        <div class="modal-content fade-in">
+            <h3 class="text-2xl font-bold mb-6" style="color: var(--canaveral-green);">
+                <span id="modal-titulo">Nuevo Registro</span>
+            </h3>
+            
+            <form id="form-registro">
+                <input type="hidden" id="registro-id">
+                
+                <div class="form-group">
+                    <label for="sigla">Sigla *</label>
+                    <input type="text" id="sigla" class="form-control" maxlength="10" required 
+                           placeholder="Ej: FC, EST, DOM" style="text-transform: uppercase;">
+                </div>
+
+                <div class="form-group">
+                    <label for="descripcion" id="label-descripcion">Descripción *</label>
+                    <input type="text" id="descripcion" class="form-control" maxlength="100" required 
+                           placeholder="Descripción completa" style="text-transform: uppercase;">
+                </div>
+
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                        <input type="checkbox" id="activo" checked style="width: 20px; height: 20px;">
+                        <span>Activo</span>
+                    </label>
+                </div>
+
+                <div class="flex gap-3 mt-6">
+                    <button type="submit" class="btn-success">💾 Guardar</button>
+                    <button type="button" onclick="cerrarModal()" class="btn-danger">❌ Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Estado global
+        let tabActual = 'tipo-documento';
+        let modoEdicion = false;
+
+        // Theme Toggle
+        function toggleTheme() {
+            const body = document.body;
+            if (body.classList.contains('light-mode')) {
+                body.classList.remove('light-mode');
+                body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                body.classList.remove('dark-mode');
+                body.classList.add('light-mode');
+                localStorage.setItem('theme', 'light');
+            }
+        }
+
+        // Cargar tema guardado
+        window.addEventListener('DOMContentLoaded', () => {
+            const theme = localStorage.getItem('theme') || 'light';
+            document.body.classList.add(theme === 'dark' ? 'dark-mode' : 'light-mode');
+            cargarDatos();
+        });
+
+        // Cambiar Tab
+        function cambiarTab(tabla) {
+            tabActual = tabla;
+            
+            // Actualizar botones
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Mostrar/ocultar botón "Nuevo Registro" según el tab
+            const btnNuevoContainer = document.getElementById('btn-nuevo-container');
+            const searchUsuarioContainer = document.getElementById('search-usuario-container');
+            
+            if (tabla === 'usuarios') {
+                btnNuevoContainer.style.display = 'none'; // Usuarios ya existen, no se crean nuevos
+                searchUsuarioContainer.style.display = 'block'; // Mostrar buscador de usuarios
+                // Limpiar búsqueda anterior
+                const searchInput = document.getElementById('search-usuario');
+                if (searchInput) {
+                    searchInput.value = '';
+                }
+                // Mostrar todas las filas
+                const tbody = document.getElementById('tbody-datos');
+                if (tbody) {
+                    const rows = tbody.getElementsByTagName('tr');
+                    for (let i = 0; i < rows.length; i++) {
+                        rows[i].style.display = '';
+                    }
+                }
+            } else {
+                btnNuevoContainer.style.display = 'block';
+                searchUsuarioContainer.style.display = 'none'; // Ocultar buscador en otros tabs
+            }
+            
+            // Actualizar estructura de tabla según el tipo
+            const thead = document.querySelector('#tabla-datos thead tr');
+            
+            if (tabla === 'usuarios') {
+                // Tabla especial para usuarios
+                thead.innerHTML = `
+                    <th>ID</th>
+                    <th>Usuario</th>
+                    <th>Email</th>
+                    <th>Departamento</th>
+                    <th style="min-width: 200px;">Permisos</th>
+                    <th>Acciones</th>
+                `;
+            } else {
+                // Tabla estándar para catálogos
+                thead.innerHTML = `
+                    <th>ID</th>
+                    <th>Sigla</th>
+                    <th id="th-nombre">${tabla === 'departamento' ? 'Nombre' : 'Descripción'}</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                `;
+            }
+            
+            cargarDatos();
+        }
+        
+        // Función de búsqueda en tiempo real para usuarios
+        function buscarUsuario() {
+            const input = document.getElementById('search-usuario');
+            const filter = input.value.toLowerCase();
+            const tbody = document.getElementById('tbody-datos');
+            const rows = tbody.getElementsByTagName('tr');
+            
+            let visibleCount = 0;
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const cells = row.getElementsByTagName('td');
+                
+                if (cells.length > 1) {
+                    const usuario = cells[1].textContent || cells[1].innerText;
+                    const email = cells[2].textContent || cells[2].innerText;
+                    const departamentos = cells[3].textContent || cells[3].innerText;
+                    
+                    if (usuario.toLowerCase().indexOf(filter) > -1 || 
+                        email.toLowerCase().indexOf(filter) > -1 ||
+                        departamentos.toLowerCase().indexOf(filter) > -1) {
+                        row.style.display = '';
+                        visibleCount++;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                }
+            }
+            
+            // Mostrar mensaje si no hay resultados
+            if (visibleCount === 0 && rows.length > 0) {
+                const noResultRow = document.getElementById('no-results-row');
+                if (!noResultRow) {
+                    const newRow = tbody.insertRow(0);
+                    newRow.id = 'no-results-row';
+                    newRow.innerHTML = '<td colspan="6" style="text-align: center; color: #999; padding: 20px;">No se encontraron usuarios que coincidan con la búsqueda</td>';
+                }
+            } else {
+                const noResultRow = document.getElementById('no-results-row');
+                if (noResultRow) {
+                    noResultRow.remove();
+                }
+            }
+        }
+
+        // Cargar Datos
+        async function cargarDatos() {
+            const tbody = document.getElementById('tbody-datos');
+            const colspan = tabActual === 'usuarios' ? '6' : '5';
+            tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center">⏳ Cargando...</td></tr>`;
+
+            try {
+                const response = await fetch(`/facturas-digitales/configuracion/api/${tabActual}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    if (result.data.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center">No hay registros</td></tr>`;
+                        return;
+                    }
+
+                    tbody.innerHTML = '';
+                    
+                    if (tabActual === 'usuarios') {
+                        // NUEVO: Renderizado con múltiples departamentos
+                        result.data.forEach(item => {
+                            // Separar departamentos (viene como "TIC, FIN, MER")
+                            const departamentos = item.departamentos && item.departamentos !== 'Sin asignar' 
+                                ? item.departamentos.split(', ')
+                                : [];
+                            
+                            // Badges de departamentos con colores
+                            const coloresDepartamentos = {
+                                'TIC': '#007bff',
+                                'MER': '#28a745',
+                                'FIN': '#ffc107',
+                                'DOM': '#dc3545',
+                                'MYP': '#6f42c1'
+                            };
+                            
+                            const departamentosHTML = departamentos.length > 0
+                                ? departamentos.map(d => {
+                                    const color = coloresDepartamentos[d] || '#6c757d';
+                                    return `<span style="background: ${color}; color: white; padding: 4px 10px; border-radius: 12px; font-weight: 600; font-size: 12px; margin: 2px; display: inline-block;">${d}</span>`;
+                                }).join(' ')
+                                : '<span style="color: #999; font-style: italic;">Sin departamentos</span>';
+                            
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${item.id}</td>
+                                <td><strong>${item.usuario}</strong></td>
+                                <td>${item.email || item.correo || 'Sin email'}</td>
+                                <td>${departamentosHTML}</td>
+                                <td style="min-width: 200px;">
+                                    <span style="color: #999; font-size: 11px;">
+                                        ${departamentos.length > 0 ? `${departamentos.length} depto(s)` : 'Sin asignar'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button onclick="editarUsuario(${item.id})" class="btn-secondary">
+                                        ⚙️ Configurar
+                                    </button>
+                                </td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    } else {
+                        // Renderizado estándar para catálogos
+                        result.data.forEach(item => {
+                            const nombre = item.nombre || item.descripcion;
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${item.id}</td>
+                                <td><strong>${item.sigla}</strong></td>
+                                <td>${nombre}</td>
+                                <td>
+                                    <span class="${item.activo ? 'badge-activo' : 'badge-inactivo'}">
+                                        ${item.activo ? '✓ Activo' : '✗ Inactivo'}
+                                    </span>
+                                </td>
+                                <td>
+                                    <button onclick="editarRegistro(${item.id})" class="btn-secondary" style="margin-right: 5px;">
+                                        ✏️ Editar
+                                    </button>
+                                    ${item.activo ? `
+                                        <button onclick="desactivarRegistro(${item.id})" class="btn-danger">
+                                            🚫 Desactivar
+                                        </button>
+                                    ` : `
+                                        <button onclick="activarRegistro(${item.id})" class="btn-success">
+                                            ✓ Activar
+                                        </button>
+                                    `}
+                                </td>
+                            `;
+                            tbody.appendChild(tr);
+                        });
+                    }
+                }
+            } catch (error) {
+                tbody.innerHTML = `<tr><td colspan="${colspan}" class="text-center text-red-600">❌ Error al cargar datos</td></tr>`;
+                console.error('Error:', error);
+            }
+        }
+
+        // Abrir Modal Nuevo
+        function abrirModalNuevo() {
+            modoEdicion = false;
+            document.getElementById('modal-titulo').textContent = 'Nuevo Registro';
+            document.getElementById('form-registro').reset();
+            document.getElementById('registro-id').value = '';
+            document.getElementById('activo').checked = true;
+            
+            // Ajustar label según tabla
+            const labelDesc = document.getElementById('label-descripcion');
+            labelDesc.textContent = tabActual === 'departamento' ? 'Nombre *' : 'Descripción *';
+            
+            document.getElementById('modal-form').classList.add('active');
+        }
+
+        // Editar Registro
+        async function editarRegistro(id) {
+            modoEdicion = true;
+            document.getElementById('modal-titulo').textContent = 'Editar Registro';
+
+            try {
+                const response = await fetch(`/facturas-digitales/configuracion/api/${tabActual}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const registro = result.data.find(r => r.id === id);
+                    if (registro) {
+                        document.getElementById('registro-id').value = registro.id;
+                        document.getElementById('sigla').value = registro.sigla;
+                        document.getElementById('descripcion').value = registro.nombre || registro.descripcion;
+                        document.getElementById('activo').checked = registro.activo;
+                        
+                        const labelDesc = document.getElementById('label-descripcion');
+                        labelDesc.textContent = tabActual === 'departamento' ? 'Nombre *' : 'Descripción *';
+                        
+                        document.getElementById('modal-form').classList.add('active');
+                    }
+                }
+            } catch (error) {
+                alert('❌ Error al cargar registro');
+                console.error('Error:', error);
+            }
+        }
+
+        // Cerrar Modal
+        function cerrarModal() {
+            document.getElementById('modal-form').classList.remove('active');
+        }
+
+        // Guardar Registro
+        document.getElementById('form-registro').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const id = document.getElementById('registro-id').value;
+            const sigla = document.getElementById('sigla').value.toUpperCase();
+            const descripcion = document.getElementById('descripcion').value.toUpperCase();
+            const activo = document.getElementById('activo').checked;
+
+            const data = {
+                sigla: sigla,
+                [tabActual === 'departamento' ? 'nombre' : 'descripcion']: descripcion,
+                activo: activo
+            };
+
+            try {
+                const url = id 
+                    ? `/facturas-digitales/configuracion/api/${tabActual}/${id}`
+                    : `/facturas-digitales/configuracion/api/${tabActual}`;
+                
+                const method = id ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ ' + result.message);
+                    cerrarModal();
+                    cargarDatos();
+                } else {
+                    alert('❌ ' + (result.message || result.error));
+                }
+            } catch (error) {
+                alert('❌ Error al guardar');
+                console.error('Error:', error);
+            }
+        });
+
+        // Desactivar Registro
+        async function desactivarRegistro(id) {
+            if (!confirm('¿Está seguro de desactivar este registro?')) return;
+
+            try {
+                const response = await fetch(`/facturas-digitales/configuracion/api/${tabActual}/${id}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('✅ ' + result.message);
+                    cargarDatos();
+                } else {
+                    alert('❌ ' + result.error);
+                }
+            } catch (error) {
+                alert('❌ Error al desactivar');
+                console.error('Error:', error);
+            }
+        }
+
+        // Activar Registro
+        async function activarRegistro(id) {
+            try {
+                const response = await fetch(`/facturas-digitales/configuracion/api/${tabActual}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    const registro = result.data.find(r => r.id === id);
+                    if (registro) {
+                        registro.activo = true;
+                        
+                        const updateResponse = await fetch(`/facturas-digitales/configuracion/api/${tabActual}/${id}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(registro)
+                        });
+
+                        const updateResult = await updateResponse.json();
+                        
+                        if (updateResult.success) {
+                            alert('✅ Registro activado exitosamente');
+                            cargarDatos();
+                        } else {
+                            alert('❌ ' + updateResult.error);
+                        }
+                    }
+                }
+            } catch (error) {
+                alert('❌ Error al activar');
+                console.error('Error:', error);
+            }
+        }
+
+        // ========================================
+        // FUNCIONES ESPECIALES PARA USUARIOS
+        // ========================================
+        
+        async function editarUsuario(usuarioId) {
+            try {
+                // Obtener datos del usuario con múltiples departamentos
+                const response = await fetch(`/facturas-digitales/configuracion/api/usuarios/${usuarioId}`);
+                const result = await response.json();
+                
+                if (!result.success) {
+                    alert('❌ Error al cargar usuario');
+                    return;
+                }
+                
+                const usuario = result.data; // { id, usuario, email, departamentos: [...] }
+                
+                // Obtener lista de departamentos disponibles
+                const deptosResp = await fetch('/facturas-digitales/configuracion/api/activos/departamento');
+                const deptosResult = await deptosResp.json();
+                const todosDepartamentos = deptosResult.success ? deptosResult.data : [];
+                
+                // Colores por departamento
+                const coloresDepartamentos = {
+                    'TIC': '#007bff',
+                    'MER': '#28a745',
+                    'FIN': '#ffc107',
+                    'DOM': '#dc3545',
+                    'MYP': '#6f42c1'
+                };
+                
+                // Crear modal personalizado para usuarios con múltiples departamentos
+                const modal = document.getElementById('modal-form');
+                const modalContent = modal.querySelector('.modal-content');
+                
+                // Renderizar departamentos asignados
+                const departamentosAsignados = (usuario.departamentos || []).map(dept => {
+                    const color = coloresDepartamentos[dept.departamento] || '#6c757d';
+                    return `
+                        <div style="background: white; border: 2px solid ${color}; border-radius: 8px; padding: 15px; margin-bottom: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <span style="background: ${color}; color: white; padding: 6px 14px; border-radius: 12px; font-weight: 600; font-size: 14px;">
+                                    🏢 ${dept.departamento}
+                                </span>
+                                <button type="button" onclick="eliminarDepartamentoUsuario(${usuarioId}, '${dept.departamento}')" 
+                                        style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px;">
+                                    ❌ Eliminar
+                                </button>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                <label style="display: flex; align-items: center; font-size: 13px; cursor: pointer;">
+                                    <input type="checkbox" ${dept.puede_recibir ? 'checked' : ''} 
+                                           onchange="actualizarPermisoDepartamento(${usuarioId}, '${dept.departamento}', 'puede_recibir', this.checked)"
+                                           style="margin-right: 6px; accent-color: #17a2b8;">
+                                    📥 Recibir
+                                </label>
+                                <label style="display: flex; align-items: center; font-size: 13px; cursor: pointer;">
+                                    <input type="checkbox" ${dept.puede_aprobar ? 'checked' : ''} 
+                                           onchange="actualizarPermisoDepartamento(${usuarioId}, '${dept.departamento}', 'puede_aprobar', this.checked)"
+                                           style="margin-right: 6px; accent-color: #28a745;">
+                                    ✅ Aprobar
+                                </label>
+                                <label style="display: flex; align-items: center; font-size: 13px; cursor: pointer;">
+                                    <input type="checkbox" ${dept.puede_rechazar ? 'checked' : ''} 
+                                           onchange="actualizarPermisoDepartamento(${usuarioId}, '${dept.departamento}', 'puede_rechazar', this.checked)"
+                                           style="margin-right: 6px; accent-color: #dc3545;">
+                                    ❌ Rechazar
+                                </label>
+                                <label style="display: flex; align-items: center; font-size: 13px; cursor: pointer;">
+                                    <input type="checkbox" ${dept.puede_firmar ? 'checked' : ''} 
+                                           onchange="actualizarPermisoDepartamento(${usuarioId}, '${dept.departamento}', 'puede_firmar', this.checked)"
+                                           style="margin-right: 6px; accent-color: #6f42c1;">
+                                    ✍️ Firmar
+                                </label>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                // Departamentos disponibles (excluir los ya asignados)
+                const deptosAsignados = (usuario.departamentos || []).map(d => d.departamento);
+                const deptosDisponibles = todosDepartamentos.filter(d => !deptosAsignados.includes(d.sigla));
+                
+                modalContent.innerHTML = `
+                    <h3 class="text-2xl font-bold mb-4" style="color: var(--canaveral-green);">
+                        ⚙️ Configurar Usuario: ${usuario.usuario}
+                    </h3>
+                    
+                    <!-- Información del Usuario -->
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 20px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div>
+                                <strong style="color: #666; font-size: 12px;">👤 Usuario:</strong>
+                                <div style="font-size: 15px; font-weight: 600; color: var(--canaveral-green);">${usuario.usuario}</div>
+                            </div>
+                            <div>
+                                <strong style="color: #666; font-size: 12px;">📧 Email:</strong>
+                                <div style="font-size: 13px;">${usuario.email || 'Sin email'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Departamentos Asignados -->
+                    <div style="margin-bottom: 20px;">
+                        <h4 style="font-weight: 600; margin-bottom: 12px; color: #333;">
+                            📋 Departamentos Asignados (${(usuario.departamentos || []).length})
+                        </h4>
+                        <div style="max-height: 300px; overflow-y: auto;">
+                            ${departamentosAsignados || '<div style="text-align: center; color: #999; padding: 20px; font-style: italic;">No tiene departamentos asignados</div>'}
+                        </div>
+                    </div>
+                    
+                    <!-- Agregar Nuevo Departamento -->
+                    ${deptosDisponibles.length > 0 ? `
+                    <div style="border-top: 2px solid #e0e0e0; padding-top: 20px;">
+                        <h4 style="font-weight: 600; margin-bottom: 12px; color: #333;">
+                            ➕ Agregar Nuevo Departamento
+                        </h4>
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <div style="margin-bottom: 12px;">
+                                <select id="nuevo-departamento" class="form-control" style="width: 100%; padding: 8px;">
+                                    <option value="">Seleccione departamento...</option>
+                                    ${deptosDisponibles.map(d => `<option value="${d.sigla}">${d.sigla} - ${d.nombre}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                                <label style="display: flex; align-items: center; font-size: 13px; cursor: pointer;">
+                                    <input type="checkbox" id="nuevo-recibir" style="margin-right: 6px; accent-color: #17a2b8;">
+                                    📥 Recibir
+                                </label>
+                                <label style="display: flex; align-items: center; font-size: 13px; cursor: pointer;">
+                                    <input type="checkbox" id="nuevo-aprobar" style="margin-right: 6px; accent-color: #28a745;">
+                                    ✅ Aprobar
+                                </label>
+                                <label style="display: flex; align-items: center; font-size: 13px; cursor: pointer;">
+                                    <input type="checkbox" id="nuevo-rechazar" style="margin-right: 6px; accent-color: #dc3545;">
+                                    ❌ Rechazar
+                                </label>
+                                <label style="display: flex; align-items: center; font-size: 13px; cursor: pointer;">
+                                    <input type="checkbox" id="nuevo-firmar" style="margin-right: 6px; accent-color: #6f42c1;">
+                                    ✍️ Firmar
+                                </label>
+                            </div>
+                            <button type="button" onclick="agregarDepartamentoUsuario(${usuarioId})" class="btn-primary" style="width: 100%;">
+                                ➕ Agregar Departamento
+                            </button>
+                        </div>
+                    </div>
+                    ` : '<div style="text-align: center; color: #28a745; padding: 15px; background: #d4edda; border-radius: 8px;"><strong>✅ Todos los departamentos ya están asignados</strong></div>'}
+                    
+                    <!-- Botón Cerrar -->
+                    <div style="text-align: right; margin-top: 20px;">
+                        <button type="button" onclick="cerrarModalUsuario()" class="btn-secondary">
+                            ✖️ Cerrar
+                        </button>
+                    </div>
+                `;
+                
+                // Mostrar modal
+                modal.style.display = 'flex';
+                
+            } catch (error) {
+                alert('❌ Error al cargar configuración de usuario');
+                console.error('Error:', error);
+            }
+        }
+        
+        async function agregarDepartamentoUsuario(usuarioId) {
+            const departamento = document.getElementById('nuevo-departamento').value;
+            const puedeRecibir = document.getElementById('nuevo-recibir').checked;
+            const puedeAprobar = document.getElementById('nuevo-aprobar').checked;
+            const puedeRechazar = document.getElementById('nuevo-rechazar').checked;
+            const puedeFirmar = document.getElementById('nuevo-firmar').checked;
+            
+            if (!departamento) {
+                alert('⚠️ Debe seleccionar un departamento');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/facturas-digitales/configuracion/api/usuarios/${usuarioId}/departamento`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        departamento: departamento,
+                        puede_recibir: puedeRecibir,
+                        puede_aprobar: puedeAprobar,
+                        puede_rechazar: puedeRechazar,
+                        puede_firmar: puedeFirmar
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Departamento agregado exitosamente');
+                    // Recargar modal para mostrar el nuevo departamento
+                    editarUsuario(usuarioId);
+                    cargarDatos(); // Actualizar tabla principal
+                } else {
+                    alert('❌ Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('❌ Error al agregar departamento');
+                console.error('Error:', error);
+            }
+        }
+        
+        async function actualizarPermisoDepartamento(usuarioId, departamento, permiso, valor) {
+            try {
+                // Obtener permisos actuales del departamento
+                const response = await fetch(`/facturas-digitales/configuracion/api/usuarios/${usuarioId}`);
+                const result = await response.json();
+                
+                if (!result.success) {
+                    alert('❌ Error al obtener datos');
+                    return;
+                }
+                
+                const dept = result.data.departamentos.find(d => d.departamento === departamento);
+                if (!dept) {
+                    alert('❌ Departamento no encontrado');
+                    return;
+                }
+                
+                // Actualizar el permiso específico
+                const permisos = {
+                    puede_recibir: dept.puede_recibir,
+                    puede_aprobar: dept.puede_aprobar,
+                    puede_rechazar: dept.puede_rechazar,
+                    puede_firmar: dept.puede_firmar
+                };
+                permisos[permiso] = valor;
+                
+                // Enviar actualización
+                const updateResp = await fetch(`/facturas-digitales/configuracion/api/usuarios/${usuarioId}/departamento`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        departamento: departamento,
+                        ...permisos
+                    })
+                });
+                
+                const updateResult = await updateResp.json();
+                
+                if (!updateResult.success) {
+                    alert('❌ Error: ' + updateResult.error);
+                    // Revertir checkbox
+                    event.target.checked = !valor;
+                }
+            } catch (error) {
+                alert('❌ Error al actualizar permiso');
+                console.error('Error:', error);
+                // Revertir checkbox
+                event.target.checked = !valor;
+            }
+        }
+        
+        async function eliminarDepartamentoUsuario(usuarioId, departamento) {
+            if (!confirm(`¿Está seguro de eliminar el departamento ${departamento}?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/facturas-digitales/configuracion/api/usuarios/${usuarioId}/departamento/${departamento}`, {
+                    method: 'DELETE'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('✅ Departamento eliminado exitosamente');
+                    // Recargar modal
+                    editarUsuario(usuarioId);
+                    cargarDatos(); // Actualizar tabla principal
+                } else {
+                    alert('❌ Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('❌ Error al guardar configuración');
+                console.error('Error:', error);
+            }
+        }
+        
+        function cerrarModalUsuario() {
+            const modal = document.getElementById('modal-form');
+            modal.style.display = 'none';
+            
+            // Restaurar contenido original del modal
+            location.reload(); // Forzar recarga para restaurar modal original
+        }
+
+        // Cerrar modal al hacer click fuera
+        document.getElementById('modal-form').addEventListener('click', (e) => {
+            if (e.target.id === 'modal-form') {
+                if (tabActual === 'usuarios') {
+                    cerrarModalUsuario();
+                } else {
+                    cerrarModal();
+                }
+            }
+        });
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+</body>
+</html>

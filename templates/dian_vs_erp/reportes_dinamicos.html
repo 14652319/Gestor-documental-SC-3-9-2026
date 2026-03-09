@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Reportes Dinámicos - DIAN vs ERP</title>
+    <style>
+        /* Colores institucionales Supertiendas Cañaveral */
+        :root {
+            --bg: #1a1f2e;
+            --panel: #252b3b;
+            --hdr: #151924;
+            --bd: #3a4254;
+            --green-bright: #00d084;
+            --green-primary: #00c875;
+            --green-header: #2d5016;
+            --txt: #e8eaed;
+            --txt-muted: #9fb0c7;
+            --danger: #e94444;
+            --info: #2563eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--txt);
+            line-height: 1.6;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--green-bright) 0%, #00a86b 100%);
+            padding: 20px 30px;
+            border-radius: 12px 12px 0 0;
+            color: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--green-primary);
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #00a86b;
+            box-shadow: 0 4px 12px rgba(0, 200, 117, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn:disabled {
+            background: #4a5568;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .content {
+            background: var(--panel);
+            padding: 30px;
+            border-radius: 0 0 12px 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .section {
+            background: var(--bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid var(--bd);
+        }
+
+        .section h3 {
+            color: var(--txt);
+            margin-bottom: 15px;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--txt-muted);
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid var(--bd);
+            background: var(--panel);
+            color: var(--txt);
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--green-primary);
+            box-shadow: 0 0 0 3px rgba(0, 200, 117, 0.1);
+        }
+
+        .form-group select[multiple] {
+            min-height: 100px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            justify-content: center;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid var(--bd);
+            border-top: 4px solid var(--green-primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .alert-info {
+            background: rgba(37, 99, 235, 0.1);
+            border: 1px solid var(--info);
+            color: #60a5fa;
+        }
+
+        .alert-success {
+            background: rgba(0, 200, 117, 0.1);
+            border: 1px solid var(--green-primary);
+            color: var(--green-bright);
+        }
+
+        .alert-danger {
+            background: rgba(233, 68, 68, 0.1);
+            border: 1px solid var(--danger);
+            color: #f87171;
+        }
+
+        .section-divider {
+            border-top: 2px solid var(--bd);
+            margin: 30px 0;
+        }
+
+        #progress-container {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        #progress-container.active {
+            display: block;
+        }
+
+        #progress-bar {
+            width: 100%;
+            height: 30px;
+            background: var(--bg);
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        #progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--green-primary), var(--green-bright));
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Reportes Dinámicos</h1>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-secondary" onclick="window.location.href='/dian_vs_erp'">
+                    🔙 Volver al Dashboard
+                </button>
+                <button class="btn btn-secondary" onclick="window.location.href='/dian_vs_erp/configuracion'">
+                    ⚙️ Configuración
+                </button>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="alert alert-info">
+                <span>💡</span>
+                <div>
+                    <strong>Reporte Dinámico con 3 Hojas:</strong>
+                    Este reporte generará un archivo Excel con 3 hojas:<br>
+                    <strong>1) "Datos"</strong> - Listado completo filtrado de facturas | 
+                    <strong>2) "Resumen"</strong> - Tabla agregada por Tipo de Tercero y Forma de Pago | 
+                    <strong>3) "Instrucciones"</strong> - Guía para crear tu propia tabla dinámica en Excel (30 seg)
+                </div>
+            </div>
+
+            <form id="filtrosForm">
+                <!-- ===== FILTROS DE FECHA (OBLIGATORIOS) ===== -->
+                <div class="section">
+                    <h3>📅 Rango de Fechas (Obligatorio)</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="fecha_inicio">Fecha Inicio *</label>
+                            <input type="date" id="fecha_inicio" name="fecha_inicio" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="fecha_fin">Fecha Fin *</label>
+                            <input type="date" id="fecha_fin" name="fecha_fin" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== FILTROS DE TERCERO ===== -->
+                <div class="section">
+                    <h3>🏢 Filtros de Tercero</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nit_emisor">NIT Emisor (Ctrl+Click para múltiples)</label>
+                            <select id="nit_emisor" name="nit_emisor" multiple>
+                                <!-- Opciones cargadas dinámicamente -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tipo_tercero">Tipo Tercero</label>
+                            <select id="tipo_tercero" name="tipo_tercero" multiple>
+                                <!-- ✅ Opciones cargadas dinámicamente desde la base de datos -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== FILTROS DE DOCUMENTO ===== -->
+                <div class="section">
+                    <h3>📑 Filtros de Documento</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="tipo_documento">Tipo Documento</label>
+                            <select id="tipo_documento" name="tipo_documento" multiple>
+                                <!-- ✅ Opciones cargadas dinámicamente desde la base de datos -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="prefijo">Prefijo</label>
+                            <select id="prefijo" name="prefijo" multiple>
+                                <!-- ✅ Opciones cargadas dinámicamente desde la base de datos -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== FILTROS DE ESTADO ===== -->
+                <div class="section">
+                    <h3>✅ Filtros de Estado</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="estado_aprobacion">Estado Aprobación DIAN</label>
+                            <select id="estado_aprobacion" name="estado_aprobacion" multiple>
+                                <!-- ✅ Opciones cargadas dinámicamente desde la base de datos -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="estado_contable">Estado Contable</label>
+                            <select id="estado_contable" name="estado_contable" multiple>
+                                <!-- ✅ Opciones cargadas dinámicamente desde la base de datos -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="forma_pago">Forma de Pago</label>
+                            <select id="forma_pago" name="forma_pago" multiple>
+                                <!-- ✅ Opciones cargadas dinámicamente desde la base de datos -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="modulo">Módulo ERP</label>
+                            <select id="modulo" name="modulo" multiple>
+                                <!-- ✅ Opciones cargadas dinámicamente desde la base de datos -->
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== FILTROS NUMÉRICOS ===== -->
+                <div class="section">
+                    <h3>🔢 Filtros Numéricos</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="dias_min">N° Días Mínimo</label>
+                            <input type="number" id="dias_min" name="dias_min" min="0" placeholder="Ej: 30">
+                        </div>
+                        <div class="form-group">
+                            <label for="dias_max">N° Días Máximo</label>
+                            <input type="number" id="dias_max" name="dias_max" min="0" placeholder="Ej: 90">
+                        </div>
+                        <div class="form-group">
+                            <label for="valor_min">Valor Mínimo</label>
+                            <input type="number" id="valor_min" name="valor_min" min="0" step="0.01" placeholder="Ej: 1000000">
+                        </div>
+                        <div class="form-group">
+                            <label for="valor_max">Valor Máximo</label>
+                            <input type="number" id="valor_max" name="valor_max" min="0" step="0.01" placeholder="Ej: 10000000">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== BOTONES DE ACCIÓN ===== -->
+                <div class="action-buttons">
+                    <button type="submit" class="btn btn-primary" id="btnGenerar">
+                        📊 Generar Reporte con Tabla Dinámica
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="limpiarFiltros()">
+                        🔄 Limpiar Filtros
+                    </button>
+                </div>
+            </form>
+
+            <!-- ===== INDICADOR DE PROGRESO ===== -->
+            <div id="progress-container">
+                <div id="progress-bar">
+                    <div id="progress-fill">0%</div>
+                </div>
+                <div id="progress-text">Generando reporte, por favor espere...</div>
+            </div>
+
+            <!-- ===== LOADING ===== -->
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Consultando base de datos y generando Excel con tabla dinámica...</p>
+                <p style="font-size: 12px; color: var(--txt-muted);">
+                    Este proceso puede tardar algunos segundos dependiendo del volumen de datos.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== CONFIGURACIÓN INICIAL =====
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar opciones dinámicas
+            cargarOpcionesNIT();
+            cargarOpcionesPrefijos();
+            
+            // Establecer fechas por defecto (último mes)
+            const hoy = new Date();
+            const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+            
+            document.getElementById('fecha_inicio').value = inicioMes.toISOString().split('T')[0];
+            document.getElementById('fecha_fin').value = hoy.toISOString().split('T')[0];
+        });
+
+        // ===== CARGAR OPCIONES DINÁMICAS DE NITs =====
+        async function cargarOpcionesNIT() {
+            try {
+                // Obtener NITs únicos del maestro consolidado
+                const response = await fetch('/dian_vs_erp/api/dian_v2?limit=10000');
+                const data = await response.json();
+                
+                // Extraer NITs únicos con razón social
+                const nitsUnicos = new Map();
+                data.forEach(factura => {
+                    if (factura.nit_emisor && !nitsUnicos.has(factura.nit_emisor)) {
+                        nitsUnicos.set(factura.nit_emisor, factura.nombre_emisor || '');
+                    }
+                });
+                
+                // Llenar select
+                const select = document.getElementById('nit_emisor');
+                select.innerHTML = '';
+                
+                Array.from(nitsUnicos.entries())
+                    .sort((a, b) => a[1].localeCompare(b[1]))
+                    .forEach(([nit, razon]) => {
+                        const option = document.createElement('option');
+                        option.value = nit;
+                        option.textContent = `${nit} - ${razon}`;
+                        select.appendChild(option);
+                    });
+                
+                console.log(`✅ ${nitsUnicos.size} NITs cargados`);
+            } catch (error) {
+                console.error('❌ Error cargando NITs:', error);
+            }
+        }
+
+        // ===== CARGAR OPCIONES DINÁMICAS DE PREFIJOS =====
+        async function cargarOpcionesPrefijos() {
+            try {
+                const response = await fetch('/dian_vs_erp/api/dian_v2?limit=10000');
+                const data = await response.json();
+                
+                // Extraer prefijos únicos
+                const prefijosUnicos = new Set();
+                data.forEach(factura => {
+                    if (factura.prefijo && factura.prefijo.trim()) {
+                        prefijosUnicos.add(factura.prefijo.trim());
+                    }
+                });
+                
+                // Llenar select
+                const select = document.getElementById('prefijo');
+                select.innerHTML = '';
+                
+                Array.from(prefijosUnicos)
+                    .sort()
+                    .forEach(prefijo => {
+                        const option = document.createElement('option');
+                        option.value = prefijo;
+                        option.textContent = prefijo;
+                        select.appendChild(option);
+                    });
+                
+                console.log(`✅ ${prefijosUnicos.size} prefijos cargados`);
+            } catch (error) {
+                console.error('❌ Error cargando prefijos:', error);
+            }
+        }
+
+        // ===== ENVIAR FORMULARIO Y GENERAR REPORTE =====
+        document.getElementById('filtrosForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            console.log('📊 Iniciando generación de reporte...');
+            
+            // Mostrar loading
+            document.getElementById('loading').classList.add('active');
+            document.getElementById('btnGenerar').disabled = true;
+            document.getElementById('progress-container').classList.add('active');
+            
+            // Simular progreso
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 10;
+                if (progress > 90) progress = 90;
+                document.getElementById('progress-fill').style.width = progress + '%';
+                document.getElementById('progress-fill').textContent = Math.round(progress) + '%';
+            }, 300);
+            
+            // Recolectar filtros del formulario
+            const filtros = {
+                fecha_inicio: document.getElementById('fecha_inicio').value,
+                fecha_fin: document.getElementById('fecha_fin').value,
+                nit_emisor: getSelectedValues('nit_emisor'),
+                tipo_tercero: getSelectedValues('tipo_tercero'),
+                tipo_documento: getSelectedValues('tipo_documento'),
+                prefijo: getSelectedValues('prefijo'),
+                estado_aprobacion: getSelectedValues('estado_aprobacion'),
+                estado_contable: getSelectedValues('estado_contable'),
+                forma_pago: getSelectedValues('forma_pago'),
+                modulo: getSelectedValues('modulo'),
+                dias_min: document.getElementById('dias_min').value || null,
+                dias_max: document.getElementById('dias_max').value || null,
+                valor_min: document.getElementById('valor_min').value || null,
+                valor_max: document.getElementById('valor_max').value || null
+            };
+            
+            // ⚠️ AUTO-CORRECCIÓN: Si "No Registrada" está seleccionado, ignorar filtro de módulo
+            if (filtros.estado_contable && filtros.estado_contable.includes('No Registrada')) {
+                filtros.modulo = null;  // Forzar a null para ignorar el filtro
+                console.warn('⚠️ Estado "No Registrada" seleccionado: ignorando filtro de módulo automáticamente');
+            }
+            
+            console.log('📋 Filtros aplicados:', filtros);
+            
+            try {
+                // Enviar solicitud al backend
+                const response = await fetch('/dian_vs_erp/api/generar_reporte_dinamico', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(filtros)
+                });
+                
+                clearInterval(progressInterval);
+                document.getElementById('progress-fill').style.width = '100%';
+                document.getElementById('progress-fill').textContent = '100%';
+                
+                // ✅ VERIFICAR SI ES EXCEL O JSON (fix para archivos corruptos)
+                const contentType = response.headers.get('content-type');
+                
+                if (response.ok && contentType && contentType.includes('spreadsheetml')) {
+                    // Descargar archivo Excel
+                    const blob = await response.blob();
+                    
+                    // ✅ VALIDAR TAMAÑO DEL BLOB
+                    if (blob.size < 5000) {
+                        alert('⚠️ El archivo generado es muy pequeño. Probablemente no hay datos que coincidan con los filtros aplicados.');
+                        console.warn('⚠️ Blob muy pequeño:', blob.size, 'bytes');
+                        return;
+                    }
+                    
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    
+                    // Obtener nombre del archivo de los headers o generar uno
+                    const contentDisposition = response.headers.get('content-disposition');
+                    let filename = 'Reporte_DIAN_vs_ERP.xlsx';
+                    if (contentDisposition) {
+                        const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+                        if (matches && matches[1]) {
+                            filename = matches[1].replace(/['"]/g, '');
+                        }
+                    }
+                    
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    
+                    alert('✅ Reporte generado exitosamente!');
+                    console.log('✅ Excel descargado:', filename, '- Tamaño:', blob.size, 'bytes');
+                } else {
+                    // Respuesta JSON (error o sin datos)
+                    const errorData = await response.json();
+                    const mensajeError = errorData.error || errorData.mensaje || 'Error desconocido';
+                    alert(`❌ ${mensajeError}`);
+                    console.error('❌ Error del servidor:', errorData);
+                }
+            } catch (error) {
+                clearInterval(progressInterval);
+                alert(`❌ Error generando reporte: ${error.message}`);
+                console.error('❌ Error:', error);
+            } finally {
+                // Ocultar loading
+                document.getElementById('loading').classList.remove('active');
+                document.getElementById('btnGenerar').disabled = false;
+                document.getElementById('progress-container').classList.remove('active');
+                document.getElementById('progress-fill').style.width = '0%';
+            }
+        });
+
+        // ===== HELPERS =====
+        function getSelectedValues(selectId) {
+            const select = document.getElementById(selectId);
+            const selected = Array.from(select.selectedOptions).map(opt => opt.value);
+            return selected.length > 0 ? selected : null;
+        }
+
+        function limpiarFiltros() {
+            document.getElementById('filtrosForm').reset();
+            
+            // Restablecer fechas por defecto
+            const hoy = new Date();
+            const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth() - 1, 1);
+            
+            document.getElementById('fecha_inicio').value = inicioMes.toISOString().split('T')[0];
+            document.getElementById('fecha_fin').value = hoy.toISOString().split('T')[0];
+            
+            console.log('🔄 Filtros limpiados');
+        }
+
+        // ===== CARGAR FILTROS DINÁMICOS DESDE LA BASE DE DATOS =====
+        async function cargarFiltrosDinamicos() {
+            try {
+                console.log('📥 Cargando filtros dinámicos desde la base de datos...');
+                
+                const response = await fetch('/dian_vs_erp/api/obtener_filtros_unicos');
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('✅ Filtros obtenidos:', data);
+                
+                // 1️⃣ Llenar TIPO DOCUMENTO
+                if (data.tipos_documento && data.tipos_documento.length > 0) {
+                    const selectTipoDoc = document.getElementById('tipo_documento');
+                    selectTipoDoc.innerHTML = '';
+                    data.tipos_documento.forEach(tipo => {
+                        const option = document.createElement('option');
+                        option.value = tipo;
+                        option.textContent = tipo;
+                        selectTipoDoc.appendChild(option);
+                    });
+                    console.log(`   ✅ ${data.tipos_documento.length} tipos de documento cargados`);
+                } else {
+                    console.warn('   ⚠️ No hay tipos de documento');
+                }
+                
+                // 2️⃣ Llenar PREFIJOS
+                if (data.prefijos && data.prefijos.length > 0) {
+                    const selectPrefijo = document.getElementById('prefijo');
+                    selectPrefijo.innerHTML = '';
+                    data.prefijos.forEach(prefijo => {
+                        const option = document.createElement('option');
+                        option.value = prefijo;
+                        option.textContent = prefijo;
+                        selectPrefijo.appendChild(option);
+                    });
+                    console.log(`   ✅ ${data.prefijos.length} prefijos cargados`);
+                } else {
+                    console.warn('   ⚠️ No hay prefijos');
+                }
+                
+                // 3️⃣ Llenar TIPO TERCERO
+                if (data.tipos_tercero && data.tipos_tercero.length > 0) {
+                    const selectTipoTercero = document.getElementById('tipo_tercero');
+                    selectTipoTercero.innerHTML = '';
+                    data.tipos_tercero.forEach(tipo => {
+                        const option = document.createElement('option');
+                        option.value = tipo;
+                        option.textContent = tipo;
+                        selectTipoTercero.appendChild(option);
+                    });
+                    console.log(`   ✅ ${data.tipos_tercero.length} tipos de tercero cargados`);
+                } else {
+                    console.warn('   ⚠️ No hay tipos de tercero');
+                }
+                
+                // 4️⃣ Llenar ESTADO APROBACIÓN DIAN
+                if (data.estados_aprobacion && data.estados_aprobacion.length > 0) {
+                    const selectEstadoAprobacion = document.getElementById('estado_aprobacion');
+                    selectEstadoAprobacion.innerHTML = '';
+                    data.estados_aprobacion.forEach(estado => {
+                        const option = document.createElement('option');
+                        option.value = estado;
+                        option.textContent = estado;
+                        selectEstadoAprobacion.appendChild(option);
+                    });
+                    console.log(`   ✅ ${data.estados_aprobacion.length} estados de aprobación cargados`);
+                } else {
+                    console.warn('   ⚠️ No hay estados de aprobación (usando defaults)');
+                }
+                
+                // 5️⃣ Llenar ESTADO CONTABLE
+                if (data.estados_contable && data.estados_contable.length > 0) {
+                    const selectEstadoContable = document.getElementById('estado_contable');
+                    selectEstadoContable.innerHTML = '';
+                    data.estados_contable.forEach(estado => {
+                        const option = document.createElement('option');
+                        option.value = estado;
+                        option.textContent = estado;
+                        selectEstadoContable.appendChild(option);
+                    });
+                    console.log(`   ✅ ${data.estados_contable.length} estados contables cargados`);
+                } else {
+                    console.warn('   ⚠️ No hay estados contables (usando defaults)');
+                }
+                
+                // 6️⃣ Llenar FORMA DE PAGO
+                if (data.formas_pago && data.formas_pago.length > 0) {
+                    const selectFormaPago = document.getElementById('forma_pago');
+                    selectFormaPago.innerHTML = '';
+                    data.formas_pago.forEach(forma => {
+                        const option = document.createElement('option');
+                        option.value = forma;
+                        option.textContent = forma;
+                        selectFormaPago.appendChild(option);
+                    });
+                    console.log(`   ✅ ${data.formas_pago.length} formas de pago cargadas`);
+                } else {
+                    console.warn('   ⚠️ No hay formas de pago (usando defaults)');
+                }
+                
+                // 7️⃣ Llenar MÓDULO ERP
+                if (data.modulos && data.modulos.length > 0) {
+                    const selectModulo = document.getElementById('modulo');
+                    selectModulo.innerHTML = '';
+                    data.modulos.forEach(modulo => {
+                        const option = document.createElement('option');
+                        option.value = modulo;
+                        option.textContent = modulo;
+                        selectModulo.appendChild(option);
+                    });
+                    console.log(`   ✅ ${data.modulos.length} módulos ERP cargados`);
+                } else {
+                    console.warn('   ⚠️ No hay módulos ERP (usando defaults)');
+                }
+                
+                console.log('🎉 CARGA DE FILTROS COMPLETADA');
+                
+            } catch (error) {
+                console.error('❌ Error cargando filtros dinámicos:', error);
+                alert('⚠️ Error cargando filtros desde la base de datos. Se usarán valores por defecto.\n\nError: ' + error.message);
+            }
+        }
+
+        // 🚀 CARGAR FILTROS AL INICIAR LA PÁGINA
+        window.addEventListener('DOMContentLoaded', () => {
+            cargarFiltrosDinamicos();
+        });
+    </script>
+</body>
+</html>

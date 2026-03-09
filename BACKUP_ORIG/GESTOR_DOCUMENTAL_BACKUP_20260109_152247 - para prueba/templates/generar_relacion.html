@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>📄 Generar Relación de Facturas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      /* Modo Claro */
+      --bg-color: #f0f4f8;
+      --card-bg: #ffffff;
+      --text-color: #333;
+      --heading-color: #1a237e;
+      --input-bg: #fdfdff;
+      --input-border: #d1d5db;
+      --input-focus-border: #166534;
+      --brand-green: #16a34a;
+      --brand-red: #dc2626;
+      --brand-orange: #f59e0b;
+      --brand-blue: #2563eb;
+      --table-header-bg: #eef2f7;
+      --table-row-odd-bg: #ffffff;
+      --table-row-even-bg: #f9fafb;
+      --shadow-color: rgba(0, 0, 0, 0.08);
+      --alert-success-bg: #dcfce7;
+      --alert-success-text: #166534;
+      --alert-warning-bg: #fee2e2;
+      --alert-warning-text: #991b1b;
+      --row-highlight-bg: #fee2e2;
+      --row-highlight-text: #991b1b;
+    }
+
+    body.dark-mode {
+      /* Modo Oscuro */
+      --bg-color: #121212;
+      --card-bg: #1e1e1e;
+      --text-color: #e0e0e0;
+      --heading-color: #86efac;
+      --input-bg: #2a2a2a;
+      --input-border: #4b5563;
+      --input-focus-border: #86efac;
+      --brand-green: #4ade80;
+      --brand-red: #f87171;
+      --brand-orange: #fbbf24;
+      --brand-blue: #60a5fa;
+      --table-header-bg: #282828;
+      --table-row-odd-bg: #1e1e1e;
+      --table-row-even-bg: #222222;
+      --shadow-color: rgba(0, 0, 0, 0.3);
+      --alert-success-bg: #14532d;
+      --alert-success-text: #dcfce7;
+      --alert-warning-bg: #7f1d1d;
+      --alert-warning-text: #fee2e2;
+      --row-highlight-bg: #4c1d22;
+      --row-highlight-text: #fecaca;
+    }
+    
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
+    }
+    
+    .main-wrapper { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+    header {
+      background-color: var(--card-bg); padding: 15px 30px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 1px solid var(--input-border); box-shadow: 0 2px 4px var(--shadow-color);
+      flex-shrink: 0; z-index: 10;
+    }
+    header h2 { margin: 0; font-size: 1.5em; color: var(--heading-color); display: flex; align-items: center; gap: 10px; }
+    .header-right { display: flex; align-items: center; gap: 15px; }
+    .user-badge {
+      display: flex; align-items: center; gap: 8px;
+      background-color: var(--bg-color); padding: 6px 12px;
+      border-radius: 20px; font-size: 0.85em; font-weight: 600;
+      border: 1px solid var(--input-border);
+    }
+    .user-icon { color: var(--heading-color); }
+    .user-nit { color: var(--text-color); font-weight: 400; opacity: 0.8; }
+
+    .container { padding: 20px; overflow-y: auto; flex-grow: 1; display: flex; flex-direction: column; gap: 20px; }
+    .card { background-color: var(--card-bg); border-radius: 12px; padding: 25px; box-shadow: 0 4px 12px var(--shadow-color); }
+    .card h3 { margin-top: 0; color: var(--heading-color); border-bottom: 1px solid var(--input-border); padding-bottom: 10px; }
+
+    .filtros {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+      align-items: end;
+    }
+    .form-group { display: flex; flex-direction: column; }
+    label { font-weight: 600; font-size: 0.9em; margin-bottom: 8px; }
+
+    select, input[type="date"] {
+      padding: 10px; background-color: var(--input-bg);
+      color: var(--text-color); border: 1px solid var(--input-border);
+      border-radius: 8px; width: 100%;
+      font-family: 'Poppins', sans-serif; font-size: 0.9em;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    select:focus, input:focus {
+      outline: none; border-color: var(--input-focus-border);
+      box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.15);
+    }
+    body.dark-mode select:focus, body.dark-mode input:focus { box-shadow: 0 0 0 3px rgba(134, 239, 172, 0.2); }
+    input[type="date"]::-webkit-calendar-picker-indicator { filter: var(--text-color) == #e0e0e0 ? invert(1) : none; cursor: pointer; }
+
+    .btn {
+      padding: 10px 18px; border: none; border-radius: 8px;
+      font-weight: bold; cursor: pointer; font-size: 0.9em;
+      transition: all 0.2s ease; display: inline-flex;
+      align-items: center; justify-content: center; gap: 8px;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+    .btn-generar { background: var(--brand-blue); color: white; }
+    .btn-salir { background: var(--brand-red); color: white; }
+    .btn-filtrar { background: var(--brand-orange); color: white; }
+    
+    .actions-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    .contador { font-weight: 600; font-size: 0.9em; }
+
+    .tabla-container { max-height: 450px; overflow: auto; border: 1px solid var(--input-border); border-radius: 8px; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 12px 15px; border-bottom: 1px solid var(--input-border); text-align: left; }
+    th {
+      background-color: var(--table-header-bg); position: sticky; top: 0; z-index: 1;
+      font-weight: 600; text-transform: uppercase; font-size: 11px;
+    }
+    tbody tr:nth-child(even) { background-color: var(--table-row-even-bg); }
+    td:first-child, th:first-child { text-align: center; }
+
+    .roja {
+      background-color: var(--row-highlight-bg) !important;
+      color: var(--row-highlight-text);
+      font-weight: 600;
+    }
+    .alerta {
+      padding: 12px; border-radius: 8px;
+      margin-bottom: 20px; text-align: center; font-weight: 600;
+    }
+    .alerta.success { background-color: var(--alert-success-bg); color: var(--alert-success-text); }
+    .alerta.warning { background-color: var(--alert-warning-bg); color: var(--alert-warning-text); }
+
+    @media (max-width: 768px) {
+        header { padding: 10px 15px; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        .container { padding: 15px; } .card { padding: 20px; }
+        .actions-header { flex-direction: column; align-items: stretch; }
+        .btn { width: 100%; }
+        td, th { padding: 8px; }
+    }
+    .relacionada {
+      background-color: #fff3cd !important; /* amarillo/naranja claro */
+      color: #856404;  /* marrón oscuro para contraste */
+    }
+    
+    /* 🆕 ESTILOS DE PAGINACIÓN */
+    .paginacion {
+      margin-top: 20px;
+      padding: 15px;
+      background: var(--card-bg);
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .paginacion-info {
+      color: var(--text-secondary);
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .paginacion-botones {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .btn-pagina {
+      padding: 8px 12px;
+      background: var(--input-bg);
+      color: var(--text-color);
+      border: 1px solid var(--input-border);
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .btn-pagina:hover {
+      background: var(--brand-green);
+      color: white;
+      border-color: var(--brand-green);
+      transform: translateY(-2px);
+    }
+    .btn-pagina.activa {
+      background: var(--brand-green);
+      color: white;
+      border-color: var(--brand-green);
+      font-weight: 700;
+      cursor: default;
+    }
+    
+    @media (max-width: 768px) {
+      .paginacion {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .paginacion-botones {
+        justify-content: center;
+      }
+      .btn-pagina {
+        padding: 10px 14px;
+        font-size: 13px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+  <header>
+    <h2>📄 Generar Relación</h2>
+    <div class="header-right">
+      <div class="user-badge" title="Usuario conectado">
+          <svg xmlns="http://www.w3.org/2000/svg" class="user-icon" viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 12c2.761 0 5-2.462 5-5.5S14.761 1 12 1 7 3.462 7 6.5 9.239 12 12 12zm0 2c-4.418 0-8 3.009-8 6.72C4 22.403 5.567 23 7.5 23h9c1.933 0 3.5-.597 3.5-2.28C20 17.009 16.418 14 12 14z"/></svg>
+          <span class="user-name">{{ session['usuario']|upper }}</span>
+      </div>
+      <div class="toggle-mode" id="toggleModeBtn" title="Cambiar modo"></div>
+      <button type="button" class="btn btn-salir" onclick="confirmarSalida()">Salir</button>
+    </div>
+  </header>
+
+  <div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alerta {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="card">
+      <h3>🔍 Opciones de Filtrado</h3>
+      <form method="get" class="filtros">
+        <div class="form-group">
+          <label>Centro Operación:</label>
+          <select name="co">
+            <option value="">Todos</option>
+            {% for item in lista_co %}
+              <option value="{{ item }}" {% if item == co %}selected{% endif %}>{{ item }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Destino:</label>
+          <select name="destino">
+            <option value="CONTABILIDAD" {% if destino=='CONTABILIDAD' %}selected{% endif %}>CONTABILIDAD</option>
+            <option value="PAGOS" {% if destino=='PAGOS' %}selected{% endif %}>PAGOS</option>
+            <option value="SUMINISTROS" {% if destino=='SUMINISTROS' %}selected{% endif %}>SUMINISTROS</option>
+            <option value="OTRO" {% if destino=='OTRO' %}selected{% endif %}>OTRO</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Formato:</label>
+          <select name="formato">
+            <option value="Excel" {% if formato=='Excel' %}selected{% endif %}>Excel</option>
+            <option value="pdf" {% if formato=='pdf' %}selected{% endif %}>PDF</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Desde:</label>
+          <input type="date" name="desde" value="{{ desde }}">
+        </div>
+        <div class="form-group">
+          <label>Hasta:</label>
+          <input type="date" name="hasta" value="{{ hasta }}">
+        </div>
+        <button type="submit" class="btn btn-filtrar">Filtrar</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <form method="post" action="/generar_relacion" id="form-generar" onsubmit="return validarEnvio()">
+        <input type="hidden" name="co" value="{{ co }}">
+        <input type="hidden" name="destino" value="{{ destino }}">
+        <input type="hidden" name="formato" value="{{ formato }}">
+
+        <div class="actions-header">
+            <button type="submit" form="form-generar" class="btn btn-generar">📥 Generar Relación</button>
+            <div class="contador"><span id="contador">0 documentos seleccionados</span></div>
+        </div>
+
+        <div class="tabla-container">
+          <table>
+            <thead>
+              <tr>
+                <th><input type="checkbox" onclick="toggleSeleccion(this)" title="Seleccionar Todo"></th>
+                <th>NIT</th>
+                <th>Razón Social</th>
+                <th>C.O</th>
+                <th>Prefijo</th>
+                <th>Folio</th>
+                <th>Fecha</th>
+                <th>Valor</th>
+                <th>No. Relación</th>
+                <th>Fecha Relación</th>
+              </tr>
+            </thead>
+            <tbody>
+            <tbody>
+              {% for f in facturas %}
+                <tr class="{{ f.color }}" title="{{ f.tooltip }}">
+                  <td><input type="checkbox" name="factura" value="{{ f['clave'] }}" onchange="contarSeleccionados()"></td>
+                  <td>{{ f['nit'] }}</td>
+                  <td>{{ f['razon_social'] }}</td>
+                  <td>{{ f['co'] }}</td>
+                  <td>{{ f['prefijo'] }}</td>
+                  <td>{{ f['folio'] }}</td>
+                  <td>{{ f['fecha_radicacion'] }}</td>
+                  <td>${{ "{:,.0f}".format(f['valor']|float) }}</td>
+                  <td>{{ f['numero_relacion'] }}</td>
+                  <td>{{ f['fecha_relacion'] }}</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        
+        <!-- 🆕 CONTROLES DE PAGINACIÓN -->
+        {% if total_paginas and total_paginas > 1 %}
+        <div class="paginacion">
+          <div class="paginacion-info">
+            Mostrando página {{ pagina }} de {{ total_paginas }} ({{ total_facturas }} facturas totales)
+          </div>
+          <div class="paginacion-botones">
+            {% if pagina > 1 %}
+            <a href="?desde={{ desde }}&hasta={{ hasta }}&co={{ co }}&destino={{ destino }}&formato={{ formato }}&pagina=1" class="btn-pagina">« Primera</a>
+            <a href="?desde={{ desde }}&hasta={{ hasta }}&co={{ co }}&destino={{ destino }}&formato={{ formato }}&pagina={{ pagina - 1 }}" class="btn-pagina">‹ Anterior</a>
+            {% endif %}
+            
+            <!-- Números de página (mostrar ±2 páginas alrededor de la actual) -->
+            {% for p in range([1, pagina - 2]|max, [total_paginas, pagina + 2]|min + 1) %}
+              {% if p == pagina %}
+              <span class="btn-pagina activa">{{ p }}</span>
+              {% else %}
+              <a href="?desde={{ desde }}&hasta={{ hasta }}&co={{ co }}&destino={{ destino }}&formato={{ formato }}&pagina={{ p }}" class="btn-pagina">{{ p }}</a>
+              {% endif %}
+            {% endfor %}
+            
+            {% if pagina < total_paginas %}
+            <a href="?desde={{ desde }}&hasta={{ hasta }}&co={{ co }}&destino={{ destino }}&formato={{ formato }}&pagina={{ pagina + 1 }}" class="btn-pagina">Siguiente ›</a>
+            <a href="?desde={{ desde }}&hasta={{ hasta }}&co={{ co }}&destino={{ destino }}&formato={{ formato }}&pagina={{ total_paginas }}" class="btn-pagina">Última »</a>
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
+        
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- LÓGICA DE LA PÁGINA ---
+  function contarSeleccionados() {
+    const seleccionados = document.querySelectorAll('input[name="factura"]:checked').length;
+    document.getElementById("contador").innerText = `${seleccionados} documentos seleccionados`;
+  }
+
+  function toggleSeleccion(check) {
+    const todos = document.querySelectorAll('input[name="factura"]');
+    todos.forEach(c => c.checked = check.checked);
+    contarSeleccionados();
+  }
+
+  function confirmarSalida() {
+    window.location.href = "/validaciones";
+  }
+
+  function validarEnvio() {
+    const seleccionados = document.querySelectorAll('input[name="factura"]:checked');
+    if (seleccionados.length === 0) {
+      alert("Debe seleccionar al menos una factura para generar la relación.");
+      return false;
+    }
+    
+    // ✅ NUEVO: Confirmación ANTES de generar la relación
+    if (!confirm(`¿Está seguro de generar la relación con ${seleccionados.length} factura(s) seleccionada(s)?`)) {
+      return false;
+    }
+    
+    let hay_rojas = false;
+    seleccionados.forEach(c => {
+      if (c.closest('tr').classList.contains('roja')) {
+        hay_rojas = true;
+      }
+    });
+    if (hay_rojas && !confirm("Algunas facturas ya fueron relacionadas. ¿Deseas continuar?")) {
+      return false;
+    }
+    return true;
+  }
+  
+  // Inicializar contador al cargar
+  document.addEventListener('DOMContentLoaded', contarSeleccionados);
+
+  // --- LÓGICA DE MODO OSCURO / CLARO ---
+  document.addEventListener('DOMContentLoaded', function() {
+      const toggleModeBtn = document.getElementById('toggleModeBtn');
+      const body = document.body;
+      const moonIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+      const sunIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+      const updateModeIcon = (isDarkMode) => { toggleModeBtn.innerHTML = isDarkMode ? sunIcon : moonIcon; };
+      toggleModeBtn.addEventListener('click', () => {
+          body.classList.toggle('dark-mode');
+          const isDarkMode = body.classList.contains('dark-mode');
+          localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+          updateModeIcon(isDarkMode);
+      });
+      const savedTheme = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+          body.classList.add('dark-mode');
+          updateModeIcon(true);
+      } else {
+          updateModeIcon(false);
+      }
+  });
+
+
+    // --- TIMER DE INACTIVIDAD (25 minutos) ---
+    let timer;
+    let tiempoInactividad = 25 * 60 * 1000; // 25 minutos
+    async function cerrarSesionPorInactividad() {
+      try {
+        await fetch('/api/auth/logout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ motivo: 'inactividad_25min' })
+        });
+      } catch (e) {
+        console.warn('Logout por inactividad: no se pudo notificar al backend.', e);
+      } finally {
+        window.location.href = "/";
+      }
+    }
+    function reiniciarTimer() {
+      clearTimeout(timer);
+      timer = setTimeout(() => {
+        alert("⏱️ Sesión cerrada por inactividad (25 minutos).");
+        cerrarSesionPorInactividad();
+      }, tiempoInactividad);
+    }
+    ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(evt => {
+      document.addEventListener(evt, reiniciarTimer, false);
+    });
+    reiniciarTimer();
+
+    // --- GUARDAR EN SESSION STORAGE AL SALIR ---
+    window.addEventListener('beforeunload', () => {
+      if (typeof listaFacturas !== 'undefined') {
+        sessionStorage.setItem("facturas_temporales", JSON.stringify(listaFacturas));
+      }
+    });
+</script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+    {% include '_session_expired_interceptor.html' %}
+  </body>
+</html>

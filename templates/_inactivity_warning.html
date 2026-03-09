@@ -1,0 +1,126 @@
+<!-- =============================================
+     ⏱️ MODAL DE ADVERTENCIA ANTES DE CERRAR SESIÓN
+     Se muestra 1 minuto antes del cierre automático
+     ============================================= -->
+<div id="modalAdvertenciaInactividad" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:10000; align-items:center; justify-content:center;">
+    <div style="background:#fff; border-radius:12px; padding:30px; max-width:400px; text-align:center; box-shadow:0 8px 32px rgba(0,0,0,0.3); color:#2c3e50;">
+        <div style="font-size:3em; margin-bottom:15px;">⏱️</div>
+        <h3 style="margin-bottom:15px; color:#ea580c;">⚠️ Advertencia de Inactividad</h3>
+        <p style="margin-bottom:20px; line-height:1.6;">
+            Su sesión se cerrará en <strong id="contadorSegundos">60</strong> segundos por inactividad.<br>
+            ¿Desea continuar trabajando?
+        </p>
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <button id="btnContinuarTrabajando" style="background:#166534; color:#fff; border:none; padding:12px 24px; border-radius:8px; cursor:pointer; font-weight:600; font-size:1em;">
+                ✅ Continuar Trabajando
+            </button>
+            <button id="btnCerrarSesionAhora" style="background:#dc2626; color:#fff; border:none; padding:12px 24px; border-radius:8px; cursor:pointer; font-weight:600; font-size:1em;">
+                🚪 Salir Ahora
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // =====================================================
+    // ⏱️ SISTEMA DE INACTIVIDAD CON ADVERTENCIA (25 MIN)
+    // Advertencia 1 minuto antes del cierre automático
+    // =====================================================
+    (function() {
+        const TIEMPO_TOTAL = 25 * 60 * 1000;       // 25 minutos
+        const TIEMPO_ADVERTENCIA = 24 * 60 * 1000; // 24 minutos (1 min antes)
+        
+        let timerInactividad;
+        let timerAdvertencia;
+        let contadorSegundosInterval;
+        
+        const modal = document.getElementById('modalAdvertenciaInactividad');
+        const contadorSpan = document.getElementById('contadorSegundos');
+        const btnContinuar = document.getElementById('btnContinuarTrabajando');
+        const btnCerrar = document.getElementById('btnCerrarSesionAhora');
+        
+        // Función para cerrar sesión en el servidor
+        async function cerrarSesionServidor() {
+            try {
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ motivo: 'inactividad_25min' })
+                });
+            } catch (e) {
+                console.warn('Logout: no se pudo notificar al backend.', e);
+            } finally {
+                window.location.href = '/';
+            }
+        }
+        
+        // Mostrar modal de advertencia
+        function mostrarAdvertencia() {
+            modal.style.display = 'flex';
+            let segundosRestantes = 60;
+            contadorSpan.textContent = segundosRestantes;
+            
+            // Actualizar contador cada segundo
+            contadorSegundosInterval = setInterval(() => {
+                segundosRestantes--;
+                contadorSpan.textContent = segundosRestantes;
+                
+                if (segundosRestantes <= 0) {
+                    clearInterval(contadorSegundosInterval);
+                    cerrarSesionServidor();
+                }
+            }, 1000);
+        }
+        
+        // Ocultar modal y resetear timers
+        function ocultarAdvertencia() {
+            modal.style.display = 'none';
+            clearInterval(contadorSegundosInterval);
+            reiniciarTimers();
+        }
+        
+        // Reiniciar timers de inactividad
+        function reiniciarTimers() {
+            clearTimeout(timerInactividad);
+            clearTimeout(timerAdvertencia);
+            
+            // Timer de advertencia (1 min antes)
+            timerAdvertencia = setTimeout(() => {
+                mostrarAdvertencia();
+            }, TIEMPO_ADVERTENCIA);
+            
+            // Timer final de cierre (25 min)
+            timerInactividad = setTimeout(() => {
+                cerrarSesionServidor();
+            }, TIEMPO_TOTAL);
+        }
+        
+        // Botón "Continuar Trabajando"
+        btnContinuar.addEventListener('click', () => {
+            ocultarAdvertencia();
+        });
+        
+        // Botón "Salir Ahora"
+        btnCerrar.addEventListener('click', () => {
+            clearInterval(contadorSegundosInterval);
+            cerrarSesionServidor();
+        });
+        
+        // Detectar actividad del usuario
+        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(evt => {
+            document.addEventListener(evt, () => {
+                // Si el modal está visible, cualquier actividad cuenta como "continuar"
+                if (modal.style.display === 'flex') {
+                    ocultarAdvertencia();
+                } else {
+                    reiniciarTimers();
+                }
+            }, false);
+        });
+        
+        // Iniciar timers al cargar la página
+        reiniciarTimers();
+    })();
+</script>
+
+{% include '_session_expired_interceptor.html' %}

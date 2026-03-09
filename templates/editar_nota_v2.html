@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📝 Editar Documento Contable</title>
+    <style>
+        :root {
+            --brand-green: #166534;
+            --brand-green-dark: #14532d;
+            --brand-green-light: #dcfce7;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* =============================================
+           HEADER
+           ============================================= */
+        .header {
+            background: linear-gradient(135deg, var(--brand-green), var(--brand-green-dark));
+            color: white;
+            padding: 20px 40px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            margin-bottom: 5px;
+        }
+
+        .header .breadcrumb {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        /* =============================================
+           LAYOUT PRINCIPAL: 3 COLUMNAS
+           ============================================= */
+        .main-container {
+            flex: 1;
+            display: flex;
+            gap: 20px;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        /* COLUMNA IZQUIERDA: Formulario (30%) */
+        .left-column {
+            flex: 0 0 30%;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* COLUMNA CENTRAL: Visor PDF con carrusel (45%) */
+        .center-column {
+            flex: 0 0 45%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* COLUMNA DERECHA: Historial y Observaciones (25%) */
+        .right-column {
+            flex: 0 0 25%;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        /* =============================================
+           CARDS
+           ============================================= */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            color: var(--brand-green);
+            margin-bottom: 15px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* =============================================
+           FORMULARIO
+           ============================================= */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            color: var(--gray-700);
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9em;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 0.95em;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--brand-green);
+        }
+
+        .form-group input[readonly] {
+            background: var(--gray-100);
+            cursor: not-allowed;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* =============================================
+           VISOR PDF CON CARRUSEL
+           ============================================= */
+        .pdf-carousel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .carousel-header {
+            background: linear-gradient(135deg, var(--brand-green), var(--brand-green-dark));
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .carousel-title {
+            font-size: 1em;
+            font-weight: 600;
+        }
+
+        .carousel-counter {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .carousel-body {
+            flex: 1;
+            position: relative;
+            background: var(--gray-100);
+        }
+
+        .pdf-viewer {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .carousel-controls {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+            pointer-events: none;
+        }
+
+        .carousel-btn {
+            pointer-events: all;
+            background: rgba(22, 101, 52, 0.9);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .carousel-btn:hover:not(:disabled) {
+            background: var(--brand-green-dark);
+            transform: scale(1.1);
+        }
+
+        .carousel-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .carousel-thumbnails {
+            display: flex;
+            gap: 10px;
+            padding: 15px;
+            overflow-x: auto;
+            background: white;
+            border-top: 2px solid var(--gray-200);
+        }
+
+        .thumbnail {
+            min-width: 80px;
+            height: 100px;
+            border: 3px solid var(--gray-300);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gray-100);
+            font-size: 2em;
+        }
+
+        .thumbnail:hover {
+            border-color: var(--brand-green);
+            transform: translateY(-5px);
+        }
+
+        .thumbnail.active {
+            border-color: var(--brand-green);
+            border-width: 4px;
+            box-shadow: 0 4px 12px rgba(22, 101, 52, 0.3);
+        }
+
+        .thumbnail-label {
+            font-size: 0.7em;
+            text-align: center;
+            margin-top: 5px;
+            color: var(--gray-600);
+        }
+
+        /* =============================================
+           HISTORIAL Y OBSERVACIONES
+           ============================================= */
+        .timeline {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .timeline-item {
+            border-left: 3px solid var(--brand-green);
+            padding-left: 15px;
+            padding-bottom: 15px;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -7px;
+            top: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--brand-green);
+        }
+
+        .timeline-date {
+            font-size: 0.8em;
+            color: var(--gray-600);
+            margin-bottom: 5px;
+        }
+
+        .timeline-action {
+            font-weight: 600;
+            color: var(--brand-green);
+            margin-bottom: 5px;
+        }
+
+        .timeline-detail {
+            font-size: 0.9em;
+            color: var(--gray-700);
+        }
+
+        .timeline-meta {
+            font-size: 0.75em;
+            color: var(--gray-600);
+            font-style: italic;
+            margin-top: 5px;
+        }
+
+        /* =============================================
+           OBSERVACIONES
+           ============================================= */
+        .observacion-item {
+            background: var(--brand-green-light);
+            border-left: 4px solid var(--brand-green);
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+        }
+
+        .observacion-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .observacion-momento {
+            font-weight: 600;
+            color: var(--brand-green);
+            font-size: 0.9em;
+        }
+
+        .observacion-fecha {
+            font-size: 0.75em;
+            color: var(--gray-600);
+        }
+
+        .observacion-texto {
+            color: var(--gray-800);
+            margin-bottom: 5px;
+        }
+
+        .observacion-meta {
+            font-size: 0.75em;
+            color: var(--gray-600);
+            font-style: italic;
+        }
+
+        .add-observacion {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid var(--gray-200);
+        }
+
+        .add-observacion textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 10px;
+            border: 2px solid var(--gray-200);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        /* =============================================
+           BOTONES
+           ============================================= */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95em;
+        }
+
+        .btn-primary {
+            background: var(--brand-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--brand-green-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-secondary {
+            background: var(--gray-600);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-700);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* =============================================
+           AGREGAR ANEXOS
+           ============================================= */
+        .upload-area {
+            border: 2px dashed var(--gray-300);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .upload-area:hover {
+            border-color: var(--brand-green);
+            background: var(--brand-green-light);
+        }
+
+        .upload-area input[type="file"] {
+            display: none;
+        }
+
+        /* =============================================
+           RESPONSIVE
+           ============================================= */
+        @media (max-width: 1200px) {
+            .main-container {
+                flex-direction: column;
+            }
+            
+            .left-column,
+            .center-column,
+            .right-column {
+                flex: 1 1 100%;
+                max-width: 100%;
+            }
+            
+            .center-column {
+                min-height: 500px;
+            }
+        }
+
+        /* =============================================
+           LOADING
+           ============================================= */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .spinner {
+            border: 4px solid var(--gray-200);
+            border-top: 4px solid var(--brand-green);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER -->
+    <div class="header">
+        <h1>📝 Editar Documento Contable</h1>
+        <div class="breadcrumb">
+            Archivo Digital > Documentos > Editar > ID: <span id="docIdBreadcrumb">...</span>
+        </div>
+    </div>
+
+    <!-- LAYOUT PRINCIPAL: 3 COLUMNAS -->
+    <div class="main-container">
+        
+        <!-- =============================================
+             COLUMNA IZQUIERDA: FORMULARIO
+             ============================================= -->
+        <div class="left-column">
+            <div class="card">
+                <h3>📋 Información del Documento</h3>
+                <form id="formEditarDocumento">
+                    <input type="hidden" id="documentoId">
+                    
+                    <div class="form-group">
+                        <label>Tipo de Documento</label>
+                        <input type="text" id="tipoDocumento" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Centro de Operación</label>
+                        <input type="text" id="centroOperacion" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Consecutivo</label>
+                        <input type="text" id="consecutivo" readonly>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Fecha del Documento</label>
+                        <input type="date" id="fechaDocumento">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Empresa</label>
+                        <input type="text" id="empresa">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Nombre del Archivo</label>
+                        <input type="text" id="nombreArchivo">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Observaciones Generales</label>
+                        <textarea id="observaciones" placeholder="Observaciones generales del documento..."></textarea>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary" onclick="guardarCambios()">
+                            💾 Guardar Cambios
+                        </button>
+                        <button type="button" class="btn btn-secondary" onclick="volverAlListado()">
+                            ← Volver
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- AGREGAR MÁS ANEXOS -->
+            <div class="card">
+                <h3>📎 Agregar Más Anexos</h3>
+                <div class="upload-area" onclick="document.getElementById('inputAnexos').click()">
+                    <div style="font-size: 3em; margin-bottom: 10px;">📁</div>
+                    <div style="font-weight: 600; margin-bottom: 5px;">Haz clic o arrastra archivos aquí</div>
+                    <div style="font-size: 0.85em; color: var(--gray-600);">PDF, Excel, Imágenes (Máx. 25MB)</div>
+                    <input type="file" id="inputAnexos" multiple accept=".pdf,.xlsx,.xls,.jpg,.jpeg,.png">
+                </div>
+                <button type="button" class="btn btn-primary" onclick="subirAnexos()" style="width: 100%; margin-top: 10px;">
+                    ⬆️ Subir Anexos
+                </button>
+            </div>
+        </div>
+
+        <!-- =============================================
+             COLUMNA CENTRAL: VISOR PDF CON CARRUSEL
+             ============================================= -->
+        <div class="center-column">
+            <div class="pdf-carousel">
+                <div class="carousel-header">
+                    <span class="carousel-title" id="currentFileName">📄 Documento Principal</span>
+                    <span class="carousel-counter" id="carouselCounter">1 / 1</span>
+                </div>
+                
+                <div class="carousel-body">
+                    <div id="pdfLoading" class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                    <iframe id="pdfViewer" class="pdf-viewer" style="display:none;"></iframe>
+                    
+                    <!-- Controles de navegación -->
+                    <div class="carousel-controls">
+                        <button class="carousel-btn" id="btnPrev" onclick="navegarPDF(-1)">‹</button>
+                        <button class="carousel-btn" id="btnNext" onclick="navegarPDF(1)">›</button>
+                    </div>
+                </div>
+                
+                <!-- Miniaturas -->
+                <div class="carousel-thumbnails" id="thumbnails">
+                    <!-- Se llena dinámicamente con JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- =============================================
+             COLUMNA DERECHA: HISTORIAL Y OBSERVACIONES
+             ============================================= -->
+        <div class="right-column">
+            <!-- HISTORIAL -->
+            <div class="card">
+                <h3>📜 Historial Completo</h3>
+                <div class="timeline" id="historialTimeline">
+                    <p style="color: var(--gray-600); font-style: italic;">Cargando historial...</p>
+                </div>
+            </div>
+
+            <!-- OBSERVACIONES AUDITADAS -->
+            <div class="card">
+                <h3>💬 Observaciones Auditadas</h3>
+                <div id="observacionesList">
+                    <p style="color: var(--gray-600); font-style: italic;">No hay observaciones registradas</p>
+                </div>
+                
+                <!-- Agregar nueva observación -->
+                <div class="add-observacion">
+                    <textarea id="nuevaObservacion" placeholder="Escribe una nueva observación..."></textarea>
+                    <button class="btn btn-primary" onclick="agregarObservacion()" style="width: 100%;">
+                        💬 Agregar Observación
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =============================================
+         💻 JAVASCRIPT
+         ============================================= -->
+    <script>
+        let documentoActual = null;
+        let todosLosPDFs = [];  // [{ url, nombre, tipo }]
+        let pdfActualIndex = 0;
+        const documentoId = window.location.pathname.split('/').pop();
+
+        // ===== INICIALIZACIÓN =====
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('docIdBreadcrumb').textContent = documentoId;
+            cargarDocumento();
+            
+            // Event listener para arrastrar archivos
+            setupDragAndDrop();
+        });
+
+        // ===== CARGAR DOCUMENTO COMPLETO =====
+        async function cargarDocumento() {
+            try {
+                const response = await fetch(`/api/notas/detalle/${documentoId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    documentoActual = data.data;
+                    renderizarDocumento();
+                    renderizarHistorial();
+                    renderizarObservaciones();
+                    inicializarCarrusel();
+                } else {
+                    alert('❌ Error: ' + (data.message || 'Error desconocido'));
+                }
+            } catch (error) {
+                console.error('❌ Error cargando documento:', error);
+                alert('❌ Error al cargar el documento');
+            }
+        }
+
+        // ===== RENDERIZAR FORMULARIO =====
+        function renderizarDocumento() {
+            const doc = documentoActual;
+            
+            // Llenar formulario
+            document.getElementById('documentoId').value = doc.id;
+            
+            const tipoDoc = doc.tipo_documento || {};
+            const centroOp = doc.centro_operacion || {};
+            
+            document.getElementById('tipoDocumento').value = `${tipoDoc.siglas || ''} - ${tipoDoc.nombre || ''}`;
+            document.getElementById('centroOperacion').value = `${centroOp.codigo || ''} - ${centroOp.nombre || ''}`;
+            document.getElementById('consecutivo').value = doc.consecutivo;
+            document.getElementById('fechaDocumento').value = doc.fecha_documento;
+            document.getElementById('empresa').value = doc.empresa;
+            document.getElementById('nombreArchivo').value = doc.nombre_archivo || '';
+            document.getElementById('observaciones').value = doc.observaciones || '';
+        }
+
+        // ===== INICIALIZAR CARRUSEL =====
+        function inicializarCarrusel() {
+            const doc = documentoActual;
+            todosLosPDFs = [];
+            
+            // Agregar documento principal
+            todosLosPDFs.push({
+                url: `/api/notas/visualizar/${doc.id}`,
+                nombre: 'Documento Principal',
+                tipo: 'principal',
+                id: doc.id
+            });
+            
+            // Agregar adjuntos
+            if (doc.adjuntos && doc.adjuntos.length > 0) {
+                doc.adjuntos.forEach(adj => {
+                    todosLosPDFs.push({
+                        url: `/api/notas/visualizar_adjunto/${adj.id}`,
+                        nombre: adj.nombre_archivo,
+                        tipo: 'adjunto',
+                        id: adj.id
+                    });
+                });
+            }
+            
+            // Renderizar miniaturas
+            renderizarThumbnails();
+            
+            // Cargar primer PDF
+            cargarPDFEnCarrusel(0);
+        }
+
+        // ===== RENDERIZAR MINIATURAS =====
+        function renderizarThumbnails() {
+            const container = document.getElementById('thumbnails');
+            
+            const thumbnailsHTML = todosLosPDFs.map((pdf, index) => {
+                const icono = pdf.tipo === 'principal' ? '📄' : '📎';
+                return `
+                    <div class="thumbnail ${index === 0 ? 'active' : ''}" 
+                         onclick="cargarPDFEnCarrusel(${index})"
+                         id="thumb-${index}">
+                        <div>
+                            <div style="font-size: 2em;">${icono}</div>
+                            <div class="thumbnail-label">${index + 1}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = thumbnailsHTML;
+        }
+
+        // ===== CARGAR PDF EN CARRUSEL =====
+        function cargarPDFEnCarrusel(index) {
+            if (index < 0 || index >= todosLosPDFs.length) return;
+            
+            pdfActualIndex = index;
+            const pdf = todosLosPDFs[index];
+            
+            // Actualizar UI
+            document.getElementById('currentFileName').textContent = `📄 ${pdf.nombre}`;
+            document.getElementById('carouselCounter').textContent = `${index + 1} / ${todosLosPDFs.length}`;
+            
+            // Actualizar estado de botones
+            document.getElementById('btnPrev').disabled = (index === 0);
+            document.getElementById('btnNext').disabled = (index === todosLosPDFs.length - 1);
+            
+            // Actualizar thumbnails activos
+            document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
+                thumb.classList.toggle('active', i === index);
+            });
+            
+            // Cargar PDF
+            const pdfViewer = document.getElementById('pdfViewer');
+            const pdfLoading = document.getElementById('pdfLoading');
+            
+            pdfLoading.style.display = 'flex';
+            pdfViewer.style.display = 'none';
+            
+            pdfViewer.src = pdf.url;
+            
+            pdfViewer.onload = () => {
+                pdfLoading.style.display = 'none';
+                pdfViewer.style.display = 'block';
+            };
+        }
+
+        // ===== NAVEGAR EN CARRUSEL =====
+        function navegarPDF(direccion) {
+            const nuevoIndex = pdfActualIndex + direccion;
+            cargarPDFEnCarrusel(nuevoIndex);
+        }
+
+        // ===== RENDERIZAR HISTORIAL =====
+        function renderizarHistorial() {
+            const historial = documentoActual.historial || [];
+            const container = document.getElementById('historialTimeline');
+            
+            if (historial.length === 0) {
+                container.innerHTML = '<p style="color: var(--gray-600); font-style: italic;">No hay historial registrado</p>';
+                return;
+            }
+            
+            const historialHTML = historial.map(item => {
+                const fecha = new Date(item.created_at);
+                const fechaStr = fecha.toLocaleString('es-CO', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                let iconoAccion = '•';
+                if (item.accion === 'CREADO') iconoAccion = '✅';
+                if (item.accion === 'EDITADO') iconoAccion = '✏️';
+                if (item.accion === 'VISUALIZADO') iconoAccion = '👁️';
+                if (item.accion === 'ANEXO_AGREGADO') iconoAccion = '📎';
+                
+                return `
+                    <div class="timeline-item">
+                        <div class="timeline-date">${fechaStr}</div>
+                        <div class="timeline-action">${iconoAccion} ${item.accion}</div>
+                        <div class="timeline-detail">${item.motivo || 'Sin detalles'}</div>
+                        <div class="timeline-meta">
+                            👤 ${item.created_by} • 🌐 ${item.ip_address || 'N/A'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = historialHTML;
+        }
+
+        // ===== RENDERIZAR OBSERVACIONES =====
+        function renderizarObservaciones() {
+            const observaciones = documentoActual.observaciones_auditadas || [];
+            const container = document.getElementById('observacionesList');
+            
+            if (observaciones.length === 0) {
+                container.innerHTML = '<p style="color: var(--gray-600); font-style: italic;">No hay observaciones registradas</p>';
+                return;
+            }
+            
+            const obsHTML = observaciones.map(obs => {
+                const fecha = new Date(obs.created_at);
+                const fechaStr = fecha.toLocaleString('es-CO', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                return `
+                    <div class="observacion-item">
+                        <div class="observacion-header">
+                            <span class="observacion-momento">${obs.momento}</span>
+                            <span class="observacion-fecha">${fechaStr}</span>
+                        </div>
+                        <div class="observacion-texto">${obs.observacion}</div>
+                        <div class="observacion-meta">
+                            👤 ${obs.created_by} • 🌐 ${obs.ip_address || 'N/A'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            container.innerHTML = obsHTML;
+        }
+
+        // ===== AGREGAR OBSERVACIÓN =====
+        async function agregarObservacion() {
+            const texto = document.getElementById('nuevaObservacion').value.trim();
+            
+            if (!texto) {
+                alert('❌ Escribe una observación antes de guardar');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/notas/observacion/${documentoId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        observacion: texto,
+                        momento: 'EDICION'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ Observación agregada correctamente');
+                    document.getElementById('nuevaObservacion').value = '';
+                    cargarDocumento();  // Recargar todo
+                } else {
+                    alert('❌ Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('❌ Error al agregar observación');
+            }
+        }
+
+        // ===== GUARDAR CAMBIOS =====
+        async function guardarCambios() {
+            const formData = {
+                fecha_documento: document.getElementById('fechaDocumento').value,
+                empresa: document.getElementById('empresa').value,
+                nombre_archivo: document.getElementById('nombreArchivo').value,
+                observaciones: document.getElementById('observaciones').value
+            };
+            
+            try {
+                const response = await fetch(`/api/notas/editar/${documentoId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('✅ Cambios guardados correctamente');
+                    cargarDocumento();  // Recargar todo
+                } else {
+                    alert('❌ Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('❌ Error al guardar cambios');
+            }
+        }
+
+        // ===== SUBIR ANEXOS =====
+        async function subirAnexos() {
+            const input = document.getElementById('inputAnexos');
+            const archivos = input.files;
+            
+            if (archivos.length === 0) {
+                alert('❌ Selecciona al menos un archivo');
+                return;
+            }
+            
+            const formData = new FormData();
+            for (let i = 0; i < archivos.length; i++) {
+                formData.append('adjuntos', archivos[i]);
+            }
+            
+            try {
+                const response = await fetch(`/api/notas/agregar_adjuntos/${documentoId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert(`✅ ${archivos.length} archivo(s) subido(s) correctamente`);
+                    input.value = '';  // Limpiar input
+                    cargarDocumento();  // Recargar todo
+                } else {
+                    alert('❌ Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('❌ Error al subir anexos');
+            }
+        }
+
+        // ===== DRAG AND DROP =====
+        function setupDragAndDrop() {
+            const uploadArea = document.querySelector('.upload-area');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => {
+                    uploadArea.style.borderColor = 'var(--brand-green)';
+                    uploadArea.style.background = 'var(--brand-green-light)';
+                });
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => {
+                    uploadArea.style.borderColor = '';
+                    uploadArea.style.background = '';
+                });
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                document.getElementById('inputAnexos').files = files;
+            });
+        }
+
+        // ===== VOLVER AL LISTADO =====
+        function volverAlListado() {
+            window.location.href = '/archivo_digital';
+        }
+
+        // ===== ATAJOS DE TECLADO =====
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') navegarPDF(-1);
+            if (e.key === 'ArrowRight') navegarPDF(1);
+        });
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

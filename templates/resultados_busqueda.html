@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados de Búsqueda - {{ query }}</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #e17055 0%, #d63031 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        .search-info {
+            background: #e8f5e8;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nueva-busqueda {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .search-input {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .search-select {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            background: white;
+        }
+        .resultado-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .resultado-card {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .resultado-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .factura-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .clave-busqueda {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 16px;
+        }
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .status-fisico { background: #d4edda; color: #155724; }
+        .status-metadata { background: #fff3cd; color: #856404; }
+        .factura-info {
+            margin-bottom: 15px;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            padding: 3px 0;
+        }
+        .info-label {
+            font-weight: 500;
+            color: #666;
+            min-width: 80px;
+        }
+        .info-value {
+            flex: 1;
+            text-align: right;
+            color: #333;
+        }
+        .factura-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+        .btn:hover { transform: translateY(-1px); }
+        .btn-primary { background: #007bff; color: white; }
+        .btn-success { background: #28a745; color: white; }
+        .btn-info { background: #17a2b8; color: white; }
+        .btn-warning { background: #ffc107; color: black; }
+        .btn-secondary { background: #6c757d; color: white; }
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #666;
+        }
+        .paginacion {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
+        @media (max-width: 768px) {
+            .resultado-grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; gap: 20px; }
+            .search-info { flex-direction: column; gap: 10px; }
+            .nueva-busqueda { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1>🔍 Resultados de Búsqueda</h1>
+                <p>Búsqueda en sistema de facturas físicas</p>
+            </div>
+            <div>
+                <a href="/" class="btn btn-secondary">🏠 Dashboard</a>
+                <a href="/explorar" class="btn btn-info">📁 Explorar</a>
+            </div>
+        </div>
+
+        <div class="search-info">
+            <div>
+                <strong>Búsqueda:</strong> "{{ query }}" en campo <em>{{ tipo if tipo != 'todo' else 'todos los campos' }}</em>
+            </div>
+            <div>
+                <strong>{{ total }}</strong> resultado(s) encontrado(s)
+            </div>
+        </div>
+
+        <!-- Nueva búsqueda -->
+        <div class="nueva-busqueda">
+            <input type="text" class="search-input" id="nueva-query" placeholder="Nueva búsqueda..." value="{{ query }}">
+            <select class="search-select" id="nuevo-tipo">
+                <option value="todo" {{ 'selected' if tipo == 'todo' else '' }}>Todos los campos</option>
+                <option value="nit" {{ 'selected' if tipo == 'nit' else '' }}>NIT</option>
+                <option value="prefijo" {{ 'selected' if tipo == 'prefijo' else '' }}>Prefijo</option>
+                <option value="folio" {{ 'selected' if tipo == 'folio' else '' }}>Folio</option>
+                <option value="razon" {{ 'selected' if tipo == 'razon' else '' }}>Razón Social</option>
+            </select>
+            <button class="btn btn-primary" onclick="nuevaBusqueda()">🔍 Buscar</button>
+        </div>
+
+        {% if resultados %}
+        <!-- Resultados -->
+        <div class="resultado-grid">
+            {% for factura in resultados %}
+            <div class="resultado-card">
+                <div class="factura-header">
+                    <div class="clave-busqueda">{{ factura.clave_busqueda }}</div>
+                    <div class="status-badge {{ 'status-fisico' if factura.get('archivos_fisicos', 0) > 0 else 'status-metadata' }}">
+                        {{ factura.get('archivos_fisicos', 0) }} archivo(s)
+                    </div>
+                </div>
+
+                <div class="factura-info">
+                    <div class="info-row">
+                        <span class="info-label">NIT:</span>
+                        <span class="info-value">{{ factura.nit_tercero }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Razón:</span>
+                        <span class="info-value" title="{{ factura.razon_social }}">
+                            {{ factura.razon_social[:30] }}{{ '...' if factura.razon_social|length > 30 else '' }}
+                        </span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Prefijo:</span>
+                        <span class="info-value">{{ factura.prefijo }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Folio:</span>
+                        <span class="info-value">{{ factura.folio }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Fecha:</span>
+                        <span class="info-value">{{ factura.fecha }}</span>
+                    </div>
+                    {% if factura.valor > 0 %}
+                    <div class="info-row">
+                        <span class="info-label">Valor:</span>
+                        <span class="info-value">${{ "{:,.0f}".format(factura.valor) }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="factura-actions">
+                    <a href="/factura/{{ factura.clave_busqueda }}" class="btn btn-info">👁️ Ver Detalle</a>
+                    <a href="/tercero/{{ factura.nit_tercero }}" class="btn btn-secondary">🏢 Ver Tercero</a>
+                    {% if factura.get('archivos_fisicos', 0) > 0 %}
+                    <a href="/descargar_pdf/{{ factura.clave_busqueda }}" class="btn btn-primary">📄 PDF</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Información adicional -->
+        <div style="background: #f8f9fa; padding: 15px; border-radius: 10px; margin-top: 20px;">
+            <h4>📊 Resumen de Resultados</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 10px;">
+                <div>
+                    <strong>Total Facturas:</strong> {{ total }}
+                </div>
+                <div>
+                    <strong>Con Archivos:</strong> 
+                    {% set con_archivos = [] %}
+                    {% for f in resultados if f.get('archivos_fisicos', 0) > 0 %}{% set _ = con_archivos.append(f) %}{% endfor %}
+                    {{ con_archivos|length }}
+                </div>
+                <div>
+                    <strong>Solo Metadatos:</strong> {{ total - con_archivos|length }}
+                </div>
+                <div>
+                    <strong>Valor Total:</strong> ${{ "{:,.0f}".format(resultados | sum(attribute='valor')) }}
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- Sin resultados -->
+        <div class="empty-state">
+            <h3>🔍 Sin Resultados</h3>
+            <p>No se encontraron facturas que coincidan con tu búsqueda.</p>
+            <p><strong>Sugerencias:</strong></p>
+            <ul style="text-align: left; display: inline-block;">
+                <li>Verifica la ortografía de los términos de búsqueda</li>
+                <li>Utiliza términos más generales</li>
+                <li>Prueba buscando solo por NIT o prefijo</li>
+                <li>Revisa el tipo de campo seleccionado</li>
+            </ul>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-primary" onclick="document.getElementById('nueva-query').focus()">🔍 Nueva Búsqueda</button>
+                <a href="/" class="btn btn-secondary">🏠 Volver al Dashboard</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        function nuevaBusqueda() {
+            const query = document.getElementById('nueva-query').value.trim();
+            const tipo = document.getElementById('nuevo-tipo').value;
+            
+            if (!query) {
+                alert('Por favor ingresa un término de búsqueda');
+                return;
+            }
+            
+            window.location.href = `/buscar?q=${encodeURIComponent(query)}&tipo=${tipo}`;
+        }
+
+        // Resaltar términos de búsqueda
+        function resaltarTerminos() {
+            const query = '{{ query }}';
+            if (query && query.length > 2) {
+                const elementos = document.querySelectorAll('.info-value, .clave-busqueda');
+                elementos.forEach(elemento => {
+                    const texto = elemento.textContent;
+                    const regex = new RegExp(`(${query})`, 'gi');
+                    if (regex.test(texto)) {
+                        elemento.innerHTML = texto.replace(regex, '<span class="highlight">$1</span>');
+                    }
+                });
+            }
+        }
+
+        // Permitir búsqueda con Enter
+        document.getElementById('nueva-query').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                nuevaBusqueda();
+            }
+        });
+
+        // Ejecutar al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            resaltarTerminos();
+            document.getElementById('nueva-query').focus();
+        });
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

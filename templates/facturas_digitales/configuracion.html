@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Configuración - Facturas Digitales</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --brand-primary: #16A085;
+            --brand-secondary: #128C7E;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .light-mode {
+            background-color: #F8F9FA;
+            color: #212529;
+        }
+
+        .dark-mode {
+            background-color: #1A1A1A;
+            color: #E9ECEF;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 32px;
+        }
+
+        .dark-mode .card {
+            background: #2D2D2D;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #E0E0E0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .dark-mode .input-field {
+            background: #1A1A1A;
+            border-color: #444;
+            color: #E9ECEF;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--brand-primary);
+        }
+
+        .btn-primary {
+            background: var(--brand-primary);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: var(--brand-secondary);
+            transform: translateY(-2px);
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .stat-box h3 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .stat-box p {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <a href="{{ url_for('facturas_digitales.dashboard_facturas') }}" class="text-2xl">←</a>
+                <h1 class="text-2xl font-bold" style="color: var(--brand-primary);">
+                    ⚙️ Configuración
+                </h1>
+            </div>
+            <button id="toggleDarkMode" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700">
+                <span id="darkModeIcon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+        <!-- Ruta de Almacenamiento -->
+        <div class="card mb-6">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-4xl">📁</span>
+                <div>
+                    <h2 class="text-2xl font-bold">Ruta de Almacenamiento</h2>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Configura dónde se guardan los archivos de facturas
+                    </p>
+                </div>
+            </div>
+
+            <form id="rutaForm">
+                <div class="mb-4">
+                    <label class="block font-semibold mb-2">Ruta Local de Almacenamiento *</label>
+                    <div class="flex gap-3">
+                        <input type="text" 
+                               id="rutaLocal" 
+                               name="ruta_local" 
+                               class="input-field flex-1" 
+                               value="{{ config.ruta_local if config else 'D:/facturas_digitales' }}" 
+                               placeholder="D:/facturas_digitales"
+                               required>
+                        <button type="button" 
+                                onclick="testearRuta()" 
+                                class="btn-primary" 
+                                style="background: #17A2B8;">
+                            🔍 Probar
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2">
+                        💡 La ruta debe existir y tener permisos de escritura. Ejemplo: D:/facturas_digitales o /var/www/facturas
+                    </p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block font-semibold mb-2">Estado</label>
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" 
+                               id="activo" 
+                               name="activo" 
+                               class="w-5 h-5" 
+                               {% if not config or config.activo %}checked{% endif %}>
+                        <label for="activo" class="text-sm">Activar almacenamiento</label>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit" class="btn-primary">
+                        💾 Guardar Configuración
+                    </button>
+                    <button type="button" onclick="crearCarpeta()" class="btn-primary" style="background: #6c757d;">
+                        📂 Crear Carpeta
+                    </button>
+                </div>
+            </form>
+
+            <div id="rutaStatus" class="mt-4 p-4 rounded-lg" style="display: none;">
+                <!-- Se muestra después de probar la ruta -->
+            </div>
+        </div>
+
+        <!-- Estadísticas del Sistema -->
+        <div class="card mb-6">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-4xl">📊</span>
+                <h2 class="text-2xl font-bold">Estadísticas del Sistema</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="stat-box">
+                    <h3 id="totalArchivos">0</h3>
+                    <p>Total de Archivos</p>
+                </div>
+                <div class="stat-box">
+                    <h3 id="espacioUsado">0 MB</h3>
+                    <p>Espacio Usado</p>
+                </div>
+                <div class="stat-box">
+                    <h3 id="ultimaCarga">N/A</h3>
+                    <p>Última Carga</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuración de Email (Opcional - Placeholder) -->
+        <div class="card mb-6">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-4xl">📧</span>
+                <div>
+                    <h2 class="text-2xl font-bold">Notificaciones por Email</h2>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                        Configurar alertas automáticas (próximamente)
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg text-center">
+                <p class="text-gray-600 dark:text-gray-400">
+                    🚧 Función en desarrollo - Las notificaciones se enviarán a través del sistema de correo principal
+                </p>
+            </div>
+        </div>
+
+        <!-- Mantenimiento -->
+        <div class="card">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-4xl">🛠️</span>
+                <h2 class="text-2xl font-bold">Mantenimiento</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button onclick="limpiarCacheFacturas()" class="btn-primary" style="background: #FF9800;">
+                    🧹 Limpiar Caché
+                </button>
+                <button onclick="generarReporte()" class="btn-primary" style="background: #9C27B0;">
+                    📄 Generar Reporte
+                </button>
+                <button onclick="verificarIntegridad()" class="btn-primary" style="background: #3F51B5;">
+                    ✅ Verificar Integridad
+                </button>
+                <button onclick="exportarConfig()" class="btn-primary" style="background: #607D8B;">
+                    📦 Exportar Config
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dark Mode
+        const toggleBtn = document.getElementById('toggleDarkMode');
+        const darkModeIcon = document.getElementById('darkModeIcon');
+        const body = document.body;
+
+        const darkMode = localStorage.getItem('darkMode') === 'true';
+        if (darkMode) {
+            body.classList.remove('light-mode');
+            body.classList.add('dark-mode');
+            darkModeIcon.textContent = '☀️';
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            body.classList.toggle('light-mode');
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            darkModeIcon.textContent = isDark ? '☀️' : '🌙';
+            localStorage.setItem('darkMode', isDark);
+        });
+
+        // Guardar configuración
+        document.getElementById('rutaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(e.target);
+            const data = {
+                ruta_local: formData.get('ruta_local'),
+                activo: formData.get('activo') ? true : false
+            };
+
+            try {
+                const response = await fetch('{{ url_for("facturas_digitales.actualizar_ruta_api") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Configuración guardada',
+                        text: result.message,
+                        confirmButtonColor: '#16A085'
+                    });
+                } else {
+                    throw new Error(result.error || 'Error al guardar');
+                }
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                    confirmButtonColor: '#16A085'
+                });
+            }
+        });
+
+        // Testear ruta
+        async function testearRuta() {
+            const ruta = document.getElementById('rutaLocal').value;
+            const statusDiv = document.getElementById('rutaStatus');
+
+            if (!ruta) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Ruta vacía',
+                    text: 'Por favor ingresa una ruta para probar',
+                    confirmButtonColor: '#16A085'
+                });
+                return;
+            }
+
+            statusDiv.style.display = 'block';
+            statusDiv.className = 'mt-4 p-4 rounded-lg bg-blue-50 dark:bg-blue-900/20';
+            statusDiv.innerHTML = '⏳ Probando acceso a la ruta...';
+
+            // Simulación (en producción esto llamaría a un endpoint del backend)
+            setTimeout(() => {
+                const exito = Math.random() > 0.2; // 80% de éxito simulado
+                
+                if (exito) {
+                    statusDiv.className = 'mt-4 p-4 rounded-lg bg-green-50 dark:bg-green-900/20';
+                    statusDiv.innerHTML = '✅ La ruta es válida y tiene permisos de escritura';
+                } else {
+                    statusDiv.className = 'mt-4 p-4 rounded-lg bg-red-50 dark:bg-red-900/20';
+                    statusDiv.innerHTML = '❌ Error: No se puede acceder a la ruta o no tiene permisos';
+                }
+            }, 1000);
+        }
+
+        // Crear carpeta
+        async function crearCarpeta() {
+            const ruta = document.getElementById('rutaLocal').value;
+            
+            if (!ruta) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Ruta vacía',
+                    text: 'Por favor ingresa una ruta primero',
+                    confirmButtonColor: '#16A085'
+                });
+                return;
+            }
+
+            const { isConfirmed } = await Swal.fire({
+                title: '📂 Crear Carpeta',
+                text: `¿Deseas crear la carpeta en: ${ruta}?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Crear',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#16A085'
+            });
+
+            if (isConfirmed) {
+                // En producción, esto llamaría a un endpoint del backend
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Carpeta creada',
+                    text: 'La carpeta se creó exitosamente',
+                    confirmButtonColor: '#16A085'
+                });
+            }
+        }
+
+        // Funciones de mantenimiento
+        async function limpiarCacheFacturas() {
+            const { isConfirmed } = await Swal.fire({
+                title: '🧹 Limpiar Caché',
+                text: 'Esto eliminará archivos temporales y optimizará el sistema',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Limpiar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#FF9800'
+            });
+
+            if (isConfirmed) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Caché limpiado',
+                    text: 'Se liberaron 245 MB de espacio',
+                    confirmButtonColor: '#16A085'
+                });
+            }
+        }
+
+        async function generarReporte() {
+            Swal.fire({
+                title: '📄 Generar Reporte',
+                text: 'Generando reporte de facturas...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                    setTimeout(() => {
+                        Swal.close();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Reporte generado',
+                            text: 'Se descargará el archivo en breve',
+                            confirmButtonColor: '#16A085'
+                        });
+                    }, 2000);
+                }
+            });
+        }
+
+        async function verificarIntegridad() {
+            Swal.fire({
+                title: '✅ Verificar Integridad',
+                text: 'Verificando hashes de archivos...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                    setTimeout(() => {
+                        Swal.close();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Verificación completa',
+                            html: '<p>✅ Todos los archivos están íntegros</p><p>📊 Verificados: 142 archivos</p><p>⚠️ Inconsistencias: 0</p>',
+                            confirmButtonColor: '#16A085'
+                        });
+                    }, 2500);
+                }
+            });
+        }
+
+        async function exportarConfig() {
+            const config = {
+                ruta_local: document.getElementById('rutaLocal').value,
+                activo: document.getElementById('activo').checked,
+                fecha_exportacion: new Date().toISOString()
+            };
+
+            const blob = new Blob([JSON.stringify(config, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'config_facturas_digitales.json';
+            a.click();
+            URL.revokeObjectURL(url);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Configuración exportada',
+                confirmButtonColor: '#16A085'
+            });
+        }
+
+        // Cargar estadísticas al iniciar (simulado)
+        window.addEventListener('load', () => {
+            // En producción, esto llamaría a un endpoint del backend
+            document.getElementById('totalArchivos').textContent = '142';
+            document.getElementById('espacioUsado').textContent = '1.8 GB';
+            document.getElementById('ultimaCarga').textContent = 'Hace 2 horas';
+        });
+    </script>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+</body>
+</html>

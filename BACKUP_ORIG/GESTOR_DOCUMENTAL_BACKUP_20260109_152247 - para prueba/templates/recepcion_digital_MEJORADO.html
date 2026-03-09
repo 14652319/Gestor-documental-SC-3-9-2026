@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📱 Recepción Digital de Relaciones</title>
+    <style>
+        /* ===== VARIABLES CSS - MODO CLARO ===== */
+        :root {
+            --brand-green: #166534;
+            --brand-green-dark: #14532d;
+            --brand-green-light: #22c55e;
+            --bg-light: #f8fafc;
+            --bg-white: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --border-color: #e2e8f0;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --header-bg: var(--brand-green);
+            --header-text: #ffffff;
+        }
+
+        /* ===== MODO OSCURO ===== */
+        [data-theme="dark"] {
+            --bg-light: #1e293b;
+            --bg-white: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --border-color: #475569;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* ===== RESET Y BASE ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-primary);
+            line-height: 1.6;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ===== HEADER CON USUARIO Y MODO OSCURO ===== */
+        .top-header {
+            background: var(--header-bg);
+            color: var(--header-text);
+            padding: 10px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info span {
+            font-weight: 600;
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .theme-toggle-btn {
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* ===== CONTENEDOR PRINCIPAL ===== */
+        .container {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            max-width: 1600px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* ===== CARD ===== */
+        .card {
+            background: var(--bg-white);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            max-height: 100%;
+            overflow: hidden;
+            transition: background 0.3s;
+        }
+
+        .card-header {
+            background: var(--brand-green);
+            color: white;
+            padding: 20px 30px;
+            flex-shrink: 0;
+        }
+
+        .card-header h1 {
+            margin: 0;
+            font-size: 1.8em;
+            font-weight: 600;
+        }
+
+        .card-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+        }
+
+        /* ===== SECCIÓN DE BÚSQUEDA - FIJA ===== */
+        .search-section {
+            background: var(--bg-light);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--text-primary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            background: var(--bg-white);
+            color: var(--text-primary);
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--brand-green);
+        }
+
+        /* ===== BOTONES - FIJOS EN LA PARTE SUPERIOR ===== */
+        .actions-bar {
+            background: var(--bg-light);
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--brand-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--brand-green-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #16a34a;
+        }
+
+        .btn-success:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        /* ===== TABLA DE FACTURAS - SCROLLABLE ===== */
+        .tabla-container {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-white);
+            position: relative;
+        }
+
+        .tabla-facturas {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        /* ===== THEAD STICKY ===== */
+        .tabla-facturas thead {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--brand-green);
+            color: white;
+        }
+
+        .tabla-facturas thead th {
+            padding: 15px 10px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--brand-green-dark);
+            white-space: nowrap;
+        }
+
+        .tabla-facturas tbody tr {
+            border-bottom: 1px solid var(--border-color);
+            transition: background 0.2s;
+        }
+
+        .tabla-facturas tbody tr:hover {
+            background: var(--bg-light);
+        }
+
+        .tabla-facturas tbody td {
+            padding: 12px 10px;
+            color: var(--text-primary);
+        }
+
+        .tabla-facturas tbody td.observaciones-cell {
+            max-width: 250px;
+            word-wrap: break-word;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+
+        /* ===== CHECKBOX PERSONALIZADO ===== */
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        /* ===== MODAL DE OBSERVACIONES ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-white);
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--brand-green);
+        }
+
+        .modal-close {
+            background: var(--danger);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+        }
+
+        .modal-close:hover {
+            background: #dc2626;
+        }
+
+        .observaciones-list {
+            margin: 20px 0;
+        }
+
+        .observacion-item {
+            background: var(--bg-light);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--brand-green);
+        }
+
+        .observacion-item .observacion-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            color: var(--text-secondary);
+        }
+
+        .observacion-item .observacion-texto {
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .nueva-observacion {
+            margin-top: 20px;
+        }
+
+        .nueva-observacion textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+            resize: vertical;
+            background: var(--bg-white);
+            color: var(--text-primary);
+        }
+
+        .nueva-observacion textarea:focus {
+            outline: none;
+            border-color: var(--brand-green);
+        }
+
+        /* ===== TOKEN SECTION ===== */
+        .token-section {
+            background: #eff6ff;
+            border: 2px solid var(--brand-green);
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .token-card h3 {
+            color: var(--brand-green);
+            margin-bottom: 15px;
+        }
+
+        .token-input-group {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .token-input-group input {
+            font-size: 24px;
+            text-align: center;
+            letter-spacing: 5px;
+            font-family: 'Courier New', monospace;
+            width: 200px;
+            padding: 15px;
+            border: 2px solid var(--brand-green);
+            border-radius: 8px;
+        }
+
+        .token-button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        /* ===== FIRMA SECTION ===== */
+        .firma-section {
+            background: #f0fdf4;
+            border: 2px solid var(--success);
+            padding: 30px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .firma-section h3 {
+            color: var(--success);
+            margin-bottom: 15px;
+        }
+
+        .firma-hash {
+            background: var(--bg-light);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .top-header {
+                flex-direction: column;
+                gap: 10px;
+                padding: 15px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .card-header {
+                padding: 15px 20px;
+            }
+
+            .card-header h1 {
+                font-size: 1.4em;
+            }
+
+            .card-body {
+                padding: 15px;
+            }
+
+            .actions-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .tabla-facturas {
+                font-size: 0.85em;
+            }
+
+            .tabla-facturas thead th,
+            .tabla-facturas tbody td {
+                padding: 8px 5px;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+        }
+
+        /* ===== ALERT STYLES ===== */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-info {
+            background: #eff6ff;
+            border: 2px solid #3b82f6;
+            color: #1e40af;
+        }
+
+        .alert-success {
+            background: #f0fdf4;
+            border: 2px solid var(--success);
+            color: #166534;
+        }
+
+        .alert-warning {
+            background: #fef3c7;
+            border: 2px solid var(--warning);
+            color: #92400e;
+        }
+
+        /* ===== RESUMEN SECTION (ahora parte de actions-bar) ===== */
+        .resumen-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .resumen-item {
+            text-align: center;
+        }
+
+        .resumen-item .label {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+
+        .resumen-item .value {
+            font-size: 1.3em;
+            font-weight: 700;
+            color: var(--brand-green);
+        }
+    </style>
+</head>
+<body>
+    <!-- HEADER CON USUARIO Y MODO OSCURO -->
+    <div class="top-header">
+        <div class="user-info">
+            <span>👤 Usuario:</span>
+            <strong>{{ session.get('usuario', 'Invitado') }}</strong>
+        </div>
+        <div class="theme-toggle">
+            <button class="theme-toggle-btn" onclick="toggleTheme()">
+                <span id="theme-icon">🌙</span>
+                <span id="theme-text">Modo Oscuro</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                <h1>📱 Recepción Digital de Relaciones</h1>
+            </div>
+            <div class="card-body">
+                
+                <!-- FORMULARIO DE BÚSQUEDA - FIJO -->
+                <div class="search-section">
+                    <h2 style="color: var(--brand-green); margin-bottom: 15px;">🔍 Buscar Relación</h2>
+                    <form method="GET" action="{{ url_for('relaciones.recepcion_digital') }}">
+                        <div class="form-group">
+                            <label for="numero_relacion">Número de Relación:</label>
+                            <input type="text" 
+                                   id="numero_relacion" 
+                                   name="numero_relacion" 
+                                   placeholder="Ej: REL-001" 
+                                   value="{{ numero_relacion or '' }}"
+                                   pattern="REL-[0-9]+"
+                                   required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">🔍 Buscar Relación</button>
+                    </form>
+
+                    {% if not numero_relacion %}
+                    <div style="background: var(--bg-light); border-radius: 8px; padding: 20px; margin-top: 20px;">
+                        <h3 style="color: var(--brand-green); margin-bottom: 15px;">ℹ️ ¿Cómo funciona?</h3>
+                        <ol style="color: var(--text-secondary); line-height: 2;">
+                            <li>Ingrese el número de relación que desea recibir digitalmente</li>
+                            <li>Verifique cada factura física contra el listado digital</li>
+                            <li>Marque con ✅ cada factura que reciba físicamente</li>
+                            <li>Escriba observaciones si lo necesita (haga clic en 📝)</li>
+                            <li>Al finalizar, presione "Confirmar Recepción"</li>
+                            <li>Recibirá un token de 6 dígitos por correo</li>
+                            <li>Valide el token para generar la firma digital</li>
+                            <li>Queda registrado en auditoría quién recibió cada factura</li>
+                        </ol>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- SECCIÓN DE FACTURAS -->
+                {% if numero_relacion and facturas %}
+                <div>
+                    <h2 style="color: var(--brand-green); margin-bottom: 15px;">
+                        📋 Relación: {{ numero_relacion }}
+                    </h2>
+
+                    {% if recepcion_existente and recepcion_existente.completa %}
+                    <div class="alert alert-success">
+                        ✅ Esta relación ya fue recibida completamente por usted el {{ recepcion_existente.fecha_recepcion.strftime('%d/%m/%Y %H:%M') }}
+                    </div>
+                    {% endif %}
+
+                    <!-- BARRA DE ACCIONES - FIJA -->
+                    <div class="actions-bar">
+                        <div class="resumen-info">
+                            <div class="resumen-item">
+                                <div class="label">Total Facturas</div>
+                                <div class="value" id="total-facturas">{{ total_facturas }}</div>
+                            </div>
+                            <div class="resumen-item">
+                                <div class="label">Recibidas</div>
+                                <div class="value" id="facturas-recibidas" style="color: var(--success);">0</div>
+                            </div>
+                            <div class="resumen-item">
+                                <div class="label">Progreso</div>
+                                <div class="value" id="progreso">0%</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button type="button" class="btn btn-secondary" onclick="toggleTodas()">
+                                ☑️ Marcar/Desmarcar Todas
+                            </button>
+                            <button type="button" 
+                                    class="btn btn-success" 
+                                    id="btn-confirmar"
+                                    onclick="confirmarRecepcion()"
+                                    disabled>
+                                🔐 Confirmar Recepción
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- TABLA DE FACTURAS - SCROLLABLE -->
+                    <div class="tabla-container">
+                        <table class="tabla-facturas">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px; text-align: center;">✅</th>
+                                    <th>NIT</th>
+                                    <th>Razón Social</th>
+                                    <th>Prefijo</th>
+                                    <th>Folio</th>
+                                    <th>C.O</th>
+                                    <th style="text-align: right;">Valor</th>
+                                    <th>Fecha Factura</th>
+                                    <th>Observaciones</th>
+                                    <th style="width: 80px;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody-facturas">
+                                {% for factura in facturas %}
+                                <tr data-factura-id="{{ factura.id }}">
+                                    <td style="text-align: center;">
+                                        <div class="checkbox-wrapper">
+                                            <input type="checkbox" 
+                                                   class="factura-check" 
+                                                   data-factura-id="{{ factura.id }}"
+                                                   onchange="actualizarContador()">
+                                        </div>
+                                    </td>
+                                    <td>{{ factura.nit }}</td>
+                                    <td>{{ factura.razon_social or '-' }}</td>
+                                    <td>{{ factura.prefijo }}</td>
+                                    <td>{{ factura.folio }}</td>
+                                    <td>{{ "%03d"|format(factura.co|int) if factura.co else '---' }}</td>
+                                    <td style="text-align: right;">
+                                        ${{ "{:,.2f}".format(factura.valor_total or 0) }}
+                                    </td>
+                                    <td>{{ factura.fecha_factura.strftime('%d/%m/%Y') if factura.fecha_factura else '-' }}</td>
+                                    <td class="observaciones-cell" id="obs-{{ factura.id }}">
+                                        <span class="obs-preview">-</span>
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <button type="button" 
+                                                class="btn btn-secondary" 
+                                                style="padding: 6px 12px; font-size: 0.85em;"
+                                                onclick="abrirModalObservaciones({{ factura.id }}, '{{ factura.prefijo }}', '{{ factura.folio }}')">
+                                            📝
+                                        </button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- 🆕 SECCIÓN DE VALIDACIÓN DE TOKEN -->
+                    <div class="token-section" id="token-section" style="display: none;">
+                        <div class="token-card">
+                            <h3>📧 Validación de Token de Firma</h3>
+                            <div class="token-mensaje" id="token-mensaje">
+                                Se ha enviado un token de 6 dígitos a su correo electrónico registrado.
+                            </div>
+                            <div class="token-input-group">
+                                <label for="token-input">Digite aquí su token de firma:</label><br>
+                                <input type="text" 
+                                       id="token-input" 
+                                       maxlength="6" 
+                                       placeholder="000000"
+                                       pattern="[0-9]{6}"
+                                       autocomplete="off">
+                                <br><small style="color: #666;">⏱ El token es válido por 10 minutos. Máximo 3 intentos.</small>
+                            </div>
+                            <div class="token-button-group">
+                                <button type="button" 
+                                        class="btn btn-success" 
+                                        id="btn-validar-token"
+                                        onclick="validarTokenYFirmar()"
+                                        disabled>
+                                    ✅ Validar Token
+                                </button>
+                                <button type="button" 
+                                        class="btn btn-secondary" 
+                                        onclick="cancelarToken()">
+                                    ❌ Cancelar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SECCIÓN DE FIRMA DIGITAL -->
+                    <div class="firma-section" id="firma-section" style="display: none;">
+                        <h3>🔐 Firma Digital Generada</h3>
+                        <div class="firma-info">
+                            <p><strong>✅ Usted ha firmado el recibido de <span id="firma-facturas-cantidad"></span> facturas</strong></p>
+                            <p><strong>Usuario:</strong> <span id="firma-usuario"></span></p>
+                            <p><strong>Fecha y Hora:</strong> <span id="firma-fecha"></span></p>
+                            <p><strong>IP:</strong> <span id="firma-ip"></span></p>
+                            <p><strong>Facturas Recibidas:</strong> <span id="firma-facturas"></span></p>
+                            <div class="firma-hash">
+                                <strong>Hash SHA256:</strong><br>
+                                <span id="firma-hash"></span>
+                            </div>
+                            <div id="firma-correo-enviado" style="display: none;">
+                                <p style="color: var(--success); margin-top: 15px;">
+                                    ✉️ Se ha enviado una copia de esta recepción a su correo electrónico.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BOTONES DE NAVEGACIÓN -->
+                    <div style="margin-top: 30px; text-align: center; display: flex; gap: 15px; justify-content: center;">
+                        <a href="{{ url_for('relaciones.recepcion_digital') }}" class="btn btn-secondary">
+                            ⬅️ Buscar Otra Relación
+                        </a>
+                        <a href="{{ url_for('relaciones.mostrar_formulario') }}" class="btn btn-secondary">
+                            🏠 Volver al Menú Principal
+                        </a>
+                    </div>
+                </div>
+                {% elif numero_relacion and not facturas %}
+                <div class="alert alert-warning">
+                    ⚠️ No se encontraron facturas para la relación <strong>{{ numero_relacion }}</strong>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE OBSERVACIONES -->
+    <div class="modal" id="modal-observaciones">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📝 Observaciones - <span id="modal-factura-titulo"></span></h3>
+                <button class="modal-close" onclick="cerrarModalObservaciones()">✖ Cerrar</button>
+            </div>
+
+            <div class="observaciones-list" id="observaciones-existentes">
+                <!-- Se llenarán con JavaScript -->
+            </div>
+
+            <div class="nueva-observacion">
+                <h4 style="margin-bottom: 10px; color: var(--brand-green);">➕ Agregar Nueva Observación</h4>
+                <textarea id="nueva-obs-texto" placeholder="Escribe tu observación aquí..."></textarea>
+                <button type="button" class="btn btn-success" style="margin-top: 15px; width: 100%;" onclick="guardarObservacion()">
+                    💾 Guardar Observación
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        const numeroRelacion = "{{ numero_relacion }}";
+        const totalFacturas = {{ total_facturas or 0 }};
+        let facturaActualModal = null;
+        let observacionesPorFactura = {};
+        let facturasRecibidas = [];
+        let inactivityTimeout;
+        const INACTIVITY_LIMIT = 25 * 60 * 1000; // 25 minutos
+
+        async function cerrarSesionPorInactividad() {
+            try {
+                await fetch('/api/auth/logout', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ motivo: 'inactividad_25min' })
+                });
+            } catch (e) {
+                console.warn('Logout por inactividad: no se pudo notificar al backend.', e);
+            } finally {
+                window.location.href = '/';
+            }
+        }
+
+        // ===== MODO OSCURO =====
+        function toggleTheme() {
+            const body = document.body;
+            const currentTheme = body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            
+            if (newTheme === 'dark') {
+                icon.textContent = '☀️';
+                text.textContent = 'Modo Claro';
+            } else {
+                icon.textContent = '🌙';
+                text.textContent = 'Modo Oscuro';
+            }
+        }
+
+        // Cargar tema guardado
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.body.setAttribute('data-theme', savedTheme);
+            if (savedTheme === 'dark') {
+                document.getElementById('theme-icon').textContent = '☀️';
+                document.getElementById('theme-text').textContent = 'Modo Claro';
+            }
+
+            // Iniciar timeout de inactividad
+            resetInactivityTimeout();
+
+            // Cargar observaciones existentes de las facturas
+            cargarObservacionesExistentes();
+        });
+
+        // ===== TIMEOUT DE INACTIVIDAD =====
+        function resetInactivityTimeout() {
+            clearTimeout(inactivityTimeout);
+            inactivityTimeout = setTimeout(() => {
+                alert('⏱ Su sesión ha expirado por inactividad (25 minutos). Será redirigido al login.');
+                cerrarSesionPorInactividad();
+            }, INACTIVITY_LIMIT);
+        }
+
+        // Detectar actividad del usuario
+        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'].forEach(event => {
+            document.addEventListener(event, resetInactivityTimeout, true);
+        });
+
+        // ===== ACTUALIZAR CONTADOR =====
+        function actualizarContador() {
+            const checks = document.querySelectorAll('.factura-check:checked');
+            const cantidad = checks.length;
+            const progreso = totalFacturas > 0 ? Math.round((cantidad / totalFacturas) * 100) : 0;
+            
+            document.getElementById('facturas-recibidas').textContent = cantidad;
+            document.getElementById('progreso').textContent = progreso + '%';
+            
+            const btnConfirmar = document.getElementById('btn-confirmar');
+            btnConfirmar.disabled = cantidad === 0;
+        }
+
+        // ===== MARCAR/DESMARCAR TODAS =====
+        function toggleTodas() {
+            const checks = document.querySelectorAll('.factura-check');
+            const todasMarcadas = Array.from(checks).every(check => check.checked);
+            
+            checks.forEach(check => {
+                if (!check.disabled) {
+                    check.checked = !todasMarcadas;
+                }
+            });
+            
+            actualizarContador();
+        }
+
+        // ===== OBSERVACIONES =====
+        async function cargarObservacionesExistentes() {
+            // Aquí cargaríamos las observaciones existentes desde el backend
+            // Por ahora, estructura vacía
+            observacionesPorFactura = {};
+        }
+
+        function abrirModalObservaciones(facturaId, prefijo, folio) {
+            facturaActualModal = facturaId;
+            document.getElementById('modal-factura-titulo').textContent = `${prefijo}-${folio}`;
+            document.getElementById('nueva-obs-texto').value = '';
+            
+            // Cargar observaciones existentes
+            const obsExistentes = document.getElementById('observaciones-existentes');
+            const observaciones = observacionesPorFactura[facturaId] || [];
+            
+            if (observaciones.length === 0) {
+                obsExistentes.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No hay observaciones registradas para esta factura.</p>';
+            } else {
+                obsExistentes.innerHTML = observaciones.map(obs => `
+                    <div class="observacion-item">
+                        <div class="observacion-header">
+                            <span><strong>👤 ${obs.usuario}</strong></span>
+                            <span>📅 ${obs.fecha}</span>
+                        </div>
+                        <div class="observacion-texto">${obs.texto}</div>
+                    </div>
+                `).join('');
+            }
+            
+            document.getElementById('modal-observaciones').classList.add('active');
+        }
+
+        function cerrarModalObservaciones() {
+            document.getElementById('modal-observaciones').classList.remove('active');
+            facturaActualModal = null;
+        }
+
+        function guardarObservacion() {
+            const texto = document.getElementById('nueva-obs-texto').value.trim();
+            
+            if (!texto) {
+                alert('⚠️ Por favor escribe una observación antes de guardar.');
+                return;
+            }
+
+            if (!observacionesPorFactura[facturaActualModal]) {
+                observacionesPorFactura[facturaActualModal] = [];
+            }
+
+            const nuevaObs = {
+                usuario: "{{ session.get('usuario', 'Usuario') }}",
+                fecha: new Date().toLocaleString('es-CO'),
+                texto: texto
+            };
+
+            observacionesPorFactura[facturaActualModal].push(nuevaObs);
+
+            // Actualizar preview en la tabla
+            const preview = document.querySelector(`#obs-${facturaActualModal} .obs-preview`);
+            preview.textContent = texto.length > 50 ? texto.substring(0, 50) + '...' : texto;
+            preview.style.color = 'var(--brand-green)';
+            preview.style.fontWeight = '600';
+
+            alert('✅ Observación guardada correctamente');
+            cerrarModalObservaciones();
+        }
+
+        // Cerrar modal al hacer clic fuera
+        document.getElementById('modal-observaciones').addEventListener('click', (e) => {
+            if (e.target.id === 'modal-observaciones') {
+                cerrarModalObservaciones();
+            }
+        });
+
+        // ===== CONFIRMAR RECEPCIÓN (CON TOKEN) =====
+        async function confirmarRecepcion() {
+            const checks = document.querySelectorAll('.factura-check:checked');
+            facturasRecibidas = Array.from(checks).map(check => parseInt(check.dataset.facturaId));
+            
+            if (facturasRecibidas.length === 0) {
+                alert('⚠️ Debe seleccionar al menos una factura');
+                return;
+            }
+
+            if (!confirm(`¿Firmar digitalmente la recepción de ${facturasRecibidas.length} facturas?\n\n📧 Se enviará un token de 6 dígitos a su correo.`)) {
+                return;
+            }
+
+            const btnConfirmar = document.getElementById('btn-confirmar');
+            btnConfirmar.disabled = true;
+            btnConfirmar.textContent = '📧 Enviando token...';
+
+            try {
+                const response = await fetch('/relaciones/solicitar_token_firma', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        numero_relacion: numeroRelacion,
+                        facturas_cantidad: facturasRecibidas.length
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Mostrar sección de token
+                    document.getElementById('token-section').style.display = 'block';
+                    document.getElementById('token-mensaje').innerHTML = `
+                        ✅ Token enviado exitosamente<br>
+                        Se ha enviado un código de 6 dígitos a su correo electrónico.<br>
+                        Por favor, revise su bandeja de entrada.
+                    `;
+                    btnConfirmar.style.display = 'none';
+                    document.getElementById('token-input').focus();
+                } else {
+                    alert('❌ Error: ' + (data.message || data.error));
+                    btnConfirmar.disabled = false;
+                    btnConfirmar.textContent = '🔐 Confirmar Recepción';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al solicitar token: ' + error.message);
+                btnConfirmar.disabled = false;
+                btnConfirmar.textContent = '🔐 Confirmar Recepción';
+            }
+        }
+
+        // ===== VALIDAR TOKEN Y FIRMAR =====
+        async function validarTokenYFirmar() {
+            const token = document.getElementById('token-input').value.trim();
+            
+            if (token.length !== 6 || !/^\d{6}$/.test(token)) {
+                alert('⚠️ El token debe ser de 6 dígitos numéricos');
+                return;
+            }
+
+            const btnValidar = document.getElementById('btn-validar-token');
+            btnValidar.disabled = true;
+            btnValidar.textContent = '⏳ Validando...';
+
+            try {
+                // Incluir observaciones
+                const facturasConObs = facturasRecibidas.map(id => ({
+                    id: id,
+                    observaciones: observacionesPorFactura[id] || []
+                }));
+
+                const response = await fetch('/relaciones/validar_token_y_firmar', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        token: token,
+                        numero_relacion: numeroRelacion,
+                        usuario: "{{ session.get('usuario') }}",
+                        facturas_recibidas: facturasConObs
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Ocultar token section
+                    document.getElementById('token-section').style.display = 'none';
+
+                    // Mostrar firma digital
+                    document.getElementById('firma-usuario').textContent = "{{ session.get('usuario') }}";
+                    document.getElementById('firma-fecha').textContent = new Date().toLocaleString('es-CO');
+                    document.getElementById('firma-ip').textContent = "{{ request.remote_addr }}";
+                    document.getElementById('firma-facturas-cantidad').textContent = facturasRecibidas.length;
+                    document.getElementById('firma-facturas').textContent = `${facturasRecibidas.length}/${totalFacturas}`;
+                    document.getElementById('firma-hash').textContent = data.firma_digital;
+                    
+                    if (data.correo_enviado) {
+                        document.getElementById('firma-correo-enviado').style.display = 'block';
+                    }
+                    
+                    document.getElementById('firma-section').style.display = 'block';
+
+                    // Deshabilitar checkboxes
+                    document.querySelectorAll('.factura-check').forEach(check => check.disabled = true);
+
+                    // Scroll a firma
+                    document.getElementById('firma-section').scrollIntoView({ behavior: 'smooth' });
+
+                    alert(`✅ Usted ha firmado el recibido de ${facturasRecibidas.length} facturas\n\n🔐 La firma digital ha sido generada y registrada en auditoría.${data.correo_enviado ? '\n✉️ Se ha enviado una copia a su correo electrónico.' : ''}`);
+                } else {
+                    alert('❌ Error: ' + (data.message || data.error));
+                    btnValidar.disabled = false;
+                    btnValidar.textContent = '✅ Validar Token';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ Error al validar token: ' + error.message);
+                btnValidar.disabled = false;
+                btnValidar.textContent = '✅ Validar Token';
+            }
+        }
+
+        // ===== CANCELAR TOKEN =====
+        function cancelarToken() {
+            if (!confirm('¿Está seguro de cancelar la validación del token?\n\nDeberá solicitar un nuevo token si desea continuar.')) {
+                return;
+            }
+            
+            document.getElementById('token-section').style.display = 'none';
+            document.getElementById('token-input').value = '';
+            
+            const btnConfirmar = document.getElementById('btn-confirmar');
+            btnConfirmar.style.display = 'inline-flex';
+            btnConfirmar.disabled = false;
+            btnConfirmar.textContent = '🔐 Confirmar Recepción';
+        }
+
+        // ===== HABILITAR BOTÓN DE TOKEN CON 6 DÍGITOS =====
+        document.addEventListener('DOMContentLoaded', () => {
+            const tokenInput = document.getElementById('token-input');
+            const btnValidar = document.getElementById('btn-validar-token');
+            
+            if (tokenInput && btnValidar) {
+                tokenInput.addEventListener('input', function() {
+                    btnValidar.disabled = this.value.length !== 6;
+                });
+            }
+        });
+    </script>
+
+    <!-- ✅ INACTIVITY WARNING MODAL (25 MIN CON ADVERTENCIA 1 MIN ANTES) -->
+    {% include '_inactivity_warning.html' %}
+
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>

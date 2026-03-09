@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏭 Causaciones - Gestor Documental</title>
+    <!-- Frameworks y Librerías -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+    
+    <!-- Fuentes personalizadas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Estilos CSS de la Aplicación -->
+    <style>
+        /* ==========================================================================
+        1. Paleta de Colores Institucionales (Light/Dark Mode Compatible)
+        ========================================================================== */
+        :root {
+            /* 🟢 Colores Corporativos Verdes */
+            --brand-green: #166534;
+            --brand-green-dark: #14532d;
+            --brand-green-light: #16a34a;
+            --brand-green-lighter: rgba(22, 101, 52, 0.1);
+            --brand-secondary: #20c997;
+            
+            /* 🌞 Light Mode */
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --bg-tertiary: #e9ecef;
+            --bg-header: rgba(22, 101, 52, 0.95);
+            
+            --border-primary: #dee2e6;
+            --border-secondary: #adb5bd;
+            
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --text-accent: #166534;
+            
+            --shadow-color: rgba(0, 0, 0, 0.1);
+            
+            /* Estados */
+            --state-pending-bg: rgba(255, 193, 7, 0.15);
+            --state-pending-text: #ffc107;
+            --state-approved-bg: rgba(32, 201, 151, 0.15);
+            --state-approved-text: #20c997;
+            --state-rejected-bg: rgba(220, 53, 69, 0.15);
+            --state-rejected-text: #dc3545;
+            --state-viewing-bg: rgba(13, 110, 253, 0.15);
+            --state-viewing-text: #0d6efd;
+        }
+        
+        /* 🌙 Dark Mode */
+        [data-theme="dark"] {
+            --bg-primary: #0d0d0d;
+            --bg-secondary: #1c1c1c;
+            --bg-tertiary: #2e2e2e;
+            --bg-header: rgba(22, 101, 52, 0.95);
+            
+            --border-primary: #3d3d3d;
+            --border-secondary: #555555;
+            
+            --text-primary: #ffffff;
+            --text-secondary: #d0d0d0;
+            --text-accent: #20c997;
+            
+            --shadow-color: rgba(0, 0, 0, 0.5);
+            
+            --state-pending-bg: rgba(255, 193, 7, 0.25);
+            --state-approved-bg: rgba(32, 201, 151, 0.25);
+            --state-rejected-bg: rgba(220, 53, 69, 0.25);
+            --state-viewing-bg: rgba(13, 110, 253, 0.25);
+        }
+
+        /* ==========================================================================
+        2. Estilos Base y Efecto de Fondo Animado
+        ========================================================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 14px;
+            overflow: hidden;
+            position: relative;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        
+        /* 🌊 Efecto Aurora Sutil (Light/Dark Adaptativo) */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 15% 25%, var(--brand-green-lighter), transparent 55%),
+                        radial-gradient(circle at 85% 75%, rgba(32, 201, 151, 0.08), transparent 55%);
+            animation: aurora 25s infinite ease-in-out alternate;
+            z-index: -1;
+            opacity: 0.6;
+        }
+        
+        [data-theme="dark"] body::before {
+            background: radial-gradient(circle at 15% 25%, rgba(22, 101, 52, 0.2), transparent 55%),
+                        radial-gradient(circle at 85% 75%, rgba(32, 201, 151, 0.15), transparent 55%);
+            opacity: 1;
+        }
+        
+        @keyframes aurora {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(5%, 5%) scale(1.05); }
+        }
+
+        /* 🟢 Scrollbar Personalizado Verde Corporativo */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { 
+            background: var(--bg-secondary); 
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb { 
+            background: var(--brand-green); 
+            border-radius: 10px;
+            border: 2px solid var(--bg-secondary);
+        }
+        ::-webkit-scrollbar-thumb:hover { 
+            background: var(--brand-green-dark);
+        }
+        
+        /* Firefox scrollbar */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: var(--brand-green) var(--bg-secondary);
+        }
+
+        /* ==========================================================================
+        3. Header Sticky con Gradiente Verde Institucional
+        ========================================================================== */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--brand-green-light);
+            box-shadow: 0 4px 12px var(--shadow-color);
+            padding: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        header h1 {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        /* Toggle Light/Dark Mode Button */
+        .theme-toggle {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 2000;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px var(--shadow-color);
+        }
+        
+        .theme-toggle:hover {
+            transform: scale(1.1);
+            background: var(--brand-green);
+            color: white;
+        }
+        
+        /* ==========================================================================
+        4. Estilos de Componentes
+        ========================================================================== */
+        .visor-iframe.cargando { 
+            opacity: 0.3; 
+            transition: opacity 0.3s ease;
+        }
+        
+        /* 🟢 Documento Siendo Visualizado (Resaltado Verde) */
+        .lista-item.siendo-visualizado {
+            background: linear-gradient(90deg, var(--state-viewing-bg), transparent);
+            border-left: 4px solid var(--brand-green);
+            box-shadow: 0 2px 8px rgba(22, 101, 52, 0.2);
+        }
+        
+        /* ☁️ Cloud Icon para Observaciones */
+        .cloud-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
+            background: var(--state-pending-bg);
+            color: var(--state-pending-text);
+            border-radius: 50%;
+            font-size: 12px;
+            cursor: help;
+        }
+        
+        /* Tooltip para mostrar usuario visualizando */
+        .viewer-tooltip {
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 100;
+        }
+        
+        .lista-item:hover .viewer-tooltip {
+            opacity: 1;
+        }
+        
+        .lista-item.seleccionado {
+            background-color: var(--brand-green);
+            border-color: var(--brand-green-light) !important;
+            box-shadow: 0 0 20px rgba(22, 101, 52, 0.4);
+            color: white;
+        }
+        .lista-item.seleccionado .text-text-secondary { color: #f8f9fa; }
+        .lista-item.seleccionado .text-text-accent { color: white; }
+        
+        body.resizing * { pointer-events: none; user-select: none; }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .lista-item { animation: fadeInUp 0.4s ease-out forwards; }
+
+        /* 🏷️ Etiquetas de Estado Mejoradas */
+        .state-badge { 
+            font-weight: 600; 
+            padding: 3px 12px; 
+            border-radius: 12px; 
+            font-size: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.2s ease;
+        }
+        .state-badge:before {
+            content: '●';
+            font-size: 8px;
+        }
+        .state-pendiente { 
+            background-color: var(--state-pending-bg); 
+            color: var(--state-pending-text); 
+        }
+        .state-causado { 
+            background-color: var(--state-approved-bg); 
+            color: var(--state-approved-text); 
+        }
+        .state-rechazado { 
+            background-color: var(--state-rejected-bg); 
+            color: var(--state-rejected-text); 
+        }
+        
+        /* Estilos para campos de formulario */
+        .form-input {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            transition: all 0.2s ease;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--brand-green);
+            box-shadow: 0 0 0 3px rgba(22, 101, 52, 0.1);
+        }
+        .form-input option {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        /* 🍞 Notificaciones Toast Mejoradas */
+        #toast-container { 
+            position: fixed; 
+            bottom: 20px; 
+            right: 20px; 
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .toast { 
+            background-color: var(--bg-tertiary); 
+            color: var(--text-primary); 
+            padding: 14px 20px; 
+            border-radius: 8px; 
+            border-left: 4px solid var(--brand-green);
+            box-shadow: 0 4px 16px var(--shadow-color); 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            min-width: 300px;
+            transform: translateX(400px);
+            animation: slideInRight 0.4s forwards;
+        }
+        .toast.success { border-left-color: var(--state-approved-text); }
+        .toast.error { border-left-color: var(--state-rejected-text); }
+        .toast.warning { border-left-color: var(--state-pending-text); }
+        
+        @keyframes slideInRight { 
+            from { transform: translateX(400px); opacity: 0; } 
+            to { transform: translateX(0); opacity: 1; } 
+        }
+
+        /* 🎯 Botones de Acción con Hover Mejorado */
+        .action-btn {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .action-btn:hover { 
+            background-color: var(--brand-green);
+            color: white;
+            border-color: var(--brand-green-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px var(--shadow-color);
+        }
+        .action-btn:active { 
+            transform: translateY(0);
+            box-shadow: 0 2px 4px var(--shadow-color);
+        }
+        
+        .ver-pdf:hover {
+            background-color: var(--brand-green-light) !important;
+        }
+        
+        /* 📋 Panel Inferior con Datos de Factura */
+        .invoice-panel {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, var(--bg-secondary), var(--bg-primary));
+            border-top: 2px solid var(--brand-green);
+            padding: 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+            opacity: 0;
+            z-index: 900;
+            box-shadow: 0 -4px 16px var(--shadow-color);
+        }
+        
+        .invoice-panel.active {
+            max-height: 400px;
+            opacity: 1;
+        }
+        
+        .invoice-data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .invoice-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        
+        .invoice-field-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .invoice-field-value {
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        
+        #sede-selector-panel {
+            background-color: var(--bg-secondary) !important;
+            backdrop-filter: none !important;
+        }
+
+        /* ========================================================================== 
+        Ajustes Responsivos adicionales para móviles
+        ========================================================================== */
+        @media (max-width: 768px) {
+        body {
+            font-size: 13px; /* 🔹 Letra más compacta */
+        }
+
+        /* Ajustar inputs y selects para que no sean tan altos */
+        .form-input, 
+        header form button {
+            padding: 6px 10px !important;
+            font-size: 13px !important;
+        }
+
+        /* El visor PDF debe ocupar un bloque definido */
+        iframe#visor-pdf {
+            min-height: 70vh !important; /* 🔹 al menos 70% de la pantalla */
+            height: auto !important;
+        }
+
+        /* La lista que va encima no debe comerse toda la pantalla */
+        aside {
+            max-height: 40vh; /* 🔹 límite para que deje espacio al visor */
+            overflow-y: auto;
+        }
+
+        /* Texto de los listados más compacto */
+        .lista-item p {
+            font-size: 12px !important;
+        }
+        .state-badge {
+            font-size: 0.7em !important;
+            padding: 1px 6px;
+        }
+        /* ==========================================================================  
+        🔹 Mejoras Responsivas para los Botones de Acción  
+        ========================================================================== */
+        
+        /* Apila los botones verticalmente con espacio entre ellos */
+        .lista-item .flex-col {
+            flex-direction: column !important;
+            align-items: stretch !important;
+        }
+        .lista-item .action-btn {
+            width: 100%;
+            text-align: center;
+            justify-content: center;
+        }
+        
+
+
+        }
+        
+
+    </style>
+</head>
+<body data-theme="light">
+    
+    <!-- 🌓 Toggle Light/Dark Mode -->
+    <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema">
+        <span id="theme-icon">🌙</span>
+    </button>
+    
+    <!-- 🍞 Toast Notifications Container -->
+    <div id="toast-container"></div>
+    
+    <!-- 
+      ==========================================================================
+      HEADER STICKY: Título y controles principales siempre visibles
+      ==========================================================================
+    -->
+    <header>
+        <div class="container mx-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h1>
+                    <span>🏭</span>
+                    <span>Causaciones</span>
+                </h1>
+                <div class="flex items-center gap-3">
+                    <span class="text-white text-sm">
+                        Usuario: <strong>{{ session.get('usuario', 'Invitado') }}</strong>
+                    </span>
+                    <button onclick="window.location.href='/dashboard'" 
+                            class="action-btn bg-white text-brand-green hover:bg-gray-100">
+                        ← Volver al Dashboard
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Filtros -->
+            <form id="main-form" method="get" class="flex items-center gap-4 flex-wrap">
+                <!-- Selector de Sedes Personalizado -->
+                <div class="relative">
+                    <label class="text-sm font-medium text-text-secondary">Sede(s):</label>
+                    <button type="button" id="sede-selector-btn" class="form-input border rounded-md text-sm p-2 mt-1 focus:ring-2 focus:ring-brand-primary transition-colors w-48 text-left flex justify-between items-center">
+                        <span id="sede-selector-text">Seleccionar...</span>
+                        <svg class="w-4 h-4 text-text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <!-- Panel de sedes con fondo sólido y opacidad completa -->
+                    <!--<div id="sede-selector-panel" class="hidden absolute z-30 mt-2 w-64 bg-bg-tertiary border border-border-primary rounded-lg shadow-2xl p-2">  -->
+                    <div id="sede-selector-panel" class="hidden absolute z-30 mt-2 w-64 bg-bg-secondary border border-border-primary rounded-lg shadow-2xl p-2">
+
+                        <input type="text" id="sede-search" class="form-input w-full p-2 mb-2 text-sm border rounded-md" placeholder="Buscar sede...">
+                        <div class="flex justify-between mb-2">
+                            <button type="button" id="sede-select-all" class="text-xs text-brand-primary hover:underline">Todos</button>
+                            <button type="button" id="sede-clear-all" class="text-xs text-red-500 hover:underline">Ninguno</button>
+                        </div>
+                        <div id="sede-options-container" class="max-h-48 overflow-y-auto">
+                            <!-- Opciones inyectadas por JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                 <!-- Selector de Carpetas -->
+                 <div class="flex flex-col">
+                    <label for="carpeta" class="text-sm font-medium text-text-secondary">Carpeta:</label>
+                    <select name="carpeta" onchange="this.form.submit()" class="form-input border rounded-md text-sm p-2 mt-1 focus:ring-2 focus:ring-brand-primary transition-colors">
+                        <option value="__all__" {% if ruta_relativa == "__all__" %}selected{% endif %}>Todas</option>
+                        {% for c in carpetas %}<option value="{{ c }}" {% if c == ruta_relativa %}selected{% endif %}>{{ c }}</option>{% endfor %}
+                    </select>
+                </div>
+                <!-- Campo de Filtro de Texto -->
+                <div class="flex flex-col">
+                    <label for="filtro" class="text-sm font-medium text-text-secondary">Filtro:</label>
+                    <input type="text" name="filtro" value="{{ filtro }}" class="form-input border rounded-md text-sm p-2 mt-1 focus:ring-2 focus:ring-brand-primary w-32 transition-colors">
+                </div>
+                <!-- Selector de Paginación -->
+                 <div class="flex flex-col">
+                    <label for="por_pagina" class="text-sm font-medium text-text-secondary">Mostrar:</label>
+                    <select name="por_pagina" onchange="this.form.submit()" class="form-input border rounded-md text-sm p-2 mt-1 focus:ring-2 focus:ring-brand-primary transition-colors">
+                        <option value="50" {% if por_pagina==50 %}selected{% endif %}>50</option>
+                        <option value="70" {% if por_pagina==70 %}selected{% endif %}>70</option>
+                        <option value="100" {% if por_pagina==100 %}selected{% endif %}>100</option>
+                    </select>
+                </div>
+                <!-- Botón de Búsqueda Principal -->
+                <button type="submit" id="btn-buscar" class="self-end bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white font-bold py-2 px-5 rounded-md text-sm transition-all transform hover:scale-105 shadow-lg hover:shadow-cyan-500/50 flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    Buscar
+                </button>
+            </form>
+            <!-- Acciones Globales del Usuario -->
+            <div class="flex items-center gap-4 self-end">
+                <a href="/exportar-excel?{% for s in sede %}sede={{ s }}&{% endfor %}carpeta={{ ruta_relativa }}&filtro={{ filtro }}"
+                class="text-white font-bold py-2 px-4 rounded-md text-sm transition-all transform hover:scale-105 flex items-center gap-2 shadow-md"
+                style="background-color:#6A0DAD;"
+                onmouseover="this.style.backgroundColor='#580b8f'"
+                onmouseout="this.style.backgroundColor='#6A0DAD'">
+            
+                📥 Exportar Excel
+                            
+                </a>
+                <div class="flex items-center gap-2 bg-bg-secondary px-3 py-2 rounded-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-text-secondary" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" /></svg>
+                    <span class="text-sm font-bold text-text-accent">{{ session['usuario'] | upper }}</span>
+                </div>
+                <a href="{{ url_for('dashboard') }}" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md text-sm transition-all transform hover:scale-105 shadow-md">Salir</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 
+      ==========================================================================
+      CONTENEDOR PRINCIPAL: Layout de dos columnas redimensionable
+      ==========================================================================
+    -->
+    <div id="main-container" class="grid h-[calc(100vh-88px)]" style="grid-template-columns: 40% 6px 1fr;">
+        <!-- Columna de la Lista de Archivos -->
+        <aside class="bg-bg-primary overflow-y-auto transition-colors">
+            <div class="sticky top-0 bg-header backdrop-blur-xl z-10 p-3 border-b border-border-primary transition-colors">
+                 <div class="flex justify-between items-center text-sm">
+                     <div class="font-semibold text-text-secondary">
+                        📄 Mostrando {{ archivos|length }} de {{ cantidad_archivos }}
+                     </div>
+                     <!-- Controles de Paginación -->
+                     <div class="flex justify-center items-center gap-2">
+                        <a href="?pagina=1&por_pagina={{ por_pagina }}&carpeta={{ ruta_relativa }}&filtro={{ filtro }}{% for s in sede %}&sede={{ s }}{% endfor %}" class="px-2 py-1 rounded hover:bg-border-secondary transition-colors {% if pagina <= 1 %}text-text-secondary pointer-events-none{% endif %}">«</a>
+                        <a href="?pagina={{ pagina - 1 }}&por_pagina={{ por_pagina }}&carpeta={{ ruta_relativa }}&filtro={{ filtro }}{% for s in sede %}&sede={{ s }}{% endfor %}" class="px-2 py-1 rounded hover:bg-border-secondary transition-colors {% if pagina <= 1 %}text-text-secondary pointer-events-none{% endif %}">‹</a>
+                        <span class="font-semibold text-text-primary">Página {{ pagina }}/{{ total_paginas }}</span>
+                        <a href="?pagina={{ pagina + 1 }}&por_pagina={{ por_pagina }}&carpeta={{ ruta_relativa }}&filtro={{ filtro }}{% for s in sede %}&sede={{ s }}{% endfor %}" class="px-2 py-1 rounded hover:bg-border-secondary transition-colors {% if pagina >= total_paginas %}text-text-secondary pointer-events-none{% endif %}">›</a>
+                        <a href="?pagina={{ total_paginas }}&por_pagina={{ por_pagina }}&carpeta={{ ruta_relativa }}&filtro={{ filtro }}{% for s in sede %}&sede={{ s }}{% endfor %}" class="px-2 py-1 rounded hover:bg-border-secondary transition-colors {% if pagina >= total_paginas %}text-text-secondary pointer-events-none{% endif %}">»</a>
+                    </div>
+                </div>
+            </div>
+            <!-- Lista de Documentos (renderizada por el servidor) -->
+            <ul id="lista-documentos" class="p-2 space-y-2">
+                {% for sede_archivo, archivo, fecha in archivos %}
+                    {% set nombre = archivo.split('/')[-1] %}
+                    {% set estado = estados.get(nombre, {}) %}
+                    {% set ruta_completa = (sede_archivo ~ '/' ~ archivo) | replace('\\', '/') %}
+                    <li data-archivo="{{ ruta_completa }}" style="opacity:0;"
+                        class="lista-item bg-bg-tertiary border border-border-primary rounded-lg p-3 transition-all duration-300 hover:border-brand-primary hover:shadow-lg
+                        {% if ruta_completa == archivo_actual %}seleccionado{% endif %}
+                        {% if archivos_ocupados.get(ruta_completa) %}border-l-4 border-green-500{% endif %}"
+                        {% if archivos_ocupados.get(ruta_completa) %}
+                        title="Visualizado por: {{ archivos_ocupados[ruta_completa]['usuario'] }}"
+                        {% endif %}>
+                        
+                        <div class="flex justify-between items-start">
+                             <div class="flex-1 min-w-0">
+                                <p class="text-base font-bold truncate text-text-accent" title="{{ nombre }}">{{ nombre }}</p>
+                                <p class="text-sm text-text-secondary mt-1">🗓 {{ fecha|datetimeformat }}</p>
+                            </div>
+                            {% if estado.estado %}
+                            <span class="state-badge ml-2
+                                {% if estado.estado == 'Aprobado' %}state-aprobado
+                                {% elif estado.estado == 'Rechazado' %}state-rechazado
+                                {% elif estado.estado == 'Novedad' %}state-novedad
+                                {% elif estado.estado == 'Especial' %}state-especial
+                                {% else %}state-default{% endif %}">
+                                {{ estado.estado }}
+                            </span>
+                            {% endif %}
+                        </div>
+
+                        <div class="mt-2 text-xl" title="{{ estado.observaciones }}">
+                             {% if estado.evento %}{% for e in estado.evento.split(',') %}<span title="{{ e.strip() }}">{{ {'Recibida':'📦','Revisada':'🔍','Aprobada':'✅','Causada':'🏁','Rechazada':'❌','Novedad':'⚠️','Especial':'🟡','Pagada':'💰','Auditada':'📋'}.get(e.strip(),'') }}</span>{% endfor %}{% endif %}
+                        </div>
+
+                    <!-- ***** BLOQUE DE BOTONES RESPONSIVO ***** -->
+                    <div class="flex flex-col items-stretch gap-2 mt-3 pt-3 border-t border-border-primary md:flex-row md:items-center md:justify-end">
+                        <a href="#" class="ver-pdf action-btn font-semibold py-1 px-3 rounded-md text-sm flex items-center justify-center gap-1.5"
+                        data-url="{{ url_for('servir_pdf', sede=sede_archivo, archivo=archivo) }}"
+                        data-archivo-completo="{{ ruta_completa }}"
+                        data-usuario="{{ session['usuario'] }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                            Ver
+                        </a>
+                        <a href="{{ url_for('renombrar', archivo=archivo, sede=sede_archivo, carpeta=ruta_relativa, filtro=filtro, pagina=pagina, por_pagina=por_pagina) }}"
+                        class="renombrar-btn action-btn hover:bg-blue-600 font-semibold py-1 px-3 rounded-md text-sm flex items-center justify-center gap-1.5"
+                        data-archivo-completo="{{ ruta_completa }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z" /><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd" /></svg>
+                            Renombrar
+                        </a>
+                        {% if session['usuario'] in ['alejandra', 'master', 'ricardo', 'admin', 'liseht'] %}
+                        <button class="borrar-btn action-btn hover:bg-red-600 font-semibold py-1 px-3 rounded-md text-sm flex items-center justify-center gap-1.5"
+                                data-sede="{{ sede_archivo }}" data-archivo="{{ archivo | replace('\\', '/') }}">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
+                            Borrar
+                        </button>
+                        {% endif %}
+                    </div>
+                    <!-- ***** FIN BLOQUE RESPONSIVO ***** -->
+
+                {% endfor %}
+            </ul>
+        </aside>
+
+        <!-- Divisor Vertical Arrastrable -->
+        <div id="resizer" class="group bg-border-secondary hover:bg-brand-primary cursor-col-resize transition-colors duration-200 w-[6px] flex items-center justify-center">
+             <div class="w-1 h-10 bg-resizer-handle rounded-full transition-colors group-hover:bg-white/50"></div>
+        </div>
+
+        <!-- Columna del Visor de PDF -->
+        <main class="bg-bg-secondary h-full transition-colors">
+            <iframe id="visor-pdf" class="w-full h-full border-none visor-iframe" src="{% if archivo_actual %}{{ url_for('servir_pdf', sede=archivo_actual.split('/')[0], archivo='/'.join(archivo_actual.split('/')[1:]) | urlencode) }}{% endif %}"></iframe>
+        </main>
+    </div>
+
+    <!-- Contenedor para Notificaciones -->
+    <div id="toast-container"></div>
+    
+    <script>
+        // CORRECCIÓN: Pasa los datos del servidor a variables JS de forma segura y directa
+        const allSedesData = {{ sedes | tojson | safe }};
+        const initialSelectedSedes = {{ sede | tojson | safe }};
+        console.log('🔍 DEBUG - Sedes recibidas:', allSedesData);
+        console.log('🔍 DEBUG - Sedes seleccionadas:', initialSelectedSedes);
+    </script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // ==========================================================================
+        // 1. NOTIFICACIONES TOAST
+        //    Reemplaza los 'alert' estándar por notificaciones modernas.
+        // ==========================================================================
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            let icon = '';
+            if(type === 'success') icon = '✅';
+            if(type === 'error') icon = '❌';
+            if(type === 'warn') icon = '⚠️';
+            toast.className = 'toast';
+            toast.innerHTML = `${icon} <span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'slideOut 0.5s forwards';
+                setTimeout(() => toast.remove(), 500);
+            }, 3000);
+        }
+        window.alert = (message) => {
+            let type = 'info';
+            if(message.includes('✅')) type = 'success';
+            if(message.includes('❌')) type = 'error';
+            if(message.includes('⚠️')) type = 'warn';
+            showToast(message, type);
+        };
+        
+        // ==========================================================================
+        // 2. SELECTOR DE SEDES PERSONALIZADO
+        //    Mejora la UX para seleccionar múltiples sedes.
+        // ==========================================================================
+        const sedeBtn = document.getElementById('sede-selector-btn');
+        const sedePanel = document.getElementById('sede-selector-panel');
+        const sedeSearch = document.getElementById('sede-search');
+        const sedeOptionsContainer = document.getElementById('sede-options-container');
+        const sedeSelectAll = document.getElementById('sede-select-all');
+        const sedeClearAll = document.getElementById('sede-clear-all');
+        const sedeSelectorText = document.getElementById('sede-selector-text');
+        const mainForm = document.getElementById('main-form');
+        
+        const allSedes = allSedesData.map(s => ({ value: s, text: s }));
+        let selectedSedes = new Set(initialSelectedSedes);
+        
+        console.log('🔍 DEBUG - allSedes procesadas:', allSedes);
+        console.log('🔍 DEBUG - selectedSedes Set:', selectedSedes);
+
+        function renderSedeOptions(filter = '') {
+            console.log('📝 Renderizando opciones de sede, filtro:', filter);
+            sedeOptionsContainer.innerHTML = '';
+            allSedes.forEach(sede => {
+                if (sede.text.toLowerCase().includes(filter.toLowerCase())) {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'flex items-center p-2 hover:bg-bg-secondary rounded-md cursor-pointer';
+                    optionDiv.innerHTML = `
+                        <input type="checkbox" id="sede-${sede.value}" value="${sede.value}" class="h-4 w-4 rounded border-border-secondary text-brand-primary focus:ring-brand-primary" ${selectedSedes.has(sede.value) ? 'checked' : ''}>
+                        <label for="sede-${sede.value}" class="ml-3 text-sm text-text-primary cursor-pointer">${sede.text}</label>
+                    `;
+                    sedeOptionsContainer.appendChild(optionDiv);
+                }
+            });
+            console.log('✅ Opciones renderizadas:', sedeOptionsContainer.children.length);
+        }
+
+        function updateSedeSelectorText() {
+            if (selectedSedes.size === 0) {
+                sedeSelectorText.textContent = 'Ninguna sede';
+            } else if (selectedSedes.has('Todo') || selectedSedes.size === allSedes.length -1) {
+                 sedeSelectorText.textContent = 'Todas las sedes';
+            } else if (selectedSedes.size === 1) {
+                sedeSelectorText.textContent = selectedSedes.values().next().value;
+            } else {
+                sedeSelectorText.textContent = `${selectedSedes.size} sedes seleccionadas`;
+            }
+            // Actualiza los inputs ocultos para el envío del formulario
+            document.querySelectorAll('input[name="sede"]').forEach(i => i.remove());
+            selectedSedes.forEach(val => {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'sede';
+                hiddenInput.value = val;
+                mainForm.appendChild(hiddenInput);
+            });
+        }
+
+        sedeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            sedePanel.classList.toggle('hidden');
+            if(!sedePanel.classList.contains('hidden')) renderSedeOptions();
+        });
+
+        sedeSearch.addEventListener('keyup', () => renderSedeOptions(sedeSearch.value));
+
+        sedeOptionsContainer.addEventListener('change', e => {
+            if(e.target.type === 'checkbox') {
+                if (e.target.checked) selectedSedes.add(e.target.value);
+                else selectedSedes.delete(e.target.value);
+                updateSedeSelectorText();
+            }
+        });
+        
+        sedeSelectAll.addEventListener('click', () => {
+            allSedes.forEach(s => selectedSedes.add(s.value));
+            renderSedeOptions(sedeSearch.value); updateSedeSelectorText();
+        });
+        
+        sedeClearAll.addEventListener('click', () => {
+            selectedSedes.clear();
+            renderSedeOptions(sedeSearch.value); updateSedeSelectorText();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!sedeBtn.contains(e.target) && !sedePanel.contains(e.target)) {
+                sedePanel.classList.add('hidden');
+            }
+        });
+
+        updateSedeSelectorText();
+
+        // ==========================================================================
+        // 2.5. CARGAR ARCHIVOS DE LAS CARPETAS DE RED
+        // ==========================================================================
+        // COMENTADO: Ahora usamos renderizado del servidor, no APIs
+        /*
+        const btnBuscar = document.getElementById('btn-buscar');
+        const listaArchivos = document.querySelector('aside ul');
+        
+        async function cargarArchivos() {
+            try {
+                // Obtener valores del formulario
+                const carpeta = document.querySelector('select[name="carpeta"]').value;
+                const filtro = document.querySelector('input[name="filtro"]').value;
+                const porPagina = document.querySelector('select[name="por_pagina"]').value;
+                
+                // Construir array de sedes seleccionadas
+                const sedesArray = Array.from(selectedSedes);
+                
+                console.log('🔍 Cargando archivos...', { sedes: sedesArray, carpeta, filtro });
+                
+                // Construir query string
+                const params = new URLSearchParams();
+                sedesArray.forEach(sede => params.append('sede', sede));
+                if (carpeta && carpeta !== '__all__') params.set('carpeta', carpeta);
+                if (filtro) params.set('filtro', filtro);
+                params.set('por_pagina', porPagina);
+                
+                console.log('🌐 URL:', `/causaciones/api/carpetas/archivos?${params.toString()}`);
+                
+                // Llamar a la API
+                const response = await fetch(`/causaciones/api/carpetas/archivos?${params.toString()}`);
+                const data = await response.json();
+                
+                console.log('📦 Respuesta API:', data);
+                
+                if (data.success) {
+                    console.log('✅ Archivos cargados:', data.total);
+                    console.log('📁 Carpetas disponibles:', data.carpetas_disponibles?.length || 0);
+                    
+                    // Actualizar dropdown de carpetas si hay disponibles
+                    if (data.carpetas_disponibles && data.carpetas_disponibles.length > 0) {
+                        actualizarSelectorCarpetas(data.carpetas_disponibles);
+                    }
+                    
+                    renderizarArchivos(data.archivos);
+                } else {
+                    console.error('❌ Error:', data.message);
+                    alert('Error al cargar archivos: ' + data.message);
+                }
+            } catch (error) {
+                console.error('❌ Error:', error);
+                alert('Error al cargar archivos: ' + error.message);
+            }
+        }
+        
+        function renderizarArchivos(archivos) {
+            if (!listaArchivos) {
+                console.error('❌ No se encontró el contenedor de archivos');
+                return;
+            }
+            
+            listaArchivos.innerHTML = '';
+            
+            if (archivos.length === 0) {
+                listaArchivos.innerHTML = '<li class="p-4 text-center text-text-secondary">No se encontraron archivos</li>';
+                return;
+            }
+            
+            archivos.forEach(archivo => {
+                const li = document.createElement('li');
+                li.className = 'flex flex-col p-3 bg-bg-secondary border-b border-border-primary hover:bg-bg-tertiary transition-colors cursor-pointer';
+                li.setAttribute('data-archivo', archivo.nombre);
+                
+                const formatoTamaño = (bytes) => {
+                    if (bytes < 1024) return bytes + ' B';
+                    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+                    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+                };
+                
+                li.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <p class="text-sm font-bold text-text-primary truncate" title="${archivo.nombre}">${archivo.nombre}</p>
+                            <p class="text-xs text-text-secondary mt-1">
+                                📁 ${archivo.sede} ${archivo.carpeta ? '/ ' + archivo.carpeta : ''} | 
+                                📦 ${formatoTamaño(archivo.tamano)} | 
+                                🕒 ${new Date(archivo.fecha_modificacion).toLocaleString()}
+                            </p>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 mt-2">
+                        <button onclick="verPDF('${archivo.ruta_completa.replace(/\\/g, '\\\\')}')" class="action-btn bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded">
+                            👁️ Ver
+                        </button>
+                        <button onclick="renombrarArchivo('${archivo.ruta_completa.replace(/\\/g, '\\\\')}')" class="action-btn bg-amber-600 hover:bg-amber-700 text-white text-xs px-3 py-1 rounded">
+                            ✏️ Renombrar
+                        </button>
+                        <button onclick="borrarArchivo('${archivo.ruta_completa.replace(/\\/g, '\\\\')}')" class="action-btn bg-red-600 hover:bg-red-700 text-white text-xs px-3 py-1 rounded">
+                            🗑️ Borrar
+                        </button>
+                    </div>
+                `;
+                
+                listaArchivos.appendChild(li);
+            });
+        }
+        
+        function actualizarSelectorCarpetas(carpetas) {
+            const selectCarpeta = document.querySelector('select[name="carpeta"]');
+            if (!selectCarpeta) return;
+            
+            console.log('📁 Actualizando selector con', carpetas.length, 'carpetas');
+            
+            // Guardar valor seleccionado actual
+            const valorActual = selectCarpeta.value;
+            
+            // Limpiar y agregar opción "Todas"
+            selectCarpeta.innerHTML = '<option value="__all__">📂 Todas las carpetas</option>';
+            
+            // Agregar carpetas dinámicamente
+            carpetas.forEach(carpeta => {
+                const option = document.createElement('option');
+                option.value = carpeta;
+                option.textContent = `📁 ${carpeta}`;
+                selectCarpeta.appendChild(option);
+            });
+            
+            // Restaurar selección si existe
+            if (valorActual && carpetas.includes(valorActual)) {
+                selectCarpeta.value = valorActual;
+            }
+        }
+        */
+        
+        // Event listener para el botón buscar
+        // COMENTADO: El botón ahora funciona con submit tradicional de formulario
+        // btnBuscar.addEventListener('click', cargarArchivos);
+        
+        // Funciones placeholder para las acciones
+        window.verPDF = function(ruta) {
+            const url = `/causaciones/api/carpetas/ver_pdf?ruta=${encodeURIComponent(ruta)}`;
+            window.open(url, '_blank');
+        };
+        
+        window.renombrarArchivo = function(ruta) {
+            alert('Función de renombrar en desarrollo. Archivo: ' + ruta);
+        };
+        
+        window.borrarArchivo = function(ruta) {
+            if (confirm('¿Está seguro de eliminar este archivo?')) {
+                alert('Función de borrar en desarrollo. Archivo: ' + ruta);
+            }
+        };
+
+        // ==========================================================================
+        // 3. LÓGICA DEL DIVISOR REDIMENSIONABLE
+        //    Permite al usuario ajustar el ancho de los paneles.
+        // ==========================================================================
+        const mainContainer = document.getElementById('main-container');
+        const resizer = document.getElementById('resizer');
+        const savedWidth = localStorage.getItem('asideWidth');
+        if (savedWidth) mainContainer.style.gridTemplateColumns = `${savedWidth} 6px 1fr`;
+        let isResizing = false;
+        resizer.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            document.body.classList.add('resizing');
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', stopResize);
+        });
+        function handleMouseMove(e) {
+            if (!isResizing) return;
+            let newWidth = (e.clientX / window.innerWidth) * 100;
+            if (newWidth < 20) newWidth = 20;
+            if (newWidth > 70) newWidth = 70;
+            mainContainer.style.gridTemplateColumns = `${newWidth}% 6px 1fr`;
+        }
+        function stopResize() {
+            isResizing = false;
+            document.body.classList.remove('resizing');
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', stopResize);
+            const currentWidth = mainContainer.style.gridTemplateColumns.split(' ')[0];
+            localStorage.setItem('asideWidth', currentWidth);
+        }
+
+        // ==========================================================================
+        // 4. CONFIGURACIÓN DE SOCKET.IO
+        //    Gestiona la comunicación en tiempo real para bloquear/liberar archivos.
+        // ==========================================================================
+        const socket = io();
+        const lastEvt = {}; // Objeto para evitar parpadeos (race conditions)
+        socket.on('archivo_bloqueado', (data) => {
+            const k = norm(data.archivo);
+            lastEvt[k] = { type: 'bloqueado', t: Date.now() };
+            const li = document.querySelector(`li[data-archivo="${CSS.escape(k)}"]`);
+            if (li) {
+                li.classList.add('border-l-8', 'border-green-500'); // 👈 aquí subí de 4 a 8
+                if (data.usuario) li.setAttribute('title', `Visualizado por: ${data.usuario}`);
+            }
+        });
+        socket.on('archivo_liberado', (data) => {
+            const k = norm(data.archivo);
+            const last = lastEvt[k];
+            if (last && last.type === 'bloqueado' && Date.now() - last.t < 1000) return;
+            const li = document.querySelector(`li[data-archivo="${CSS.escape(k)}"]`);
+            if (li) {
+                li.classList.remove('border-l-4', 'border-green-500');
+                if (li.getAttribute('title')?.startsWith('Visualizado por:')) {
+                    li.removeAttribute('title');
+                }
+            }
+        });
+
+        // ==========================================================================
+        // 5. VISUALIZACIÓN DE PDF Y HEARTBEAT
+        //    Controla el iframe y notifica al servidor qué archivo se está viendo.
+        // ==========================================================================
+        let currentFile = null;
+        let hbTimer = null;
+        const visor = document.getElementById('visor-pdf');
+        function startHeartbeat(archivo) {
+            stopHeartbeat();
+            hbTimer = setInterval(() => { if (archivo) socket.emit('viewer_heartbeat', { archivo }); }, 15000);
+        }
+        function stopHeartbeat() { if (hbTimer) clearInterval(hbTimer); hbTimer = null; }
+        function stopViewing() {
+            if (currentFile) { socket.emit('viewer_stop', { archivo: currentFile }); currentFile = null; }
+            stopHeartbeat();
+        }
+        window.addEventListener('beforeunload', stopViewing);
+        document.addEventListener('visibilitychange', () => { if (document.hidden) stopViewing(); });
+        function mostrarPDF(url, archivoCompleto, usuario) {
+            if (!visor) return;
+            const archivoNorm = norm(archivoCompleto);
+
+            // 👇 Primero libero el archivo anterior si es distinto
+            if (currentFile && currentFile !== archivoNorm) {
+                stopViewing();   // 🔹 esto manda el viewer_stop correctamente
+            }
+
+            // Ahora actualizo el nuevo archivo actual
+            currentFile = archivoNorm;
+
+            // Notifica a los demás usuarios que este archivo está en uso
+            socket.emit('viewer_start', { archivo: currentFile, usuario });
+
+            // 🔹 Registrar en CSV
+            fetch('/visualizar_archivo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ archivo: currentFile, usuario })
+            }).catch(console.error);
+
+            visor.classList.add('cargando');
+            visor.onload = () => visor.classList.remove('cargando');
+            visor.src = url;
+
+            // Arranco el heartbeat para mantener el bloqueo activo
+            startHeartbeat(currentFile);
+
+            // Marcar en la UI el documento seleccionado
+            document.querySelectorAll('.lista-item.seleccionado').forEach(el => el.classList.remove('seleccionado'));
+            const li = document.querySelector(`li[data-archivo="${CSS.escape(archivoNorm)}"]`);
+            if (li) li.classList.add('seleccionado');
+        }
+
+
+        // ==========================================================================
+        // 6. MANEJO DE EVENTOS (DELEGACIÓN)
+        //    Un único listener en 'body' para todas las acciones de los documentos.
+        // ==========================================================================
+        document.body.addEventListener('click', (e) => {
+            const verPdfBtn = e.target.closest('.ver-pdf');
+            if (verPdfBtn) {
+                e.preventDefault();
+                sessionStorage.setItem('scrollPos', document.querySelector('aside').scrollTop);
+                mostrarPDF(verPdfBtn.dataset.url, verPdfBtn.dataset.archivoCompleto, verPdfBtn.dataset.usuario);
+                return;
+            }
+            const renombrarBtn = e.target.closest('.renombrar-btn');
+            if (renombrarBtn) {
+                liberarAntesDeRenombrar(renombrarBtn.dataset.archivoCompleto);
+                sessionStorage.setItem('scrollPos', document.querySelector('aside').scrollTop);
+            }
+            const borrarBtn = e.target.closest('.borrar-btn');
+            if (borrarBtn) {
+                e.preventDefault();
+                liberarYBorrar(borrarBtn.dataset.sede, borrarBtn.dataset.archivo);
+            }
+        });
+
+        // ==========================================================================
+        // 7. FUNCIONES DE ACCIÓN (LLAMADAS A LA API)
+        //    Funciones que se comunican con el backend de Flask.
+        // ==========================================================================
+        function liberarAntesDeRenombrar(archivo) {
+            fetch('/liberar_manual', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ archivo: norm(archivo) }) }).catch(console.error);
+        }
+        function liberarYBorrar(sede, archivo) {
+            const ruta = norm(`${sede}/${archivo}`);
+            if (confirm('⚠️ ¿Estás seguro de que deseas borrar este archivo?')) {
+                if (confirm('❗ Esta acción no se puede deshacer. ¿Confirmas que deseas enviarlo a la papelera?')) {
+                    fetch('/liberar_manual', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ archivo: ruta }) })
+                    .then(() => moverAPapelera(sede, archivo)).catch(console.error);
+                }
+            }
+        }
+        function moverAPapelera(sede, archivo) {
+            fetch('/mover_a_papelera', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sede: sede, archivo: archivo }) })
+            .then(resp => resp.text())
+            .then(msg => {
+                alert(msg.includes('Movido correctamente') ? '✅ Documento movido a la papelera.' : `❌ ${msg}`);
+                if (msg.includes('Movido correctamente')) location.reload();
+            }).catch(err => { alert('❌ Error en la solicitud.'); console.error(err); });
+        }
+
+        // ==========================================================================
+        // 8. GESTIÓN DE SESIÓN Y ESTADO
+        //    Control de inactividad y guardado de la posición del scroll.
+        // ==========================================================================
+        (function gestionarInactividad() {
+            let timer; const INACTIVO = 20 * 60 * 1000;
+            function reiniciar() {
+                clearTimeout(timer);
+                timer = setTimeout(() => { alert("⚠️ Tu sesión ha caducado por inactividad."); window.location.href = "/login"; }, INACTIVO);
+            }
+            ['click', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(e => document.addEventListener(e, reiniciar, false));
+            reiniciar();
+        })();
+        (function restaurarEstadoLista(){
+            const cont = document.querySelector('aside'); if (!cont) return;
+            const saved = sessionStorage.getItem('scrollPos');
+            if (saved !== null) { cont.scrollTop = parseInt(saved, 10); sessionStorage.removeItem('scrollPos'); }
+        })();
+        
+        // Utilidad para normalizar rutas de archivo
+        const norm = (p) => (p || '').toString().replace(/\\/g, '/');
+    });
+    
+    // ==========================================================================
+    // 🌓 TOGGLE LIGHT/DARK MODE
+    // ==========================================================================
+    function toggleTheme() {
+        const body = document.body;
+        const icon = document.getElementById('theme-icon');
+        const currentTheme = body.getAttribute('data-theme');
+        
+        if (currentTheme === 'light') {
+            body.setAttribute('data-theme', 'dark');
+            icon.textContent = '☀️';
+            localStorage.setItem('theme', 'dark');
+        } else {
+            body.setAttribute('data-theme', 'light');
+            icon.textContent = '🌙';
+            localStorage.setItem('theme', 'light');
+        }
+    }
+    
+    // Cargar tema guardado al inicio
+    (function loadTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+        document.getElementById('theme-icon').textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    })();
+    
+    // ==========================================================================
+    // ☁️ MOSTRAR CLOUD ICON SI HAY OBSERVACIONES
+    // ==========================================================================
+    function addCloudIcons() {
+        // Esta función se conectará con el backend para verificar observaciones
+        // Por ahora es un placeholder
+        document.querySelectorAll('.lista-item').forEach(item => {
+            // Simulación: agregar cloud icon si tiene data-observaciones
+            const hasObservations = item.dataset.observaciones === 'true';
+            if (hasObservations) {
+                const cloudIcon = document.createElement('span');
+                cloudIcon.className = 'cloud-icon';
+                cloudIcon.innerHTML = '☁️';
+                cloudIcon.title = 'Este documento tiene observaciones';
+                item.querySelector('.flex.items-center').appendChild(cloudIcon);
+            }
+        });
+    }
+    
+    // ==========================================================================
+    // 🟢 RESALTAR DOCUMENTOS SIENDO VISUALIZADOS
+    // ==========================================================================
+    function updateViewingStatus() {
+        fetch('/causaciones/api/documentos')
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    data.documentos.forEach(doc => {
+                        const item = document.querySelector(`[data-documento-id="${doc.id}"]`);
+                        if (item) {
+                            if (doc.siendo_visualizado_por) {
+                                item.classList.add('siendo-visualizado');
+                                // Agregar tooltip con usuario
+                                const tooltip = document.createElement('div');
+                                tooltip.className = 'viewer-tooltip';
+                                tooltip.textContent = `Siendo visualizado por: ${doc.siendo_visualizado_por}`;
+                                item.style.position = 'relative';
+                                item.appendChild(tooltip);
+                            } else {
+                                item.classList.remove('siendo-visualizado');
+                                const tooltip = item.querySelector('.viewer-tooltip');
+                                if (tooltip) tooltip.remove();
+                            }
+                        }
+                    });
+                }
+            })
+            .catch(error => console.error('Error actualizando estado de visualización:', error));
+    }
+    
+    // Actualizar cada 5 segundos
+    setInterval(updateViewingStatus, 5000);
+    
+    // ==========================================================================
+    // 📋 PANEL INFERIOR CON DATOS DE FACTURA
+    // ==========================================================================
+    function showInvoicePanel(documentoId) {
+        fetch(`/causaciones/api/extraer_datos/${documentoId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const panel = document.getElementById('invoice-panel');
+                    const grid = document.getElementById('invoice-data-grid');
+                    
+                    grid.innerHTML = `
+                        <div class="invoice-field">
+                            <span class="invoice-field-label">NIT</span>
+                            <span class="invoice-field-value">${data.datos.nit || 'N/A'}</span>
+                        </div>
+                        <div class="invoice-field">
+                            <span class="invoice-field-label">Razón Social</span>
+                            <span class="invoice-field-value">${data.datos.razon_social || 'N/A'}</span>
+                        </div>
+                        <div class="invoice-field">
+                            <span class="invoice-field-label">Prefijo</span>
+                            <span class="invoice-field-value">${data.datos.prefijo || 'N/A'}</span>
+                        </div>
+                        <div class="invoice-field">
+                            <span class="invoice-field-label">Folio</span>
+                            <span class="invoice-field-value">${data.datos.folio || 'N/A'}</span>
+                        </div>
+                        <div class="invoice-field">
+                            <span class="invoice-field-label">Valor Antes IVA</span>
+                            <span class="invoice-field-value">$${(data.datos.valor_antes_iva || 0).toLocaleString()}</span>
+                        </div>
+                        <div class="invoice-field">
+                            <span class="invoice-field-label">IVA</span>
+                            <span class="invoice-field-value">$${(data.datos.valor_iva || 0).toLocaleString()}</span>
+                        </div>
+                        <div class="invoice-field">
+                            <span class="invoice-field-label">Valor Total</span>
+                            <span class="invoice-field-value">$${(data.datos.valor_total || 0).toLocaleString()}</span>
+                        </div>
+                        <div class="invoice-field">
+                            <span class="invoice-field-label">CUFE</span>
+                            <span class="invoice-field-value" style="font-size: 0.7rem;">${data.datos.cufe || 'N/A'}</span>
+                        </div>
+                        <div class="invoice-field">
+                            <span class="invoice-field-label">Resolución</span>
+                            <span class="invoice-field-value">${data.datos.resolucion || 'N/A'}</span>
+                        </div>
+                        <div class="invoice-field">
+                            <span class="invoice-field-label">Rango</span>
+                            <span class="invoice-field-value">${data.datos.rango_desde || 'N/A'} - ${data.datos.rango_hasta || 'N/A'}</span>
+                        </div>
+                        <div class="invoice-field">
+                            <span class="invoice-field-label">Tipo</span>
+                            <span class="invoice-field-value">${data.datos.es_electronica ? '📱 Electrónica' : '📄 Física'}</span>
+                        </div>
+                    `;
+                    
+                    panel.classList.add('active');
+                }
+            })
+            .catch(error => {
+                console.error('Error extrayendo datos:', error);
+                showToast('Error al extraer datos del PDF', 'error');
+            });
+    }
+    
+    function hideInvoicePanel() {
+        const panel = document.getElementById('invoice-panel');
+        panel.classList.remove('active');
+    }
+    
+    // Agregar listener a botones "Ver PDF"
+    document.querySelectorAll('.ver-pdf').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            const documentoId = this.dataset.documentoId;
+            if (documentoId) {
+                showInvoicePanel(documentoId);
+            }
+        });
+    });
+    </script>
+    
+    <!-- 📋 Panel Inferior con Datos de Factura -->
+    <div id="invoice-panel" class="invoice-panel">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-bold" style="color: var(--brand-green);">
+                📋 Datos de la Factura
+            </h3>
+            <button onclick="hideInvoicePanel()" class="action-btn">
+                ✖ Cerrar
+            </button>
+        </div>
+        <div id="invoice-data-grid" class="invoice-data-grid">
+            <!-- Datos inyectados por JavaScript -->
+        </div>
+    </div>
+
+<!-- ============================================ -->
+<!-- ⏰ TIMEOUT DE SESIÓN - 25 MINUTOS -->
+<!-- ============================================ -->
+<script>
+// Configuración de timeout
+const SESSION_TIMEOUT = 25 * 60 * 1000; // 25 minutos en milisegundos
+let timeoutTimer;
+
+function iniciarContadorSesion() {
+    // Limpiar cualquier timer existente
+    if (timeoutTimer) {
+        clearTimeout(timeoutTimer);
+    }
+    
+    // Iniciar nuevo timer
+    timeoutTimer = setTimeout(() => {
+        cerrarSesionPorInactividad();
+    }, SESSION_TIMEOUT);
+}
+
+function reiniciarContadorSesion() {
+    // Reiniciar el contador con cada actividad del usuario
+    iniciarContadorSesion();
+}
+
+function cerrarSesionPorInactividad() {
+    // Mostrar mensaje
+    alert('⏰ Tu sesión ha expirado por inactividad (25 minutos).
+
+' +
+          'Serás redirigido al inicio de sesión.');
+    
+    // Cerrar sesión en el servidor
+    fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'same-origin'
+    }).finally(() => {
+        // Redirigir al login
+        window.location.href = '/';
+    });
+}
+
+// Eventos que reinician el contador
+document.addEventListener('mousemove', reiniciarContadorSesion, { passive: true });
+document.addEventListener('keypress', reiniciarContadorSesion, { passive: true });
+document.addEventListener('click', reiniciarContadorSesion, { passive: true });
+document.addEventListener('scroll', reiniciarContadorSesion, { passive: true });
+document.addEventListener('touchstart', reiniciarContadorSesion, { passive: true });
+
+// Iniciar contador al cargar la página
+window.addEventListener('DOMContentLoaded', () => {
+    console.log('✅ Timeout de sesión activado (25 minutos)');
+    iniciarContadorSesion();
+});
+
+// Advertencia si el usuario intenta cerrar la página con cambios sin guardar
+window.addEventListener('beforeunload', (e) => {
+    // Solo mostrar si hay cambios pendientes (puedes personalizar esta lógica)
+    const formularioModificado = document.querySelector('form.modificado');
+    if (formularioModificado) {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+</script>
+
+        {% include '_session_expired_interceptor.html' %}
+    </body>
+</html>
+
+

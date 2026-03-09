@@ -1,0 +1,383 @@
+/* =============================================
+   🎨 NUEVA FACTURA - DISEÑO ELEGANTE Y RESPONSIVE
+   ============================================= */
+
+/* ========== VARIABLES CSS ========== */
+:root {
+    --bg-color: #f5f7fa;
+    --card-bg: #ffffff;
+    --text-color: #2d3748;
+    --border-color: #e2e8f0;
+    --input-bg: #ffffff;
+    --input-border: #cbd5e0;
+    --brand-green: #16a34a;
+    --brand-green-dark: #15803d;
+    --brand-green-light: #dcfce7;
+    --red-error: #dc2626;
+    --red-light: #fee2e2;
+    --orange-warning: #f59e0b;
+    --blue-info: #3b82f6;
+}
+
+[data-theme="dark"] {
+    --bg-color: #1a202c;
+    --card-bg: #2d3748;
+    --text-color: #e2e8f0;
+    --border-color: #4a5568;
+    --input-bg: #374151;
+    --input-border: #4b5563;
+    --brand-green: #22c55e;
+    --brand-green-dark: #16a34a;
+    --brand-green-light: #14532d;
+    --red-error: #ef4444;
+    --red-light: #7f1d1d;
+    --orange-warning: #f59e0b;
+    --blue-info: #60a5fa;
+}
+
+/* ========== BASE ========== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, var(--bg-color) 0%, var(--border-color) 100%);
+    color: var(--text-color);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ========== HEADER ELEGANTE ========== */
+.header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+    padding: 15px 30px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+h2 {
+    color: white;
+    font-size: 1.6em;
+    font-weight: 700;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.header-controls {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.user-badge {
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    padding: 10px 20px;
+    border-radius: 30px;
+    color: white;
+    font-weight: 500;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dark-mode-toggle,
+.btn-salir {
+    padding: 10px 20px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+}
+
+.dark-mode-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dark-mode-toggle:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-salir {
+    background: #dc2626;
+    color: white;
+}
+
+.btn-salir:hover {
+    background: #b91c1c;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+/* ========== MAIN CONTENT ========== */
+.main-content {
+    flex: 1;
+    overflow: hidden;
+    padding: 20px;
+}
+
+/* ========== LAYOUT RESPONSIVE ========== */
+.content-layout {
+    display: grid;
+    grid-template-columns: 500px 1fr;
+    gap: 20px;
+    height: 100%;
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+.form-section,
+.table-section {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    gap: 15px;
+}
+
+/* ========== CARDS ELEGANTES ========== */
+.card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 25px;
+    box-shadow: 0 6px 30px rgba(0,0,0,0.1);
+    border: 1px solid var(--border-color);
+    transition: all 0.3s;
+}
+
+.card:hover {
+    box-shadow: 0 8px 35px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+/* ========== FORMULARIO ========== */
+#registerForm {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-weight: 600;
+    font-size: 0.9em;
+    color: var(--text-color);
+    letter-spacing: 0.5px;
+}
+
+.form-group label.required::after {
+    content: " *";
+    color: var(--red-error);
+    font-weight: 700;
+}
+
+.form-group input,
+.form-group select {
+    padding: 12px 16px;
+    border: 2px solid var(--input-border);
+    border-radius: 10px;
+    font-size: 0.95em;
+    background: var(--input-bg);
+    color: var(--text-color);
+    transition: all 0.3s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: var(--brand-green);
+    box-shadow: 0 0 0 4px var(--brand-green-light);
+    transform: translateY(-2px);
+}
+
+.form-group input:disabled {
+    background: var(--border-color);
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Tamaños de columnas */
+.col-1 { grid-column: span 1; }
+.col-2 { grid-column: span 2; }
+
+/* ========== BOTONES ========== */
+.button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+button {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.95em;
+    font-family: 'Poppins', sans-serif;
+}
+
+button:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.btn-primary {
+    background: var(--brand-green);
+    color: white;
+}
+
+.btn-danger {
+    background: var(--red-error);
+    color: white;
+}
+
+.btn-warning {
+    background: var(--orange-warning);
+    color: white;
+}
+
+.btn-info {
+    background: var(--blue-info);
+    color: white;
+}
+
+/* ========== TABLA ELEGANTE ========== */
+.table-container {
+    flex: 1;
+    overflow: auto;
+    border-radius: 12px;
+}
+
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: var(--card-bg);
+}
+
+thead {
+    background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+thead th {
+    padding: 16px 12px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.9em;
+    letter-spacing: 0.5px;
+}
+
+thead th:first-child {
+    border-top-left-radius: 12px;
+}
+
+thead th:last-child {
+    border-top-right-radius: 12px;
+}
+
+tbody td {
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.9em;
+}
+
+tbody tr {
+    transition: all 0.3s;
+}
+
+tbody tr:hover {
+    background: var(--brand-green-light);
+    transform: scale(1.01);
+}
+
+/* ========== SCROLLBARS ========== */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--brand-green);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--brand-green-dark);
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 1200px) {
+    .content-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+    
+    #registerForm {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
+    
+    h2 {
+        font-size: 1.3em;
+    }
+    
+    .header-controls {
+        flex-wrap: wrap;
+    }
+    
+    #registerForm {
+        grid-template-columns: 1fr;
+    }
+    
+    .col-1, .col-2 {
+        grid-column: span 1;
+    }
+    
+    .button-group {
+        flex-direction: column;
+    }
+    
+    button {
+        width: 100%;
+    }
+}
