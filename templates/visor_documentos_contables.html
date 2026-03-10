@@ -8,6 +8,7 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -157,16 +158,97 @@
         }
         
         @media (max-width: 480px) {
-            .module-header h1 {
-                font-size: 1rem;
-            }
-            .btn {
-                padding: 8px 12px;
-                font-size: 0.9rem;
-            }
-            table {
-                font-size: 0.8rem;
-            }
+            .module-header h1 { font-size: 1rem; }
+            .btn { padding: 8px 12px; font-size: 0.9rem; }
+            table { font-size: 0.8rem; }
+        }
+
+        /* ─── PANEL FLOTANTE VERIFICAR / EXPORTAR ─── */
+        .panel-overlay {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45); z-index: 1000;
+            justify-content: center; align-items: center;
+        }
+        .panel-overlay.active { display: flex; }
+        .panel-box {
+            background: white; border-radius: 14px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.22);
+            width: min(680px, 95vw); max-height: 92vh;
+            overflow-y: auto; display: flex; flex-direction: column;
+        }
+        .panel-header {
+            background: linear-gradient(135deg, #166534, #16a34a);
+            color: white; padding: 16px 20px;
+            border-radius: 14px 14px 0 0;
+            display: flex; justify-content: space-between; align-items: center;
+            position: sticky; top: 0; z-index: 1;
+        }
+        .panel-header h2 { font-size: 1.1rem; margin: 0; }
+        .panel-close {
+            background: rgba(255,255,255,0.2); border: none;
+            color: white; font-size: 1.2rem; width: 30px; height: 30px;
+            border-radius: 50%; cursor: pointer; line-height: 30px; text-align: center;
+        }
+        .panel-close:hover { background: rgba(255,255,255,0.35); }
+        .panel-body { padding: 20px; }
+        .panel-section { margin-bottom: 18px; }
+        .panel-section .section-title {
+            display: block; font-weight: 700; color: #166534;
+            margin-bottom: 8px; font-size: 0.85rem;
+            text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .panel-section .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .panel-section select,
+        .panel-section input[type="date"] {
+            width: 100%; padding: 9px 10px;
+            border: 1px solid #d1d5db; border-radius: 8px;
+            font-family: 'Inter', sans-serif; font-size: 0.9rem; background: #f9fafb;
+        }
+        .panel-section select:focus,
+        .panel-section input[type="date"]:focus {
+            outline: none; border-color: #16a34a; background: white;
+        }
+        .checkbox-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+        .check-chip {
+            display: flex; align-items: center; gap: 5px;
+            padding: 6px 12px; border: 1.5px solid #d1d5db;
+            border-radius: 20px; cursor: pointer; font-size: 0.85rem;
+            transition: all 0.15s; user-select: none;
+        }
+        .check-chip input[type="checkbox"] { accent-color: #16a34a; cursor: pointer; }
+        .btn-select-all {
+            font-size: 0.78rem; padding: 3px 10px;
+            background: #f3f4f6; border: 1px solid #d1d5db;
+            border-radius: 12px; cursor: pointer; margin-bottom: 8px;
+        }
+        .panel-footer {
+            padding: 14px 20px; border-top: 1px solid #e5e7eb;
+            display: flex; gap: 10px; flex-wrap: wrap;
+            position: sticky; bottom: 0; background: white;
+            border-radius: 0 0 14px 14px;
+        }
+        .btn-pv { border: none; padding: 10px 18px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 0.9rem; flex: 1; }
+        .btn-pv-green  { background: #16a34a; color: white; }
+        .btn-pv-green:hover { background: #15803d; }
+        .btn-pv-yellow { background: #facc15; color: #166534; }
+        .btn-pv-yellow:hover { background: #eab308; }
+        .btn-pv-cancel { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; flex: 0; }
+        #panelResultados {
+            display: none; margin-top: 14px;
+            background: #f8fafc; border: 1px solid #e2e8f0;
+            border-radius: 10px; padding: 14px;
+            max-height: 280px; overflow-y: auto; font-size: 0.85rem;
+        }
+        .res-tipo { margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #e2e8f0; }
+        .res-tipo:last-child { border-bottom: none; }
+        .res-tipo h4 { color: #166534; margin-bottom: 4px; font-size: 0.9rem; }
+        .tag-ok  { color: #16a34a; font-weight: 700; }
+        .tag-fail { color: #dc2626; font-weight: 700; }
+        .falt-lista {
+            color: #dc2626; word-break: break-all;
+            font-family: 'Courier New', monospace; font-size: 0.8rem;
+            background: #fef2f2; padding: 4px 8px;
+            border-radius: 4px; margin-top: 3px;
         }
     </style>
 </head>
@@ -181,12 +263,12 @@
         <!-- CONTENIDO -->
         <div class="module-content">
                 <div class="toolbar">
-            <span style="color: #166534; font-weight: 600;">👤 admin</span>
+            <span style="color: #166534; font-weight: 600;">👤 {{ session.get('usuario', '') }}</span>
             <input type="text" id="buscar" placeholder="🔍 Buscar...">
             <input type="date" id="fechaDesde">
             <input type="date" id="fechaHasta">
             <button class="btn btn-primary" onclick="filtrarTabla()">Filtrar</button>
-            <button class="btn btn-secondary" onclick="verificarConsecutivos()">🔢 Verificar Consecutivos</button>
+            <button class="btn btn-secondary" onclick="abrirPanelConsecutivos()">🔢 Verificar / Exportar</button>
             <button class="btn btn-primary" onclick="window.location.href='/archivo_digital/cargar'">⬆️ Cargar</button>
             <button class="btn btn-warn" onclick="window.location.href='/dashboard'">🏠 Volver al Menú</button>
         </div>
@@ -240,18 +322,96 @@
         </div><!-- Cierre module-content -->
     </div><!-- Cierre container -->
 
+    <!-- ─── PANEL FLOTANTE VERIFICAR / EXPORTAR ─── -->
+    <div class="panel-overlay" id="panelOverlay" onclick="cerrarPanelSiFuera(event)">
+        <div class="panel-box" id="panelBox">
+            <div class="panel-header">
+                <h2>🔢 Verificar Consecutivos / Exportar</h2>
+                <button class="panel-close" onclick="cerrarPanel()">✕</button>
+            </div>
+            <div class="panel-body">
+
+                <!-- Rango de fechas -->
+                <div class="panel-section">
+                    <span class="section-title">📅 Rango de fechas</span>
+                    <div class="row-2">
+                        <div>
+                            <label style="font-size:0.8rem;color:#6b7280;display:block;margin-bottom:3px">Desde</label>
+                            <input type="date" id="pnlDesde">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem;color:#6b7280;display:block;margin-bottom:3px">Hasta</label>
+                            <input type="date" id="pnlHasta">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empresa -->
+                <div class="panel-section">
+                    <span class="section-title">🏢 Empresa</span>
+                    <select id="pnlEmpresa">
+                        <option value="">— Todas las empresas —</option>
+                    </select>
+                </div>
+
+                <!-- Centro de operación -->
+                <div class="panel-section">
+                    <span class="section-title">📍 Centro de operación</span>
+                    <select id="pnlCentro">
+                        <option value="">— Todos los centros —</option>
+                    </select>
+                </div>
+
+                <!-- Tipos de documento -->
+                <div class="panel-section" id="pnlTiposSection">
+                    <span class="section-title">📂 Tipos de documento</span>
+                    <button class="btn-select-all" onclick="toggleSeleccionTipos()">Seleccionar / Deseleccionar todos</button>
+                    <div class="checkbox-grid" id="pnlTiposGrid">
+                        <!-- Se puebla dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Resultados dentro del panel -->
+                <div id="panelResultados"></div>
+            </div>
+            <div class="panel-footer">
+                <button class="btn-pv btn-pv-green" onclick="ejecutarVerificacion()">📊 Ver Reporte de Consecutivos</button>
+                <button class="btn-pv btn-pv-yellow" onclick="ejecutarExportacion()">📥 Exportar a Excel</button>
+                <button class="btn-pv btn-pv-cancel" onclick="limpiarFiltrosPanel()" title="Restablecer todos los filtros">🗑️ Limpiar filtros</button>
+                <button class="btn-pv btn-pv-cancel" onclick="cerrarPanel()">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         $(document).ready(function() {
-            // ✅ PASO 1: ESTABLECER FECHAS POR DEFECTO
-            const hoy = new Date();
-            const anio = hoy.getFullYear();
-            const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-            const dia = String(hoy.getDate()).padStart(2, '0');
-            
-            // Primer día del mes actual
-            document.getElementById('fechaDesde').value = `${anio}-${mes}-01`;
-            // Día actual
-            document.getElementById('fechaHasta').value = `${anio}-${mes}-${dia}`;
+            // ✅ PASO 1: ESTABLECER FECHAS (restaurar desde URL o usar valores por defecto)
+            const desdeFlask = '{{ fecha_desde }}';
+            const hastaFlask = '{{ fecha_hasta }}';
+            const filtroFlask = '{{ filtro }}';
+
+            if (desdeFlask) {
+                document.getElementById('fechaDesde').value = desdeFlask;
+            } else {
+                const hoy = new Date();
+                const anio = hoy.getFullYear();
+                const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+                document.getElementById('fechaDesde').value = `${anio}-${mes}-01`;
+            }
+
+            if (hastaFlask) {
+                document.getElementById('fechaHasta').value = hastaFlask;
+            } else {
+                const hoy = new Date();
+                const anio = hoy.getFullYear();
+                const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+                const dia = String(hoy.getDate()).padStart(2, '0');
+                document.getElementById('fechaHasta').value = `${anio}-${mes}-${dia}`;
+            }
+
+            if (filtroFlask) {
+                document.getElementById('buscar').value = filtroFlask;
+            }
             
             // ✅ PASO 2: INICIALIZAR DATATABLE
             $('#docsTable').DataTable({
@@ -279,19 +439,290 @@
             });
         });
 
-        // ✅ FUNCIÓN DE FILTRADO (SI EXISTE EN EL BACKEND)
+        // ✅ FUNCIÓN DE FILTRADO — Navega al backend con los parámetros seleccionados
         function filtrarTabla() {
-            const buscar = document.getElementById('buscar').value;
+            const buscar = document.getElementById('buscar').value.trim();
             const desde = document.getElementById('fechaDesde').value;
             const hasta = document.getElementById('fechaHasta').value;
-            
-            console.log('🔍 Filtrar:', { buscar, desde, hasta });
-            // TODO: Implementar lógica de filtrado con backend
-            alert('Filtrado: ' + buscar + '\nDesde: ' + desde + '\nHasta: ' + hasta);
+
+            const params = new URLSearchParams();
+            if (buscar) params.append('filtro', buscar);
+            if (desde)  params.append('desde', desde);
+            if (hasta)  params.append('hasta', hasta);
+
+            window.location.href = '/archivo_digital/visor?' + params.toString();
         }
 
-        // ✅ VERIFICACIÓN DE CONSECUTIVOS MEJORADA - SIEMPRE GENERA EXCEL COMPLETO
-        async function verificarConsecutivos() {
+        // ─── PANEL FLOTANTE: ABRIR ───────────────────────────────────────────────
+        function abrirPanelConsecutivos() {
+            // Pre-llenar fechas desde la barra de filtros
+            const desdeVal = document.getElementById('fechaDesde').value;
+            const hastaVal = document.getElementById('fechaHasta').value;
+            if (desdeVal) document.getElementById('pnlDesde').value = desdeVal;
+            if (hastaVal) document.getElementById('pnlHasta').value = hastaVal;
+
+            // Extraer valores únicos de empresa, centro y tipo desde la DataTable completa
+            const tabla = $('#docsTable').DataTable();
+            const filas = tabla.rows().data().toArray();
+
+            const empresas = new Set(), centros = new Set(), tipos = new Set();
+            filas.forEach((fila, idx) => {
+                empresas.add(tabla.cell(idx, 2).data().replace(/<[^>]*>/g, '').trim());
+                centros.add(tabla.cell(idx, 3).data().replace(/<[^>]*>/g, '').trim());
+                tipos.add(tabla.cell(idx, 4).data().replace(/<[^>]*>/g, '').trim());
+            });
+
+            // Puebla empresa
+            const selEmp = document.getElementById('pnlEmpresa');
+            selEmp.innerHTML = '<option value="">— Todas las empresas —</option>';
+            [...empresas].sort().forEach(e => {
+                if (e) selEmp.innerHTML += `<option value="${e}">${e}</option>`;
+            });
+            // Preseleccionar empresa si hay filtro activo de URL
+            const urlEmp = new URLSearchParams(window.location.search).get('empresa');
+            if (urlEmp) selEmp.value = urlEmp;
+
+            // Puebla centro
+            const selCentro = document.getElementById('pnlCentro');
+            selCentro.innerHTML = '<option value="">— Todos los centros —</option>';
+            [...centros].sort().forEach(c => {
+                if (c) selCentro.innerHTML += `<option value="${c}">${c}</option>`;
+            });
+
+            // Puebla checkboxes de tipos
+            const grid = document.getElementById('pnlTiposGrid');
+            grid.innerHTML = '';
+            [...tipos].sort().forEach(t => {
+                if (!t) return;
+                const label = document.createElement('label');
+                label.className = 'check-chip';
+                label.innerHTML = `<input type="checkbox" value="${t}" checked> ${t}`;
+                grid.appendChild(label);
+            });
+
+            // Limpiar resultados previos
+            const res = document.getElementById('panelResultados');
+            res.style.display = 'none';
+            res.innerHTML = '';
+
+            document.getElementById('panelOverlay').classList.add('active');
+        }
+
+        function cerrarPanel() {
+            document.getElementById('panelOverlay').classList.remove('active');
+        }
+
+        function cerrarPanelSiFuera(event) {
+            if (event.target.id === 'panelOverlay') cerrarPanel();
+        }
+
+        function toggleSeleccionTipos() {
+            const checks = document.querySelectorAll('#pnlTiposGrid input[type="checkbox"]');
+            const allChecked = [...checks].every(c => c.checked);
+            checks.forEach(c => { c.checked = !allChecked; });
+        }
+
+        // ─── OBTENER FILAS FILTRADAS POR LOS CRITERIOS DEL PANEL ─────────────────
+        function obtenerFilasFiltradas() {
+            const pDesde  = document.getElementById('pnlDesde').value;
+            const pHasta  = document.getElementById('pnlHasta').value;
+            const pEmp    = document.getElementById('pnlEmpresa').value;
+            const pCentro = document.getElementById('pnlCentro').value;
+            const tiposChk = [...document.querySelectorAll('#pnlTiposGrid input[type="checkbox"]:checked')]
+                             .map(c => c.value);
+
+            if (!pDesde || !pHasta) {
+                alert('⚠️ Selecciona un rango de fechas');
+                return null;
+            }
+            if (tiposChk.length === 0) {
+                alert('⚠️ Selecciona al menos un tipo de documento');
+                return null;
+            }
+
+            const dDesde = new Date(pDesde + 'T00:00:00');
+            const dHasta = new Date(pHasta + 'T23:59:59');
+
+            const tabla = $('#docsTable').DataTable();
+            const filas = tabla.rows().data().toArray();
+
+            const resultado = [];
+            filas.forEach((fila, idx) => {
+                const empresa  = tabla.cell(idx, 2).data().replace(/<[^>]*>/g, '').trim();
+                const centro   = tabla.cell(idx, 3).data().replace(/<[^>]*>/g, '').trim();
+                const tipo     = tabla.cell(idx, 4).data().replace(/<[^>]*>/g, '').trim();
+                const consec   = parseInt(tabla.cell(idx, 5).data()) || 0;
+                const adjuntos = tabla.cell(idx, 6).data();
+                const fechaCreStr = tabla.cell(idx, 7).data();
+                const fechaDocStr = tabla.cell(idx, 8).data();
+                const usuario  = tabla.cell(idx, 9).data();
+                const nombre   = tabla.cell(idx, 1).data().replace(/<[^>]*>/g, '').trim();
+
+                // Filtro empresa
+                if (pEmp && empresa !== pEmp) return;
+                // Filtro centro
+                if (pCentro && centro !== pCentro) return;
+                // Filtro tipo
+                if (!tiposChk.includes(tipo)) return;
+                // Filtro fecha
+                const partesFecha = fechaDocStr ? fechaDocStr.split('/') : null;
+                if (partesFecha && partesFecha.length === 3) {
+                    const fDoc = new Date(`${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}T12:00:00`);
+                    if (fDoc < dDesde || fDoc > dHasta) return;
+                }
+
+                resultado.push({ nombre, empresa, centro, tipo, consec, adjuntos, fechaCreStr, fechaDocStr, usuario });
+            });
+            return resultado;
+        }
+
+        // ─── MOSTRAR REPORTE DE CONSECUTIVOS DENTRO DEL PANEL ───────────────────
+        function ejecutarVerificacion() {
+            const docs = obtenerFilasFiltradas();
+            if (!docs) return;
+
+            const pDesde = document.getElementById('pnlDesde').value;
+            const pHasta = document.getElementById('pnlHasta').value;
+
+            if (docs.length === 0) {
+                const res = document.getElementById('panelResultados');
+                res.style.display = 'block';
+                res.innerHTML = '<p style="color:#6b7280;text-align:center">⚠️ No se encontraron documentos con los filtros aplicados.</p>';
+                return;
+            }
+
+            // Agrupar por tipo
+            const porTipo = {};
+            docs.forEach(d => {
+                if (!porTipo[d.tipo]) porTipo[d.tipo] = [];
+                porTipo[d.tipo].push(d.consec);
+            });
+
+            let html = `<p style="color:#6b7280;font-size:0.8rem;margin-bottom:10px">
+                Periodo: <b>${pDesde}</b> → <b>${pHasta}</b> &nbsp;|&nbsp; ${docs.length} documentos filtrados</p>`;
+
+            for (const [tipo, consecutivos] of Object.entries(porTipo).sort()) {
+                const ord = consecutivos.filter(n => !isNaN(n)).sort((a,b) => a-b);
+                if (ord.length === 0) continue;
+                const min = ord[0], max = ord[ord.length - 1];
+                html += `<div class="res-tipo">
+                    <h4>📄 ${tipo}</h4>
+                    <div style="font-size:0.82rem;color:#374151">
+                        Rango: <b>${min}</b>–<b>${max}</b> &nbsp;|&nbsp; <b>${ord.length}</b> documentos encontrados
+                    </div>
+                    <div style="font-size:0.8rem;color:#6b7280;margin-top:3px">
+                        Consecutivos: ${ord.join(', ')}
+                    </div>`;
+                html += '</div>';
+            }
+
+            const res = document.getElementById('panelResultados');
+            res.style.display = 'block';
+            res.innerHTML = html;
+            res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // ─── EXPORTAR EXCEL FILTRADO ─────────────────────────────────────────────
+        async function ejecutarExportacion() {
+            const docs = obtenerFilasFiltradas();
+            if (!docs) return;
+
+            const pDesde = document.getElementById('pnlDesde').value;
+            const pHasta = document.getElementById('pnlHasta').value;
+
+            if (docs.length === 0) {
+                alert('⚠️ No hay documentos con los filtros seleccionados.');
+                return;
+            }
+
+            docs.sort((a, b) => a.tipo.localeCompare(b.tipo) || a.consec - b.consec);
+
+            const workbook = new ExcelJS.Workbook();
+            workbook.creator = 'Gestor Documental';
+            workbook.created = new Date();
+
+            const ws = workbook.addWorksheet('Documentos');
+
+            // Columnas (mismos campos que la tabla)
+            ws.columns = [
+                { header: 'Nombre del Archivo',  key: 'nombre',   width: 32 },
+                { header: 'Empresa',             key: 'empresa',  width: 14 },
+                { header: 'Centro de Operación', key: 'centro',   width: 22 },
+                { header: 'Tipo',                key: 'tipo',     width: 10 },
+                { header: 'Consecutivo',         key: 'consec',   width: 14 },
+                { header: 'Adjuntos',            key: 'adjuntos', width: 11 },
+                { header: 'Fecha Creación',      key: 'fechaCre', width: 16 },
+                { header: 'Fecha Documento',     key: 'fechaDoc', width: 16 },
+                { header: 'Usuario',             key: 'usuario',  width: 14 },
+            ];
+
+            // Datos
+            docs.forEach(d => ws.addRow({
+                nombre:   d.nombre,
+                empresa:  d.empresa,
+                centro:   d.centro,
+                tipo:     d.tipo,
+                consec:   d.consec,
+                adjuntos: parseInt(d.adjuntos) || 0,
+                fechaCre: d.fechaCreStr,
+                fechaDoc: d.fechaDocStr,
+                usuario:  d.usuario,
+            }));
+
+            // ── Estilo encabezado: negrita + fondo morado suave ──
+            const headerRow = ws.getRow(1);
+            headerRow.height = 22;
+            headerRow.eachCell(cell => {
+                cell.font      = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 };
+                cell.fill      = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF7C3AED' } };
+                cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: false };
+                cell.border    = { bottom: { style: 'medium', color: { argb: 'FF5B21B6' } } };
+            });
+
+            // ── Fila superior fija (freeze) ──
+            ws.views = [{ state: 'frozen', xSplit: 0, ySplit: 1, activeCell: 'A2' }];
+
+            // ── Descargar ──
+            const buffer = await workbook.xlsx.writeBuffer();
+            const blob   = new Blob([buffer], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            });
+            const link = document.createElement('a');
+            link.href  = URL.createObjectURL(blob);
+            const fecha = new Date().toISOString().split('T')[0];
+            link.download = `DocumentosContables_${pDesde}_${pHasta}_${fecha}.xlsx`;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // ── Limpiar todos los filtros del panel ──────────────────────────────────
+        function limpiarFiltrosPanel() {
+            // Restablecer fechas al mes actual
+            const hoy = new Date();
+            const anio = hoy.getFullYear();
+            const mes  = String(hoy.getMonth() + 1).padStart(2, '0');
+            const ultimoDia = new Date(anio, hoy.getMonth() + 1, 0).getDate();
+            document.getElementById('pnlDesde').value = `${anio}-${mes}-01`;
+            document.getElementById('pnlHasta').value = `${anio}-${mes}-${String(ultimoDia).padStart(2, '0')}`;
+            // Empresa y centro → "todos"
+            document.getElementById('pnlEmpresa').value  = '';
+            document.getElementById('pnlCentro').value   = '';
+            // Tipos → todos marcados
+            document.querySelectorAll('#pnlTiposGrid input[type="checkbox"]')
+                    .forEach(c => { c.checked = true; });
+            // Limpiar resultados previos
+            const res = document.getElementById('panelResultados');
+            res.style.display = 'none';
+            res.innerHTML = '';
+        }
+
+        // Alias para compatibilidad con llamadas antiguas
+        function verificarConsecutivos() { abrirPanelConsecutivos(); }
+
+        // LEGACY - función original (conservada por referencia)
+        async function verificarConsecutivosLegacy() {
             const desde = document.getElementById('fechaDesde').value;
             const hasta = document.getElementById('fechaHasta').value;
             

@@ -63,7 +63,8 @@ def visor_documentos():
     
     if fecha_hasta:
         try:
-            fecha_hasta_obj = datetime.strptime(fecha_hasta, '%Y-%m-%d')
+            # Incluir el día completo (hasta las 23:59:59)
+            fecha_hasta_obj = datetime.strptime(fecha_hasta, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
             query = query.filter(DocumentoContable.fecha_documento <= fecha_hasta_obj)
         except ValueError:
             pass
