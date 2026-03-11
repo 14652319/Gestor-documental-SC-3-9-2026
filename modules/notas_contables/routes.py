@@ -22,10 +22,19 @@ notas_bp = Blueprint('notas_contables', __name__, url_prefix='/api/notas')
 
 # Configuración de archivos
 ALLOWED_EXTENSIONS_PDF = {'pdf'}
-ALLOWED_EXTENSIONS_ADJUNTOS = {'pdf', 'xlsx', 'xls', 'jpg', 'jpeg', 'png'}
-MAX_FILE_SIZE = 25 * 1024 * 1024  # 25 MB
+ALLOWED_EXTENSIONS_ADJUNTOS = {'pdf'}  # Solo PDF para adjuntos
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
+
+MESES_ES = {
+    1: 'ENERO', 2: 'FEBRERO', 3: 'MARZO', 4: 'ABRIL',
+    5: 'MAYO', 6: 'JUNIO', 7: 'JULIO', 8: 'AGOSTO',
+    9: 'SEPTIEMBRE', 10: 'OCTUBRE', 11: 'NOVIEMBRE', 12: 'DICIEMBRE'
+}
 
 # Ruta base de documentos (configurar en .env)
+# Se lee dinámicamente para tomar el valor cargado por Flask al iniciar
+def get_base_dir():
+    return os.environ.get('BASE_DIR_DOCUMENTOS', 'D:/DOCUMENTOS_CONTABLES')
 BASE_DIR_DOCUMENTOS = os.environ.get('BASE_DIR_DOCUMENTOS', 'D:/DOCUMENTOS_CONTABLES')
 
 # =====================================================
@@ -50,8 +59,8 @@ def allowed_file(filename, allowed_extensions):
 
 def crear_carpeta_documento(empresa, ano, mes, tipo_siglas, co_codigo, consecutivo):
     """
-    Crea la estructura de carpetas: BASE_DIR/EMPRESA/AÑO/MES/CO/TIPO/CO-TIPO-CONSECUTIVO/
-    Ejemplo: D:/DOCUMENTOS_CONTABLES/SC/2025/08/002/NOC/002-NOC-00000001/
+    Crea la estructura de carpetas: BASE_DIR/ARCHIVO_DIGITAL/EMPRESA/AÑO/MES/CO/TIPO/CO-TIPO-CONSECUTIVO/
+    Ejemplo: RESPLADOS/ARCHIVO_DIGITAL/SC/2026/3. MARZO/001/NOC/001-NOC-00000001/
     Retorna la ruta completa de la carpeta creada
     """
     try:
@@ -61,15 +70,15 @@ def crear_carpeta_documento(empresa, ano, mes, tipo_siglas, co_codigo, consecuti
         # Construir nombre de carpeta final: CO-TIPO-CONSECUTIVO
         nombre_carpeta = f"{co_codigo}-{tipo_siglas}-{consecutivo_formateado}"
         
-        # Construir ruta: SC/2025/08/002/NOC/002-NOC-00000001/
+        # Construir ruta: ARCHIVO_DIGITAL/SC/2026/001/NOC/001-NOC-00000001/
         ruta = os.path.join(
-            BASE_DIR_DOCUMENTOS,
+            get_base_dir(),
+            'ARCHIVO_DIGITAL',          # Carpeta raíz del módulo
             empresa,                    # SC o LG
-            str(ano),                   # 2025
-            str(mes).zfill(2),         # 08
-            co_codigo,                  # 002
+            str(ano),                   # 2026
+            co_codigo,                  # 001
             tipo_siglas,                # NOC
-            nombre_carpeta              # 002-NOC-00000001
+            nombre_carpeta              # 001-NOC-00000001
         )
         
         # Crear carpetas si no existen
@@ -96,13 +105,17 @@ def validar_consecutivo():
         tipo_id = data.get('tipo_documento_id')
         centro_id = data.get('centro_operacion_id')
         consecutivo = data.get('consecutivo', '').zfill(8)  # Auto-padding
+        empresa = data.get('empresa', '')
         
-        # Buscar documento con mismo tipo, C.O. y consecutivo
-        documento_existente = DocumentoContable.query.filter_by(
+        # Buscar documento con mismo tipo, C.O., consecutivo Y empresa
+        query = DocumentoContable.query.filter_by(
             tipo_documento_id=tipo_id,
             centro_operacion_id=centro_id,
             consecutivo=consecutivo
-        ).first()
+        )
+        if empresa:
+            query = query.filter_by(empresa=empresa)
+        documento_existente = query.first()
         
         if documento_existente:
             # Compatibilidad: siempre 200 y exponer 'disponible' para el frontend y tests
@@ -256,11 +269,12 @@ def subir_documento():
                 'message': 'Tipo de documento o centro de operación no encontrado'
             }), 404
         
-        # Validar consecutivo único
+        # Validar consecutivo único (por empresa + tipo + C.O. + consecutivo)
         if DocumentoContable.query.filter_by(
             tipo_documento_id=tipo_id,
             centro_operacion_id=centro_id,
-            consecutivo=consecutivo
+            consecutivo=consecutivo,
+            empresa=empresa
         ).first():
             return jsonify({
                 'success': False,
@@ -508,7 +522,7 @@ def visualizar_documento(documento_id):
         
         # Construir ruta completa: nombre_archivo en BD NO tiene .pdf, agregarlo
         nombre_archivo_con_extension = f"{documento.nombre_archivo}.pdf"
-        base_dir = "D:/DOCUMENTOS_CONTABLES"
+        base_dir = get_base_dir()
         ruta_completa = os.path.join(base_dir, documento.ruta_archivo, nombre_archivo_con_extension)
         
         if not os.path.exists(ruta_completa):
@@ -920,8 +934,8 @@ def visualizar_adjunto(adjunto_id):
                 'message': 'Adjunto no encontrado'
             }), 404
         
-        base_dir = "D:/DOCUMENTOS_CONTABLES"
-        ruta_completa = os.path.join(base_dir, adjunto.ruta_archivo)
+        base_dir = get_base_dir()
+        ruta_completa = os.path.join(adjunto.ruta_archivo, adjunto.nombre_archivo)
         
         if not os.path.exists(ruta_completa):
             return jsonify({
@@ -1218,17 +1232,18 @@ def agregar_adjuntos_adicionales(documento_id):
                 continue
             
             # ✅ USAR NOMBRE PERSONALIZADO SI EXISTE
+            # Convención: {nombre_documento}_ANEXO_{etiqueta}.{ext}
             if idx < len(nombres_personalizados) and nombres_personalizados[idx]:
-                nombre_personalizado = secure_filename(nombres_personalizados[idx])
-                # Asegurar extensión correcta
-                if not nombre_personalizado.endswith(f'.{extension}'):
-                    nombre_personalizado = f"{nombre_personalizado}.{extension}"
-                nombre_final = nombre_personalizado
+                etiqueta_raw = nombres_personalizados[idx]
+                # Quitar extensión si el usuario la incluyó accidentalmente
+                etiqueta_sin_ext = etiqueta_raw.rsplit('.', 1)[0] if '.' in etiqueta_raw else etiqueta_raw
+                etiqueta_segura = secure_filename(etiqueta_sin_ext).upper()
+                nombre_final = f"{documento.nombre_archivo}_ANEXO_{etiqueta_segura}.{extension}"
             else:
                 # Nombre por defecto con timestamp
-                nombre_base = secure_filename(archivo.filename)
+                nombre_base = secure_filename(archivo.filename.rsplit('.', 1)[0])
                 timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-                nombre_final = f"{documento.nombre_archivo}_ANEXO_{timestamp}_{nombre_base}"
+                nombre_final = f"{documento.nombre_archivo}_ANEXO_{timestamp}_{nombre_base}.{extension}"
             
             ruta_completa = os.path.join(ruta_carpeta, nombre_final)
             
@@ -1782,13 +1797,10 @@ def validar_correccion_documento(token_id):
             centro = CentroOperacion.query.get(documento.centro_operacion_id)
             
             # Base de datos
-            base_dir = "D:/DOCUMENTOS_CONTABLES"
+            base_dir = get_base_dir()
             
-            # Obtener año y mes
-            import datetime
-            fecha_creacion = documento.created_at or obtener_fecha_naive_colombia()
-            año = str(fecha_creacion.year)
-            mes = str(fecha_creacion.month).zfill(2)
+            # Obtener año desde la fecha del documento
+            año = str(documento.fecha_documento.year)
             
             # NUEVO NOMBRE BASE (nombre de la carpeta nueva)
             nuevo_nombre_base = f"{centro.codigo}-{tipo_doc.siglas}-{documento.consecutivo.zfill(8)}"
@@ -1800,7 +1812,7 @@ def validar_correccion_documento(token_id):
             # ============================================================================
             # PASO 1: CREAR LA CARPETA NUEVA CON EL NOMBRE PRINCIPAL
             # ============================================================================
-            directorio_tipo = os.path.join(base_dir, empresa.sigla, año, mes, centro.codigo, tipo_doc.siglas)
+            directorio_tipo = os.path.join(base_dir, 'ARCHIVO_DIGITAL', empresa.sigla, año, centro.codigo, tipo_doc.siglas)
             nuevo_directorio = os.path.join(directorio_tipo, nuevo_nombre_base)
             
             print(f"\n📁 PASO 1: CREAR CARPETA NUEVA")
@@ -1907,10 +1919,7 @@ def validar_correccion_documento(token_id):
                     
                     if adjunto_bd:
                         adjunto_bd.nombre_archivo = nombre_anexo_nuevo
-                        adjunto_bd.ruta_archivo = os.path.join(
-                            empresa.sigla, año, mes, centro.codigo, tipo_doc.siglas,
-                            nuevo_nombre_base, nombre_anexo_nuevo
-                        ).replace('\\', '/')
+                        adjunto_bd.ruta_archivo = nuevo_directorio
                         print(f"   💾 BD actualizada")
                     else:
                         print(f"   ⚠️ No se encontró registro en BD (archivo huérfano)")
@@ -1923,9 +1932,7 @@ def validar_correccion_documento(token_id):
             # PASO 4: ACTUALIZAR BASE DE DATOS DEL DOCUMENTO PRINCIPAL
             # ============================================================================
             print(f"\n💾 PASO 4: ACTUALIZAR BASE DE DATOS")
-            documento.ruta_archivo = os.path.join(
-                empresa.sigla, año, mes, centro.codigo, tipo_doc.siglas, nuevo_nombre_base
-            ).replace('\\', '/')
+            documento.ruta_archivo = nuevo_directorio
             documento.nombre_archivo = nuevo_nombre_base
             print(f"   ✅ BD del documento actualizada")
             
@@ -2095,11 +2102,11 @@ def validar_correccion_documento(token_id):
 
 📄 DOCUMENTO:
    ID: {documento.id}
-   Nombre original: {valores_anteriores['nombre_base']}
+   Nombre original: {valores_anteriores['nombre_archivo']}
    Nombre final: {documento.nombre_archivo}
    
 📁 RUTAS:
-   Ruta original: {valores_anteriores['ruta_original']}
+   Ruta original: {valores_anteriores['ruta']}
    Ruta final: {documento.ruta_archivo}
 
 🔄 CAMBIOS APLICADOS:
@@ -2107,7 +2114,7 @@ def validar_correccion_documento(token_id):
    Tipo: {valores_anteriores['tipo_documento_id']} → {documento.tipo_documento_id}
    Centro: {valores_anteriores['centro_operacion_id']} → {documento.centro_operacion_id}
    Consecutivo: {valores_anteriores['consecutivo']} → {documento.consecutivo}
-   Fecha expedición: {valores_anteriores['fecha_expedicion']} → {documento.fecha_expedicion}
+   Fecha expedición: {valores_anteriores['fecha_documento']} → {documento.fecha_documento}
 
 📎 ADJUNTOS MODIFICADOS: {len(adjuntos_bd)} archivo(s)
 """

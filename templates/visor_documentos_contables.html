@@ -19,148 +19,292 @@
             --red-error: #dc2626;
         }
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
         body {
             font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #dcfce7, #fefce8, #dbeafe);
-            min-height: 100vh;
-            padding: 20px;
+            background: #f0fdf4;
+            padding: 12px;
         }
+
+        /* ─── CONTENEDOR ─── */
         .container {
-            max-width: 1400px;
+            max-width: 1440px;
+            height: calc(100vh - 24px);
             margin: 0 auto;
             background: white;
-            border-radius: 12px;
+            border-radius: 14px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+            display: flex;
+            flex-direction: column;
         }
-        /* 🎨 HEADER VERDE (Nuevo) */
+
+        /* ─── HEADER ─── */
         .module-header {
-            background: linear-gradient(135deg, var(--brand-green), var(--brand-green-dark));
+            background: linear-gradient(135deg, var(--brand-green-dark) 0%, var(--brand-green) 100%);
             color: white;
-            padding: 20px 25px;
+            padding: 14px 24px;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 12px;
+            border-bottom: 3px solid var(--brand-yellow);
         }
+        .module-header-left { display: flex; align-items: center; gap: 12px; }
         .module-header h1 {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 700;
             margin: 0;
             color: white;
+            letter-spacing: -0.01em;
         }
-        .module-content {
-            padding: 20px;
+        .header-user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
         }
-        h1 {
+        .header-user-info span.sep { opacity: 0.4; }
+        .module-content { padding: 0; }
+        h1 { color: var(--brand-green-dark); }
+
+        /* ─── BARRA DE HERRAMIENTAS ─── */
+        .toolbar-wrap {
+            padding: 12px 20px;
+            background: white;
+            border-bottom: 2px solid #e5e7eb;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        .toolbar {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .user-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #dcfce7;
             color: var(--brand-green-dark);
-            margin-bottom: 20px;
+            font-weight: 700;
+            font-size: 0.82rem;
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: 1.5px solid #86efac;
+            white-space: nowrap;
+        }
+        .search-input {
+            padding: 7px 12px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.88rem;
+            width: 200px;
+            background: #fafafa;
+            transition: all 0.15s;
+        }
+        .search-input:focus {
+            outline: none;
+            border-color: var(--brand-green);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(22,163,74,0.12);
+        }
+        input[type="date"] {
+            padding: 7px 10px;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            background: #fafafa;
+            transition: all 0.15s;
+        }
+        input[type="date"]:focus {
+            outline: none;
+            border-color: var(--brand-green);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(22,163,74,0.12);
+        }
+        .toolbar-sep {
+            width: 1px; height: 28px;
+            background: #e5e7eb;
+            margin: 0 2px;
+        }
+
+        /* ─── BOTONES ─── */
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.86rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .btn-primary  { background: var(--brand-yellow); color: var(--brand-green-dark); }
+        .btn-primary:hover  { background: #fbbf24; box-shadow: 0 2px 8px rgba(234,179,8,0.38); }
+        .btn-secondary { background: var(--brand-green-dark); color: white; }
+        .btn-secondary:hover { background: #14532d; box-shadow: 0 2px 8px rgba(22,101,52,0.35); }
+        .btn-warn  { background: #dc2626; color: white; }
+        .btn-warn:hover  { background: #b91c1c; box-shadow: 0 2px 8px rgba(220,38,38,0.30); }
+        .btn:disabled { opacity: 0.45; cursor: not-allowed; box-shadow: none !important; }
+
+        /* ─── BARRA DE SELECCIÓN ─── */
+        .selection-bar {
+            padding: 8px 20px;
+            background: #f8fafc;
+            border-bottom: 1px solid #e5e7eb;
             display: flex;
             align-items: center;
             gap: 10px;
         }
-        .toolbar {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .btn {
-            padding: 10px 16px;
-            border: none;
-            border-radius: 8px;
+        .selection-bar label {
+            font-size: 0.84rem;
             font-weight: 600;
+            color: #4b5563;
+            display: flex;
+            align-items: center;
+            gap: 6px;
             cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
         }
-        .btn-primary { background: #facc15; color: #166534; }
-        .btn-secondary { background: #166534; color: white; }
-        .btn-warn { background: #dc2626; color: white; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        input[type="text"], input[type="date"] {
-            padding: 10px;
-            border: 1px solid #d1d5db;
+
+        /* ─── ÁREA DE TABLA ─── */
+        .table-area { padding: 0 20px 10px; }
+        .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+        /* Ocultar scrollbar redundante del contenedor externo cuando DataTables activa su propio scroll */
+        .dataTables_scrollBody::-webkit-scrollbar { width: 7px; }
+        .dataTables_scrollBody::-webkit-scrollbar-track { background: #f1f5f9; }
+        .dataTables_scrollBody::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+        .dataTables_scrollBody::-webkit-scrollbar-thumb:hover { background: var(--brand-green); }
+        /* Solo DataTables tiene scroll vertical interno */
+
+        /* ─── OVERRIDE DATATABLES: ENCABEZADOS VERDES ─── */
+        table.dataTable thead th,
+        .dataTables_scrollHead table thead th {
+            background: linear-gradient(180deg, var(--brand-green-dark) 0%, #1a7a3e 100%) !important;
+            color: white !important;
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            padding: 11px 12px;
+            border-right: 1px solid rgba(255,255,255,0.12) !important;
+            border-bottom: 3px solid var(--brand-yellow) !important;
+            white-space: nowrap;
+        }
+        table.dataTable thead .sorting:after,
+        table.dataTable thead .sorting_asc:after,
+        table.dataTable thead .sorting_desc:after { color: rgba(255,255,255,0.65) !important; }
+        table.dataTable.no-footer { border-bottom: 1px solid #e5e7eb !important; }
+        .dataTables_scrollHead { border-radius: 8px 8px 0 0; overflow: hidden; }
+        .dataTables_scrollBody { border: none !important; }
+
+        /* Filas alternas */
+        #docsTable tbody tr:nth-child(even) { background: #f8fffe; }
+        #docsTable tbody tr:nth-child(odd)  { background: #ffffff; }
+        #docsTable tbody tr:hover           { background: #ecfdf5 !important; cursor: pointer; }
+        #docsTable tbody td {
+            padding: 9px 12px;
+            font-size: 0.86rem;
+            color: #374151;
+            border-bottom: 1px solid #f0f0f0;
+            vertical-align: middle;
+        }
+
+        /* Paginación */
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            background: var(--brand-green) !important;
+            color: white !important;
+            border-color: var(--brand-green) !important;
+            border-radius: 6px;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+            background: #dcfce7 !important;
+            color: var(--brand-green-dark) !important;
+            border-color: #86efac !important;
+        }
+        .dataTables_wrapper .dataTables_info { font-size: 0.82rem; color: #6b7280; padding-top: 10px; }
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1.5px solid #e5e7eb;
             border-radius: 8px;
+            padding: 5px 10px;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+        }
+        .dataTables_wrapper .dataTables_filter input:focus {
+            outline: none; border-color: var(--brand-green);
+        }
+        .dataTables_wrapper .dataTables_length select {
+            border: 1.5px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 4px 6px;
             font-family: 'Inter', sans-serif;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        th {
-            background: #f3f4f6;
-            font-weight: 700;
-            color: #166534;
-        }
-        tr:hover {
-            background: #f9fafb;
-        }
+
+        /* ─── CHIPS ─── */
         .chip {
             display: inline-block;
-            padding: 4px 8px;
-            background: #e0e7ff;
-            border-radius: 4px;
-            font-size: 12px;
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
         }
-        
-        /* 📱 RESPONSIVE CSS (Nuevo) */
+        .chip-empresa { background: #d1fae5; color: #065f46; border: 1px solid #6ee7b7; }
+        .chip-tipo    { background: #ede9fe; color: #5b21b6; border: 1px solid #c4b5fd; }
+
+        /* ─── INFO PIE ─── */
+        .docs-info {
+            font-size: 0.82rem;
+            color: #6b7280;
+            padding: 8px 20px 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .docs-count {
+            background: var(--brand-green);
+            color: white;
+            font-weight: 700;
+            font-size: 0.75rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
         @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            .container {
-                border-radius: 8px;
-            }
-            .module-header {
-                padding: 15px;
-            }
-            .module-header h1 {
-                font-size: 1.2rem;
-            }
-            .module-content {
-                padding: 15px;
-            }
-            .toolbar {
-                flex-direction: column;
-                gap: 8px;
-            }
-            .toolbar form {
-                flex-direction: column;
-                width: 100%;
-            }
-            .toolbar input[type="text"],
-            .toolbar input[type="date"],
-            .toolbar .btn {
-                width: 100%;
-            }
-            /* Tabla responsive: scroll horizontal */
-            .table-wrapper {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-            }
-            table {
-                min-width: 800px; /* Forzar scroll en móviles */
-                font-size: 0.85rem;
-            }
-            th, td {
-                padding: 8px;
-            }
-            .chip {
-                font-size: 10px;
-                padding: 3px 6px;
-            }
+            body { padding: 8px; }
+            .container { border-radius: 10px; }
+            .module-header { padding: 14px 16px; }
+            .module-header h1 { font-size: 1.1rem; }
+            .toolbar-wrap { padding: 10px 14px; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .search-input { width: 100%; }
+            .toolbar-sep { display: none; }
+            .btn { justify-content: center; }
+            .table-area { padding: 0 12px 12px; }
         }
-        
         @media (max-width: 480px) {
             .module-header h1 { font-size: 1rem; }
-            .btn { padding: 8px 12px; font-size: 0.9rem; }
-            table { font-size: 0.8rem; }
+            .btn { font-size: 0.84rem; padding: 8px 12px; }
         }
 
         /* ─── PANEL FLOTANTE VERIFICAR / EXPORTAR ─── */
@@ -254,71 +398,87 @@
 </head>
 <body>
     <div class="container">
-        <!-- 🎨 HEADER VERDE (Nuevo) -->
+        <!-- 🎨 HEADER VERDE -->
         <div class="module-header">
-            <span style="font-size: 1.8rem;">📂</span>
-            <h1>Visor de Documentos Contables</h1>
+            <div class="module-header-left">
+                <span style="font-size:1.6rem;">📂</span>
+                <h1>Visor de Documentos Contables</h1>
+            </div>
+            <div class="header-user-info">
+                👤 {{ session.get('usuario', '') }}
+                <span class="sep">|</span>
+                NIT: {{ session.get('nit', '') }}
+            </div>
         </div>
         
         <!-- CONTENIDO -->
         <div class="module-content">
-                <div class="toolbar">
-            <span style="color: #166534; font-weight: 600;">👤 {{ session.get('usuario', '') }}</span>
-            <input type="text" id="buscar" placeholder="🔍 Buscar...">
-            <input type="date" id="fechaDesde">
-            <input type="date" id="fechaHasta">
-            <button class="btn btn-primary" onclick="filtrarTabla()">Filtrar</button>
-            <button class="btn btn-secondary" onclick="abrirPanelConsecutivos()">🔢 Verificar / Exportar</button>
-            <button class="btn btn-primary" onclick="window.location.href='/archivo_digital/cargar'">⬆️ Cargar</button>
-            <button class="btn btn-warn" onclick="window.location.href='/dashboard'">🏠 Volver al Menú</button>
-        </div>
 
-        <form method="post">
-            <div style="margin-bottom: 10px;">
-                <label><input id="checkAll" type="checkbox"> Seleccionar todo</label>
-                <button id="btnEditar" class="btn btn-secondary" type="button" disabled>✏️ Editar</button>
+            <!-- Barra de herramientas -->
+            <div class="toolbar-wrap">
+                <div class="toolbar">
+                    <input type="text" id="buscar" class="search-input" placeholder="Buscar...">
+                    <span class="toolbar-sep"></span>
+                    <input type="date" id="fechaDesde">
+                    <input type="date" id="fechaHasta">
+                    <button class="btn btn-primary" onclick="filtrarTabla()">🔍 Filtrar</button>
+                    <span class="toolbar-sep"></span>
+                    <button class="btn btn-secondary" onclick="abrirPanelConsecutivos()">🔢 Verificar / Exportar</button>
+                    <button class="btn btn-primary" onclick="window.location.href='/archivo_digital/cargar'">⬆️ Cargar</button>
+                    <button class="btn btn-warn" onclick="window.location.href='/dashboard'">🏠 Volver al Menú</button>
+                </div>
             </div>
-            
-            <!-- 📱 WRAPPER RESPONSIVE PARA TABLA (Nuevo) -->
-            <div class="table-wrapper">
-            <table id="docsTable">
-                <thead>
-                    <tr>
-                        <th></th>
-                        <th>Nombre</th>
-                        <th>Empresa</th>
-                        <th>C.O.</th>
-                        <th>Tipo</th>
-                        <th>Consecutivo</th>
-                        <th>Adjuntos</th>
-                        <th>Fecha Creación</th>
-                        <th>Fecha Documento</th>
-                        <th>Usuario</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for doc in documentos %}
-                    <tr>
-                        <td><input class="row-check" type="checkbox" value="{{ doc.id }}"></td>
-                        <td><strong>{{ doc.nombre_archivo }}</strong></td>
-                        <td><span class="chip">{{ doc.empresa if doc.empresa else 'N/A' }}</span></td>
-                        <td>{{ doc.centro_operacion.codigo if doc.centro_operacion else 'N/A' }}</td>
-                        <td><span class="chip">{{ doc.tipo_documento.siglas if doc.tipo_documento else 'N/A' }}</span></td>
-                        <td>{{ doc.consecutivo }}</td>
-                        <td>{{ doc.adjuntos|length if doc.adjuntos else 0 }}</td>
-                        <td>{{ doc.created_at.strftime('%d/%m/%Y') if doc.created_at else 'N/A' }}</td>
-                        <td>{{ doc.fecha_documento.strftime('%d/%m/%Y') if doc.fecha_documento else 'N/A' }}</td>
-                        <td>{{ doc.created_by }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            </div><!-- Cierre table-wrapper -->
-            
-            <p style="margin-top: 20px; color: #6b7280;">
-                Mostrando {{ documentos|length }} de {{ total_documentos }} documentos
-            </p>
-        </form>
+
+            <form method="post">
+                <!-- Barra de selección -->
+                <div class="selection-bar">
+                    <label><input id="checkAll" type="checkbox"> Seleccionar todo</label>
+                    <button id="btnEditar" class="btn btn-secondary" type="button" disabled>✏️ Editar</button>
+                </div>
+
+                <!-- Tabla -->
+                <div class="table-area">
+                    <div class="table-wrapper">
+                    <table id="docsTable">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>Nombre</th>
+                                <th>Empresa</th>
+                                <th>C.O.</th>
+                                <th>Tipo</th>
+                                <th>Consecutivo</th>
+                                <th>Adjuntos</th>
+                                <th>Fecha Creación</th>
+                                <th>Fecha Documento</th>
+                                <th>Usuario</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for doc in documentos %}
+                            <tr>
+                                <td><input class="row-check" type="checkbox" value="{{ doc.id }}"></td>
+                                <td><strong>{{ doc.nombre_archivo }}</strong></td>
+                                <td><span class="chip chip-empresa">{{ doc.empresa if doc.empresa else 'N/A' }}</span></td>
+                                <td>{{ doc.centro_operacion.codigo if doc.centro_operacion else 'N/A' }}</td>
+                                <td><span class="chip chip-tipo">{{ doc.tipo_documento.siglas if doc.tipo_documento else 'N/A' }}</span></td>
+                                <td>{{ doc.consecutivo }}</td>
+                                <td>{{ doc.adjuntos|length if doc.adjuntos else 0 }}</td>
+                                <td>{{ doc.created_at.strftime('%d/%m/%Y') if doc.created_at else 'N/A' }}</td>
+                                <td>{{ doc.fecha_documento.strftime('%d/%m/%Y') if doc.fecha_documento else 'N/A' }}</td>
+                                <td>{{ doc.created_by }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    </div><!-- Cierre table-wrapper -->
+                </div><!-- Cierre table-area -->
+
+                <div class="docs-info">
+                    <span class="docs-count">{{ total_documentos }}</span>
+                    Mostrando <b>{{ documentos|length }}</b> de <b>{{ total_documentos }}</b> documentos
+                </div>
+            </form>
         </div><!-- Cierre module-content -->
     </div><!-- Cierre container -->
 
@@ -417,7 +577,9 @@
             $('#docsTable').DataTable({
                 paging: true,
                 pageLength: 50,
-                language: { url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json" }
+                scrollY: 'calc(100vh - 310px)',
+                scrollCollapse: true,
+                language: { url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json' }
             });
 
             // ✅ PASO 3: CONTROLES DE SELECCIÓN

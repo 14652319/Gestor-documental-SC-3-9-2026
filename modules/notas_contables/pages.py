@@ -41,31 +41,35 @@ def visor_documentos():
     
     # Parámetros de filtrado
     filtro = request.args.get('filtro', '').strip()
-    fecha_desde = request.args.get('desde', '')
-    fecha_hasta = request.args.get('hasta', '')
     pagina = int(request.args.get('pagina', 1))
     por_pagina = int(request.args.get('por_pagina', 50))
-    
+
+    # Por defecto: primer día del mes en curso → hoy (mejora rendimiento)
+    hoy = datetime.today()
+    primer_dia_mes = hoy.replace(day=1).strftime('%Y-%m-%d')
+    fecha_desde = request.args.get('desde', primer_dia_mes)
+    fecha_hasta = request.args.get('hasta', hoy.strftime('%Y-%m-%d'))
+
     # Base query
     query = DocumentoContable.query
-    
+
     # Filtro de texto (busca en nombre_archivo)
     if filtro:
         query = query.filter(DocumentoContable.nombre_archivo.ilike(f'%{filtro}%'))
-    
-    # Filtro de fechas
+
+    # Filtro de fechas (por fecha de CARGA al sistema = created_at)
     if fecha_desde:
         try:
             fecha_desde_obj = datetime.strptime(fecha_desde, '%Y-%m-%d')
-            query = query.filter(DocumentoContable.fecha_documento >= fecha_desde_obj)
+            query = query.filter(DocumentoContable.created_at >= fecha_desde_obj)
         except ValueError:
             pass
-    
+
     if fecha_hasta:
         try:
             # Incluir el día completo (hasta las 23:59:59)
             fecha_hasta_obj = datetime.strptime(fecha_hasta, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
-            query = query.filter(DocumentoContable.fecha_documento <= fecha_hasta_obj)
+            query = query.filter(DocumentoContable.created_at <= fecha_hasta_obj)
         except ValueError:
             pass
     

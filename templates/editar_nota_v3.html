@@ -45,6 +45,7 @@
             display: flex;
             flex-direction: column;
             transition: background 0.3s;
+            overflow-x: hidden; /* ✅ evita scroll horizontal en móvil */
         }
 
         [data-theme="dark"] body {
@@ -126,6 +127,265 @@
             background: rgba(185, 28, 28, 1);
             transform: translateY(-2px);
         }
+
+        .btn-volver-listado {
+            background: rgba(37, 99, 235, 0.9);
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-volver-listado:hover {
+            background: rgba(29, 78, 216, 1);
+            transform: translateY(-2px);
+        }
+
+        .btn-anexos {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            box-shadow: 0 2px 6px rgba(245,158,11,0.35);
+        }
+
+        .btn-anexos:hover {
+            background: linear-gradient(135deg, #d97706, #b45309);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(245,158,11,0.45);
+        }
+
+        /* ===== MODAL ANEXOS ===== */
+        #modalAnexos {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .modal-anexos-box {
+            background: var(--white, #fff);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 92vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-anexos-header {
+            background: linear-gradient(135deg, #166534, #15803d);
+            color: white;
+            padding: 20px 24px 16px;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 3px solid #fbbf24;
+        }
+
+        .modal-anexos-header h3 {
+            margin: 0;
+            font-size: 1.1em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-anexos-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .modal-anexos-close:hover { background: rgba(255,255,255,0.35); }
+
+        .modal-anexos-body {
+            padding: 20px 24px;
+            flex: 1;
+        }
+
+        .modal-drop-zone {
+            border: 2.5px dashed #16a34a;
+            border-radius: 12px;
+            padding: 28px 20px;
+            text-align: center;
+            cursor: pointer;
+            background: #f0fdf4;
+            transition: all 0.25s;
+            margin-bottom: 16px;
+        }
+
+        .modal-drop-zone:hover,
+        .modal-drop-zone.drag-over {
+            background: #dcfce7;
+            border-color: #15803d;
+            transform: scale(1.01);
+        }
+
+        .modal-drop-zone .drop-icon { font-size: 2.8em; margin-bottom: 8px; }
+        .modal-drop-zone .drop-title { font-weight: 700; color: #166534; font-size: 0.95em; margin-bottom: 4px; }
+        .modal-drop-zone .drop-sub { color: #6b7280; font-size: 0.78em; }
+
+        .modal-btn-seleccionar {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #166534;
+            color: white;
+            border: none;
+            padding: 9px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85em;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .modal-btn-seleccionar:hover { background: #15803d; }
+
+        #listaArchivosModal { margin-bottom: 16px; }
+
+        .anexo-item-modal {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+
+        .anexo-badge {
+            color: white;
+            font-size: 0.65em;
+            font-weight: 800;
+            padding: 3px 7px;
+            border-radius: 5px;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+
+        .anexo-info-modal {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .anexo-nombre-input {
+            width: 100%;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.82em;
+            font-weight: 600;
+            color: #1e3a2e;
+            background: white;
+            transition: border-color 0.2s;
+        }
+
+        .anexo-nombre-input:focus {
+            outline: none;
+            border-color: #16a34a;
+            box-shadow: 0 0 0 3px rgba(22,163,74,0.15);
+        }
+
+        .anexo-remove-btn {
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+        .anexo-remove-btn:hover { background: #fca5a5; }
+
+        .modal-anexos-footer {
+            padding: 14px 24px 20px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        #notifModal {
+            display: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85em;
+            flex: 1;
+            text-align: center;
+        }
+
+        .modal-btn-cancelar {
+            background: #f3f4f6;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.88em;
+            transition: background 0.2s;
+        }
+        .modal-btn-cancelar:hover { background: #e5e7eb; }
+
+        .modal-btn-subir {
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.88em;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(22,163,74,0.3);
+        }
+        .modal-btn-subir:hover:not(:disabled) {
+            background: linear-gradient(135deg, #15803d, #166534);
+            transform: translateY(-1px);
+        }
+        .modal-btn-subir:disabled { opacity: 0.6; cursor: not-allowed; }
 
         /* =============================================
            LAYOUT PRINCIPAL: 3 COLUMNAS
@@ -616,7 +876,13 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
             height: 100%;
+            z-index: 5;
+            background: var(--gray-100);
         }
 
         .spinner {
@@ -636,23 +902,143 @@
         /* =============================================
            RESPONSIVE
            ============================================= */
+
+        /* --- Tablet landscape / pantallas medianas --- */
         @media (max-width: 1200px) {
             .main-container {
                 flex-direction: column;
+                overflow-y: auto;   /* ✅ Fix: contenido accesible al apilar */
+                overflow-x: hidden;
             }
-            
+
             .left-column,
             .center-column,
             .right-column {
                 flex: 1 1 100%;
                 max-width: 100%;
+                overflow-y: visible; /* columnas no hacen scroll interno, lo hace el contenedor */
             }
-            
+
             .center-column {
                 min-height: 500px;
             }
         }
+
+        /* --- Tablet portrait --- */
+        @media (max-width: 900px) {
+            .header {
+                padding: 12px 20px;
+            }
+
+            .header-left h1 {
+                font-size: 1.2em;
+            }
+
+            .header-right {
+                flex-wrap: wrap;
+                gap: 8px;
+                justify-content: flex-end;
+            }
+
+            .btn-volver-listado,
+            .btn-salir {
+                padding: 7px 14px;
+                font-size: 0.85em;
+            }
+
+            .user-info {
+                font-size: 0.82em;
+                padding: 6px 10px;
+            }
+
+            .center-column {
+                min-height: 420px;
+            }
+        }
+
+        /* --- Móvil --- */
+        @media (max-width: 600px) {
+            .header {
+                padding: 10px 12px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .header-left h1 {
+                font-size: 1em;
+            }
+
+            .breadcrumb {
+                font-size: 0.75em;
+            }
+
+            .header-right {
+                width: 100%;
+                justify-content: flex-start;
+            }
+
+            .user-info {
+                display: none; /* Ocultar en móvil para ahorrar espacio */
+            }
+
+            .main-container {
+                padding: 10px;
+                gap: 12px;
+            }
+
+            .card {
+                padding: 14px;
+            }
+
+            .card h3 {
+                font-size: 0.95em;
+            }
+
+            .btn-group {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .btn-group .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .center-column {
+                min-height: 350px;
+            }
+
+            .timeline {
+                max-height: 250px;
+            }
+
+            .thumbnails-wrapper {
+                max-width: 100%;
+            }
+        }
+
+        /* =============================================
+           VISOR PDF.js
+           ============================================= */
+        #pdfViewerContainer {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            overflow-y: auto;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 6px;
+            gap: 8px;
+            background: #525659;
+            scroll-behavior: smooth;
+        }
+        #pdfViewerContainer::-webkit-scrollbar { width: 8px; }
+        #pdfViewerContainer::-webkit-scrollbar-track { background: #3a3a3a; }
+        #pdfViewerContainer::-webkit-scrollbar-thumb { background: var(--brand-green); border-radius: 4px; }
     </style>
+    <!-- PDF.js CDN - evita AutoPrint embebido en PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body data-theme="light">
     <!-- HEADER -->
@@ -670,6 +1056,9 @@
             </div>
             <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema">
                 <span id="themeIcon">🌙</span>
+            </button>
+            <button class="btn-volver-listado" onclick="window.location.href='/archivo_digital/visor'">
+                ← Volver al Listado
             </button>
             <button class="btn-salir" onclick="salir()">
                 🏠 Volver al Menú
@@ -731,7 +1120,7 @@
                     
                     <div class="form-group">
                         <label>Observaciones Generales</label>
-                        <textarea id="observaciones" placeholder="Observaciones generales..."></textarea>
+                        <textarea id="observaciones" placeholder="Observaciones generales..." oninput="this.value = this.value.toUpperCase()"></textarea>
                     </div>
                     
                     <div class="btn-group">
@@ -741,26 +1130,15 @@
                         <button type="button" class="btn btn-warning" onclick="abrirModalCorreccion()" style="background: #ea580c; color: white;">
                             🔄 Solicitar Corrección
                         </button>
-                        <button type="button" class="btn btn-secondary" onclick="window.location.href='/archivo_digital/visor'">
-                            ← Volver
+                        <button type="button" class="btn btn-anexos" onclick="abrirModalAnexos()">
+                            📤 Subir Anexos
                         </button>
                     </div>
                 </form>
             </div>
 
-            <!-- AGREGAR MÁS ANEXOS -->
-            <div class="card">
-                <h3>📎 Agregar Más Anexos</h3>
-                <div class="upload-area" onclick="document.getElementById('inputAnexos').click()">
-                    <div style="font-size: 2.5em; margin-bottom: 8px;">📁</div>
-                    <div style="font-weight: 600; margin-bottom: 5px; font-size: 0.9em;">Clic o arrastra archivos</div>
-                    <div style="font-size: 0.75em; color: var(--gray-600);">PDF, Excel, Imágenes</div>
-                    <input type="file" id="inputAnexos" multiple accept=".pdf,.xlsx,.xls,.jpg,.jpeg,.png">
-                </div>
-                <button type="button" class="btn btn-primary" onclick="subirAnexos()" style="width: 100%; margin-top: 8px;">
-                    ⬆️ Subir Anexos
-                </button>
-            </div>
+            <!-- INPUT OCULTO PARA MODAL DE ANEXOS -->
+            <input type="file" id="inputAnexos" multiple accept=".pdf" style="display:none;">
         </div>
 
         <!-- COLUMNA CENTRAL: VISOR PDF -->
@@ -775,7 +1153,8 @@
                     <div id="pdfLoading" class="loading">
                         <div class="spinner"></div>
                     </div>
-                    <iframe id="pdfViewer" class="pdf-viewer" style="display:none;"></iframe>
+                    <!-- PDF.js canvas container (reemplaza iframe para evitar AutoPrint) -->
+                    <div id="pdfViewerContainer"></div>
                     
                     <div class="carousel-controls">
                         <button class="carousel-btn" id="btnPrev" onclick="navegarPDF(-1)">‹</button>
@@ -817,7 +1196,7 @@
                 </div>
                 
                 <div class="add-observacion">
-                    <textarea id="nuevaObservacion" placeholder="Nueva observación..."></textarea>
+                    <textarea id="nuevaObservacion" placeholder="Nueva observación..." oninput="this.value = this.value.toUpperCase()"></textarea>
                     <button class="btn btn-primary" onclick="agregarObservacion()" style="width: 100%; font-size: 0.85em;">
                         💬 Agregar
                     </button>
@@ -827,6 +1206,10 @@
     </div>
 
     <script>
+        // ===== PDF.js SETUP =====
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        let pdfDocInstance = null; // Instancia actual de PDF.js (para destruir antes de cargar otro)
+
         let documentoActual = null;
         let todosLosPDFs = [];
         let pdfActualIndex = 0;
@@ -943,7 +1326,7 @@
             if (doc.adjuntos && doc.adjuntos.length > 0) {
                 doc.adjuntos.forEach(adj => {
                     const nombreAdj = adj.nombre_archivo;
-                    const extensionAdj = nombreAdj.endsWith('.pdf') || nombreAdj.endsWith('.xlsx') || nombreAdj.endsWith('.jpg') ? '' : '.pdf';
+                    const extensionAdj = nombreAdj.endsWith('.pdf') ? '' : '.pdf';
                     
                     todosLosPDFs.push({
                         url: `/api/notas/visualizar_adjunto/${adj.id}`,
@@ -1026,7 +1409,7 @@
         // ===== SCROLL DE MINIATURAS (OBSOLETO - ELIMINADO) =====
         // Función scrollThumbnails eliminada - Ahora usa paginación
 
-        // ===== CARGAR PDF EN CARRUSEL =====
+        // ===== CARGAR PDF EN CARRUSEL (PDF.js - sin AutoPrint) =====
         function cargarPDFEnCarrusel(index) {
             if (index < 0 || index >= todosLosPDFs.length) return;
             
@@ -1043,31 +1426,81 @@
             document.getElementById('btnPrev').disabled = (index === 0);
             document.getElementById('btnNext').disabled = (index === todosLosPDFs.length - 1);
             
-            // ✅ ACTUALIZAR PÁGINA DE THUMBNAILS SI EL ÍNDICE ESTÁ FUERA
+            // Actualizar página de thumbnails si el índice está fuera
             const paginaRequerida = Math.floor(index / THUMBS_PER_PAGE);
             if (paginaRequerida !== thumbnailPage) {
                 thumbnailPage = paginaRequerida;
-                renderizarThumbnails(); // Re-renderizar con nueva página
+                renderizarThumbnails();
             } else {
-                // Solo actualizar clases active si ya estamos en la página correcta
                 document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
                     const globalIdx = thumbnailPage * THUMBS_PER_PAGE + i;
                     thumb.classList.toggle('active', globalIdx === index);
                 });
             }
             
-            const pdfViewer = document.getElementById('pdfViewer');
             const pdfLoading = document.getElementById('pdfLoading');
+            const container = document.getElementById('pdfViewerContainer');
             
+            // Mostrar loading, limpiar visor
             pdfLoading.style.display = 'flex';
-            pdfViewer.style.display = 'none';
+            container.style.display = 'none';
+            container.innerHTML = '';
             
-            pdfViewer.src = pdf.url;
+            // Destruir instancia PDF anterior para liberar memoria
+            if (pdfDocInstance) {
+                pdfDocInstance.destroy();
+                pdfDocInstance = null;
+            }
             
-            pdfViewer.onload = () => {
+            // PDF.js: cargar y renderizar todas las páginas como canvas
+            // Esto ignora cualquier acción AutoPrint embebida en el PDF
+            pdfjsLib.getDocument(pdf.url).promise.then(pdfDoc => {
+                pdfDocInstance = pdfDoc;
+                const numPages = pdfDoc.numPages;
+                const containerWidth = container.clientWidth || 580;
+                
+                // Renderizar páginas de forma secuencial
+                const renderPagina = (numPagina) => {
+                    return pdfDoc.getPage(numPagina).then(page => {
+                        const viewport = page.getViewport({ scale: 1 });
+                        const scale = Math.max(0.5, (containerWidth - 16) / viewport.width);
+                        const scaledViewport = page.getViewport({ scale });
+                        
+                        const canvas = document.createElement('canvas');
+                        canvas.width = scaledViewport.width;
+                        canvas.height = scaledViewport.height;
+                        canvas.style.cssText = 'display:block; border-radius:3px; box-shadow:0 2px 8px rgba(0,0,0,0.5); max-width:100%;';
+                        container.appendChild(canvas);
+                        
+                        return page.render({
+                            canvasContext: canvas.getContext('2d'),
+                            viewport: scaledViewport
+                        }).promise;
+                    });
+                };
+                
+                // Encadenar renderizado página por página
+                let cadena = Promise.resolve();
+                for (let i = 1; i <= numPages; i++) {
+                    cadena = cadena.then(() => renderPagina(i));
+                }
+                return cadena;
+                
+            }).then(() => {
                 pdfLoading.style.display = 'none';
-                pdfViewer.style.display = 'block';
-            };
+                container.style.display = 'flex';
+                container.scrollTop = 0;
+                
+            }).catch(err => {
+                console.error('PDF.js error:', err);
+                pdfLoading.style.display = 'none';
+                container.style.display = 'flex';
+                container.innerHTML = `<div style="color:white;text-align:center;padding:30px;">
+                    ❌ Error al cargar el PDF<br>
+                    <small style="opacity:0.7">${err.message}</small><br><br>
+                    <a href="${pdf.url}" target="_blank" style="color:#86efac;">📥 Abrir directamente</a>
+                </div>`;
+            });
         }
 
         // ===== NAVEGAR PDF =====
@@ -1230,57 +1663,146 @@
             }
         }
 
-        // ===== SUBIR ANEXOS CON RENOMBRADO =====
-        async function subirAnexos() {
-            const input = document.getElementById('inputAnexos');
-            const archivos = input.files;
-            
-            if (archivos.length === 0) {
-                alert('❌ Selecciona archivos');
+        // ===== MODAL SUBIR ANEXOS =====
+        function abrirModalAnexos() {
+            document.getElementById('modalAnexos').style.display = 'flex';
+            document.getElementById('listaArchivosModal').innerHTML = '';
+            document.getElementById('inputAnexos').value = '';
+            anexosPendientes = [];
+        }
+
+        function cerrarModalAnexos() {
+            document.getElementById('modalAnexos').style.display = 'none';
+            anexosPendientes = [];
+            document.getElementById('inputAnexos').value = '';
+            document.getElementById('listaArchivosModal').innerHTML = '';
+        }
+
+        let anexosPendientes = [];
+
+        function seleccionarArchivosModal() {
+            document.getElementById('inputAnexos').click();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('inputAnexos').addEventListener('change', function() {
+                const archivos = Array.from(this.files);
+                archivos.forEach(archivo => {
+                    const yaExiste = anexosPendientes.some(a => a.file.name === archivo.name && a.file.size === archivo.size);
+                    if (!yaExiste) {
+                        anexosPendientes.push({ file: archivo, nombre: archivo.name.replace(/\.\w+$/, '') });
+                    }
+                });
+                renderizarListaAnexos();
+            });
+
+            const dropZoneModal = document.getElementById('dropZoneModal');
+            ['dragenter','dragover'].forEach(e => dropZoneModal.addEventListener(e, ev => {
+                ev.preventDefault(); dropZoneModal.classList.add('drag-over');
+            }));
+            ['dragleave','drop'].forEach(e => dropZoneModal.addEventListener(e, ev => {
+                ev.preventDefault(); dropZoneModal.classList.remove('drag-over');
+            }));
+            dropZoneModal.addEventListener('drop', ev => {
+                const archivos = Array.from(ev.dataTransfer.files);
+                archivos.forEach(archivo => {
+                    const yaExiste = anexosPendientes.some(a => a.file.name === archivo.name);
+                    if (!yaExiste) {
+                        const extOk = /\.pdf$/i.test(archivo.name);
+                        if (extOk) anexosPendientes.push({ file: archivo, nombre: archivo.name.replace(/\.\w+$/, '') });
+                    }
+                });
+                renderizarListaAnexos();
+            });
+        });
+
+        function renderizarListaAnexos() {
+            const lista = document.getElementById('listaArchivosModal');
+            if (anexosPendientes.length === 0) {
+                lista.innerHTML = '';
                 return;
             }
-            
-            // ✅ PERMITIR RENOMBRAR CADA ANEXO
+            lista.innerHTML = anexosPendientes.map((item, idx) => {
+                const ext = item.file.name.split('.').pop().toUpperCase();
+                const badgeColor = '#dc2626';
+                const sizeKb = (item.file.size / 1024).toFixed(0);
+                return `
+                <div class="anexo-item-modal" id="anexoItem_${idx}">
+                    <div class="anexo-badge" style="background:${badgeColor}">${ext}</div>
+                    <div class="anexo-info-modal">
+                        <input type="text"
+                            class="anexo-nombre-input"
+                            value="${item.nombre}"
+                            oninput="this.value=this.value.toUpperCase();anexosPendientes[${idx}].nombre=this.value"
+                            placeholder="Nombre del archivo (sin extensión)">
+                        <small style="color:var(--gray-600);">${sizeKb} KB &bull; ${item.file.name}</small>
+                    </div>
+                    <button type="button" class="anexo-remove-btn" onclick="eliminarAnexoPendiente(${idx})" title="Quitar">&times;</button>
+                </div>`;
+            }).join('');
+        }
+
+        function eliminarAnexoPendiente(idx) {
+            anexosPendientes.splice(idx, 1);
+            renderizarListaAnexos();
+        }
+
+        async function subirAnexosDesdeModal() {
+            if (anexosPendientes.length === 0) {
+                mostrarNotificacionModal('⚠️ Agrega al menos un archivo', 'warning');
+                return;
+            }
+            const btn = document.getElementById('btnSubirAnexosModal');
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Subiendo...';
+
             const formData = new FormData();
             const nombresPersonalizados = [];
-            
-            for (let i = 0; i < archivos.length; i++) {
-                const archivo = archivos[i];
-                const nombreOriginal = archivo.name;
-                
-                const nuevoNombre = prompt(`📎 Renombrar archivo ${i + 1}/${archivos.length}:\n\nNombre original: ${nombreOriginal}\n\n(Dejar vacío para mantener el original)`, nombreOriginal);
-                
-                if (nuevoNombre === null) {
-                    alert('❌ Subida cancelada');
-                    return;
-                }
-                
-                formData.append('adjuntos', archivo);
-                nombresPersonalizados.push(nuevoNombre || nombreOriginal);
+
+            for (const item of anexosPendientes) {
+                const ext = item.file.name.split('.').pop();
+                formData.append('adjuntos', item.file);
+                nombresPersonalizados.push(item.nombre + '.' + ext);
             }
-            
             formData.append('nombres_personalizados', JSON.stringify(nombresPersonalizados));
-            
+
             try {
                 const response = await fetch(`/api/notas/agregar_adjuntos/${documentoId}`, {
                     method: 'POST',
                     body: formData
                 });
-                
                 const data = await response.json();
-                
                 if (data.success) {
-                    alert(`✅ ${archivos.length} anexo(s) agregado(s) correctamente`);
-                    input.value = '';
-                    cargarDocumento();
+                    mostrarNotificacionModal(`✅ ${anexosPendientes.length} anexo(s) subidos correctamente`, 'success');
+                    setTimeout(() => {
+                        cerrarModalAnexos();
+                        cargarDocumento();
+                    }, 1500);
                 } else {
-                    alert('❌ Error: ' + data.message);
+                    mostrarNotificacionModal('❌ Error: ' + data.message, 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = '📤 Subir Anexos';
                 }
             } catch (error) {
-                console.error('❌ Error:', error);
-                alert('❌ Error al subir anexos');
+                console.error(error);
+                mostrarNotificacionModal('❌ Error de conexión al subir', 'error');
+                btn.disabled = false;
+                btn.innerHTML = '📤 Subir Anexos';
             }
         }
+
+        function mostrarNotificacionModal(msg, tipo) {
+            const el = document.getElementById('notifModal');
+            const colores = { success: '#16a34a', error: '#dc2626', warning: '#d97706' };
+            el.style.background = colores[tipo] || '#1e3a2e';
+            el.textContent = msg;
+            el.style.display = 'block';
+            if (tipo === 'success') return;
+            setTimeout(() => el.style.display = 'none', 4000);
+        }
+
+        // Función legacy (por compatibilidad)
+        async function subirAnexos() { abrirModalAnexos(); }
 
         // ===== DRAG AND DROP =====
         function setupDragAndDrop() {
@@ -1389,7 +1911,8 @@
                     <div style="margin-bottom: 20px;">
                         <label style="display: block; margin-bottom: 5px; font-weight: bold;">Justificación (requerida): *</label>
                         <textarea id="corr_justificacion" placeholder="Describe el motivo de la corrección (mínimo 10 caracteres)" 
-                                  rows="3" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;"></textarea>
+                                  rows="3" style="width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px;"
+                                  oninput="this.value = this.value.toUpperCase()"></textarea>
                     </div>
 
                     <div style="display: flex; gap: 10px; justify-content: flex-end;">
@@ -1782,5 +2305,48 @@ window.addEventListener('beforeunload', (e) => {
 </script>
 
         {% include '_session_expired_interceptor.html' %}
+
+    <!-- ===== MODAL SUBIR ANEXOS ===== -->
+    <div id="modalAnexos">
+        <div class="modal-anexos-box">
+            <!-- Cabecera -->
+            <div class="modal-anexos-header">
+                <h3>📎 Subir Anexos al Documento</h3>
+                <button class="modal-anexos-close" onclick="cerrarModalAnexos()" title="Cerrar">&times;</button>
+            </div>
+
+            <!-- Cuerpo -->
+            <div class="modal-anexos-body">
+
+                <!-- Zona de arrastre / clic -->
+                <div class="modal-drop-zone" id="dropZoneModal" onclick="seleccionarArchivosModal()">
+                    <div class="drop-icon">📂</div>
+                    <div class="drop-title">Arrastra archivos aquí o haz clic para seleccionar</div>
+                    <div class="drop-sub">Solo archivos PDF</div>
+                    <button type="button" class="modal-btn-seleccionar" onclick="event.stopPropagation(); seleccionarArchivosModal()">
+                        📁 Seleccionar Archivos
+                    </button>
+                </div>
+
+                <!-- Lista de archivos seleccionados -->
+                <div id="listaArchivosModal"></div>
+
+                <!-- Instrucción -->
+                <p style="color: var(--gray-600, #6b7280); font-size: 0.78em; margin: 0; padding: 4px 0;">
+                    💡 Puedes editar el nombre de cada archivo antes de subirlo. El nombre se guardará en MAYÚSCULAS.
+                </p>
+            </div>
+
+            <!-- Pie -->
+            <div class="modal-anexos-footer">
+                <span id="notifModal"></span>
+                <button type="button" class="modal-btn-cancelar" onclick="cerrarModalAnexos()">Cancelar</button>
+                <button type="button" class="modal-btn-subir" id="btnSubirAnexosModal" onclick="subirAnexosDesdeModal()">
+                    📤 Subir Anexos
+                </button>
+            </div>
+        </div>
+    </div>
+
     </body>
 </html>

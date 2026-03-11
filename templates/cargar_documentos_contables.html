@@ -5,20 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Archivo Digital - Cargar Documento</title>
     <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📁</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         /* =============================================
            🎨 VARIABLES CSS (COLORES INSTITUCIONALES)
            ============================================= */
         :root {
-            --bg-color: #f5f7fa;
+            --bg-color: #f0fdf4;
             --card-bg: #ffffff;
             --text-color: #2c3e50;
             --border-color: #e1e8ed;
             --input-bg: #ffffff;
             --input-border: #cbd5e0;
-            --brand-green: #166534;
-            --brand-green-dark: #14532d;
+            --brand-green: #16a34a;
+            --brand-green-dark: #166534;
             --brand-green-light: #dcfce7;
+            --brand-yellow: #facc15;
             --red-error: #dc2626;
             --blue-info: #2563eb;
             --yellow-warning: #eab308;
@@ -43,7 +45,7 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: var(--bg-color);
             color: var(--text-color);
             line-height: 1.6;
@@ -58,10 +60,11 @@
            🎯 HEADER FIJO CON USUARIO
            ============================================= */
         .header {
-            background: linear-gradient(135deg, var(--brand-green) 0%, var(--brand-green-dark) 100%);
+            background: linear-gradient(135deg, var(--brand-green-dark) 0%, var(--brand-green) 100%);
             color: white;
-            padding: 15px 30px;
+            padding: 14px 24px;
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-bottom: 3px solid var(--brand-yellow);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -72,8 +75,9 @@
         }
 
         .header h1 {
-            font-size: 1.5em;
-            font-weight: 600;
+            font-size: 1.3rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -86,13 +90,16 @@
         }
 
         .user-info {
-            background: rgba(255,255,255,0.2);
-            padding: 8px 15px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.25);
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 0.9em;
+            font-size: 0.82rem;
+            font-weight: 600;
             display: flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap;
         }
 
         .dark-mode-toggle {
@@ -142,14 +149,15 @@
             overflow-x: hidden;
             display: flex;
             justify-content: center;
-            padding: 20px;
+            padding: 24px 20px;
         }
 
         .card {
             background: var(--card-bg);
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-radius: 14px;
+            padding: 28px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+            border-left: 4px solid var(--brand-green);
             width: 100%;
             max-width: 900px;
             overflow: visible; /* Sin scroll en la card */
@@ -157,13 +165,15 @@
         }
 
         .card h3 {
-            color: var(--brand-green);
+            color: var(--brand-green-dark);
             margin-bottom: 20px;
             padding-bottom: 10px;
-            border-bottom: 2px solid var(--border-color);
+            border-bottom: 2px solid var(--brand-yellow);
             display: flex;
             align-items: center;
             gap: 10px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
         }
 
         /* =============================================
@@ -187,9 +197,9 @@
 
         label {
             font-weight: 600;
-            font-size: 0.9em;
+            font-size: 0.88rem;
             margin-bottom: 8px;
-            color: var(--text-color);
+            color: var(--brand-green-dark);
         }
 
         label .required {
@@ -210,6 +220,7 @@
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--brand-green);
+            box-shadow: 0 0 0 3px rgba(22,163,74,0.12);
         }
 
         textarea {
@@ -221,16 +232,21 @@
            📎 ZONA DE CARGA DE ARCHIVOS
            ============================================= */
         .upload-section {
-            margin-top: 20px;
+            margin-top: 24px;
             padding: 20px;
             background: var(--brand-green-light);
             border-radius: 12px;
             border: 2px dashed var(--brand-green);
+            border-top: 3px solid var(--brand-yellow);
         }
 
         .upload-section h4 {
             color: var(--brand-green-dark);
+            font-weight: 700;
             margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .file-input-wrapper {
@@ -370,20 +386,25 @@
         .btn-primary {
             background: var(--brand-green);
             color: white;
+            box-shadow: 0 2px 8px rgba(22,163,74,0.35);
+            font-size: 0.93rem;
         }
 
         .btn-primary:hover {
             background: var(--brand-green-dark);
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(22,163,74,0.45);
         }
 
         .btn-secondary {
             background: #6b7280;
             color: white;
+            font-size: 0.90rem;
         }
 
         .btn-secondary:hover {
             background: #4b5563;
+            transform: translateY(-1px);
         }
 
         .btn:disabled {
@@ -516,7 +537,7 @@
                 👤 <span id="nombreUsuario">{{ session.get('usuario', 'Usuario') }}</span>
             </span>
             <button class="dark-mode-toggle" id="toggleModeBtn" onclick="toggleTheme()">🌙</button>
-            <a href="/dashboard" class="btn-volver">🔙 Dashboard</a>
+            <a href="/archivo_digital/visor" class="btn-volver">📋 Ir al Listado</a>
             <button class="btn-salir" onclick="cerrarSesion()">🏠 Volver al Menú</button>
         </div>
     </div>
@@ -531,7 +552,7 @@
             <div id="alertError" class="alert alert-error"></div>
             <div id="alertInfo" class="alert alert-info"></div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--border-color);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid var(--brand-yellow);">
                 <h3 style="margin: 0;">📄 Cargar Nuevo Documento Contable</h3>
                 
                 <!-- =============================================
@@ -549,6 +570,33 @@
 
             <form id="formCargarDocumento">
                 <div class="form-grid">
+                    <!-- FILA 1: Empresa | Fecha del Documento | Nombre del Archivo -->
+
+                    <!-- Empresa -->
+                    <div class="form-group">
+                        <label>Empresa <span class="required">*</span></label>
+                        <select id="empresa" name="empresa" required onchange="validarConsecutivo()">
+                            <option value="">Seleccione...</option>
+                            <!-- Se llena dinámicamente desde BD -->
+                        </select>
+                    </div>
+
+                    <!-- Fecha del Documento -->
+                    <div class="form-group">
+                        <label>Fecha del Documento <span class="required">*</span></label>
+                        <input type="date" id="fechaDocumento" name="fecha_documento" required>
+                    </div>
+
+                    <!-- Nombre del Archivo (solo lectura - se genera automáticamente) -->
+                    <div class="form-group">
+                        <label>Nombre del Archivo (Auto)</label>
+                        <input type="text" id="nombreArchivo" name="nombre_archivo" 
+                               placeholder="Se generará al seleccionar Tipo, Centro y Consecutivo" readonly
+                               style="background-color: #e8f5e9; cursor: default; color: #2e7d32; font-weight: 500;">
+                    </div>
+
+                    <!-- FILA 2: Tipo de Documento | Centro de Operación | Consecutivo -->
+
                     <!-- Tipo de Documento -->
                     <div class="form-group">
                         <label>Tipo de Documento <span class="required">*</span></label>
@@ -578,34 +626,12 @@
                         <small style="color: var(--red-error); display: none;" id="consecutivoError">❌ Ya existe</small>
                     </div>
 
-                    <!-- Fecha del Documento -->
-                    <div class="form-group">
-                        <label>Fecha del Documento <span class="required">*</span></label>
-                        <input type="date" id="fechaDocumento" name="fecha_documento" required>
-                    </div>
-
-                    <!-- Empresa -->
-                    <div class="form-group">
-                        <label>Empresa <span class="required">*</span></label>
-                        <select id="empresa" name="empresa" required>
-                            <option value="">Seleccione...</option>
-                            <!-- Se llena dinámicamente desde BD -->
-                        </select>
-                    </div>
-
-                    <!-- Nombre del Archivo (solo lectura - se genera automáticamente) -->
-                    <div class="form-group">
-                        <label>Nombre del Archivo (Generado Automáticamente)</label>
-                        <input type="text" id="nombreArchivo" name="nombre_archivo" 
-                               placeholder="Se generará al seleccionar Tipo, Centro y Consecutivo" readonly
-                               style="background-color: #e8f5e9; cursor: default; color: #2e7d32; font-weight: 500;">
-                    </div>
-
                     <!-- Observaciones -->
                     <div class="form-group full-width">
                         <label>Observaciones</label>
                         <textarea id="observaciones" name="observaciones" 
-                                  placeholder="Comentarios adicionales sobre el documento..."></textarea>
+                                  placeholder="Comentarios adicionales sobre el documento..."
+                                  oninput="this.value = this.value.toUpperCase()"></textarea>
                     </div>
                 </div>
 
@@ -623,10 +649,10 @@
                     </div>
                     <div id="archivoPrincipalInfo" class="file-info" style="display: none;"></div>
 
-                    <h4 style="margin-top: 20px;">📎 Adjuntos Opcionales (Excel, Imágenes)</h4>
+                    <h4 style="margin-top: 20px;">📎 Adjuntos Opcionales (PDF)</h4>
                     <div class="file-input-wrapper">
                         <input type="file" id="adjuntos" name="adjuntos[]" 
-                               accept=".pdf,.xlsx,.xls,.jpg,.jpeg,.png" 
+                               accept=".pdf" 
                                multiple onchange="agregarAdjuntos()">
                         <label for="adjuntos" class="file-label">
                             📎 Agregar Adjuntos
@@ -727,8 +753,14 @@
             const tipoId = document.getElementById('tipoDocumento').value;
             const centroId = document.getElementById('centroOperacion').value;
             const consecutivo = document.getElementById('consecutivo').value;
+            const empresa = document.getElementById('empresa').value;
 
-            if (!tipoId || !centroId || !consecutivo) return;
+            // Ocultar mensajes si faltan datos
+            if (!tipoId || !centroId || !consecutivo || !empresa) {
+                document.getElementById('consecutivoOk').style.display = 'none';
+                document.getElementById('consecutivoError').style.display = 'none';
+                return;
+            }
 
             try {
                 const response = await fetch('/api/notas/cargar/validar', {
@@ -737,7 +769,8 @@
                     body: JSON.stringify({
                         tipo_documento_id: tipoId,
                         centro_operacion_id: centroId,
-                        consecutivo: consecutivo
+                        consecutivo: consecutivo,
+                        empresa: empresa
                     })
                 });
 
@@ -763,6 +796,12 @@
             if (input.files.length > 0) {
                 const file = input.files[0];
                 const sizeMB = (file.size / 1024 / 1024).toFixed(2);
+                if (file.size > 5 * 1024 * 1024) {
+                    alert(`⚠️ El archivo "${file.name}" pesa ${sizeMB} MB y supera el límite de 5 MB.`);
+                    input.value = '';
+                    info.style.display = 'none';
+                    return;
+                }
                 info.innerHTML = `<strong>📄 ${file.name}</strong> (${sizeMB} MB)`;
                 info.style.display = 'block';
             } else {
@@ -777,7 +816,11 @@
 
             Array.from(input.files).forEach(file => {
                 if (!adjuntosArray.find(a => a.file && a.file.name === file.name)) {
-                    // Generar etiqueta por defecto: ANEXO_{nombre_sin_extension}
+                    // Validar tamaño máximo 5 MB
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert(`⚠️ El adjunto "${file.name}" pesa ${(file.size/1024/1024).toFixed(2)} MB y supera el límite de 5 MB.`);
+                        return;
+                    }
                     const nombreSinExt = file.name.replace(/\.[^/.]+$/, '');
                     const etiquetaDefault = `ANEXO_${nombreSinExt}`;
                     
