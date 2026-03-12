@@ -64,3 +64,11 @@ Desktop.ini
 *.tmp
 *.temp
 uploads/temp/
+
+# PostgreSQL local installation
+.local/
+BACKUP_*/
+*.pyc
+__pycache__/
+.venv/
+
