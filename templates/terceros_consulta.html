@@ -494,6 +494,58 @@
                 text-align: center;
             }
         }
+
+        /* ========================================================================= */
+        /*           LAYOUT FIJO: filtros y paginación siempre visibles             */
+        /* ========================================================================= */
+        @media (min-width: 769px) {
+            html, body {
+                height: 100%;
+                overflow: hidden;
+            }
+
+            .contenedor-principal {
+                position: fixed !important;
+                top: 80px;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                margin-top: 0 !important;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+                padding: 0.75rem 1rem;
+                gap: 0.5rem;
+            }
+
+            .panel-filtros {
+                flex-shrink: 0;
+                margin-bottom: 0 !important;
+                padding: 0.75rem 1rem;
+            }
+
+            .panel-estadisticas {
+                flex-shrink: 0;
+                margin-bottom: 0 !important;
+                padding: 0.5rem 1rem;
+            }
+
+            .contenedor-tabla {
+                flex: 1 1 auto;
+                min-height: 0;
+                overflow: hidden;
+                margin-bottom: 0 !important;
+            }
+
+            .tabla-wrapper {
+                height: 100%;
+                max-height: 100% !important;
+            }
+
+            .panel-paginacion {
+                flex-shrink: 0;
+            }
+        }
     </style>
 </head>
 <body>

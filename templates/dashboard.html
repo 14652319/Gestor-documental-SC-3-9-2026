@@ -967,7 +967,8 @@
         // DATOS DEL USUARIO (desde el backend)
         // ========================================
         let usuarioActual = {
-            nombre: "{{ user_data.get('usuario', 'Usuario') }}",
+            nombre: "{{ user_data.get('nombre_completo', user_data.get('usuario', 'Usuario')) }}",
+            usuario: "{{ user_data.get('usuario', '') }}",
             rol: "{{ user_data.get('rol', 'externo') }}", // "interno", "admin" o "externo"
             nit: "{{ user_data.get('nit', '') }}",
             email: "{{ user_data.get('correo', '') }}",
@@ -998,16 +999,9 @@
         // INICIALIZACIÓN
         // ========================================
         window.addEventListener('DOMContentLoaded', function() {
-            // Verificar si hay sesión (en producción esto vendría del backend)
-            const sesion = localStorage.getItem('sesion');
-            if (!sesion) {
-                window.location.href = '/';
-                return;
-            }
-            
-            // Parsear datos de sesión
-            const datosSesion = JSON.parse(sesion);
-            usuarioActual = datosSesion;
+            // Usar siempre los datos de sesión inyectados por Flask (fuente de verdad)
+            // y actualizar localStorage para mantener consistencia
+            localStorage.setItem('sesion', JSON.stringify(usuarioActual));
             
             // Configurar UI según tipo de usuario
             configurarDashboard();
@@ -1022,9 +1016,10 @@
         function configurarDashboard() {
             // Actualizar info de usuario en header
             document.getElementById('userName').textContent = usuarioActual.nombre;
-            document.getElementById('userRole').textContent = usuarioActual.rol === 'interno' 
-                ? 'Usuario Interno' 
-                : 'Proveedor Externo';
+            document.getElementById('userRole').textContent = 
+                usuarioActual.rol === 'admin' ? 'Administrador' :
+                usuarioActual.rol === 'interno' ? 'Usuario Interno' : 
+                'Proveedor Externo';
             
             // Iniciales del avatar
             const iniciales = usuarioActual.nombre.split(' ')
@@ -1051,7 +1046,7 @@
         // ========================================
         function generarTarjetasInicio() {
             const cardsGrid = document.getElementById('cardsGrid');
-            const modulos = usuarioActual.rol === 'interno' ? modulosInternos : modulosExternos;
+            const modulos = (usuarioActual.rol === 'interno' || usuarioActual.rol === 'admin') ? modulosInternos : modulosExternos;
             
             cardsGrid.innerHTML = modulos.map(modulo => `
                 <div class="module-card fade-in" onclick="navegarA('${modulo.id}', 'inicio')">
@@ -1092,75 +1087,100 @@
         // NAVEGACIÓN
         // ========================================
         function navegarA(modulo, submodulo) {
-            console.log(`Navegando a: ${modulo} > ${submodulo}`);
-            
-            // ✅ TERCEROS MODULE - Redirect to actual module pages
-            if (modulo === 'terceros') {
-                let targetUrl = '/terceros/';
-                
-                // Map submenu actions to actual module URLs
-                switch (submodulo) {
-                    case 'crear':
-                        targetUrl = '/terceros/crear';
-                        break;
-                    case 'actualizar':
-                    case 'consultar':
-                    case 'listar':
-                        targetUrl = '/terceros/consulta';
-                        break;
-                    case 'dashboard':
-                    default:
-                        targetUrl = '/terceros/';
-                        break;
+            // Mapa completo de rutas reales por módulo/submódulo
+            const rutas = {
+                // TERCEROS
+                'terceros': {
+                    'inicio':     '/terceros/',
+                    'dashboard':  '/terceros/',
+                    'consultar':  '/terceros/consulta',
+                    'listar':     '/terceros/consulta',
+                    'actualizar': '/terceros/consulta',
+                    'crear':      '/terceros/crear',
+                },
+                // FACTURAS
+                'facturas': {
+                    'inicio':    '/facturas-digitales/',
+                    'consultas': '/facturas-digitales/',
+                    'recepcion': '/recibir_facturas/nueva_factura',
+                    'relaciones':'/relaciones/generar_relacion',
+                    'digitales': '/facturas-digitales/',
+                },
+                // CAUSACIONES
+                'causaciones': {
+                    'inicio': '/causaciones/',
+                },
+                // DIAN VS ERP
+                'dian_vs_erp': {
+                    'inicio':      '/dian_vs_erp/',
+                    'dashboard':   '/dian_vs_erp/',
+                    'cargar':      '/dian_vs_erp/cargar_archivos',
+                    'validaciones':'/dian_vs_erp/validaciones',
+                    'reportes':    '/dian_vs_erp/reportes',
+                    'config':      '/dian_vs_erp/configuracion',
+                },
+                // ARCHIVO DIGITAL
+                'archivo': {
+                    'inicio':      '/archivo_digital/visor',
+                    'visor':       '/archivo_digital/visor',
+                    'cargar':      '/archivo_digital/cargar',
+                    'estadisticas':'/archivo_digital/visor',
+                },
+                'archivo-digital': {
+                    'inicio':      '/archivo_digital/visor',
+                    'visor':       '/archivo_digital/visor',
+                    'cargar':      '/archivo_digital/cargar',
+                    'estadisticas':'/archivo_digital/visor',
+                },
+                // ADMINISTRACIÓN
+                'admin': {
+                    'inicio':       '/admin/usuarios-permisos/',
+                    'usuarios':     '/admin/usuarios-permisos/',
+                    'permisos':     '/admin/usuarios-permisos/',
+                    'seguridad':    '/admin/monitoreo/dashboard',
+                    'log':          '/admin/monitoreo/dashboard',
+                    'monitoreo':    '/admin/monitoreo/dashboard',
+                    'consecutivos': '/admin/usuarios-permisos/',
+                },
+                // UTILIDADES (sitios externos del gobierno)
+                'utilidades': {
+                    'rut-dian':     { url: 'https://muisca.dian.gov.co/WebRutMuisca/DefConsultaEstadoRUT.faces', externo: true },
+                    'procuraduria': { url: 'https://www.procuraduria.gov.co/Pages/consulta-antecedentes.aspx', externo: true },
+                    'antecedentes': { url: 'https://antecedentes.policia.gov.co/', externo: true },
+                    'sisben':       { url: 'https://www.sisben.gov.co/', externo: true },
+                    'inicio':       null,
+                },
+                // SEGURIDAD SOCIAL (en construcción)
+                'seguridad-social': {
+                    'inicio':    null,
+                    'planillas': null,
+                },
+            };
+
+            const moduloRutas = rutas[modulo];
+            if (moduloRutas) {
+                const destino = moduloRutas[submodulo] !== undefined
+                    ? moduloRutas[submodulo]
+                    : moduloRutas['inicio'];
+
+                if (destino && typeof destino === 'object' && destino.externo) {
+                    window.open(destino.url, '_blank');
+                    return;
                 }
-                
-                console.log(`🚀 Redirecting to terceros module: ${targetUrl}`);
-                window.location.href = targetUrl;
-                return; // Exit early for terceros module
-            }
-            
-            // ✅ DIAN vs ERP MODULE - Redirect to actual module pages
-            if (modulo === 'dian_vs_erp') {
-                let targetUrl = '/dian_vs_erp/';
-                
-                // Map submenu actions to actual module URLs
-                switch (submodulo) {
-                    case 'cargar':
-                        targetUrl = '/dian_vs_erp/cargar_archivos';
-                        break;
-                    case 'validaciones':
-                        targetUrl = '/dian_vs_erp/validaciones';
-                        break;
-                    case 'reportes':
-                        targetUrl = '/dian_vs_erp/reportes';
-                        break;
-                    case 'dashboard':
-                    case 'inicio':
-                    default:
-                        targetUrl = '/dian_vs_erp/';
-                        break;
+                if (destino) {
+                    window.location.href = destino;
+                    return;
                 }
-                
-                console.log(`🚀 Redirecting to DIAN vs ERP module: ${targetUrl}`);
-                window.location.href = targetUrl;
-                return; // Exit early for dian_vs_erp module
             }
-            
-            // ⚠️ OTHER MODULES - Show placeholder view (legacy behavior)
-            // Ocultar vista de inicio
+
+            // Fallback: módulo sin ruta implementada, mostrar vista placeholder
             document.getElementById('vistaInicio').classList.add('hidden');
-            
-            // Mostrar vista de módulo
             document.getElementById('vistaModulo').classList.remove('hidden');
-            
-            // Actualizar título
             const moduloObj = [...modulosInternos, ...modulosExternos].find(m => m.id === modulo);
             if (moduloObj) {
                 document.getElementById('tituloModulo').textContent = moduloObj.nombre;
-                document.getElementById('subtituloModulo').textContent = `${moduloObj.descripcion} > ${submodulo}`;
+                document.getElementById('subtituloModulo').textContent = 'Módulo en construcción';
             }
-            
-            // Actualizar breadcrumb
             document.getElementById('breadcrumb').innerHTML = `
                 <div class="breadcrumb-item">
                     <span>🏠</span>
@@ -1170,19 +1190,7 @@
                 <div class="breadcrumb-item">
                     <span>${moduloObj ? moduloObj.nombre : modulo}</span>
                 </div>
-                <span class="breadcrumb-separator">›</span>
-                <div class="breadcrumb-item">
-                    <span>${submodulo}</span>
-                </div>
             `;
-            
-            // Marcar item activo en menú
-            document.querySelectorAll('.submenu-item').forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // TODO: Aquí cargarías el contenido real del módulo
-            // Por ahora mostramos el estado vacío
         }
         
         // ========================================

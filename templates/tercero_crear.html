@@ -153,6 +153,14 @@
             transition: all 0.3s ease;
         }
 
+        .campo-select {
+            text-transform: uppercase;
+        }
+
+        .campo-select option {
+            text-transform: uppercase;
+        }
+
         .campo-input:focus, .campo-select:focus, .campo-textarea:focus {
             outline: none;
             border-color: var(--primary-green);
@@ -897,6 +905,18 @@
                 alerta.style.display = 'none';
             });
         }
+
+        // Auto-mayúsculas en todos los campos de texto excepto correo
+        document.querySelectorAll('input[type="text"], input[type="tel"], input:not([type])').forEach(function(input) {
+            if (input.type !== 'email' && !input.id.includes('correo') && !input.id.includes('email')) {
+                input.style.textTransform = 'uppercase';
+                input.addEventListener('input', function() {
+                    var pos = this.selectionStart;
+                    this.value = this.value.toUpperCase();
+                    this.setSelectionRange(pos, pos);
+                });
+            }
+        });
     </script>
 </body>
 </html>

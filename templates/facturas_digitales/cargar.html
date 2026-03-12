@@ -604,13 +604,13 @@
                 <!-- ============================================= -->
                 <!-- 📋 LÍNEA 2: Datos Complementarios y Valores -->
                 <!-- ============================================= -->
-                <div class="form-grid" style="margin-top: 1rem; grid-template-columns: 170px repeat(4, 150px) repeat(3, 150px);">
+                <div class="form-grid" style="margin-top: 1rem; grid-template-columns: 170px repeat(4, 150px) repeat(3, 150px); align-items: start;">
                     <div class="form-group">
                         <label>FECHA RADICACIÓN</label>
                         <input type="date" id="fechaRadicacion" readonly>
                     </div>
                     <div class="form-group solo-interno">
-                        <label class="required">TIPO DOCUMENTO</label>
+                        <label class="required">TIPO DOC.</label>
                         <select id="tipoDocumento" required disabled>
                             <option value="">⏳ Cargando...</option>
                         </select>
@@ -660,22 +660,22 @@
 
                     <div class="archivos-container">
                         <div class="form-group">
-                            <label class="required">ARCHIVO PRINCIPAL</label>
+                            <label class="required">FACTURA Y/O DOC. DE COBRO</label>
                             <div class="file-upload-zone disabled" id="zonaPrincipal">
                                 <p>📄 PDF</p>
-                                <small>Max 50MB</small>
+                                <small>Max 10MB</small>
                             </div>
                             <input type="file" id="archivoPrincipal" accept=".pdf" class="hidden" required disabled>
                             <div id="infoPrincipal" class="file-info hidden"></div>
                         </div>
 
                         <div class="form-group">
-                            <label>ANEXOS</label>
+                            <label>ANEXOS A FACTURA Y/O DOC. DE COBRO</label>
                             <div class="file-upload-zone disabled" id="zonaAnexos">
-                                <p>📎 Archivos</p>
-                                <small>Max 100MB</small>
+                                <p>📎 PDF</p>
+                                <small>PDF · Máx 15MB c/u</small>
                             </div>
-                            <input type="file" id="archivosAnexos" accept=".pdf,.zip,.jpg,.jpeg,.png" multiple class="hidden" disabled>
+                            <input type="file" id="archivosAnexos" accept=".pdf" multiple class="hidden" disabled>
                             <div id="listaAnexos" class="anexos-list hidden"></div>
                         </div>
 
@@ -683,7 +683,7 @@
                             <label>SEG. SOCIAL</label>
                             <div class="file-upload-zone disabled" id="zonaSeguridadSocial">
                                 <p>🏥 PDF</p>
-                                <small>Max 20MB</small>
+                                <small>PDF · Máx 2MB</small>
                             </div>
                             <input type="file" id="archivoSeguridadSocial" accept=".pdf" class="hidden" disabled>
                             <div id="infoSeguridadSocial" class="file-info hidden"></div>
@@ -1073,25 +1073,69 @@
             });
         }
 
+        // Límites de tamaño (deben coincidir con el backend)
+        const LIMITE_PRINCIPAL_MB = 10;
+        const LIMITE_ANEXO_MB    = 15;
+        const LIMITE_SEG_MB      =  2;
+
+        function validarArchivo(file, limiteMB, soloPDF = false) {
+            if (soloPDF && !file.name.toLowerCase().endsWith('.pdf')) {
+                return `"${file.name}" no es un PDF. Solo se permiten archivos PDF.`;
+            }
+            if (file.size > limiteMB * 1024 * 1024) {
+                return `"${file.name}" pesa ${(file.size/1024/1024).toFixed(1)} MB y supera el límite de ${limiteMB} MB.`;
+            }
+            return null;
+        }
+
         function mostrarInfoArchivo(inputId, infoId, multiple) {
             const input = document.getElementById(inputId);
             const info = document.getElementById(infoId);
-            
-            if (input.files.length > 0) {
-                if (multiple) {
-                    anexosTemp = Array.from(input.files);
-                    info.innerHTML = anexosTemp.map((f, i) => 
-                        `<div class="anexo-item">
-                            <span>${f.name} (${(f.size / 1024 / 1024).toFixed(2)} MB)</span>
-                            <button type="button" class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="removerAnexo(${i})">✕</button>
-                        </div>`
-                    ).join('');
-                    info.classList.remove('hidden');
-                } else {
-                    const file = input.files[0];
-                    info.innerHTML = `<strong>${file.name}</strong> (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
-                    info.classList.remove('hidden');
+
+            if (input.files.length === 0) return;
+
+            if (multiple) {
+                // ANEXOS: solo PDF, máx 15 MB c/u
+                const errores = [];
+                const validos = [];
+                Array.from(input.files).forEach(f => {
+                    const err = validarArchivo(f, LIMITE_ANEXO_MB, true);
+                    if (err) errores.push(err);
+                    else validos.push(f);
+                });
+
+                if (errores.length > 0) {
+                    alert('❌ Archivos rechazados:\n\n' + errores.join('\n'));
+                    if (validos.length === 0) {
+                        input.value = '';
+                        info.classList.add('hidden');
+                        anexosTemp = [];
+                        return;
+                    }
                 }
+
+                anexosTemp = validos;
+                info.innerHTML = anexosTemp.map((f, i) =>
+                    `<div class="anexo-item">
+                        <span>📄 ${f.name} (${(f.size/1024/1024).toFixed(2)} MB)</span>
+                        <button type="button" class="btn btn-secondary" style="padding: 0.25rem 0.5rem;" onclick="removerAnexo(${i})">✕</button>
+                    </div>`
+                ).join('');
+                info.classList.remove('hidden');
+
+            } else {
+                // Archivo único: aplicar límite según el campo
+                const file = input.files[0];
+                const limiteMB = inputId === 'archivoSeguridadSocial' ? LIMITE_SEG_MB : LIMITE_PRINCIPAL_MB;
+                const err = validarArchivo(file, limiteMB, true);
+                if (err) {
+                    alert('❌ ' + err);
+                    input.value = '';
+                    info.classList.add('hidden');
+                    return;
+                }
+                info.innerHTML = `<strong>📄 ${file.name}</strong> (${(file.size/1024/1024).toFixed(2)} MB)`;
+                info.classList.remove('hidden');
             }
         }
 

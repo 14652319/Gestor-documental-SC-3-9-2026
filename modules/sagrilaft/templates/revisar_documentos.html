@@ -6,6 +6,91 @@
     <title>Revisar Documentos - {{ radicado }}</title>
     <link rel="stylesheet" href="/static/css/styles.css">
     <style>
+        /* ===== LAYOUT FIJO: header + info fijos, solo grid scrollea ===== */
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* El contenedor principal ocupa todo desde debajo del header */
+        .contenedor-principal {
+            position: fixed !important;
+            top: 70px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: 0 !important;
+            padding: 0.5rem !important;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* La tarjeta de info (radicado, NIT, botones) no crece */
+        .contenedor-principal > .tarjeta:first-child {
+            flex-shrink: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Alertas tampoco crecen */
+        #contenedor-alertas {
+            flex-shrink: 0;
+        }
+
+        /* Loading centrado */
+        #loading {
+            flex-shrink: 0;
+        }
+
+        /* El grid ocupa todo el espacio restante */
+        .grid-2col {
+            flex: 1 1 auto !important;
+            min-height: 0 !important;        /* clave para flex overflow */
+            overflow: hidden !important;
+        }
+
+        /* Cada panel del grid scrollea internamente */
+        .grid-2col > .tarjeta:first-child,
+        .grid-2col > .tarjeta:last-child {
+            overflow-y: auto !important;
+            min-height: 0 !important;
+        }
+
+        /* Visor PDF ocupa el 100% del panel sin altura fija */
+        .pdf-viewer {
+            height: calc(100% - 60px) !important;  /* 60px = tarjeta-header */
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 900px) {
+            html, body {
+                overflow: auto;
+            }
+            .contenedor-principal {
+                position: static !important;
+                display: block !important;
+                margin-top: 70px !important;
+                padding: 0.5rem !important;
+                height: auto !important;
+            }
+            .grid-2col {
+                flex-direction: column !important;
+                overflow: visible !important;
+                height: auto !important;
+            }
+            .grid-2col > .tarjeta:first-child,
+            .grid-2col > .tarjeta:last-child {
+                flex: none !important;
+                width: 100% !important;
+                overflow-y: visible !important;
+                min-height: unset !important;
+            }
+            .pdf-viewer {
+                height: 500px !important;
+            }
+            .resizer { display: none !important; }
+        }
+
         /* Tooltips personalizados para observaciones */
         .tooltip-container {
             position: relative;

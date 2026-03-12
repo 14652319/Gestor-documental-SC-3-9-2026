@@ -73,7 +73,10 @@ except ImportError:
 
 # Configuración
 ALLOWED_EXTENSIONS = {'pdf', 'xml', 'zip', 'png', 'jpg', 'jpeg', 'xlsx', 'xls'}
-MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB
+ALLOWED_EXTENSIONS_ANEXOS = {'pdf'}          # Anexos: solo PDF
+MAX_FILE_SIZE         = 10 * 1024 * 1024   # 10 MB  — archivo principal
+MAX_FILE_SIZE_ANEXO   = 15 * 1024 * 1024   # 15 MB  — cada anexo/soporte
+MAX_FILE_SIZE_SEG     =  2 * 1024 * 1024   #  2 MB  — seguridad social (máx ~3 páginas)
 
 # Logging de seguridad
 import logging
@@ -1610,6 +1613,13 @@ def cargar_factura_api():
         
         if not allowed_file(archivo_pdf.filename):
             return jsonify({'error': 'Tipo de archivo PDF no permitido'}), 400
+
+        # Validar tamaño archivo principal (máx 10 MB)
+        archivo_pdf.seek(0, 2)
+        tam_pdf = archivo_pdf.tell()
+        archivo_pdf.seek(0)
+        if tam_pdf > MAX_FILE_SIZE:
+            return jsonify({'error': 'El archivo principal supera el límite de 10 MB'}), 400
         
         # Extraer datos del formulario
         prefijo = request.form['prefijo'].upper()
@@ -1738,22 +1748,36 @@ def cargar_factura_api():
             archivo_zip.save(ruta_zip)
             archivo_zip_path = ruta_zip
         
-        # Archivo Seguridad Social
+        # Archivo Seguridad Social (solo PDF, máx 10 MB)
         if 'archivo_seguridad' in request.files and request.files['archivo_seguridad'].filename:
             archivo_seg = request.files['archivo_seguridad']
             ext_seg = archivo_seg.filename.rsplit('.', 1)[1].lower()
-            nombre_seg = secure_filename(f"{nit_proveedor}-{prefijo}-{folio}_SEG.{ext_seg}")
+            if ext_seg != 'pdf':
+                return jsonify({'error': 'El archivo de Seguridad Social debe ser PDF'}), 400
+            archivo_seg.seek(0, 2)
+            tam_seg = archivo_seg.tell()
+            archivo_seg.seek(0)
+            if tam_seg > MAX_FILE_SIZE_SEG:
+                return jsonify({'error': 'El archivo de Seguridad Social supera el límite de 2 MB'}), 400
+            nombre_seg = secure_filename(f"{nit_proveedor}-{prefijo}-{folio}_SEG.pdf")
             ruta_seg = os.path.join(ruta_anexos, nombre_seg)
             archivo_seg.save(ruta_seg)
             archivo_seguridad_path = ruta_seg
         
-        # Archivos Soportes Múltiples
+        # Archivos Soportes Múltiples (solo PDF, máx 15 MB c/u)
         if 'archivos_soportes' in request.files:
             soportes = request.files.getlist('archivos_soportes')
             for idx, soporte in enumerate(soportes, 1):
                 if soporte.filename:
                     ext_sop = soporte.filename.rsplit('.', 1)[1].lower()
-                    nombre_sop = secure_filename(f"{nit_proveedor}-{prefijo}-{folio}_SOP{idx}.{ext_sop}")
+                    if ext_sop not in ALLOWED_EXTENSIONS_ANEXOS:
+                        return jsonify({'error': f'Anexo "{soporte.filename}": solo se permiten archivos PDF'}), 400
+                    soporte.seek(0, 2)
+                    tam_sop = soporte.tell()
+                    soporte.seek(0)
+                    if tam_sop > MAX_FILE_SIZE_ANEXO:
+                        return jsonify({'error': f'Anexo "{soporte.filename}" supera el límite de 15 MB por archivo'}), 400
+                    nombre_sop = secure_filename(f"{nit_proveedor}-{prefijo}-{folio}_SOP{idx}.pdf")
                     ruta_sop = os.path.join(ruta_anexos, nombre_sop)
                     soporte.save(ruta_sop)
                     archivos_soportes_paths.append(ruta_sop)

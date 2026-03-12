@@ -1200,8 +1200,14 @@ def dashboard():
         return redirect('/')
     
     try:
-        # Obtener datos del usuario de la sesión
-        user_data = session.get('user', {})
+        # Construir user_data desde las claves individuales de la sesión
+        user_data = {
+            'usuario': session.get('usuario', ''),
+            'nombre_completo': session.get('nombre_completo', session.get('usuario', '')),
+            'rol': session.get('rol', 'externo'),
+            'nit': session.get('nit', ''),
+            'correo': session.get('email', ''),
+        }
         return render_template("dashboard.html", user_data=user_data)
     except Exception as e:
         log_security(f"ERROR cargando dashboard | error={str(e)}")
@@ -1240,12 +1246,20 @@ def api_login():
         log_security(f"LOGIN BLOQUEADO por lista negra | IP={ip}")
         return jsonify({"success": False, "message": "Acceso denegado."}), 403
 
-    # Buscar usuario (case-insensitive para el nombre de usuario)
-    user = Usuario.query.filter(
-        (db.func.lower(Usuario.usuario) == usuario_alias.lower()) | 
+    # Buscar usuario: coincidencia exacta o por correo.
+    # ORDER BY activo DESC garantiza que si hay duplicados (ej: admin/ADMIN),
+    # siempre retorna el usuario activo primero.
+    prioridad_rol = {'admin': 0, 'interno': 1, 'externo': 2}
+    candidatos = Usuario.query.filter(
+        (db.func.lower(Usuario.usuario) == usuario_alias.lower()) |
         (db.func.lower(Usuario.correo) == usuario_alias.lower())
-    ).first()
-    
+    ).all()
+    if candidatos:
+        # Ordenar: activo primero, luego por rol (admin > interno > externo), luego por ID
+        user = min(candidatos, key=lambda u: (0 if u.activo else 1, prioridad_rol.get(u.rol, 3), u.id))
+    else:
+        user = None
+
     if not user:
         db.session.add(Acceso(usuario_id=None, ip=ip, user_agent=ua, exito=False, motivo="usuario no existe"))
         db.session.commit()
@@ -1345,7 +1359,20 @@ def api_login():
     session['nit'] = nit_sesion  # NIT con el que está trabajando (puede ser diferente para admins)
     session['rol'] = user.rol
     session['tercero_id'] = user.tercero_id  # Tercero REAL del usuario
-    
+
+    # Calcular nombre para mostrar en la interfaz
+    nombre_display = user.usuario  # fallback: username
+    if tercero_usuario:
+        if getattr(tercero_usuario, 'tipo_persona', '') == 'natural':
+            partes = [
+                getattr(tercero_usuario, 'primer_nombre', '') or '',
+                getattr(tercero_usuario, 'primer_apellido', '') or ''
+            ]
+            nombre_calculado = ' '.join(p for p in partes if p).strip()
+            if nombre_calculado:
+                nombre_display = nombre_calculado
+    session['nombre_completo'] = nombre_display
+
     # Obtener email del tercero (con manejo de errores)
     try:
         if tercero_usuario and hasattr(tercero_usuario, 'correo_electronico') and tercero_usuario.correo_electronico:
@@ -1354,7 +1381,7 @@ def api_login():
             session['email'] = ''
     except:
         session['email'] = ''
-    
+
     # ✅ CRÍTICO: Calcular tipo_usuario para módulo de facturas digitales
     # - Usuarios con rol 'externo' → tipo_usuario = 'externo'
     # - Todos los demás (admin, interno, usuario) → tipo_usuario = 'interno'
@@ -3058,12 +3085,9 @@ if __name__ == "__main__":
         print(f"[ADVERTENCIA] No se pudo iniciar scheduler DIAN VS ERP: {e}")
         print("[INFO] El sistema funcionará sin envíos automáticos programados")
     
-    # Leer la IP del .env (APP_BASE_URL), por defecto escucha en todas las interfaces
-    import re as _re
-    _base_url = os.getenv('APP_BASE_URL', '')
-    _ip_match = _re.search(r'https?://([^:/]+)', _base_url)
-    _host = _ip_match.group(1) if _ip_match else '0.0.0.0'
-    app.run(host=_host, port=8099, debug=True, use_reloader=False, threaded=True)
+    # Escuchar en todas las interfaces (0.0.0.0) para acceso local y en red
+    # APP_BASE_URL en .env solo se usa para generar URLs, no para hacer bind
+    app.run(host='0.0.0.0', port=8099, debug=True, use_reloader=False, threaded=True)
 
 
 
