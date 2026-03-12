@@ -208,14 +208,14 @@
                     </button>
                 </div>
                 
-                <!-- Botón Crear Tercero (aparece después de asignar estado final) -->
+                <!-- Botón Crear/Editar Tercero (aparece después de asignar estado final) -->
                 <div id="contenedor-crear-tercero" style="display: none; margin-top: 1.5rem;">
                     <div class="alerta alerta-success" style="margin-bottom: 1.5rem;">
                         <span>✅</span>
                         <strong>Estado del radicado actualizado correctamente.</strong> 
-                        Ahora puedes crear el tercero en el sistema.
+                        <span id="msg-crear-tercero">Ahora puedes crear el tercero en el sistema.</span>
                     </div>
-                    <button class="btn btn-primary" onclick="irACrearTercero()" 
+                    <button class="btn btn-primary" id="btn-crear-editar-tercero" onclick="irACrearTercero()" 
                             style="font-size: 1.1rem; padding: 0.75rem 2rem;">
                         👤 Crear Tercero
                     </button>
@@ -318,6 +318,7 @@
         let decisionActual = null;  // 'aprobado', 'rechazado', 'aprobado_condicionado'
         let documentoActual = null;
         let estadoRadicado = null;  // Estado final del radicado (si ya existe)
+        let terceroIdExistente = null;  // ID del tercero si ya existe en el módulo
 
         // ==================== CARGAR DOCUMENTOS ====================
         async function cargarDocumentos() {
@@ -330,7 +331,8 @@
                 
                 if (data.success) {
                     documentos = data.documentos;
-                    estadoRadicado = data.estado_radicado;  // Guardar estado del radicado
+                    estadoRadicado = data.estado_radicado;
+                    terceroIdExistente = data.tercero_id || null;  // null si aún no existe en el módulo
                     
                     document.getElementById('nit-proveedor').textContent = data.nit;
                     document.getElementById('nombre-proveedor').textContent = data.nombre;
@@ -625,13 +627,20 @@
                     btn.style.display = 'none';
                 });
                 
-                // Mostrar botón Crear Tercero automáticamente
+                // Mostrar botón Crear/Editar Tercero automáticamente
                 const btnCrearTercero = document.getElementById('contenedor-crear-tercero');
                 if (btnCrearTercero) {
                     btnCrearTercero.style.display = 'block';
+                    // Actualizar texto e ícono según si ya existe
+                    if (terceroIdExistente) {
+                        const btnLabel = document.getElementById('btn-crear-editar-tercero');
+                        if (btnLabel) btnLabel.innerHTML = '✏️ Editar Tercero';
+                        const msg = document.getElementById('msg-crear-tercero');
+                        if (msg) msg.textContent = 'Este tercero ya existe en el sistema. Puedes editar su información.';
+                    }
                 }
                 
-                console.log(`✅ Radicado ya tiene estado final: ${estadoRadicado}. Botón 'Crear Tercero' mostrado automáticamente.`);
+                console.log(`✅ Radicado ya tiene estado final: ${estadoRadicado}. terceroId: ${terceroIdExistente}`);
             }
         }
 
@@ -765,7 +774,7 @@
                     
                     mostrarAlerta('success', mensaje);
                     
-                    // Ocultar botones de decisión y mostrar botón Crear Tercero
+                    // Ocultar botones de decisión y mostrar botón Crear/Editar Tercero
                     const alertaDecision = document.getElementById('alerta-decision');
                     if (alertaDecision) {
                         alertaDecision.style.display = 'none';
@@ -774,6 +783,12 @@
                     const btnCrearTercero = document.getElementById('contenedor-crear-tercero');
                     if (btnCrearTercero) {
                         btnCrearTercero.style.display = 'block';
+                        if (terceroIdExistente) {
+                            const btnLabel = document.getElementById('btn-crear-editar-tercero');
+                            if (btnLabel) btnLabel.innerHTML = '✏️ Editar Tercero';
+                            const msg = document.getElementById('msg-crear-tercero');
+                            if (msg) msg.textContent = 'Este tercero ya existe en el sistema. Puedes editar su información.';
+                        }
                     }
                     
                     // NO redirigir automáticamente - dejar que usuario use botón Crear Tercero
@@ -810,10 +825,16 @@
             }, 5000);
         }
 
-        // ==================== CREAR TERCERO ====================
+        // ==================== CREAR / EDITAR TERCERO ====================
         function irACrearTercero() {
-            const radicado = window.location.pathname.split('/').pop();
-            window.location.href = `/terceros/crear?radicado=${radicado}`;
+            if (terceroIdExistente) {
+                // El tercero ya existe en el sistema → ir a editar
+                window.location.href = `/terceros/editar/${terceroIdExistente}`;
+            } else {
+                // Tercero nuevo → ir a crear
+                const rad = window.location.pathname.split('/').pop();
+                window.location.href = `/terceros/crear?radicado=${rad}`;
+            }
         }
         
         // ==================== DIVISOR REDIMENSIONABLE ====================

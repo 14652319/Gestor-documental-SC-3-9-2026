@@ -1050,15 +1050,44 @@ class Tercero(db.Model):
     segundo_apellido = db.Column(db.String(80))
     correo = db.Column(db.String(120))
     celular = db.Column(db.String(30))
-    telefono = db.Column(db.String(30))  # ← NUEVO: Teléfono fijo
-    direccion = db.Column(db.String(255))  # ← NUEVO: Dirección
-    ciudad = db.Column(db.String(100))  # ← NUEVO: Ciudad
-    departamento = db.Column(db.String(100))  # ← NUEVO: Departamento
+    telefono = db.Column(db.String(30))
+    direccion = db.Column(db.String(255))
+    ciudad = db.Column(db.String(100))
+    departamento = db.Column(db.String(100))
     tipo_documento = db.Column(db.String(5))  # CC, NIT, TI, CE, PA, PPT, PEP
     acepta_terminos = db.Column(db.Boolean, default=True)
     acepta_contacto = db.Column(db.Boolean, default=False)
     fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
+    fecha_actualizacion = db.Column(db.DateTime)
     estado = db.Column(db.String(20), default="pendiente")
+    # Contacto extendido
+    telefono_secundario = db.Column(db.String(30))
+    contacto_principal = db.Column(db.String(150))
+    cargo_contacto = db.Column(db.String(100))
+    # Categoría y correos adicionales
+    categoria_tercero = db.Column(db.String(50))
+    email_contabilidad = db.Column(db.String(150))
+    email_tesoreria = db.Column(db.String(150))
+    email_comercial = db.Column(db.String(150))
+    # Información fiscal
+    codigo_ciiu   = db.Column(db.String(20))
+    codigo_ciiu_2 = db.Column(db.String(20))
+    codigo_ciiu_3 = db.Column(db.String(20))
+    # Responsabilidades tributarias DIAN
+    responsable_iva = db.Column(db.Boolean, default=False)        # R-48
+    autorretenedor_renta = db.Column(db.Boolean, default=False)   # R-19
+    gran_contribuyente = db.Column(db.Boolean, default=False)     # R-13
+    gran_contribuyente_ica = db.Column(db.Boolean, default=False)
+    dept_gc_ica = db.Column(db.String(100))
+    mun_gc_ica = db.Column(db.String(100))
+    autorretenedor_ica = db.Column(db.Boolean, default=False)
+    dept_autorretenedor_ica = db.Column(db.String(100))
+    mun_autorretenedor_ica = db.Column(db.String(100))
+    agente_retenedor_iva = db.Column(db.Boolean, default=False)   # R-09
+    regimen_simple = db.Column(db.Boolean, default=False)         # R-47
+    otras_responsabilidades = db.Column(db.Text)                  # JSON array
+    # Notificaciones
+    notificaciones_activas = db.Column(db.Boolean, default=True)
 
 class Usuario(db.Model):
     __tablename__ = "usuarios"

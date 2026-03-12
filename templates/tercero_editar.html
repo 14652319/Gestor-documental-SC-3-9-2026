@@ -472,6 +472,184 @@
             }
         }
     </style>
+
+    <!-- ═══ OVERRIDES CORPORATIVOS + DARK MODE ═══ -->
+    <style>
+        /* Variables de tema */
+        :root {
+            --gd-verde: #166534;
+            --gd-verde-dark: #14532d;
+            --gd-verde-light: #22c55e;
+            --gd-verde-bg: #f0fdf4;
+            --gd-foco: #166534;
+            --gd-foco-sombra: rgba(22,101,52,0.15);
+            --gd-bg: #f3f4f6;
+            --gd-card: #ffffff;
+            --gd-text: #1f2937;
+            --gd-text-sec: #6b7280;
+            --gd-text-muted: #9ca3af;
+            --gd-borde: #e5e7eb;
+            --gd-input-bg: #ffffff;
+            --gd-footer-bg: #f9fafb;
+            --gd-mod-bg: rgba(22,101,52,0.05);
+            --gd-mod-borde: rgba(22,101,52,0.2);
+        }
+        [data-theme="dark"] {
+            --gd-foco: #22c55e;
+            --gd-foco-sombra: rgba(34,197,94,0.15);
+            --gd-bg: #111827;
+            --gd-card: #1f2937;
+            --gd-text: #f9fafb;
+            --gd-text-sec: #d1d5db;
+            --gd-text-muted: #9ca3af;
+            --gd-borde: #374151;
+            --gd-input-bg: #374151;
+            --gd-footer-bg: #161f2e;
+            --gd-mod-bg: rgba(34,197,94,0.08);
+            --gd-mod-borde: rgba(34,197,94,0.25);
+        }
+
+        /* Body */
+        body { background: var(--gd-bg) !important; color: var(--gd-text) !important; transition: background .3s, color .3s; }
+
+        /* ── HEADER CORPORATIVO VERDE ── */
+        .header-fijo {
+            background: linear-gradient(135deg, #166534 0%, #14532d 100%) !important;
+            height: 62px;
+            padding: 0 1.4rem;
+            flex-wrap: nowrap;
+            gap: 0.75rem;
+        }
+        .header-left  { display: flex; align-items: center; gap: 0.85rem; min-width: 0; }
+        .header-right { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; }
+        .header-brand { display: flex; flex-direction: column; min-width: 0; }
+        .header-empresa { color: rgba(255,255,255,.65); font-size: .67rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; white-space: nowrap; }
+        .header-titulo h1 { font-size: 1.05rem !important; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; align-items: center; gap: .4rem; }
+        .header-logo { height: 32px; width: auto; object-fit: contain; flex-shrink: 0; }
+        .header-nit-badge {
+            background: rgba(255,255,255,.18); color: #bbf7d0;
+            font-size: .8rem; font-weight: 700;
+            padding: .1rem .5rem; border-radius: 12px;
+            border: 1px solid rgba(187,247,208,.3);
+        }
+        .usuario-pill {
+            display: flex; align-items: center; gap: .35rem;
+            background: rgba(255,255,255,.12);
+            border: 1px solid rgba(255,255,255,.22);
+            border-radius: 20px; padding: .28rem .72rem;
+            color: #fff; font-size: .77rem; font-weight: 700;
+            white-space: nowrap;
+        }
+        .btn-dark-toggle {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 32px; height: 32px;
+            background: rgba(255,255,255,.12);
+            border: 1px solid rgba(255,255,255,.25);
+            border-radius: 50%; color: #fff; cursor: pointer;
+            font-size: .95rem; transition: background .2s, transform .2s;
+            flex-shrink: 0;
+        }
+        .btn-dark-toggle:hover { background: rgba(255,255,255,.25); transform: rotate(20deg); }
+        .btn-header {
+            display: inline-flex !important; align-items: center; gap: .3rem;
+            background: rgba(255,255,255,.12) !important;
+            border: 1px solid rgba(255,255,255,.25) !important;
+            color: #fff !important;
+            padding: .35rem .8rem; border-radius: 6px;
+            font-size: .77rem; font-weight: 700;
+            cursor: pointer; text-decoration: none;
+            transition: background .2s, transform .15s; white-space: nowrap;
+        }
+        .btn-header:hover { background: rgba(255,255,255,.22) !important; transform: translateY(-1px); }
+
+        /* ── FORMULARIO: verde en lugar de naranja ── */
+        .formulario-header {
+            background: linear-gradient(135deg, #166534 0%, #14532d 100%) !important;
+        }
+        .paso.activo { background: rgba(255,255,255,.93) !important; color: #166534 !important; }
+
+        /* ── SECCIÓN TÍTULO ── */
+        .seccion-titulo {
+            color: #166534 !important;
+            background: #f0fdf4 !important;
+            border-bottom: none !important;
+            border-left: 4px solid #166534 !important;
+            border-radius: 8px; padding: .65rem 1rem;
+        }
+
+        /* ── INPUTS FOCUS: verde ── */
+        .campo-input:focus, .campo-select:focus, .campo-textarea:focus {
+            border-color: var(--gd-foco) !important;
+            box-shadow: 0 0 0 3px var(--gd-foco-sombra) !important;
+        }
+
+        /* ── BTN-PRIMARY: verde ── */
+        .btn-primary { background: #166534 !important; color: #fff !important; box-shadow: 0 2px 6px rgba(22,101,52,.25) !important; }
+        .btn-primary:hover:not(:disabled) { background: #14532d !important; box-shadow: 0 4px 10px rgba(22,101,52,.35) !important; transform: translateY(-1px); }
+
+        /* ── LOADING: verde ── */
+        .loading { border-color: rgba(22,101,52,.25) !important; border-top-color: #166534 !important; }
+
+        /* ── CAMPO MODIFICADO: verde ── */
+        .campo-grupo.modificado { background: var(--gd-mod-bg); border: 1.5px solid var(--gd-mod-borde); }
+
+        /* ── ANIMACIÓN DE SECCIÓN ── */
+        .seccion.activa { animation: gdFadeIn .25s ease forwards; }
+        @keyframes gdFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ══════════ DARK MODE ══════════ */
+        [data-theme="dark"] body { background: #111827 !important; }
+        [data-theme="dark"] .formulario-container,
+        [data-theme="dark"] .info-actual { background: #1f2937 !important; border-color: #374151 !important; }
+        [data-theme="dark"] .formulario-body { background: #1f2937 !important; }
+        [data-theme="dark"] .formulario-footer { background: #161f2e !important; border-top: 1px solid #374151 !important; }
+        [data-theme="dark"] .campo-input,
+        [data-theme="dark"] .campo-select,
+        [data-theme="dark"] .campo-textarea { background: #374151 !important; color: #f9fafb !important; border-color: #4b5563 !important; }
+        [data-theme="dark"] .campo-input[readonly] { background: #2d3748 !important; color: #9ca3af !important; }
+        [data-theme="dark"] select[style*="pointer-events:none"] { background: #2d3748 !important; color: #9ca3af !important; }
+        [data-theme="dark"] input[style*="background-color"],
+        [data-theme="dark"] input[style*="#f9fafb"] { background: #2d3748 !important; }
+        [data-theme="dark"] .campo-label { color: #d1d5db !important; }
+        [data-theme="dark"] .campo-ayuda,
+        [data-theme="dark"] .info-label { color: #9ca3af !important; }
+        [data-theme="dark"] .info-valor,
+        [data-theme="dark"] .info-body  { background: #1f2937 !important; color: #f9fafb !important; }
+        [data-theme="dark"] .Estado-badge,
+        [data-theme="dark"] .estado-activo { background: rgba(16,185,129,.2) !important; color: #34d399 !important; }
+        [data-theme="dark"] .estado-inactivo { background: rgba(239,68,68,.15) !important; color: #f87171 !important; }
+        [data-theme="dark"] .loading-content { background: #1f2937 !important; color: #f9fafb !important; }
+        [data-theme="dark"] .btn-secondary { color: #d1d5db !important; border-color: #4b5563 !important; }
+        [data-theme="dark"] .btn-secondary:hover { background: #374151 !important; }
+        [data-theme="dark"] .btn-danger { color: #f87171 !important; border-color: #f87171 !important; }
+        [data-theme="dark"] .btn-danger:hover:not(:disabled) { background: #f87171 !important; color: #fff !important; }
+        [data-theme="dark"] .seccion-titulo { background: rgba(22,101,52,.2) !important; color: #86efac !important; border-left-color: #22c55e !important; }
+        [data-theme="dark"] .info-header { opacity: 1; }
+        [data-theme="dark"] .formulario-header { opacity: 1; }
+        [data-theme="dark"] .campo-grupo.modificado { background: rgba(34,197,94,.08) !important; border-color: rgba(34,197,94,.25) !important; }
+
+        /* Contenedor principal */
+        .contenedor-principal { margin-top: 78px; padding: 1.5rem 2rem; max-width: 1100px; margin-left: auto; margin-right: auto; background: transparent !important; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .usuario-pill { display: none !important; }
+            .header-empresa { display: none; }
+            .contenedor-principal { padding: 1rem; margin-top: 70px; }
+        }
+        @media (max-width: 480px) {
+            .btn-dark-toggle { display: none; }
+        }
+        /* Tributario DIAN */
+        small.cod-dian { font-size:.68rem; opacity:.52; font-weight:normal; margin-left:.3rem; }
+        .campo-trib { border-bottom: 1px dotted #d1fae5; padding-bottom:.65rem; }
+        [data-theme="dark"] .campo-trib { border-bottom-color: #1a2e22; }
+        .bloque-ica { border-left: 3px solid rgba(22,101,52,.25); padding:.65rem .85rem; margin:.25rem 0 .5rem .5rem; border-radius:0 6px 6px 0; background:rgba(22,101,52,.04); }
+        [data-theme="dark"] .bloque-ica { background:rgba(34,197,94,.04); border-left-color:rgba(34,197,94,.25); }
+    </style>
+
+    <!-- Dark mode: aplicar ANTES del render para evitar flash blanco -->
+    <script>(function(){var t=localStorage.getItem('gd-theme')||'light';document.documentElement.setAttribute('data-theme',t);})();</script>
 </head>
 <body>
     <!-- LOADING OVERLAY -->
@@ -486,21 +664,33 @@
     <!--                              HEADER FIJO                                 -->
     <!-- ========================================================================= -->
     <header class="header-fijo">
-        <div class="header-titulo">
-            <h1>
-                <span>✏️</span>
-                Editar Tercero - <span id="header-nit">Cargando...</span>
-            </h1>
+        <!-- Izquierda: logo + empresa + título -->
+        <div class="header-left">
+            <img src="{{ LOGO_PATH }}" alt="{{ LOGO_ALT_TEXT }}" class="header-logo"
+                 onerror="this.onerror=null; this.style.display='none';">
+            <div class="header-brand">
+                <span class="header-empresa">{{ EMPRESA_NOMBRE }}</span>
+                <div class="header-titulo">
+                    <h1>
+                        ✏️ Editar Tercero &mdash;
+                        <span class="header-nit-badge" id="header-nit">Cargando...</span>
+                    </h1>
+                </div>
+            </div>
         </div>
-        <div class="header-acciones">
-            <a href="/terceros/consulta" class="btn-header">
-                <span>📋</span>
-                Lista de Terceros
-            </a>
-            <a href="/terceros/" class="btn-header">
-                <span>🏠</span>
-                Dashboard
-            </a>
+        <!-- Derecha: usuario + dark mode + nav -->
+        <div class="header-right">
+            <div class="usuario-pill">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" style="width:13px;height:13px;opacity:.85;flex-shrink:0">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                </svg>
+                {{ session.get('usuario', '')|upper }}
+            </div>
+            <button class="btn-dark-toggle" id="btn-dark-toggle"
+                    title="Cambiar tema claro/oscuro"
+                    onclick="toggleDarkMode()">🌙</button>
+            <a href="/terceros/consulta" class="btn-header">📋 Lista</a>
+            <a href="/dashboard" class="btn-header">🏠 Dashboard</a>
         </div>
     </header>
 
@@ -534,8 +724,9 @@
                 </div>
                 <div class="progreso-pasos">
                     <div class="paso activo">1. Datos Básicos</div>
-                    <div class="paso">2. Información Extendida</div>
-                    <div class="paso">3. Configuración</div>
+                    <div class="paso">2. Contacto y Correos</div>
+                    <div class="paso">3. Tributario DIAN</div>
+                    <div class="paso">4. Configuración</div>
                 </div>
             </div>
 
@@ -584,7 +775,9 @@
                                 <label class="campo-label requerido">
                                     🏢 Razón Social / Nombre Completo
                                 </label>
-                                <input type="text" id="razon_social" class="campo-input" placeholder="Ej: EMPRESA EJEMPLO S.A.S" required>
+                                <input type="text" id="razon_social" class="campo-input"
+                                       placeholder="Ej: EMPRESA EJEMPLO S.A.S" required
+                                       oninput="this.value=this.value.toUpperCase()">
                                 <div class="campo-ayuda">Nombre completo de la empresa o persona natural</div>
                                 <div class="campo-error">La razón social es obligatoria</div>
                             </div>
@@ -648,110 +841,192 @@
                         </div>
                     </div>
 
-                    <!-- ===== SECCIÓN 2: INFORMACIÓN EXTENDIDA ===== -->
+                    <!-- ===== SECCIÓN 2: CONTACTO Y CORREOS ===== -->
                     <div class="seccion" id="seccion-extendida">
                         <div class="seccion-titulo">
-                            <span>🔍</span>
-                            Información Extendida
+                            <span>📋</span>
+                            Contacto y Correos
                         </div>
-                        
+
                         <div class="grid-campos">
                             <div class="campo-grupo">
-                                <label class="campo-label">
-                                    📞 Teléfono Secundario
-                                </label>
+                                <label class="campo-label">📞 Teléfono Secundario</label>
                                 <input type="tel" id="telefono_secundario" class="campo-input" placeholder="Ej: 300-1234567">
                                 <div class="campo-ayuda">Número alternativo de contacto</div>
                             </div>
-
                             <div class="campo-grupo">
-                                <label class="campo-label">
-                                    👤 Contacto Principal
-                                </label>
-                                <input type="text" id="contacto_principal" class="campo-input" placeholder="Nombre del contacto">
+                                <label class="campo-label">👤 Contacto Principal</label>
+                                <input type="text" id="contacto_principal" class="campo-input" placeholder="Nombre del contacto" oninput="this.value=this.value.toUpperCase()">
                                 <div class="campo-ayuda">Persona responsable del contacto</div>
                             </div>
-
                             <div class="campo-grupo">
-                                <label class="campo-label">
-                                    💼 Cargo del Contacto
-                                </label>
-                                <input type="text" id="cargo_contacto" class="campo-input" placeholder="Ej: Gerente General">
+                                <label class="campo-label">💼 Cargo del Contacto</label>
+                                <input type="text" id="cargo_contacto" class="campo-input" placeholder="Ej: Gerente General" oninput="this.value=this.value.toUpperCase()">
                                 <div class="campo-ayuda">Cargo o posición del contacto principal</div>
                             </div>
-
                             <div class="campo-grupo">
-                                <label class="campo-label">
-                                    📊 Categoría del Tercero
-                                </label>
+                                <label class="campo-label">📊 Categoría del Tercero</label>
                                 <select id="categoria_tercero" class="campo-select">
                                     <option value="">Seleccionar...</option>
                                     <option value="proveedor">Proveedor</option>
-                                    <option value="cliente">Cliente</option>
-                                    <option value="empleado">Empleado</option>
-                                    <option value="contratista">Contratista</option>
-                                    <option value="aliado">Aliado Estratégico</option>
-                                    <option value="otro">Otro</option>
+                                    <option value="acreedor">Acreedor</option>
+                                    <option value="proveedor_acreedor">Proveedor y Acreedor</option>
                                 </select>
                                 <div class="campo-ayuda">Tipo de relación comercial</div>
                             </div>
-
-                            <div class="campo-grupo">
-                                <label class="campo-label">
-                                    ⭐ Clasificación
-                                </label>
-                                <select id="clasificacion" class="campo-select">
-                                    <option value="">Seleccionar...</option>
-                                    <option value="A">A - Alta importancia</option>
-                                    <option value="B">B - Importancia media</option>
-                                    <option value="C">C - Importancia básica</option>
-                                </select>
-                                <div class="campo-ayuda">Clasificación según volumen/importancia</div>
+                            <div class="campo-grupo" style="grid-column:1/-1;">
+                                <label class="campo-label">🏭 Código(s) CIIU <small style="font-size:.75rem;opacity:.6;font-weight:normal;">(máximo 3)</small></label>
+                                <div style="display:flex; gap:.5rem; flex-wrap:wrap;">
+                                    <input type="text" id="codigo_ciiu" class="campo-input" placeholder="Principal (ej: 4711)" maxlength="10" style="flex:1; min-width:110px;" oninput="this.value=this.value.toUpperCase()">
+                                    <input type="text" id="codigo_ciiu_2" class="campo-input" placeholder="Secundario 1" maxlength="10" style="flex:1; min-width:110px;" oninput="this.value=this.value.toUpperCase()">
+                                    <input type="text" id="codigo_ciiu_3" class="campo-input" placeholder="Secundario 2" maxlength="10" style="flex:1; min-width:110px;" oninput="this.value=this.value.toUpperCase()">
+                                </div>
+                                <div class="campo-ayuda">Clasificación Industrial Internacional Uniforme — deje en blanco los que no apliquen</div>
                             </div>
+                        </div>
 
+                        <div class="seccion-titulo" style="margin-top:1.25rem;">
+                            <span>✉️</span>
+                            Correos por Área
+                        </div>
+                        <div class="grid-campos">
                             <div class="campo-grupo">
-                                <label class="campo-label">
-                                    💰 Límite de Crédito
-                                </label>
-                                <input type="number" id="limite_credito" class="campo-input" placeholder="0.00" min="0" step="0.01">
-                                <div class="campo-ayuda">Límite de crédito en pesos colombianos</div>
+                                <label class="campo-label">📒 Correo Contabilidad</label>
+                                <input type="email" id="email_contabilidad" class="campo-input" placeholder="contabilidad@empresa.com">
+                                <div class="campo-ayuda">Correo para envío de documentos contables</div>
+                            </div>
+                            <div class="campo-grupo">
+                                <label class="campo-label">🏦 Correo Tesorería</label>
+                                <input type="email" id="email_tesoreria" class="campo-input" placeholder="tesoreria@empresa.com">
+                                <div class="campo-ayuda">Correo para pagos y estados de cuenta</div>
+                            </div>
+                            <div class="campo-grupo">
+                                <label class="campo-label">🛒 Correo Comercial</label>
+                                <input type="email" id="email_comercial" class="campo-input" placeholder="comercial@empresa.com">
+                                <div class="campo-ayuda">Correo para gestión comercial y pedidos</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- ===== SECCIÓN 3: CONFIGURACIÓN ===== -->
+                    <!-- ===== SECCIÓN 3: TRIBUTARIO DIAN ===== -->
+                    <div class="seccion" id="seccion-tributario">
+                        <div class="seccion-titulo">
+                            <span>🏛️</span>
+                            Responsabilidades Tributarias DIAN
+                        </div>
+
+                        <div class="grid-campos" style="grid-template-columns:1fr 1fr;">
+
+                            <div class="campo-grupo campo-trib">
+                                <label class="campo-label">Responsable de IVA <small class="cod-dian">R-48</small></label>
+                                <select id="responsable_iva" class="campo-select">
+                                    <option value="false">No</option>
+                                    <option value="true">Sí</option>
+                                </select>
+                            </div>
+
+                            <div class="campo-grupo campo-trib">
+                                <label class="campo-label">Autorretenedor de Renta <small class="cod-dian">R-19</small></label>
+                                <select id="autorretenedor_renta" class="campo-select">
+                                    <option value="false">No</option>
+                                    <option value="true">Sí</option>
+                                </select>
+                            </div>
+
+                            <div class="campo-grupo campo-trib">
+                                <label class="campo-label">Gran Contribuyente <small class="cod-dian">R-13</small></label>
+                                <select id="gran_contribuyente" class="campo-select">
+                                    <option value="false">No</option>
+                                    <option value="true">Sí</option>
+                                </select>
+                            </div>
+
+                            <div class="campo-grupo campo-trib">
+                                <label class="campo-label">Agente Retenedor de IVA <small class="cod-dian">R-09</small></label>
+                                <select id="agente_retenedor_iva" class="campo-select">
+                                    <option value="false">No</option>
+                                    <option value="true">Sí</option>
+                                </select>
+                            </div>
+
+                            <div class="campo-grupo campo-trib">
+                                <label class="campo-label">Régimen Simple de Tributación <small class="cod-dian">R-47</small></label>
+                                <select id="regimen_simple" class="campo-select">
+                                    <option value="false">No</option>
+                                    <option value="true">Sí</option>
+                                </select>
+                            </div>
+
+                            <!-- Gran Contribuyente ICA con campo condicional -->
+                            <div class="campo-grupo campo-trib" style="grid-column:1/-1;">
+                                <label class="campo-label">Gran Contribuyente de ICA</label>
+                                <select id="gran_contribuyente_ica" class="campo-select" onchange="toggleICA('gc')">
+                                    <option value="false">No</option>
+                                    <option value="true">Sí</option>
+                                </select>
+                                <div id="bloque_gc_ica" class="bloque-ica" style="display:none; margin-top:.6rem;">
+                                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:.75rem; width:100%;">
+                                        <div>
+                                            <label class="campo-label" style="font-size:.82rem;">Departamento</label>
+                                            <select id="dept_gc_ica" class="campo-select" style="width:100%;" onchange="cargarMunicipiosICA('gc', '')"></select>
+                                        </div>
+                                        <div>
+                                            <label class="campo-label" style="font-size:.82rem;">Municipio</label>
+                                            <select id="mun_gc_ica" class="campo-select" style="width:100%;"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Autorretenedor ICA con campo condicional -->
+                            <div class="campo-grupo campo-trib" style="grid-column:1/-1;">
+                                <label class="campo-label">Autorretenedor de ICA</label>
+                                <select id="autorretenedor_ica" class="campo-select" onchange="toggleICA('ar')">
+                                    <option value="false">No</option>
+                                    <option value="true">Sí</option>
+                                </select>
+                                <div id="bloque_ar_ica" class="bloque-ica" style="display:none; margin-top:.6rem;">
+                                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:.75rem; width:100%;">
+                                        <div>
+                                            <label class="campo-label" style="font-size:.82rem;">Departamento</label>
+                                            <select id="dept_autorretenedor_ica" class="campo-select" style="width:100%;" onchange="cargarMunicipiosICA('ar', '')"></select>
+                                        </div>
+                                        <div>
+                                            <label class="campo-label" style="font-size:.82rem;">Municipio</label>
+                                            <select id="mun_autorretenedor_ica" class="campo-select" style="width:100%;"></select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Otras responsabilidades -->
+                        <div class="seccion-titulo" style="margin-top:1.25rem;">
+                            <span>➕</span>
+                            Otras Responsabilidades
+                        </div>
+                        <div id="lista_otras_resp" style="display:flex; flex-direction:column; gap:.5rem; margin-bottom:.75rem;"></div>
+                        <button type="button" class="btn btn-secondary" style="font-size:.82rem; padding:.35rem .9rem;" onclick="agregarOtraResponsabilidad()">
+                            + Agregar responsabilidad
+                        </button>
+                    </div>
+
+                    <!-- ===== SECCIÓN 4: CONFIGURACIÓN ===== -->
                     <div class="seccion" id="seccion-configuracion">
                         <div class="seccion-titulo">
                             <span>⚙️</span>
-                            Configuración de Notificaciones
+                            Configuración
                         </div>
-                        
-                        <div class="grid-campos">
-                            <div class="campo-grupo">
-                                <label class="campo-label">
-                                    📅 Frecuencia de Notificación (días)
-                                </label>
-                                <input type="number" id="frecuencia_notificacion" class="campo-input" min="1" max="9999">
-                                <div class="campo-ayuda">Cada cuántos días enviar recordatorio de actualización</div>
-                            </div>
 
+                        <div class="grid-campos" style="grid-template-columns:1fr;">
                             <div class="campo-grupo">
-                                <label class="campo-label">
-                                    🔔 Notificaciones Activas
-                                </label>
+                                <label class="campo-label">🔔 Notificaciones por Correo</label>
                                 <select id="notificaciones_activas" class="campo-select">
-                                    <option value="true">Sí, enviar notificaciones</option>
-                                    <option value="false">No, desactivar notificaciones</option>
+                                    <option value="true">✅ Sí, enviar notificaciones</option>
+                                    <option value="false">🚫 No, desactivar notificaciones</option>
                                 </select>
-                                <div class="campo-ayuda">Habilitar o deshabilitar envío automático de correos</div>
-                            </div>
-
-                            <div class="campo-grupo">
-                                <label class="campo-label">
-                                    📝 Datos Adicionales (JSON)
-                                </label>
-                                <textarea id="datos_adicionales" class="campo-textarea" placeholder='{"campo_personalizado": "valor", "otro_campo": "otro_valor"}'></textarea>
-                                <div class="campo-ayuda">Información adicional en formato JSON para futuras extensiones</div>
+                                <div class="campo-ayuda">Envío automático de recordatorios y alertas a los correos registrados</div>
                             </div>
                         </div>
                     </div>
@@ -795,7 +1070,7 @@
         // =====================================================================
         
         let seccionActual = 1;
-        const totalSecciones = 3;
+        const totalSecciones = 4;
         let datosOriginales = {};
         // ID inyectado por Flask (disponible si se abrió desde /editar/<id>)
         let terceroId = {{ tercero.id if tercero else 'null' }};
@@ -839,7 +1114,7 @@
         }
 
         function getSectionName(numero) {
-            const nombres = ['basicos', 'extendida', 'configuracion'];
+            const nombres = ['basicos', 'extendida', 'tributario', 'configuracion'];
             return nombres[numero - 1];
         }
 
@@ -937,20 +1212,50 @@
             document.getElementById('activo').value = tercero.activo ? 'true' : 'false';
 
             // Datos extendidos
-            document.getElementById('telefono_secundario').value = tercero.telefono_secundario || '';
-            document.getElementById('contacto_principal').value = tercero.contacto_principal || '';
-            document.getElementById('cargo_contacto').value = tercero.cargo_contacto || '';
-            document.getElementById('categoria_tercero').value = tercero.categoria_tercero || '';
-            document.getElementById('clasificacion').value = tercero.clasificacion || '';
-            document.getElementById('limite_credito').value = tercero.limite_credito || '';
+            const _set = (id, val) => { const el = document.getElementById(id); if(el) el.value = val || ''; };
+            _set('telefono_secundario', tercero.telefono_secundario);
+            _set('contacto_principal',  tercero.contacto_principal);
+            _set('cargo_contacto',      tercero.cargo_contacto);
+            _set('categoria_tercero',   tercero.categoria_tercero);
+            _set('codigo_ciiu',   tercero.codigo_ciiu);
+            _set('codigo_ciiu_2', tercero.codigo_ciiu_2);
+            _set('codigo_ciiu_3', tercero.codigo_ciiu_3);
+            _set('email_contabilidad',  tercero.email_contabilidad);
+            _set('email_tesoreria',     tercero.email_tesoreria);
+            _set('email_comercial',     tercero.email_comercial);
+
+            // Responsabilidades tributarias
+            const _sb = (id, val) => { const el = document.getElementById(id); if(el) el.value = val ? 'true' : 'false'; };
+            _sb('responsable_iva',      tercero.responsable_iva);
+            _sb('autorretenedor_renta', tercero.autorretenedor_renta);
+            _sb('gran_contribuyente',   tercero.gran_contribuyente);
+            _sb('gran_contribuyente_ica', tercero.gran_contribuyente_ica);
+            _sb('autorretenedor_ica',   tercero.autorretenedor_ica);
+            _sb('agente_retenedor_iva', tercero.agente_retenedor_iva);
+            _sb('regimen_simple',       tercero.regimen_simple);
+
+            // Cargar dept/mun de GC-ICA
+            if (tercero.gran_contribuyente_ica) {
+                document.getElementById('bloque_gc_ica').style.display = 'block';
+                cargarDeptsICA('dept_gc_ica', tercero.dept_gc_ica, 'mun_gc_ica', tercero.mun_gc_ica);
+            }
+            // Cargar dept/mun de AR-ICA
+            if (tercero.autorretenedor_ica) {
+                document.getElementById('bloque_ar_ica').style.display = 'block';
+                cargarDeptsICA('dept_autorretenedor_ica', tercero.dept_autorretenedor_ica, 'mun_autorretenedor_ica', tercero.mun_autorretenedor_ica);
+            }
+
+            // Otras responsabilidades
+            if (tercero.otras_responsabilidades) {
+                try {
+                    const arr = JSON.parse(tercero.otras_responsabilidades);
+                    if (Array.isArray(arr)) arr.forEach(r => agregarOtraResponsabilidad(r));
+                } catch(e) {}
+            }
 
             // Configuración
-            document.getElementById('frecuencia_notificacion').value = tercero.frecuencia_notificacion || 365;
-            document.getElementById('notificaciones_activas').value = tercero.notificaciones_activas ? 'true' : 'false';
-            
-            // Datos adicionales JSON
-            const datosAdicionales = tercero.datos_adicionales ? JSON.stringify(tercero.datos_adicionales, null, 2) : '';
-            document.getElementById('datos_adicionales').value = datosAdicionales;
+            const notifEl = document.getElementById('notificaciones_activas');
+            if (notifEl) notifEl.value = (tercero.notificaciones_activas !== false) ? 'true' : 'false';
         }
 
         // 🪪 TIPOS DE DOCUMENTO (editar)
@@ -1014,10 +1319,6 @@
                     <div class="info-valor">${tercero.categoria_tercero || 'No especificado'}</div>
                 </div>
                 <div class="info-campo">
-                    <div class="info-label">Clasificación</div>
-                    <div class="info-valor">${tercero.clasificacion || 'No especificado'}</div>
-                </div>
-                <div class="info-campo">
                     <div class="info-label">Última Actualización</div>
                     <div class="info-valor">${formatearFecha(tercero.fecha_actualizacion || tercero.fecha_registro)}</div>
                 </div>
@@ -1048,14 +1349,11 @@
         
         function validarSeccionActual() {
             switch (seccionActual) {
-                case 1:
-                    return validarDatosBasicos();
-                case 2:
-                    return validarDatosExtendidos();
-                case 3:
-                    return validarConfiguracion();
-                default:
-                    return true;
+                case 1: return validarDatosBasicos();
+                case 2: return validarDatosExtendidos();
+                case 3: return validarTributario();
+                case 4: return validarConfiguracion();
+                default: return true;
             }
         }
 
@@ -1088,45 +1386,41 @@
         }
 
         function validarDatosExtendidos() {
-            let esValido = true;
+            // Validar correos adicionales si se especifican
+            const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            let ok = true;
+            ['email_contabilidad','email_tesoreria','email_comercial'].forEach(id => {
+                const val = document.getElementById(id).value.trim();
+                if (val && !emailRe.test(val)) {
+                    mostrarErrorCampo(id, 'Correo no válido');
+                    ok = false;
+                } else {
+                    const el = document.getElementById(id);
+                    if (el) el.closest('.campo-grupo').classList.remove('error');
+                }
+            });
+            return ok;
+        }
 
-            // Validar límite de crédito si se especifica
-            const limiteCredito = document.getElementById('limite_credito').value;
-            if (limiteCredito && (isNaN(limiteCredito) || limiteCredito < 0)) {
-                mostrarErrorCampo('limite_credito', 'El límite de crédito debe ser un número válido mayor o igual a 0');
-                esValido = false;
-            } else {
-                limpiarErrorCampo('limite_credito');
+        function validarTributario() {
+            // Verificar que si GC-ICA = Sí, se seleccionó departamento
+            if (document.getElementById('gran_contribuyente_ica').value === 'true') {
+                if (!document.getElementById('dept_gc_ica').value) {
+                    alert('⚠️ Gran Contribuyente ICA: debe seleccionar el departamento.');
+                    return false;
+                }
             }
-
-            return esValido;
+            if (document.getElementById('autorretenedor_ica').value === 'true') {
+                if (!document.getElementById('dept_autorretenedor_ica').value) {
+                    alert('⚠️ Autorretenedor ICA: debe seleccionar el departamento.');
+                    return false;
+                }
+            }
+            return true;
         }
 
         function validarConfiguracion() {
-            let esValido = true;
-
-            // Validar frecuencia de notificación
-            const frecuencia = document.getElementById('frecuencia_notificacion').value;
-            if (!frecuencia || frecuencia < 1) {
-                mostrarErrorCampo('frecuencia_notificacion', 'La frecuencia debe ser mayor a 0 días');
-                esValido = false;
-            } else {
-                limpiarErrorCampo('frecuencia_notificacion');
-            }
-
-            // Validar JSON si se especifica
-            const datosAdicionales = document.getElementById('datos_adicionales').value.trim();
-            if (datosAdicionales) {
-                try {
-                    JSON.parse(datosAdicionales);
-                    limpiarErrorCampo('datos_adicionales');
-                } catch (e) {
-                    mostrarErrorCampo('datos_adicionales', 'El formato JSON no es válido');
-                    esValido = false;
-                }
-            }
-
-            return esValido;
+            return true;  // Solo notificaciones, siempre válido
         }
 
         function mostrarErrorCampo(campoId, mensaje) {
@@ -1198,8 +1492,7 @@
         // =====================================================================
         
         async function actualizarTercero() {
-            // Validar todas las secciones
-            if (!validarDatosBasicos() || !validarDatosExtendidos() || !validarConfiguracion()) {
+            if (!validarDatosBasicos() || !validarDatosExtendidos() || !validarTributario() || !validarConfiguracion()) {
                 alert('❌ Por favor corrija los errores antes de actualizar');
                 return;
             }
@@ -1208,38 +1501,53 @@
             btnGuardar.disabled = true;
             btnGuardar.innerHTML = '<div class="loading"></div> Actualizando...';
 
-            try {
-                // Recopilar datos del formulario
-                const datosActualizados = {
-                    razon_social: document.getElementById('razon_social').value.trim(),
-                    email: document.getElementById('email').value.trim(),
-                    telefono: document.getElementById('telefono').value.trim() || null,
-                    direccion: document.getElementById('direccion').value.trim() || null,
-                    ciudad: document.getElementById('ciudad').value || null,
-                    departamento: document.getElementById('departamento').value || null,
-                    tipo_documento: (document.getElementById('tipo_documento') || {}).value || null,
-                    activo: document.getElementById('activo').value === 'true',
-                    telefono_secundario: document.getElementById('telefono_secundario').value.trim() || null,
-                    contacto_principal: document.getElementById('contacto_principal').value.trim() || null,
-                    cargo_contacto: document.getElementById('cargo_contacto').value.trim() || null,
-                    categoria_tercero: document.getElementById('categoria_tercero').value || null,
-                    clasificacion: document.getElementById('clasificacion').value || null,
-                    limite_credito: parseFloat(document.getElementById('limite_credito').value) || 0,
-                    frecuencia_notificacion: parseInt(document.getElementById('frecuencia_notificacion').value),
-                    notificaciones_activas: document.getElementById('notificaciones_activas').value === 'true',
-                    datos_adicionales: {}
-                };
+            // Recolectar otras responsabilidades
+            const otrasResp = [];
+            document.querySelectorAll('#lista_otras_resp .otra-resp-row').forEach(row => {
+                const cod  = row.querySelector('.otra-resp-cod').value.trim();
+                const desc = row.querySelector('.otra-resp-desc').value.trim();
+                if (cod || desc) otrasResp.push({ codigo: cod, descripcion: desc });
+            });
 
-                // Parsear datos adicionales JSON si existen
-                const datosAdicionalesTexto = document.getElementById('datos_adicionales').value.trim();
-                if (datosAdicionalesTexto) {
-                    try {
-                        datosActualizados.datos_adicionales = JSON.parse(datosAdicionalesTexto);
-                    } catch (e) {
-                        alert('❌ Error en el formato JSON de datos adicionales');
-                        return;
-                    }
-                }
+            try {
+                const get = id => { const el = document.getElementById(id); return el ? el.value : ''; };
+                const datosActualizados = {
+                    razon_social: get('razon_social').toUpperCase().trim(),
+                    email: get('email').trim(),
+                    telefono: get('telefono').trim() || null,
+                    direccion: get('direccion').toUpperCase().trim() || null,
+                    ciudad: get('ciudad') || null,
+                    departamento: get('departamento') || null,
+                    tipo_documento: get('tipo_documento') || null,
+                    activo: get('activo') === 'true',
+                    // Contacto extendido
+                    telefono_secundario: get('telefono_secundario').trim() || null,
+                    contacto_principal: get('contacto_principal').trim() || null,
+                    cargo_contacto: get('cargo_contacto').trim() || null,
+                    // Categoría y correos
+                    categoria_tercero: get('categoria_tercero') || null,
+                    codigo_ciiu:   get('codigo_ciiu').trim()   || null,
+                    codigo_ciiu_2: get('codigo_ciiu_2').trim() || null,
+                    codigo_ciiu_3: get('codigo_ciiu_3').trim() || null,
+                    email_contabilidad: get('email_contabilidad').trim() || null,
+                    email_tesoreria: get('email_tesoreria').trim() || null,
+                    email_comercial: get('email_comercial').trim() || null,
+                    // Responsabilidades tributarias
+                    responsable_iva:       get('responsable_iva') === 'true',
+                    autorretenedor_renta:  get('autorretenedor_renta') === 'true',
+                    gran_contribuyente:    get('gran_contribuyente') === 'true',
+                    gran_contribuyente_ica: get('gran_contribuyente_ica') === 'true',
+                    dept_gc_ica:           get('dept_gc_ica') || null,
+                    mun_gc_ica:            get('mun_gc_ica') || null,
+                    autorretenedor_ica:    get('autorretenedor_ica') === 'true',
+                    dept_autorretenedor_ica: get('dept_autorretenedor_ica') || null,
+                    mun_autorretenedor_ica:  get('mun_autorretenedor_ica') || null,
+                    agente_retenedor_iva:  get('agente_retenedor_iva') === 'true',
+                    regimen_simple:        get('regimen_simple') === 'true',
+                    otras_responsabilidades: otrasResp.length ? JSON.stringify(otrasResp) : null,
+                    // Notificaciones
+                    notificaciones_activas: get('notificaciones_activas') === 'true'
+                };
 
                 // Enviar al servidor
                 const response = await fetch(`/terceros/api/actualizar/${terceroId}`, {
@@ -1278,6 +1586,70 @@
                 llenarFormulario(datosOriginales);
                 detectarCambios();
             }
+        }
+
+        // =====================================================================
+        //              ICA: MOSTRAR/OCULTAR + LISTAS DEPENDIENTES
+        // =====================================================================
+
+        function toggleICA(tipo) {
+            const selId  = tipo === 'gc' ? 'gran_contribuyente_ica'   : 'autorretenedor_ica';
+            const bloqId = tipo === 'gc' ? 'bloque_gc_ica'            : 'bloque_ar_ica';
+            const activo = document.getElementById(selId).value === 'true';
+            const bloque = document.getElementById(bloqId);
+            bloque.style.display = activo ? 'block' : 'none';
+            if (activo && !document.getElementById(tipo === 'gc' ? 'dept_gc_ica' : 'dept_autorretenedor_ica').options.length > 1) {
+                cargarDeptsICA(tipo === 'gc' ? 'dept_gc_ica' : 'dept_autorretenedor_ica', '', tipo === 'gc' ? 'mun_gc_ica' : 'mun_autorretenedor_ica', '');
+            }
+        }
+
+        function cargarDeptsICA(deptId, deptVal, munId, munVal) {
+            // Reutiliza initDeptoCiudadDropdowns de colombia_divipola.js
+            initDeptoCiudadDropdowns(deptId, munId, deptVal || '', munVal || '');
+        }
+
+        function cargarMunicipiosICA(tipo, preselect) {
+            // No-op: initDeptoCiudadDropdowns ya enlaza el listener onchange
+            // Se mantiene por compatibilidad con onchange del HTML
+            const deptId = tipo === 'gc' ? 'dept_gc_ica' : 'dept_autorretenedor_ica';
+            const munId  = tipo === 'gc' ? 'mun_gc_ica'  : 'mun_autorretenedor_ica';
+            const deptSel = document.getElementById(deptId);
+            if (!deptSel || !deptSel.value) return;
+            const munSel = document.getElementById(munId);
+            if (!munSel || !window.COLOMBIA_DIVIPOLA) return;
+            const muns = COLOMBIA_DIVIPOLA[deptSel.value] || [];
+            munSel.innerHTML = '<option value="">-- Seleccione municipio --</option>';
+            muns.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m; opt.textContent = m;
+                if (preselect && m === preselect.toUpperCase()) opt.selected = true;
+                munSel.appendChild(opt);
+            });
+        }
+
+        // =====================================================================
+        //              OTRAS RESPONSABILIDADES DINÁMICAS
+        // =====================================================================
+
+        function agregarOtraResponsabilidad(datos) {
+            const lista = document.getElementById('lista_otras_resp');
+            const idx = lista.children.length;
+            const cod  = datos ? (datos.codigo || '') : '';
+            const desc = datos ? (datos.descripcion || '') : '';
+            const row  = document.createElement('div');
+            row.className = 'otra-resp-row';
+            row.style.cssText = 'display:flex;gap:.5rem;align-items:center;margin-bottom:.4rem;';
+            row.innerHTML = `
+                <input type="text" class="campo-input otra-resp-cod" placeholder="Código (ej: R-15)"
+                       value="${cod}" maxlength="20" style="max-width:130px;"
+                       oninput="this.value=this.value.toUpperCase()">
+                <input type="text" class="campo-input otra-resp-desc" placeholder="Descripción de la responsabilidad"
+                       value="${desc}" style="flex:1;"
+                       oninput="this.value=this.value.toUpperCase()">
+                <button type="button" class="btn btn-danger" style="padding:.3rem .6rem;font-size:.75rem;"
+                        onclick="this.closest('.otra-resp-row').remove()">🗑️</button>
+            `;
+            lista.appendChild(row);
         }
 
         async function eliminarTercero() {
@@ -1445,5 +1817,25 @@ document.querySelectorAll('input[type="text"], input[type="tel"], textarea').for
 });
 </script>
 <script src="/static/js/colombia_divipola.js"></script>
+
+    <!-- ── DARK MODE TOGGLE ── -->
+    <script>
+        function toggleDarkMode() {
+            var html = document.documentElement;
+            var isDark = html.getAttribute('data-theme') === 'dark';
+            var newTheme = isDark ? 'light' : 'dark';
+            html.setAttribute('data-theme', newTheme);
+            var btn = document.getElementById('btn-dark-toggle');
+            if (btn) btn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+            localStorage.setItem('gd-theme', newTheme);
+        }
+
+        // Actualizar ícono del botón al cargar (el tema ya fue aplicado en el <head>)
+        document.addEventListener('DOMContentLoaded', function () {
+            var saved = localStorage.getItem('gd-theme') || 'light';
+            var btn = document.getElementById('btn-dark-toggle');
+            if (btn) btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+        });
+    </script>
     </body>
 </html>

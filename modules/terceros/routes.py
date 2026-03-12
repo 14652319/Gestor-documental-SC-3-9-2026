@@ -309,8 +309,10 @@ def crear_tercero():
         tercero_existente = TerceroHelper.buscar_por_nit(data.get('nit'))
         if tercero_existente:
             return jsonify({
-                'success': False, 
-                'message': 'Ya existe un tercero con este NIT'
+                'success': False,
+                'error_code': 'NIT_DUPLICADO',
+                'message': 'Ya existe un tercero con este NIT',
+                'tercero_id': tercero_existente.id
             }), 400
         
         # Crear nuevo tercero
@@ -435,6 +437,10 @@ def obtener_tercero(tercero_id):
                 'message': 'Tercero no encontrado'
             }), 404
         
+        def _bool(val, default=False):
+            v = getattr(tercero, val, default)
+            return bool(v) if v is not None else default
+
         return jsonify({
             'success': True,
             'tercero': {
@@ -454,10 +460,35 @@ def obtener_tercero(tercero_id):
                 'tipo_documento': getattr(tercero, 'tipo_documento', '') or '',
                 'activo': getattr(tercero, 'estado', 'inactivo') == 'activo',
                 'tipo_persona': getattr(tercero, 'tipo_persona', '') or '',
-                'categoria_tercero': getattr(tercero, 'categoria_tercero', '') or '',
-                'clasificacion': getattr(tercero, 'clasificacion', '') or '',
                 'fecha_registro': tercero.fecha_registro.strftime('%Y-%m-%d %H:%M') if tercero.fecha_registro else '',
-                'fecha_actualizacion': tercero.fecha_actualizacion.strftime('%Y-%m-%d %H:%M') if getattr(tercero, 'fecha_actualizacion', None) else ''
+                'fecha_actualizacion': tercero.fecha_actualizacion.strftime('%Y-%m-%d %H:%M') if getattr(tercero, 'fecha_actualizacion', None) else '',
+                # Contacto extendido
+                'telefono_secundario': getattr(tercero, 'telefono_secundario', '') or '',
+                'contacto_principal': getattr(tercero, 'contacto_principal', '') or '',
+                'cargo_contacto': getattr(tercero, 'cargo_contacto', '') or '',
+                # Categoría y correos
+                'categoria_tercero': getattr(tercero, 'categoria_tercero', '') or '',
+                'email_contabilidad': getattr(tercero, 'email_contabilidad', '') or '',
+                'email_tesoreria': getattr(tercero, 'email_tesoreria', '') or '',
+                'email_comercial': getattr(tercero, 'email_comercial', '') or '',
+                'codigo_ciiu':   getattr(tercero, 'codigo_ciiu',   '') or '',
+                'codigo_ciiu_2': getattr(tercero, 'codigo_ciiu_2', '') or '',
+                'codigo_ciiu_3': getattr(tercero, 'codigo_ciiu_3', '') or '',
+                # Responsabilidades tributarias
+                'responsable_iva': _bool('responsable_iva'),
+                'autorretenedor_renta': _bool('autorretenedor_renta'),
+                'gran_contribuyente': _bool('gran_contribuyente'),
+                'gran_contribuyente_ica': _bool('gran_contribuyente_ica'),
+                'dept_gc_ica': getattr(tercero, 'dept_gc_ica', '') or '',
+                'mun_gc_ica': getattr(tercero, 'mun_gc_ica', '') or '',
+                'autorretenedor_ica': _bool('autorretenedor_ica'),
+                'dept_autorretenedor_ica': getattr(tercero, 'dept_autorretenedor_ica', '') or '',
+                'mun_autorretenedor_ica': getattr(tercero, 'mun_autorretenedor_ica', '') or '',
+                'agente_retenedor_iva': _bool('agente_retenedor_iva'),
+                'regimen_simple': _bool('regimen_simple'),
+                'otras_responsabilidades': getattr(tercero, 'otras_responsabilidades', '') or '',
+                # Notificaciones
+                'notificaciones_activas': _bool('notificaciones_activas', True),
             }
         })
         
@@ -515,40 +546,80 @@ def actualizar_tercero(tercero_id):
             return jsonify({'success': False, 'message': 'No se recibieron datos'}), 400
 
         # --- Campos del modelo core Tercero ---
+        def _str(key, upper=False):
+            v = data.get(key)
+            if v is None:
+                return None
+            v = str(v).strip()
+            return v.upper() if upper else v
+
+        def _bool_field(key, default=None):
+            v = data.get(key)
+            if v is None:
+                return default
+            return bool(v)
+
+        # Campos core
         if 'razon_social' in data and data['razon_social']:
             tercero.razon_social = data['razon_social'].upper().strip()
-
         if 'email' in data:
             tercero.correo = data['email'].strip() if data['email'] else None
-
         if 'telefono' in data:
-            tercero.telefono = data['telefono'] or None
-
+            tercero.telefono = _str('telefono')
         if 'direccion' in data:
-            tercero.direccion = data['direccion'] or None
-
+            tercero.direccion = _str('direccion')
         if 'ciudad' in data:
-            tercero.ciudad = data['ciudad'] or None
-
+            tercero.ciudad = _str('ciudad')
         if 'departamento' in data:
-            tercero.departamento = data['departamento'] or None
-
+            tercero.departamento = _str('departamento')
         if 'tipo_documento' in data:
-            tercero.tipo_documento = data['tipo_documento'] or None
-
+            tercero.tipo_documento = _str('tipo_documento')
         if 'activo' in data:
             tercero.estado = 'activo' if data['activo'] else 'inactivo'
 
-        # --- Actualizar fecha_actualizacion si la columna existe en BD ---
-        try:
-            from sqlalchemy import text
-            with db.engine.connect() as conn:
-                conn.execute(text(
-                    "UPDATE terceros SET fecha_actualizacion = NOW() WHERE id = :id"
-                ), {'id': tercero_id})
-                conn.commit()
-        except Exception:
-            pass  # Columna puede no existir en todos los entornos
+        # Contacto extendido
+        for campo in ('telefono_secundario', 'contacto_principal', 'cargo_contacto'):
+            if campo in data:
+                setattr(tercero, campo, _str(campo, upper=(campo in ('contacto_principal', 'cargo_contacto'))))
+
+        # Categoría y correos
+        if 'categoria_tercero' in data:
+            tercero.categoria_tercero = _str('categoria_tercero')
+        for campo in ('email_contabilidad', 'email_tesoreria', 'email_comercial'):
+            if campo in data:
+                setattr(tercero, campo, _str(campo))
+        for campo in ('codigo_ciiu', 'codigo_ciiu_2', 'codigo_ciiu_3'):
+            if campo in data:
+                setattr(tercero, campo, _str(campo))
+
+        # Responsabilidades tributarias DIAN
+        bool_campos = [
+            'responsable_iva', 'autorretenedor_renta', 'gran_contribuyente',
+            'gran_contribuyente_ica', 'autorretenedor_ica',
+            'agente_retenedor_iva', 'regimen_simple'
+        ]
+        for campo in bool_campos:
+            v = _bool_field(campo)
+            if v is not None:
+                setattr(tercero, campo, v)
+
+        # Departamento/municipio ICA
+        for campo in ('dept_gc_ica', 'mun_gc_ica', 'dept_autorretenedor_ica', 'mun_autorretenedor_ica'):
+            if campo in data:
+                setattr(tercero, campo, _str(campo))
+
+        # Otras responsabilidades (JSON string)
+        if 'otras_responsabilidades' in data:
+            tercero.otras_responsabilidades = data['otras_responsabilidades'] or None
+
+        # Notificaciones
+        v_notif = _bool_field('notificaciones_activas')
+        if v_notif is not None:
+            tercero.notificaciones_activas = v_notif
+
+        # Fecha actualización
+        from datetime import datetime as _dt
+        tercero.fecha_actualizacion = _dt.now()
 
         db.session.commit()
 

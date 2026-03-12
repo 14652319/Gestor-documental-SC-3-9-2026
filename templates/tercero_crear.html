@@ -954,6 +954,18 @@
                 const resultado = await response.json();
 
                 if (!resultado.success) {
+                    // Caso especial: NIT duplicado → ofrecer ir a editar
+                    if (resultado.error_code === 'NIT_DUPLICADO' && resultado.tercero_id) {
+                        const btnGuardar = document.getElementById('btn-guardar');
+                        btnGuardar.disabled = false;
+                        btnGuardar.innerHTML = '💾 Guardar Tercero';
+                        mostrarAlertaConEnlace(
+                            `⚠️ Este tercero ya existe en el sistema.`,
+                            `Ir a Editar Tercero`,
+                            `/terceros/editar/${resultado.tercero_id}`
+                        );
+                        return;
+                    }
                     throw new Error(resultado.message);
                 }
 
@@ -984,6 +996,15 @@
             const alerta = document.getElementById(`alerta-${tipo}`);
             if (alerta) {
                 alerta.textContent = mensaje;
+                alerta.style.display = 'block';
+            }
+        }
+
+        function mostrarAlertaConEnlace(mensaje, textoEnlace, urlEnlace) {
+            ocultarAlertas();
+            const alerta = document.getElementById('alerta-error');
+            if (alerta) {
+                alerta.innerHTML = `${mensaje} &nbsp;<a href="${urlEnlace}" style="color:#b91c1c;font-weight:bold;text-decoration:underline;">${textoEnlace} →</a>`;
                 alerta.style.display = 'block';
             }
         }

@@ -166,14 +166,19 @@ def obtener_documentos_radicado(radicado):
                 'observacion': observacion
             })
         
+        # Verificar si el tercero ya existe en el módulo de terceros
+        from modules.terceros.models import TerceroHelper
+        tercero_modulo = TerceroHelper.buscar_por_nit(tercero.nit)
+        
         return jsonify({
             'success': True,
             'radicado': radicado,
             'nit': tercero.nit,
-            'nombre': tercero.razon_social,
+            'nombre': tercero.razon_social or f"{tercero.primer_nombre or ''} {tercero.primer_apellido or ''}".strip(),
             'documentos': resultado,
             'total': len(resultado),
-            'estado_radicado': solicitud.estado  # Estado final del radicado
+            'estado_radicado': solicitud.estado,
+            'tercero_id': tercero_modulo.id if tercero_modulo else None
         })
         
     except Exception as e:
