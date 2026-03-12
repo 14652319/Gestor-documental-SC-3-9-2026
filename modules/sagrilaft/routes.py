@@ -16,8 +16,10 @@ from sqlalchemy import text
 import os
 from io import BytesIO
 
-# Ruta a documentos (usar ruta del proyecto principal)
-RUTA_DOCUMENTOS = r'C:\Users\Usuario\Desktop\Gestor Documental\PAQUETES_TRANSPORTABLES\GESTOR_DOCUMENTAL_TRANSPORTABLE_20251113_204059\documentos_terceros'
+# Ruta a documentos — calculada dinámicamente desde la raíz del proyecto
+_SAGRILAFT_DIR = os.path.dirname(os.path.abspath(__file__))   # modules/sagrilaft
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(_SAGRILAFT_DIR))  # raíz del proyecto
+RUTA_DOCUMENTOS = os.path.join(_PROJECT_ROOT, 'documentos_terceros')
 
 
 @sagrilaft_bp.route('/')

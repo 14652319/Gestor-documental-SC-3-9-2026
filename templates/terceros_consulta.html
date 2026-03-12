@@ -1095,58 +1095,6 @@
             alert(`🚧 Exportando ${tercerosSeleccionados.length} terceros...`);
         }
         
-        // =====================================================================
-        //                        FUNCIONES DE BOTONES
-        // =====================================================================
-        
-        function verTercero(id) {
-            console.log('Ver tercero:', id);
-            // Redirigir a página de visualización del tercero
-            window.location.href = `/terceros/ver/${id}`;
-        }
-        
-        function editarTercero(id) {
-            console.log('Editar tercero:', id);
-            // Redirigir a página de edición del tercero
-            window.location.href = `/terceros/editar/${id}`;
-        }
-        
-        function revisarDocumentos(id) {
-            console.log('Revisar documentos del tercero:', id);
-            alert(`📄 Revisar documentos del tercero ID: ${id}\n\n🚧 Función en desarrollo`);
-            // TODO: Implementar vista de documentos
-        }
-        
-        function cambiarEstado(id, nuevoEstado) {
-            console.log('Cambiar estado del tercero:', id, 'nuevo estado:', nuevoEstado);
-            const accion = nuevoEstado ? 'activar' : 'desactivar';
-            const confirmacion = confirm(`¿Está seguro que desea ${accion} este tercero?`);
-            
-            if (confirmacion) {
-                // Llamada real a la API
-                fetch(`/terceros/api/cambiar_estado/${id}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ activo: nuevoEstado })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        alert(`✅ ${accion.toUpperCase()} exitoso: ${data.message}`);
-                        cargarTerceros(); // Recargar después del cambio
-                    } else {
-                        alert(`❌ Error: ${data.message}`);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert(`❌ Error de conexión: ${error.message}`);
-                });
-            }
-        }
-        
         function toggleSeleccionTercero(id) {
             console.log('Toggle selección tercero:', id);
             const tercerosSeleccionados = datosActuales.terceros_seleccionados || [];

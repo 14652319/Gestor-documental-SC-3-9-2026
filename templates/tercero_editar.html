@@ -561,6 +561,27 @@
 
                             <div class="campo-grupo">
                                 <label class="campo-label requerido">
+                                    🖆 Tipo de Identificación
+                                </label>
+                                <select id="tipo_persona" class="campo-select" style="pointer-events:none; background-color:#f9fafb; opacity:0.85;" tabindex="-1">
+                                    <option value="juridica">Persona Jurídica</option>
+                                    <option value="natural">Persona Natural</option>
+                                </select>
+                                <div class="campo-ayuda">No modificable después de la creación</div>
+                            </div>
+
+                            <div class="campo-grupo">
+                                <label class="campo-label">
+                                    🪦 Tipo de Documento
+                                </label>
+                                <select id="tipo_documento" class="campo-select">
+                                    <option value="">-- Seleccione tipo --</option>
+                                </select>
+                                <div class="campo-ayuda">Tipo de identificación del tercero</div>
+                            </div>
+
+                            <div class="campo-grupo">
+                                <label class="campo-label requerido">
                                     🏢 Razón Social / Nombre Completo
                                 </label>
                                 <input type="text" id="razon_social" class="campo-input" placeholder="Ej: EMPRESA EJEMPLO S.A.S" required>
@@ -572,7 +593,9 @@
                                 <label class="campo-label requerido">
                                     📧 Correo Electrónico
                                 </label>
-                                <input type="email" id="email" class="campo-input" placeholder="contacto@empresa.com" required>
+                                <input type="email" id="email" class="campo-input"
+                                       value="{{ tercero.correo or '' }}"
+                                       placeholder="contacto@empresa.com" required>
                                 <div class="campo-ayuda">Correo principal para comunicaciones</div>
                                 <div class="campo-error">Ingrese un correo electrónico válido</div>
                             </div>
@@ -581,7 +604,9 @@
                                 <label class="campo-label">
                                     📞 Teléfono Principal
                                 </label>
-                                <input type="tel" id="telefono" class="campo-input" placeholder="Ej: 601-2345678">
+                                <input type="tel" id="telefono" class="campo-input"
+                                       value="{{ (tercero.telefono or tercero.celular or '') if tercero else '' }}"
+                                       placeholder="Ej: 601-2345678">
                                 <div class="campo-ayuda">Número de contacto principal</div>
                             </div>
 
@@ -589,8 +614,25 @@
                                 <label class="campo-label">
                                     📍 Dirección
                                 </label>
-                                <textarea id="direccion" class="campo-textarea" placeholder="Dirección completa..."></textarea>
+                                <textarea id="direccion" class="campo-textarea"
+                                          placeholder="Dirección completa...">{{ tercero.direccion or '' }}</textarea>
                                 <div class="campo-ayuda">Dirección física de la empresa o domicilio</div>
+                            </div>
+
+                            <div class="campo-grupo">
+                                <label class="campo-label">🗺️ Departamento</label>
+                                <select id="departamento" class="campo-select">
+                                    <option value="">-- Seleccione departamento --</option>
+                                </select>
+                                <div class="campo-ayuda">Departamento de Colombia</div>
+                            </div>
+
+                            <div class="campo-grupo">
+                                <label class="campo-label">🏙️ Ciudad</label>
+                                <select id="ciudad" class="campo-select">
+                                    <option value="">-- Seleccione ciudad --</option>
+                                </select>
+                                <div class="campo-ayuda">Municipio o ciudad</div>
                             </div>
 
                             <div class="campo-grupo">
@@ -598,8 +640,8 @@
                                     ✅ Estado
                                 </label>
                                 <select id="activo" class="campo-select">
-                                    <option value="false">Inactivo</option>
-                                    <option value="true">Activo</option>
+                                    <option value="false" {{ 'selected' if tercero and tercero.estado != 'activo' else '' }}>Inactivo</option>
+                                    <option value="true" {{ 'selected' if tercero and tercero.estado == 'activo' else '' }}>Activo</option>
                                 </select>
                                 <div class="campo-ayuda">Estado actual del tercero en el sistema</div>
                             </div>
@@ -755,7 +797,8 @@
         let seccionActual = 1;
         const totalSecciones = 3;
         let datosOriginales = {};
-        let terceroId = null;
+        // ID inyectado por Flask (disponible si se abrió desde /editar/<id>)
+        let terceroId = {{ tercero.id if tercero else 'null' }};
 
         // =====================================================================
         //                           NAVEGACIÓN ENTRE SECCIONES
@@ -841,9 +884,11 @@
             mostrarLoading(true);
             
             try {
-                // Obtener ID del tercero desde la URL
-                const urlParams = new URLSearchParams(window.location.search);
-                terceroId = urlParams.get('id');
+                // Obtener ID del tercero: primero desde Jinja2, luego desde la URL
+                if (!terceroId) {
+                    const urlParts = window.location.pathname.split('/');
+                    terceroId = urlParts[urlParts.length - 1] || new URLSearchParams(window.location.search).get('id');
+                }
                 
                 if (!terceroId) {
                     throw new Error('ID del tercero no especificado');
@@ -856,7 +901,7 @@
                     throw new Error(data.message || 'Error obteniendo datos del tercero');
                 }
 
-                const tercero = data.data;
+                const tercero = data.tercero;
                 datosOriginales = { ...tercero };
 
                 // Llenar formulario
@@ -880,10 +925,15 @@
         function llenarFormulario(tercero) {
             // Datos básicos
             document.getElementById('nit').value = tercero.nit || '';
+            // Tipo persona (readonly) + tipo documento
+            const tpSel = document.getElementById('tipo_persona');
+            if (tpSel) tpSel.value = tercero.tipo_persona || 'juridica';
+            actualizarOpcionesTipoDocumentoEditar(tercero.tipo_persona || 'juridica', tercero.tipo_documento || '');
             document.getElementById('razon_social').value = tercero.razon_social || '';
             document.getElementById('email').value = tercero.email || '';
             document.getElementById('telefono').value = tercero.telefono || '';
             document.getElementById('direccion').value = tercero.direccion || '';
+            initDeptoCiudadDropdowns('departamento', 'ciudad', tercero.departamento || '', tercero.ciudad || '');
             document.getElementById('activo').value = tercero.activo ? 'true' : 'false';
 
             // Datos extendidos
@@ -901,6 +951,35 @@
             // Datos adicionales JSON
             const datosAdicionales = tercero.datos_adicionales ? JSON.stringify(tercero.datos_adicionales, null, 2) : '';
             document.getElementById('datos_adicionales').value = datosAdicionales;
+        }
+
+        // 🪪 TIPOS DE DOCUMENTO (editar)
+        function actualizarOpcionesTipoDocumentoEditar(tipoPersona, currentValue) {
+            const select = document.getElementById('tipo_documento');
+            if (!select) return;
+
+            const TIPOS = {
+                juridica: [{ v: 'NIT', label: 'NIT \u2014 N\u00famero de Identificaci\u00f3n Tributaria' }],
+                natural: [
+                    { v: 'CC',  label: 'CC  \u2014 C\u00e9dula de Ciudadan\u00eda' },
+                    { v: 'TI',  label: 'TI  \u2014 Tarjeta de Identidad' },
+                    { v: 'CE',  label: 'CE  \u2014 C\u00e9dula de Extranjer\u00eda' },
+                    { v: 'NIT', label: 'NIT \u2014 NIT (Natural empresaria/o)' },
+                    { v: 'PA',  label: 'PA  \u2014 Pasaporte' },
+                    { v: 'PPT', label: 'PPT \u2014 Permiso por Protecci\u00f3n Temporal' },
+                    { v: 'PEP', label: 'PEP \u2014 Permiso Especial de Permanencia' }
+                ]
+            };
+            const tipos = TIPOS[tipoPersona] || TIPOS.juridica;
+            select.innerHTML = '<option value="">-- Seleccione tipo --</option>';
+            tipos.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.v;
+                opt.textContent = t.label;
+                if (currentValue && t.v === currentValue) opt.selected = true;
+                select.appendChild(opt);
+            });
+            if (!currentValue) select.value = tipoPersona === 'juridica' ? 'NIT' : 'CC';
         }
 
         function mostrarInformacionActual(tercero) {
@@ -1074,7 +1153,7 @@
         function detectarCambios() {
             // Comparar campos actuales con datos originales
             const camposFormulario = [
-                'razon_social', 'email', 'telefono', 'direccion', 'activo',
+                'razon_social', 'email', 'telefono', 'direccion', 'ciudad', 'departamento', 'tipo_documento', 'activo',
                 'telefono_secundario', 'contacto_principal', 'cargo_contacto',
                 'categoria_tercero', 'clasificacion', 'limite_credito',
                 'frecuencia_notificacion', 'notificaciones_activas', 'datos_adicionales'
@@ -1136,6 +1215,9 @@
                     email: document.getElementById('email').value.trim(),
                     telefono: document.getElementById('telefono').value.trim() || null,
                     direccion: document.getElementById('direccion').value.trim() || null,
+                    ciudad: document.getElementById('ciudad').value || null,
+                    departamento: document.getElementById('departamento').value || null,
+                    tipo_documento: (document.getElementById('tipo_documento') || {}).value || null,
                     activo: document.getElementById('activo').value === 'true',
                     telefono_secundario: document.getElementById('telefono_secundario').value.trim() || null,
                     contacto_principal: document.getElementById('contacto_principal').value.trim() || null,
@@ -1348,5 +1430,20 @@ window.addEventListener('beforeunload', (e) => {
 </script>
 
         {% include '_session_expired_interceptor.html' %}
+
+<script>
+// Auto-mayúsculas en todos los campos de texto excepto correo/email
+document.querySelectorAll('input[type="text"], input[type="tel"], textarea').forEach(function(input) {
+    if (input.type !== 'email' && !input.id.includes('correo') && !input.id.includes('email')) {
+        input.style.textTransform = 'uppercase';
+        input.addEventListener('input', function() {
+            var pos = this.selectionStart;
+            this.value = this.value.toUpperCase();
+            this.setSelectionRange(pos, pos);
+        });
+    }
+});
+</script>
+<script src="/static/js/colombia_divipola.js"></script>
     </body>
 </html>

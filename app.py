@@ -1054,6 +1054,7 @@ class Tercero(db.Model):
     direccion = db.Column(db.String(255))  # ← NUEVO: Dirección
     ciudad = db.Column(db.String(100))  # ← NUEVO: Ciudad
     departamento = db.Column(db.String(100))  # ← NUEVO: Departamento
+    tipo_documento = db.Column(db.String(5))  # CC, NIT, TI, CE, PA, PPT, PEP
     acepta_terminos = db.Column(db.Boolean, default=True)
     acepta_contacto = db.Column(db.Boolean, default=False)
     fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)

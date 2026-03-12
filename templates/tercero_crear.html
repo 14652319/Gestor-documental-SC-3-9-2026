@@ -571,14 +571,6 @@
                     <div class="seccion-titulo">📊 Datos Básicos del Tercero</div>
                     
                     <div class="grid-campos">
-                        <!-- NIT -->
-                        <div class="campo-grupo">
-                            <label class="campo-label requerido">Número de Identificación (NIT)</label>
-                            <input type="text" class="campo-input" id="nit" name="nit" required readonly>
-                            <span class="campo-ayuda">Ingrese el NIT completo con dígito de verificación</span>
-                            <span class="campo-error">El NIT es requerido</span>
-                        </div>
-
                         <!-- TIPO PERSONA -->
                         <div class="campo-grupo">
                             <label class="campo-label requerido">Tipo de Persona</label>
@@ -588,6 +580,23 @@
                                 <option value="natural">Persona Natural</option>
                             </select>
                             <span class="campo-error">Debe seleccionar el tipo de persona</span>
+                        </div>
+
+                        <!-- TIPO DOCUMENTO -->
+                        <div class="campo-grupo">
+                            <label class="campo-label requerido">Tipo de Documento</label>
+                            <select class="campo-select" id="tipo_documento" name="tipo_documento" required>
+                                <option value="">-- Seleccione tipo --</option>
+                            </select>
+                            <span class="campo-error">Debe seleccionar el tipo de documento</span>
+                        </div>
+
+                        <!-- NÚMERO DE IDENTIFICACIÓN -->
+                        <div class="campo-grupo campo-full">
+                            <label class="campo-label requerido" id="label-nit">Número de Identificación</label>
+                            <input type="text" class="campo-input" id="nit" name="nit" required readonly>
+                            <span class="campo-ayuda">Número según el tipo de documento seleccionado</span>
+                            <span class="campo-error">El número de identificación es requerido</span>
                         </div>
 
                         <!-- RAZON SOCIAL (solo para jurídica) -->
@@ -653,17 +662,22 @@
                             <span class="campo-error">La dirección es requerida</span>
                         </div>
 
+                        <!-- DEPARTAMENTO -->
+                        <div class="campo-grupo">
+                            <label class="campo-label requerido">Departamento</label>
+                            <select class="campo-select" id="departamento" name="departamento" required>
+                                <option value="">-- Seleccione departamento --</option>
+                            </select>
+                            <span class="campo-error">El departamento es requerido</span>
+                        </div>
+
                         <!-- CIUDAD -->
                         <div class="campo-grupo">
                             <label class="campo-label requerido">Ciudad</label>
-                            <input type="text" class="campo-input" id="ciudad" name="ciudad" required>
+                            <select class="campo-select" id="ciudad" name="ciudad" required>
+                                <option value="">-- Seleccione ciudad --</option>
+                            </select>
                             <span class="campo-error">La ciudad es requerida</span>
-                        </div>
-
-                        <!-- DEPARTAMENTO -->
-                        <div class="campo-grupo">
-                            <label class="campo-label">Departamento</label>
-                            <input type="text" class="campo-input" id="departamento" name="departamento">
                         </div>
 
                         <!-- ESTADO INICIAL -->
@@ -707,7 +721,10 @@
             // Listener para tipo de persona
             document.getElementById('tipo_persona').addEventListener('change', function() {
                 mostrarCamposSegunTipo(this.value);
+                actualizarOpcionesTipoDocumento(this.value, '');
             });
+            // Inicializar dropdown tipo_documento (persona jurídica por defecto)
+            actualizarOpcionesTipoDocumento('juridica', '');
         });
 
         // 🔄 CARGAR DATOS DESDE RADICADO
@@ -733,6 +750,7 @@
 
                 document.getElementById('nit').value = tercero.nit || '';
                 document.getElementById('tipo_persona').value = tercero.tipo_persona || 'juridica';
+                actualizarOpcionesTipoDocumento(tercero.tipo_persona || 'juridica', tercero.tipo_documento || '');
                 document.getElementById('correo').value = tercero.correo || '';
                 document.getElementById('telefono').value = tercero.telefono || '';
                 document.getElementById('direccion').value = tercero.direccion || '';
@@ -799,6 +817,66 @@
                 document.getElementById('primer_apellido').value = '';
                 document.getElementById('segundo_apellido').value = '';
             }
+
+            // Actualizar tipo_documento según tipo persona
+            actualizarOpcionesTipoDocumento(tipo, '');
+        }
+
+        // 🪪 TIPOS DE DOCUMENTO POR TIPO DE PERSONA
+        function actualizarOpcionesTipoDocumento(tipoPersona, currentValue) {
+            const select = document.getElementById('tipo_documento');
+            if (!select) return;
+
+            const TIPOS = {
+                juridica: [
+                    { v: 'NIT', label: 'NIT — Número de Identificación Tributaria' }
+                ],
+                natural: [
+                    { v: 'CC',  label: 'CC  — Cédula de Ciudadanía' },
+                    { v: 'TI',  label: 'TI  — Tarjeta de Identidad' },
+                    { v: 'CE',  label: 'CE  — Cédula de Extranjería' },
+                    { v: 'NIT', label: 'NIT — NIT (Natural empresaria/o)' },
+                    { v: 'PA',  label: 'PA  — Pasaporte' },
+                    { v: 'PPT', label: 'PPT — Permiso por Protección Temporal' },
+                    { v: 'PEP', label: 'PEP — Permiso Especial de Permanencia' }
+                ]
+            };
+
+            const tipos = TIPOS[tipoPersona] || TIPOS.juridica;
+            select.innerHTML = '<option value="">-- Seleccione tipo --</option>';
+            tipos.forEach(t => {
+                const opt = document.createElement('option');
+                opt.value = t.v;
+                opt.textContent = t.label;
+                if (currentValue && t.v === currentValue) opt.selected = true;
+                select.appendChild(opt);
+            });
+
+            // Auto-seleccionar el único disponible para jurídica
+            if (!currentValue) {
+                select.value = tipoPersona === 'juridica' ? 'NIT' : 'CC';
+            }
+
+            // Actualizar etiqueta del NIT dinámicamente
+            const labelNit = document.getElementById('label-nit');
+            if (labelNit) {
+                const textos = {
+                    'NIT': 'Número de Identificación Tributaria (NIT)',
+                    'CC':  'Número de Cédula de Ciudadanía',
+                    'TI':  'Número de Tarjeta de Identidad',
+                    'CE':  'Número de Cédula de Extranjería',
+                    'PA':  'Número de Pasaporte',
+                    'PPT': 'Número PPT — Permiso por Protección Temporal',
+                    'PEP': 'Número PEP — Permiso Especial de Permanencia'
+                };
+                const val = currentValue || select.value;
+                labelNit.textContent = textos[val] || 'Número de Identificación';
+
+                // Listener para actualizar etiqueta al cambiar tipo_documento
+                select.onchange = function() {
+                    labelNit.textContent = textos[this.value] || 'Número de Identificación';
+                };
+            }
         }
 
         // 💾 GUARDAR TERCERO
@@ -839,6 +917,7 @@
                 const datos = {
                     nit: document.getElementById('nit').value,
                     tipo_persona: tipoPersona,
+                    tipo_documento: document.getElementById('tipo_documento').value,
                     razon_social: document.getElementById('razon_social').value || '',
                     primer_nombre: document.getElementById('primer_nombre').value || '',
                     segundo_nombre: document.getElementById('segundo_nombre').value || '',
@@ -851,6 +930,15 @@
                     departamento: document.getElementById('departamento').value || '',
                     estado_inicial: document.getElementById('estado_inicial').value
                 };
+
+                // Validar tipo de documento
+                if (!datos.tipo_documento) {
+                    mostrarAlerta('error', 'Debe seleccionar el tipo de documento de identidad');
+                    const btnGuardar = document.getElementById('btn-guardar');
+                    btnGuardar.disabled = false;
+                    btnGuardar.innerHTML = '💾 Guardar Tercero';
+                    return;
+                }
 
                 console.log('📤 Enviando datos:', datos);
 
@@ -916,6 +1004,12 @@
                     this.setSelectionRange(pos, pos);
                 });
             }
+        });
+    </script>
+    <script src="/static/js/colombia_divipola.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            initDeptoCiudadDropdowns('departamento', 'ciudad', '', '');
         });
     </script>
 </body>

@@ -283,7 +283,8 @@ def obtener_datos_radicado(radicado):
                 'telefono': tercero.telefono or tercero.celular or '',
                 'direccion': tercero.direccion or '',
                 'ciudad': tercero.ciudad or '',
-                'departamento': tercero.departamento or ''
+                'departamento': tercero.departamento or '',
+                'tipo_documento': tercero.tipo_documento or ''
             }
         })
     except Exception as e:
@@ -316,14 +317,19 @@ def crear_tercero():
         from app import Tercero
         nuevo_tercero = Tercero(
             nit=data.get('nit'),
-            razon_social=data.get('razon_social'),
-            primer_nombre=data.get('primer_nombre', ''),
-            segundo_nombre=data.get('segundo_nombre', ''),
-            primer_apellido=data.get('primer_apellido', ''),
-            segundo_apellido=data.get('segundo_apellido', ''),
-            telefono=data.get('telefono', ''),
-            email=data.get('email', ''),
+            razon_social=data.get('razon_social') or None,
+            primer_nombre=data.get('primer_nombre') or None,
+            segundo_nombre=data.get('segundo_nombre') or None,
+            primer_apellido=data.get('primer_apellido') or None,
+            segundo_apellido=data.get('segundo_apellido') or None,
+            correo=data.get('correo') or data.get('email') or None,
+            telefono=data.get('telefono') or None,
+            direccion=data.get('direccion') or None,
+            ciudad=data.get('ciudad') or None,
+            departamento=data.get('departamento') or None,
             tipo_persona=data.get('tipo_persona', 'juridica'),
+            tipo_documento=data.get('tipo_documento') or ('NIT' if data.get('tipo_persona') != 'natural' else 'CC'),
+            estado=data.get('estado_inicial', 'inactivo'),
             fecha_registro=datetime.now()
         )
         
@@ -434,15 +440,24 @@ def obtener_tercero(tercero_id):
             'tercero': {
                 'id': tercero.id,
                 'nit': tercero.nit,
-                'razon_social': tercero.razon_social,
-                'primer_nombre': getattr(tercero, 'primer_nombre', ''),
-                'segundo_nombre': getattr(tercero, 'segundo_nombre', ''),
-                'primer_apellido': getattr(tercero, 'primer_apellido', ''),
-                'segundo_apellido': getattr(tercero, 'segundo_apellido', ''),
-                'telefono': getattr(tercero, 'telefono', ''),
-                'email': getattr(tercero, 'email', ''),
-                'tipo_persona': getattr(tercero, 'tipo_persona', ''),
-                'fecha_registro': tercero.fecha_registro.strftime('%Y-%m-%d %H:%M') if tercero.fecha_registro else ''
+                'razon_social': tercero.razon_social or '',
+                'primer_nombre': getattr(tercero, 'primer_nombre', '') or '',
+                'segundo_nombre': getattr(tercero, 'segundo_nombre', '') or '',
+                'primer_apellido': getattr(tercero, 'primer_apellido', '') or '',
+                'segundo_apellido': getattr(tercero, 'segundo_apellido', '') or '',
+                'telefono': getattr(tercero, 'telefono', '') or getattr(tercero, 'celular', '') or '',
+                'email': getattr(tercero, 'correo', '') or '',
+                'correo': getattr(tercero, 'correo', '') or '',
+                'direccion': getattr(tercero, 'direccion', '') or '',
+                'ciudad': getattr(tercero, 'ciudad', '') or '',
+                'departamento': getattr(tercero, 'departamento', '') or '',
+                'tipo_documento': getattr(tercero, 'tipo_documento', '') or '',
+                'activo': getattr(tercero, 'estado', 'inactivo') == 'activo',
+                'tipo_persona': getattr(tercero, 'tipo_persona', '') or '',
+                'categoria_tercero': getattr(tercero, 'categoria_tercero', '') or '',
+                'clasificacion': getattr(tercero, 'clasificacion', '') or '',
+                'fecha_registro': tercero.fecha_registro.strftime('%Y-%m-%d %H:%M') if tercero.fecha_registro else '',
+                'fecha_actualizacion': tercero.fecha_actualizacion.strftime('%Y-%m-%d %H:%M') if getattr(tercero, 'fecha_actualizacion', None) else ''
             }
         })
         
@@ -476,6 +491,90 @@ def documentos(tercero_id):
 # ============================================================================
 # ⚙️ CONFIGURACIÓN DEL MÓDULO
 # ============================================================================
+
+# ============================================================================
+# ✏️ ACTUALIZAR TERCERO
+# ============================================================================
+
+@terceros_bp.route('/api/actualizar/<int:tercero_id>', methods=['PUT'])
+@requiere_permiso('terceros', 'editar')
+def actualizar_tercero(tercero_id):
+    """API para actualizar datos de un tercero existente"""
+    valido, respuesta, codigo = validar_sesion_admin()
+    if not valido:
+        return jsonify(respuesta), codigo
+
+    try:
+        from app import Tercero
+        tercero = Tercero.query.get(tercero_id)
+        if not tercero:
+            return jsonify({'success': False, 'message': 'Tercero no encontrado'}), 404
+
+        data = request.get_json()
+        if not data:
+            return jsonify({'success': False, 'message': 'No se recibieron datos'}), 400
+
+        # --- Campos del modelo core Tercero ---
+        if 'razon_social' in data and data['razon_social']:
+            tercero.razon_social = data['razon_social'].upper().strip()
+
+        if 'email' in data:
+            tercero.correo = data['email'].strip() if data['email'] else None
+
+        if 'telefono' in data:
+            tercero.telefono = data['telefono'] or None
+
+        if 'direccion' in data:
+            tercero.direccion = data['direccion'] or None
+
+        if 'ciudad' in data:
+            tercero.ciudad = data['ciudad'] or None
+
+        if 'departamento' in data:
+            tercero.departamento = data['departamento'] or None
+
+        if 'tipo_documento' in data:
+            tercero.tipo_documento = data['tipo_documento'] or None
+
+        if 'activo' in data:
+            tercero.estado = 'activo' if data['activo'] else 'inactivo'
+
+        # --- Actualizar fecha_actualizacion si la columna existe en BD ---
+        try:
+            from sqlalchemy import text
+            with db.engine.connect() as conn:
+                conn.execute(text(
+                    "UPDATE terceros SET fecha_actualizacion = NOW() WHERE id = :id"
+                ), {'id': tercero_id})
+                conn.commit()
+        except Exception:
+            pass  # Columna puede no existir en todos los entornos
+
+        db.session.commit()
+
+        return jsonify({
+            'success': True,
+            'message': 'Tercero actualizado exitosamente',
+            'data': {
+                'id': tercero.id,
+                'nit': tercero.nit,
+                'razon_social': tercero.razon_social or '',
+                'email': tercero.correo or '',
+                'telefono': getattr(tercero, 'telefono', '') or '',
+                'direccion': getattr(tercero, 'direccion', '') or '',
+                'ciudad': getattr(tercero, 'ciudad', '') or '',
+                'departamento': getattr(tercero, 'departamento', '') or '',
+                'tipo_documento': getattr(tercero, 'tipo_documento', '') or '',
+                'activo': getattr(tercero, 'estado', 'inactivo') == 'activo',
+                'fecha_registro': tercero.fecha_registro.strftime('%Y-%m-%d %H:%M') if tercero.fecha_registro else ''
+            }
+        })
+
+    except Exception as e:
+        db.session.rollback()
+        current_app.logger.error(f"Error actualizando tercero {tercero_id}: {e}")
+        return jsonify({'success': False, 'message': f'Error interno: {str(e)}'}), 500
+
 
 @terceros_bp.route('/configuracion')
 @requiere_permiso_html('terceros', 'configurar')
